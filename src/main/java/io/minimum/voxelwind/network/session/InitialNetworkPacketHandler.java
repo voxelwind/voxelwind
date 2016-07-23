@@ -38,13 +38,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             Jwt<Header, String> jwt = Jwts.parser()
                     .setSigningKey(MOJANG_PUBLIC_KEY)
                     .parsePlaintextJwt(node.asText());
-            if (jwt.getHeader().containsKey("x5u")) {
-                // We found a certificate
-            }
-            chainJwtHeaders.add(Jwts.parser()
-                    .setSigningKey(MOJANG_PUBLIC_KEY)
-                    .parsePlaintextJwt(node.asText()));
-            //chainJwtHe
+            System.out.println(jwt.toString());
         }
     }
 }

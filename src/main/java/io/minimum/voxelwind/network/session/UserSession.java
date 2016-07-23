@@ -3,7 +3,6 @@ package io.minimum.voxelwind.network.session;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
-import io.minimum.voxelwind.network.Native;
 import io.minimum.voxelwind.network.handler.NetworkPacketHandler;
 import io.minimum.voxelwind.network.mcpe.annotations.ForceClearText;
 import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
@@ -18,7 +17,6 @@ import io.minimum.voxelwind.network.util.EncryptionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
-import net.md_5.bungee.jni.cipher.BungeeCipher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +41,6 @@ public class UserSession {
     private static final Logger LOGGER = LogManager.getLogger(UserSession.class);
 
     private final InetSocketAddress remoteAddress;
-    private final long clientGuid;
     private String username;
     private final short mtu;
     private NetworkPacketHandler handler;
@@ -60,9 +57,8 @@ public class UserSession {
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
 
-    public UserSession(InetSocketAddress remoteAddress, long clientGuid, short mtu, NetworkPacketHandler handler, Channel channel) {
+    public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel) {
         this.remoteAddress = remoteAddress;
-        this.clientGuid = clientGuid;
         this.mtu = mtu;
         this.handler = handler;
         this.channel = channel;
@@ -70,10 +66,6 @@ public class UserSession {
 
     public InetSocketAddress getRemoteAddress() {
         return remoteAddress;
-    }
-
-    public long getClientGuid() {
-        return clientGuid;
     }
 
     public short getMtu() {
@@ -267,8 +259,10 @@ public class UserSession {
             batch.getPackages().add(netPackage);
         }
 
-        internalSendPackage(batch);
-        LOGGER.error("Batch sent; " + batch.getPackages().size() + " packages sent.");
+        if (!batch.getPackages().isEmpty()) {
+            internalSendPackage(batch);
+            LOGGER.error("Batch sent; " + batch.getPackages().size() + " packages sent.");
+        }
         channel.flush();
     }
 

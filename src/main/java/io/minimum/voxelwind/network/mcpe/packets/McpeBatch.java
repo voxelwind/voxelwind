@@ -10,6 +10,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 @BatchDisallowed // You don't batch a batch packet, it makes no sense.
 public class McpeBatch implements RakNetPackage {
@@ -31,6 +32,8 @@ public class McpeBatch implements RakNetPackage {
                 if (pkg != null && !(pkg instanceof McpeBatch))
                     packages.add(pkg);
             }
+        } catch (DataFormatException e) {
+            throw new RuntimeException("Unable to inflate batch data", e);
         } finally {
             if (decompressed != null) {
                 decompressed.release();
@@ -59,6 +62,8 @@ public class McpeBatch implements RakNetPackage {
             }
 
             CompressionUtil.deflate(source, buffer);
+        } catch (DataFormatException e) {
+            throw new RuntimeException("Unable to deflate batch data", e);
         } finally {
             if (destination != null && destination != buffer) {
                 source.release();

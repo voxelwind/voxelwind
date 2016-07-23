@@ -54,8 +54,10 @@ public class SessionManager {
     }
 
     private void adjustPoolSize() {
-        int threads = sessions.size() / SESSIONS_PER_THREAD;
-        sessionTicker.setMaximumPoolSize(threads);
+        int threads = Math.max(1, sessions.size() / SESSIONS_PER_THREAD);
+        if (sessionTicker.getMaximumPoolSize() != threads) {
+            sessionTicker.setMaximumPoolSize(threads);
+        }
     }
 
     public void onTick() {

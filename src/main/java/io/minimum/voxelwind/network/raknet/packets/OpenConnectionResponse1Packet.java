@@ -8,11 +8,13 @@ import static io.minimum.voxelwind.network.raknet.RakNetConstants.RAKNET_UNCONNE
 
 public class OpenConnectionResponse1Packet implements RakNetPackage {
     private byte serverSecurity;
+    private long serverGuid;
     private short mtuSize;
 
     @Override
     public void decode(ByteBuf buffer) {
         RakNetUtil.verifyUnconnectedMagic(buffer);
+        serverGuid = buffer.readLong();
         serverSecurity = buffer.readByte();
         mtuSize = buffer.readShort();
     }
@@ -20,6 +22,7 @@ public class OpenConnectionResponse1Packet implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeBytes(RAKNET_UNCONNECTED_MAGIC);
+        buffer.writeLong(serverGuid);
         buffer.writeByte(serverSecurity);
         buffer.writeShort(mtuSize);
     }
@@ -38,5 +41,13 @@ public class OpenConnectionResponse1Packet implements RakNetPackage {
 
     public void setMtuSize(short mtuSize) {
         this.mtuSize = mtuSize;
+    }
+
+    public long getServerGuid() {
+        return serverGuid;
+    }
+
+    public void setServerGuid(long serverGuid) {
+        this.serverGuid = serverGuid;
     }
 }

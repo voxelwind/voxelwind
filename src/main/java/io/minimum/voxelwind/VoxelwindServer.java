@@ -1,6 +1,7 @@
 package io.minimum.voxelwind;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.minimum.voxelwind.network.Native;
 import io.minimum.voxelwind.network.NettyVoxelwindNetworkListener;
 import io.minimum.voxelwind.network.session.SessionManager;
@@ -9,12 +10,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class VoxelwindServer {
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final SessionManager sessionManager = new SessionManager();
+    private final ScheduledExecutorService timerService = Executors.unconfigurableScheduledExecutorService(
+            Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private NettyVoxelwindNetworkListener listener;
 
     public SessionManager getSessionManager() {
@@ -26,6 +32,8 @@ public class VoxelwindServer {
         listener.bind();
 
         LOGGER.info("Voxelwind is now running.");
+
+        timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
 
         Thread.sleep(10000000);
     }

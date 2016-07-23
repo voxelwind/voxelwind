@@ -1,17 +1,27 @@
 package io.minimum.voxelwind.network.handler;
 
 import io.minimum.voxelwind.VoxelwindServer;
+import io.minimum.voxelwind.network.PacketRegistry;
+import io.minimum.voxelwind.network.PacketType;
 import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
+import io.minimum.voxelwind.network.mcpe.packets.McpeLogin;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
+import io.minimum.voxelwind.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import io.minimum.voxelwind.network.raknet.datagrams.RakNetDatagramFlags;
 import io.minimum.voxelwind.network.raknet.enveloped.AddressedRakNetDatagram;
 import io.minimum.voxelwind.network.raknet.packets.AckPacket;
 import io.minimum.voxelwind.network.session.UserSession;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Optional;
 
 public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<AddressedRakNetDatagram> {
     private final VoxelwindServer server;
+    private static final Logger LOGGER = LogManager.getLogger(VoxelwindDatagramHandler.class);
 
     public VoxelwindDatagramHandler(VoxelwindServer server) {
         this.server = server;
@@ -24,16 +34,33 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         if (session == null)
             return;
 
-        // First, acknowledge receipt of the datagram.
+        // Acknowledge receipt of the datagram.
         session.enqueueAck(datagram.content().getDatagramSequenceNumber());
 
-        // Now figure out the underlying packets.
-        RakNetDatagramFlags flags = datagram.content().getFlags();
-        if (flags.isAck() && flags.isValid()) {
-            // ACK: acknowledged receipt of one of our datagrams.
-            AckPacket packet = new AckPacket();
-            packet.decode(datagram.content().getPackets().get(0).getBuffer());
-            session.onAck(packet.getIds());
+        // Check the datagram contents.
+        if (datagram.content().getFlags().isValid()) {
+            for (EncapsulatedRakNetPacket packet : datagram.content().getPackets()) {
+                if (packet.isHasSplit()) {
+                    Optional<ByteBuf> possiblyReassembled = session.addSplitPacket(packet);
+                    if (possiblyReassembled.isPresent()) {
+                        ByteBuf reassembled = possiblyReassembled.get();
+                        try {
+                            RakNetPackage pkg = PacketRegistry.tryDecode(reassembled, PacketType.MCPE);
+                            if (pkg != null) {
+                                handlePackage(pkg, session);
+                            }
+                        } finally {
+                            reassembled.release();
+                        }
+                    }
+                } else {
+                    // Try to decode the full packet.
+                    RakNetPackage pkg = PacketRegistry.tryDecode(packet.getBuffer(), PacketType.MCPE);
+                    if (pkg != null) {
+                        handlePackage(pkg, session);
+                    }
+                }
+            }
         }
     }
 
@@ -46,6 +73,13 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             return;
         }
 
+        if (session.getHandler() == null) {
+            LOGGER.error("Session " + session.getRemoteAddress() + " has no handler!?!?!");
+            return;
+        }
 
+        if (netPackage instanceof McpeLogin) {
+            session.getHandler().handle((McpeLogin) netPackage);
+        }
     }
 }
