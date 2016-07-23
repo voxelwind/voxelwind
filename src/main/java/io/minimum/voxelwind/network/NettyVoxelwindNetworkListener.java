@@ -2,6 +2,7 @@ package io.minimum.voxelwind.network;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.minimum.voxelwind.VoxelwindServer;
+import io.minimum.voxelwind.network.handler.VoxelwindDatagramHandler;
 import io.minimum.voxelwind.network.handler.VoxelwindDirectPacketHandler;
 import io.minimum.voxelwind.network.raknet.DatagramRakNetPacketCodec;
 import io.minimum.voxelwind.network.raknet.SimpleRakNetPacketCodec;
@@ -52,7 +53,8 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
         channel.pipeline()
                 .addLast("simpleRaknetHandler", new SimpleRakNetPacketCodec())
                 .addLast("voxelwindPacketHandler", new VoxelwindDirectPacketHandler(server))
-                .addLast("raknetDatagramHandler", new DatagramRakNetPacketCodec(server));
+                .addLast("raknetDatagramHandler", new DatagramRakNetPacketCodec(server))
+                .addLast("voxelwindDatagramHandler", new VoxelwindDatagramHandler(server));
     }
 
     public void bind() {

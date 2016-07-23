@@ -9,14 +9,18 @@ import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import io.minimum.voxelwind.network.raknet.datagrams.RakNetDatagramFlags;
 import io.minimum.voxelwind.network.raknet.enveloped.AddressedRakNetDatagram;
-import io.minimum.voxelwind.network.raknet.packets.AckPacket;
+import io.minimum.voxelwind.network.raknet.packets.*;
+import io.minimum.voxelwind.network.session.SessionState;
 import io.minimum.voxelwind.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<AddressedRakNetDatagram> {
@@ -29,6 +33,8 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, AddressedRakNetDatagram datagram) throws Exception {
+        System.out.println(datagram);
+
         UserSession session = server.getSessionManager().get(datagram.sender());
 
         if (session == null)
@@ -39,7 +45,9 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
 
         // Check the datagram contents.
         if (datagram.content().getFlags().isValid()) {
+            System.out.println("[RakNet Datagram] " + datagram);
             for (EncapsulatedRakNetPacket packet : datagram.content().getPackets()) {
+                System.out.println("[Encapsulated Packet] " + packet + ":\n" + ByteBufUtil.prettyHexDump(packet.getBuffer()));
                 if (packet.isHasSplit()) {
                     Optional<ByteBuf> possiblyReassembled = session.addSplitPacket(packet);
                     if (possiblyReassembled.isPresent()) {
@@ -75,6 +83,29 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
 
         if (session.getHandler() == null) {
             LOGGER.error("Session " + session.getRemoteAddress() + " has no handler!?!?!");
+            return;
+        }
+
+        if (netPackage instanceof ConnectedPingPacket) {
+            ConnectedPingPacket request = (ConnectedPingPacket) netPackage;
+            ConnectedPongPacket response = new ConnectedPongPacket();
+            response.setPingTime(request.getPingTime());
+            response.setPongTime(System.currentTimeMillis());
+            session.sendUrgentPackage(response);
+            return;
+        }
+
+        if (netPackage instanceof ConnectionRequestPacket) {
+            ConnectionRequestPacket request = (ConnectionRequestPacket) netPackage;
+            ConnectionResponsePacket response = new ConnectionResponsePacket();
+            response.setIncomingTimestamp(request.getTimestamp());
+            response.setSystemTimestamp(System.currentTimeMillis());
+            response.setSystemAddress(InetAddress.getLoopbackAddress());
+            InetAddress[] addresses = new InetAddress[10];
+            Arrays.fill(addresses, InetAddress.getLoopbackAddress());
+            response.setSystemAddresses(addresses);
+            response.setSystemIndex(0);
+            session.sendUrgentPackage(response);
             return;
         }
 

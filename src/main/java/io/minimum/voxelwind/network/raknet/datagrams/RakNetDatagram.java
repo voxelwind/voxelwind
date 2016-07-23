@@ -71,4 +71,13 @@ public class RakNetDatagram {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "RakNetDatagram{" +
+                "flags=" + flags +
+                ", datagramSequenceNumber=" + datagramSequenceNumber +
+                ", packets=" + packets +
+                '}';
+    }
 }

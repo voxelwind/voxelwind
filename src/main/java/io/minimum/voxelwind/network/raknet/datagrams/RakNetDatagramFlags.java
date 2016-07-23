@@ -32,4 +32,17 @@ public class RakNetDatagramFlags {
     public byte getFlagByte() {
         return flags.toByteArray()[0];
     }
+
+    @Override
+    public String toString() {
+        return "RakNetDatagramFlags{" +
+                "flags=" + flags +
+                ", valid=" + isValid() +
+                ", ack=" + isAck() +
+                ", nak=" + isNak() +
+                ", packetPair=" + isPacketPair() +
+                ", continuousSend=" + isContinuousSend() +
+                ", flagByte=" + getFlagByte() +
+                '}';
+    }
 }

@@ -6,20 +6,17 @@ import io.netty.buffer.ByteBuf;
 public class ConnectionRequestPacket implements RakNetPackage {
     private long clientGuid;
     private long timestamp;
-    private byte serverSecurity;
 
     @Override
     public void decode(ByteBuf buffer) {
         clientGuid = buffer.readLong();
         timestamp = buffer.readLong();
-        serverSecurity = buffer.readByte();
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeLong(clientGuid);
         buffer.writeLong(timestamp);
-        buffer.writeByte(serverSecurity);
     }
 
     public long getClientGuid() {
@@ -36,13 +33,5 @@ public class ConnectionRequestPacket implements RakNetPackage {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public byte getServerSecurity() {
-        return serverSecurity;
-    }
-
-    public void setServerSecurity(byte serverSecurity) {
-        this.serverSecurity = serverSecurity;
     }
 }

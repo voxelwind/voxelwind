@@ -65,26 +65,5 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
         if (packet.content() instanceof NakPacket) {
             session.onNak(((NakPacket) packet.content()).getIds());
         }
-        if (packet.content() instanceof ConnectionRequestPacket) {
-            ConnectionRequestPacket request = (ConnectionRequestPacket) packet.content();
-            ConnectionResponsePacket response = new ConnectionResponsePacket();
-            response.setIncomingTimestamp(request.getTimestamp());
-            response.setSystemTimestamp(System.currentTimeMillis());
-            response.setSystemAddress(InetAddress.getLoopbackAddress());
-            InetAddress[] addresses = new InetAddress[10];
-            Arrays.fill(addresses, InetAddress.getLoopbackAddress());
-            response.setSystemAddresses(addresses);
-            response.setSystemIndex(0);
-            session.sendUrgentPackage(response);
-            return;
-        }
-        if (packet.content() instanceof ConnectedPingPacket) {
-            ConnectedPingPacket request = (ConnectedPingPacket) packet.content();
-            ConnectedPongPacket response = new ConnectedPongPacket();
-            response.setPingTime(request.getPingTime());
-            response.setPongTime(System.currentTimeMillis());
-            session.sendUrgentPackage(response);
-            return;
-        }
     }
 }

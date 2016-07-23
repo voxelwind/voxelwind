@@ -119,9 +119,9 @@ public class EncapsulatedRakNetPacket {
 
     public void decode(ByteBuf buf) {
         byte flags = buf.readByte();
-        reliability =  RakNetReliability.values()[((flags & 0b00010000) >> 5)];
+        reliability = RakNetReliability.values()[((flags & 0b00010000) >> 5)];
         hasSplit = ((flags & 0b00010000) > 0);
-        short size = (short) Math.ceil(buf.readShort() / 8D);
+        short size = (short) Math.ceil(buf.readUnsignedShort() / 8D);
 
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
@@ -141,7 +141,7 @@ public class EncapsulatedRakNetPacket {
             partIndex = buf.readInt();
         }
 
-        buffer = buf.readSlice(size);
+        buffer = buf.readSlice(buf.readableBytes());
     }
 
     public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, UserSession session) {
@@ -188,5 +188,22 @@ public class EncapsulatedRakNetPacket {
     public int totalLength() {
         // Back of the envelope calculation, YMMV
         return buffer.readableBytes() + 24;
+    }
+
+    @Override
+    public String toString() {
+        return "EncapsulatedRakNetPacket{" +
+                "reliability=" + reliability +
+                ", reliabilityNumber=" + reliabilityNumber +
+                ", sequenceIndex=" + sequenceIndex +
+                ", orderingIndex=" + orderingIndex +
+                ", orderingChannel=" + orderingChannel +
+                ", hasSplit=" + hasSplit +
+                ", partCount=" + partCount +
+                ", partId=" + partId +
+                ", partIndex=" + partIndex +
+                ", buffer=" + buffer +
+                ", totalLength=" + totalLength() +
+                '}';
     }
 }

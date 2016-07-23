@@ -2,9 +2,11 @@ package io.minimum.voxelwind.network.raknet;
 
 import io.minimum.voxelwind.VoxelwindServer;
 import io.minimum.voxelwind.network.raknet.datagrams.RakNetDatagram;
+import io.minimum.voxelwind.network.raknet.datagrams.RakNetDatagramFlags;
 import io.minimum.voxelwind.network.raknet.enveloped.AddressedRakNetDatagram;
 import io.minimum.voxelwind.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -33,8 +35,15 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
         if (session == null)
             return;
 
-        RakNetDatagram datagram = new RakNetDatagram();
-        datagram.decode(packet.content());
-        list.add(datagram);
+        packet.content().markReaderIndex();
+        RakNetDatagramFlags flags = new RakNetDatagramFlags(packet.content().readByte());
+        packet.content().resetReaderIndex();
+
+        if (flags.isValid() && !flags.isAck() && !flags.isNak()) {
+            //System.out.println("[RakNet Datagram] " + packet + ":\n " + ByteBufUtil.prettyHexDump(packet.content()));
+            RakNetDatagram datagram = new RakNetDatagram();
+            datagram.decode(packet.content().retain()); // Must be retained since packet body is a slice
+            list.add(new AddressedRakNetDatagram(datagram, packet.recipient(), packet.sender()));
+        }
     }
 }

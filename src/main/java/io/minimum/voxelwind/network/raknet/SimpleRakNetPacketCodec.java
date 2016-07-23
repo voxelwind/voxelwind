@@ -7,6 +7,7 @@ import io.minimum.voxelwind.network.raknet.enveloped.DirectAddressedRakNetPacket
 import io.minimum.voxelwind.network.raknet.packets.AckPacket;
 import io.minimum.voxelwind.network.raknet.packets.NakPacket;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -29,9 +30,11 @@ public class SimpleRakNetPacketCodec extends MessageToMessageCodec<DatagramPacke
     @Override
     protected void decode(ChannelHandlerContext ctx, DatagramPacket packet, List<Object> list) throws Exception {
         // Certain RakNet packets do not require special encapsulation. This encoder tries to handle them.
+        //System.out.println(packet + ": \n" + ByteBufUtil.prettyHexDump(packet.content()));
+
         ByteBuf buf = packet.content();
         buf.markReaderIndex();
-        int id = buf.readByte();
+        int id = buf.readUnsignedByte();
         if (id < USER_ID_START) { // User data
             buf.resetReaderIndex();
 
@@ -40,6 +43,7 @@ public class SimpleRakNetPacketCodec extends MessageToMessageCodec<DatagramPacke
             if (netPackage != null) {
                 list.add(new DirectAddressedRakNetPacket(netPackage, packet.recipient(), packet.sender()));
             }
+            return;
         } else {
             // We can decode some datagrams directly.
             buf.resetReaderIndex();
@@ -55,9 +59,12 @@ public class SimpleRakNetPacketCodec extends MessageToMessageCodec<DatagramPacke
                     NakPacket nakPacket = new NakPacket();
                     nakPacket.decode(buf);
                     list.add(new DirectAddressedRakNetPacket(nakPacket, packet.recipient(), packet.sender()));
+                } else {
+                    buf.readerIndex(0);
+                    list.add(packet.retain()); // needs further processing
                 }
             } else {
-                buf.readerIndex(0);
+                buf.readerIndex(0); // not interested
             }
         }
     }
