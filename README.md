@@ -15,6 +15,7 @@ Voxelwind upstream so that the larger community can benefit from them.
 ## Special Thanks
 
 * [MiNET](https://github.com/NiclasOlofsson/MiNET) was invaluable in helping me figure out some of the more difficult stuff.
+* [yawkat's protocol documentation](https://confluence.yawk.at/display/PEPROTOCOL/pe-protocol-docs+Home) was also useful, especially for encryption.
 
 ## Requirements
 
@@ -23,6 +24,6 @@ Debian-based Linux distribution (Debian 8 or Ubuntu 16.04) for two reasons:
 
 * Voxelwind can use multiple threads to listen to the same port on Linux (`SO_REUSEPORT`). **JDK 9 includes more native
 support for SO_REUSPORT, so it will work on any modern Unix-like OS.**
-* Voxelwind can take advantage of native cryptography and compression support.
+* Voxelwind can take advantage of native compression support. (A solution needs to be sought for native encryption support.)
 
 Voxelwind will work on other configurations outside 64-bit Debian/Ubuntu, but scalability and throughput will be affected.

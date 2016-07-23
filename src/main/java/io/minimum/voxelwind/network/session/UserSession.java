@@ -3,8 +3,10 @@ package io.minimum.voxelwind.network.session;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
+import io.minimum.voxelwind.network.Native;
 import io.minimum.voxelwind.network.handler.NetworkPacketHandler;
-import io.minimum.voxelwind.network.mcpe.McpeBatch;
+import io.minimum.voxelwind.network.mcpe.annotations.ForceClearText;
+import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
 import io.minimum.voxelwind.network.mcpe.annotations.BatchDisallowed;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.datagrams.EncapsulatedRakNetPacket;
@@ -12,13 +14,24 @@ import io.minimum.voxelwind.network.raknet.datagrams.RakNetDatagram;
 import io.minimum.voxelwind.network.raknet.enveloped.AddressedRakNetDatagram;
 import io.minimum.voxelwind.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import io.minimum.voxelwind.network.raknet.packets.AckPacket;
+import io.minimum.voxelwind.network.util.EncryptionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
+import net.md_5.bungee.jni.cipher.BungeeCipher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.net.InetSocketAddress;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -44,6 +57,8 @@ public class UserSession {
     private final Queue<Integer> ackQueue = new ArrayDeque<>();
     private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
     private final Channel channel;
+    private Cipher encryptionCipher;
+    private Cipher decryptionCipher;
 
     public UserSession(InetSocketAddress remoteAddress, long clientGuid, short mtu, NetworkPacketHandler handler, Channel channel) {
         this.remoteAddress = remoteAddress;
@@ -177,7 +192,22 @@ public class UserSession {
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
         netPackage.encode(buf);
 
-        List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(buf, this);
+        ByteBuf toEncapsulate;
+        if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
+            toEncapsulate = PooledByteBufAllocator.DEFAULT.buffer();
+            try {
+                EncryptionUtil.aesEncrypt(buf, toEncapsulate, encryptionCipher);
+            } catch (GeneralSecurityException e) {
+                toEncapsulate.release();
+                throw new RuntimeException("Unable to encipher package", e);
+            } finally {
+                buf.release();
+            }
+        } else {
+            toEncapsulate = buf;
+        }
+
+        List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(toEncapsulate, this);
         List<RakNetDatagram> datagrams = new ArrayList<>();
         RakNetDatagram datagram = new RakNetDatagram();
         datagram.setDatagramSequenceNumber(datagramSequenceGenerator.incrementAndGet());
@@ -261,5 +291,19 @@ public class UserSession {
         AckPacket packet = new AckPacket();
         packet.getIds().addAll(ranges);
         sendDirectPackage(packet);
+    }
+
+    protected void beginEncrypting(byte[] sharedSecret) {
+        byte[] iv = Arrays.copyOf(sharedSecret, 16);
+        SecretKey key = new SecretKeySpec(sharedSecret, "AES");
+        try {
+            encryptionCipher = Cipher.getInstance("AES/CFB8/NoPadding");
+            decryptionCipher = Cipher.getInstance("AES/CFB8/NoPadding");
+
+            encryptionCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+            decryptionCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException | InvalidKeyException e) {
+            throw new RuntimeException("Unable to initialize ciphers", e);
+        }
     }
 }

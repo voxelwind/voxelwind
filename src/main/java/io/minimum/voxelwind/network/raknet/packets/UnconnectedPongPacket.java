@@ -15,7 +15,7 @@ public class UnconnectedPongPacket implements RakNetPackage {
         pingId = buffer.readLong();
         serverId = buffer.readLong();
         RakNetUtil.verifyUnconnectedMagic(buffer);
-        advertise = RakNetUtil.getString(buffer);
+        advertise = RakNetUtil.readString(buffer);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class UnconnectedPongPacket implements RakNetPackage {
         buffer.writeLong(pingId);
         buffer.writeLong(serverId);
         buffer.writeBytes(RAKNET_UNCONNECTED_MAGIC);
-        RakNetUtil.putString(buffer, advertise);
+        RakNetUtil.writeString(buffer, advertise);
     }
 
     public long getPingId() {

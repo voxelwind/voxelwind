@@ -18,14 +18,14 @@ public class RakNetUtil {
         throw new AssertionError("Can't create instance of RakNetUtil");
     }
 
-    public static void putString(ByteBuf buffer, String string) {
+    public static void writeString(ByteBuf buffer, String string) {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
         buffer.writeShort((short) string.length());
         ByteBufUtil.writeUtf8(buffer, string);
     }
 
-    public static String getString(ByteBuf buffer) {
+    public static String readString(ByteBuf buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
 
         int length = buffer.readShort();

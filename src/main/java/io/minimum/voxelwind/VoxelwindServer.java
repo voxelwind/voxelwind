@@ -1,5 +1,6 @@
 package io.minimum.voxelwind;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minimum.voxelwind.network.Native;
 import io.minimum.voxelwind.network.NettyVoxelwindNetworkListener;
 import io.minimum.voxelwind.network.session.SessionManager;
@@ -11,6 +12,7 @@ import java.io.IOException;
 
 public class VoxelwindServer {
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
+    public static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final SessionManager sessionManager = new SessionManager();
     private NettyVoxelwindNetworkListener listener;
@@ -22,6 +24,8 @@ public class VoxelwindServer {
     public void boot() throws Exception {
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
+
+        LOGGER.info("Voxelwind is now running.");
 
         Thread.sleep(10000000);
     }

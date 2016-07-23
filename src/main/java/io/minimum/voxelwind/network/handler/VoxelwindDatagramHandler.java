@@ -1,7 +1,7 @@
 package io.minimum.voxelwind.network.handler;
 
 import io.minimum.voxelwind.VoxelwindServer;
-import io.minimum.voxelwind.network.mcpe.McpeBatch;
+import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.datagrams.RakNetDatagramFlags;
 import io.minimum.voxelwind.network.raknet.enveloped.AddressedRakNetDatagram;
