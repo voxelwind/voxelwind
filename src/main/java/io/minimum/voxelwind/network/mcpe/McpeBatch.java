@@ -87,7 +87,7 @@ public class McpeBatch implements RakNetPackage {
 
             for (RakNetPackage netPackage : packages) {
                 ByteBuf encodedPackage = PacketRegistry.tryEncode(netPackage);
-                source.writeInt(encodedPackage.writableBytes());
+                source.writeInt(encodedPackage.readableBytes());
                 source.writeBytes(encodedPackage);
                 encodedPackage.release();
             }
