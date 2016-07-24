@@ -1,5 +1,6 @@
 package io.minimum.voxelwind.network.handler;
 
+import com.google.common.net.InetAddresses;
 import io.minimum.voxelwind.VoxelwindServer;
 import io.minimum.voxelwind.network.PacketRegistry;
 import io.minimum.voxelwind.network.PacketType;
@@ -31,8 +32,6 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, AddressedRakNetDatagram datagram) throws Exception {
-        System.out.println(datagram);
-
         UserSession session = server.getSessionManager().get(datagram.sender());
 
         if (session == null)
@@ -128,7 +127,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             response.setSystemTimestamp(System.currentTimeMillis());
             response.setSystemAddress(InetAddress.getLoopbackAddress());
             InetAddress[] addresses = new InetAddress[10];
-            Arrays.fill(addresses, InetAddress.getLoopbackAddress());
+            Arrays.fill(addresses, InetAddresses.forString("255.255.255.255"));
             response.setSystemAddresses(addresses);
             response.setSystemIndex(0);
             session.sendUrgentPackage(response);

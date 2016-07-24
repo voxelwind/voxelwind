@@ -1,9 +1,11 @@
 package io.minimum.voxelwind.network.session;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import io.minimum.voxelwind.VoxelwindServer;
+import io.minimum.voxelwind.network.PacketRegistry;
 import io.minimum.voxelwind.network.handler.NetworkPacketHandler;
 import io.minimum.voxelwind.network.mcpe.annotations.ForceClearText;
 import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
@@ -184,7 +186,11 @@ public class UserSession {
     }
 
     private void internalSendPackage(RakNetPackage netPackage) {
+        Integer id = PacketRegistry.getId(netPackage);
+        Preconditions.checkArgument(id != null, "Package " + netPackage + " has no ID.");
+
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
+        buf.writeByte((id & 0xFF));
         netPackage.encode(buf);
 
         ByteBuf toEncapsulate;
@@ -204,25 +210,19 @@ public class UserSession {
 
         List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(toEncapsulate, this);
         List<RakNetDatagram> datagrams = new ArrayList<>();
-        RakNetDatagram datagram = new RakNetDatagram();
-        datagram.setDatagramSequenceNumber(datagramSequenceGenerator.incrementAndGet());
         for (EncapsulatedRakNetPacket packet : addressed) {
+            RakNetDatagram datagram = new RakNetDatagram();
+            datagram.setDatagramSequenceNumber(datagramSequenceGenerator.incrementAndGet());
             if (!datagram.tryAddPacket(packet, mtu)) {
-                datagrams.add(datagram);
-                datagram = new RakNetDatagram();
-                datagram.setDatagramSequenceNumber(datagramSequenceGenerator.incrementAndGet());
-                if (!datagram.tryAddPacket(packet, mtu)) {
-                    throw new RuntimeException("Packet too large to fit in MTU (size: " + packet.totalLength() + ", MTU: " + mtu + ")");
-                }
+                throw new RuntimeException("Packet too large to fit in MTU (size: " + packet.totalLength() + ", MTU: " + mtu + ")");
             }
+            datagrams.add(datagram);
         }
-
-        datagrams.add(datagram);
 
         for (RakNetDatagram netDatagram : datagrams) {
             System.out.println("[Attempt Send] " + netDatagram);
             channel.write(new AddressedRakNetDatagram(netDatagram, remoteAddress), channel.voidPromise());
-            datagramAcks.put(datagram.getDatagramSequenceNumber(), new SentDatagram(datagram));
+            datagramAcks.put(netDatagram.getDatagramSequenceNumber(), new SentDatagram(netDatagram));
         }
     }
 
@@ -239,11 +239,11 @@ public class UserSession {
         RakNetPackage netPackage;
         McpeBatch batch = new McpeBatch();
         while ((netPackage = currentlyQueued.poll()) != null) {
-            if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class)) {
+            if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class) ||
+                    netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
                 // We hit a un-batchable packet. Send the current batch and then send the un-batchable packet.
                 if (!batch.getPackages().isEmpty()) {
                     internalSendPackage(batch);
-                    LOGGER.error("Sent batch before batch-exempt packet; " + batch.getPackages().size() + " packages sent.");
                     batch = new McpeBatch();
                 }
 
@@ -267,7 +267,6 @@ public class UserSession {
 
         if (!batch.getPackages().isEmpty()) {
             internalSendPackage(batch);
-            LOGGER.error("Batch sent; " + batch.getPackages().size() + " packages sent.");
         }
         channel.flush();
     }
@@ -287,8 +286,6 @@ public class UserSession {
             ranges = AckPacket.intoRanges(ackQueue);
             ackQueue.clear();
         }
-
-        System.out.println("Doing ACK: " + ranges);
 
         AckPacket packet = new AckPacket();
         packet.getIds().addAll(ranges);

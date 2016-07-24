@@ -3,16 +3,14 @@ package io.minimum.voxelwind.network.util;
 import io.netty.buffer.ByteBuf;
 
 import javax.crypto.*;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 
 public class EncryptionUtil {
     private EncryptionUtil() {
 
     }
 
-    private static final SecretKey serverKey;
+    private static final KeyPair serverKey;
     private static final ThreadLocal<byte[]> heapInLocal = new EmptyByteThreadLocal();
     private static final ThreadLocal<byte[]> heapOutLocal = new EmptyByteThreadLocal();
 
@@ -23,10 +21,9 @@ public class EncryptionUtil {
         }
     }
 
-
     static {
         try {
-            serverKey = KeyGenerator.getInstance("EC").generateKey();
+            serverKey = KeyPairGenerator.getInstance("EC").generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -41,7 +38,7 @@ public class EncryptionUtil {
         }
 
         try {
-            agreement.init(serverKey);
+            agreement.init(serverKey.getPrivate());
             agreement.doPhase(clientKey, true);
         } catch (InvalidKeyException e) {
             throw new AssertionError(e);
@@ -50,7 +47,7 @@ public class EncryptionUtil {
         return agreement.generateSecret();
     }
 
-    public static SecretKey getServerKey() {
+    public static KeyPair getServerKey() {
         return serverKey;
     }
 

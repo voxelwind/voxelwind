@@ -3,6 +3,8 @@ package io.minimum.voxelwind.network;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import io.minimum.voxelwind.network.mcpe.packets.McpeLogin;
+import io.minimum.voxelwind.network.mcpe.packets.McpeServerHandshake;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.packets.*;
 import io.netty.buffer.ByteBuf;
@@ -28,7 +30,10 @@ public class PacketRegistry {
                             .put(0xa0, NakPacket.class)
                             .put(0xc0, AckPacket.class)
                             .build())
-                    .put(PacketType.MCPE, ImmutableBiMap.of())
+                    .put(PacketType.MCPE, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
+                            .put(0x01, McpeLogin.class)
+                            .put(0x03, McpeServerHandshake.class)
+                            .build())
                     .build();
 
     private PacketRegistry() {
@@ -50,6 +55,16 @@ public class PacketRegistry {
 
         netPackage.decode(buf);
         return netPackage;
+    }
+
+    public static Integer getId(RakNetPackage pkg) {
+        for (Map.Entry<PacketType, BiMap<Integer, Class<? extends RakNetPackage>>> entry : PACKAGE_BY_ID.entrySet()) {
+            Integer res = entry.getValue().inverse().get(pkg.getClass());
+            if (res != null) {
+                return res;
+            }
+        }
+        return null;
     }
 
     public static Integer getId(RakNetPackage pkg, PacketType type) {
