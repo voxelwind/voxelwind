@@ -27,7 +27,10 @@ class SentDatagram {
 
     void refreshForResend(UserSession session) {
         stopwatch.reset();
-        datagram.setDatagramSequenceNumber(session.getDatagramSequenceGenerator().incrementAndGet());
+        datagram.setDatagramSequenceNumber(session.getDatagramSequenceGenerator().getAndIncrement());
+        for (EncapsulatedRakNetPacket packet : datagram.getPackets()) {
+            packet.getBuffer().retain(); // because the re-write will cause a decrement of the reference count
+        }
     }
 
     void tryRelease() {
@@ -40,5 +43,6 @@ class SentDatagram {
         }
 
         stopwatch.stop();
+        released = true;
     }
 }

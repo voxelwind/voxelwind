@@ -43,10 +43,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
 
         // Check the datagram contents.
         if (datagram.content().getFlags().isValid()) {
-            System.out.println("[RakNet Datagram] " + datagram);
             for (EncapsulatedRakNetPacket packet : datagram.content().getPackets()) {
-                System.out.println("[Encapsulated Packet] " + packet + ":\n" + ByteBufUtil.prettyHexDump(packet.getBuffer()));
-
                 // Try to figure out what packet got sent.
                 if (packet.isHasSplit()) {
                     Optional<ByteBuf> possiblyReassembled = session.addSplitPacket(packet);
@@ -126,11 +123,12 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             ConnectionResponsePacket response = new ConnectionResponsePacket();
             response.setIncomingTimestamp(request.getTimestamp());
             response.setSystemTimestamp(System.currentTimeMillis());
-            response.setSystemAddress(new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132));
+            response.setSystemAddress(session.getRemoteAddress());
             InetSocketAddress[] addresses = new InetSocketAddress[10];
             Arrays.fill(addresses, new InetSocketAddress(InetAddresses.forString("255.255.255.255"), 19132));
+            addresses[0] = new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132);
             response.setSystemAddresses(addresses);
-            response.setSystemIndex(0);
+            response.setSystemIndex((short) 0);
             session.sendUrgentPackage(response);
             return;
         }

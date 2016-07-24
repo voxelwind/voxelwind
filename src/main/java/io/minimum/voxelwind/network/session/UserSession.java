@@ -123,7 +123,7 @@ public class UserSession {
         packets.add(packet);
 
         // Is the packet collection complete?
-        BitSet found = new BitSet();
+        BitSet found = new BitSet(packet.getPartCount());
         for (EncapsulatedRakNetPacket netPacket : packets) {
             if (found.get(netPacket.getPartIndex()))
                 throw new RuntimeException("Multiple parts found for " + netPacket.getPartId() + " at #" + netPacket.getPartId());
@@ -154,7 +154,6 @@ public class UserSession {
             for (Integer integer : ContiguousSet.create(range, DiscreteDomain.integers())) {
                 SentDatagram datagram = datagramAcks.remove(integer);
                 if (datagram != null) {
-                    LOGGER.error("Datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " has been ACKed");
                     datagram.tryRelease();
                 }
             }

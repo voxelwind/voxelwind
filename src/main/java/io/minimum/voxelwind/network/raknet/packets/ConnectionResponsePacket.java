@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 
 public class ConnectionResponsePacket implements RakNetPackage {
     private InetSocketAddress systemAddress;
-    private int systemIndex;
+    private short systemIndex;
     private InetSocketAddress[] systemAddresses;
     private long incomingTimestamp;
     private long systemTimestamp;
@@ -16,7 +16,7 @@ public class ConnectionResponsePacket implements RakNetPackage {
     @Override
     public void decode(ByteBuf buffer) {
         systemAddress = RakNetUtil.readSocketAddress(buffer);
-        systemIndex = buffer.readInt();
+        systemIndex = buffer.readShort();
         systemAddresses = new InetSocketAddress[10];
         for (int i = 0; i < 10; i++) {
             systemAddresses[i] = RakNetUtil.readSocketAddress(buffer);
@@ -28,7 +28,7 @@ public class ConnectionResponsePacket implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         RakNetUtil.writeSocketAddress(buffer, systemAddress);
-        buffer.writeInt(systemIndex);
+        buffer.writeShort(systemIndex);
         for (InetSocketAddress address : systemAddresses) {
             RakNetUtil.writeSocketAddress(buffer, address);
         }
@@ -44,11 +44,11 @@ public class ConnectionResponsePacket implements RakNetPackage {
         this.systemAddress = systemAddress;
     }
 
-    public int getSystemIndex() {
+    public short getSystemIndex() {
         return systemIndex;
     }
 
-    public void setSystemIndex(int systemIndex) {
+    public void setSystemIndex(short systemIndex) {
         this.systemIndex = systemIndex;
     }
 

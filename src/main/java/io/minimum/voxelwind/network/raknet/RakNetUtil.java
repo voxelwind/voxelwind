@@ -44,7 +44,7 @@ public class RakNetUtil {
     }
 
     public static InetAddress readAddress(ByteBuf buf) {
-        byte type = buf.readByte();
+        short type = buf.readUnsignedByte();
         if (type == 4) {
             byte[] addr = new byte[4];
             buf.readBytes(addr);
@@ -67,7 +67,7 @@ public class RakNetUtil {
 
     public static void writeAddress(ByteBuf buf, InetAddress address) {
         if (address instanceof Inet4Address) {
-            buf.writeByte(4);
+            buf.writeByte((4 & 0xFF));
             buf.writeBytes(address.getAddress());
         } else {
             throw new UnsupportedOperationException("Can't serialize an IPv6 address.");

@@ -96,7 +96,7 @@ public class EncapsulatedRakNetPacket {
     public void encode(ByteBuf buf) {
         int flags = reliability.ordinal();
         buf.writeByte((byte) ((flags << 5) | (hasSplit ? 0b00010000 : 0x00))); // flags
-        buf.order(ByteOrder.LITTLE_ENDIAN).writeShort(buf.readableBytes() * 8); // size
+        buf.writeShort(buffer.readableBytes() * 8); // size
 
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
@@ -154,7 +154,8 @@ public class EncapsulatedRakNetPacket {
             // Split the buffer up
             int split = (int) Math.ceil(buffer.readableBytes() / by);
             for (int i = 0; i < split; i++) {
-                bufs.add(buffer.slice(i * by, Math.min(buffer.readableBytes(), (i + 1) * by)));
+                // Need to retain, in the event that we need to send due to NAK.
+                bufs.add(buffer.slice(i * by, Math.min(buffer.readableBytes(), (i + 1) * by)).retain());
             }
         } else {
             bufs.add(buffer);
