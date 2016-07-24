@@ -3,6 +3,7 @@ package io.minimum.voxelwind.network;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
 import io.minimum.voxelwind.network.mcpe.packets.McpeLogin;
 import io.minimum.voxelwind.network.mcpe.packets.McpeServerHandshake;
 import io.minimum.voxelwind.network.mcpe.packets.McpeWrapper;
@@ -35,6 +36,7 @@ public class PacketRegistry {
                     .put(PacketType.MCPE, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
                             .put(0x01, McpeLogin.class)
                             .put(0x03, McpeServerHandshake.class)
+                            .put(0x06, McpeBatch.class)
                             .put(0xfe, McpeWrapper.class)
                             .build())
                     .build();
@@ -44,7 +46,7 @@ public class PacketRegistry {
     }
 
     public static RakNetPackage tryDecode(ByteBuf buf, PacketType type) {
-        int id = buf.readByte();
+        int id = buf.readUnsignedByte();
         Class<? extends RakNetPackage> pkgClass = PACKAGE_BY_ID.get(type).get(id);
         if (pkgClass == null)
             return null;
@@ -74,10 +76,10 @@ public class PacketRegistry {
         return PACKAGE_BY_ID.get(type).inverse().get(pkg.getClass());
     }
 
-    public static ByteBuf tryEncode(RakNetPackage pkg, PacketType type) {
-        Integer id = PACKAGE_BY_ID.get(type).inverse().get(pkg.getClass());
+    public static ByteBuf tryEncode(RakNetPackage pkg) {
+        Integer id = getId(pkg);
         if (id == null) {
-            throw new RuntimeException("Package does not exist");
+            throw new IllegalArgumentException("Package " + pkg.getClass() + " is not registered");
         }
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();

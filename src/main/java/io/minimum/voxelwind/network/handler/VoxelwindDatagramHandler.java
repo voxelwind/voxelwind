@@ -69,19 +69,26 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
     }
 
     private RakNetPackage bruteForceDecode(ByteBuf buf) throws Exception {
-        RakNetPackage pkg;
+        ByteBuf smallSlice = buf.slice(0, Math.min(buf.readableBytes(), 16));
 
         for (PacketType type : PacketType.values()) {
+            RakNetPackage pkg;
+
             buf.markReaderIndex();
             try {
                 pkg = PacketRegistry.tryDecode(buf, type);
             } catch (Exception e) {
+                System.out.println("Can't decode with " + type + ": " + ByteBufUtil.hexDump(smallSlice) + " (" + buf + ")");
+                e.printStackTrace();
                 buf.resetReaderIndex();
                 continue;
             }
 
-            if (pkg == null)
+            if (pkg == null) {
+                System.out.println("Invalid package type with " + type + ": " + ByteBufUtil.hexDump(smallSlice) + " (" + buf + ")");
+                buf.resetReaderIndex();
                 continue;
+            }
 
             if (buf.isReadable()) {
                 // Not all data was read?
@@ -92,7 +99,6 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             }
         }
 
-        ByteBuf smallSlice = buf.slice(0, Math.min(buf.readableBytes(), 16));
         throw new Exception("Unable to create packet for ID " + Integer.toHexString(smallSlice.getUnsignedByte(0)) + " (first 16 bytes: " + ByteBufUtil.hexDump(smallSlice) + ", " +
                 "buffer: " + buf + ").");
     }

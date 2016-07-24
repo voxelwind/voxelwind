@@ -6,6 +6,7 @@ import io.minimum.voxelwind.network.mcpe.annotations.BatchDisallowed;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 
 import java.util.ArrayList;
@@ -23,7 +24,16 @@ public class McpeBatch implements RakNetPackage {
         try {
             decompressed = CompressionUtil.inflate(buffer);
 
+            if (decompressed.readByte() != 0x78) {
+                throw new DataFormatException("Found invalid zlib header byte (should be 0x78)");
+            }
+
+            decompressed.readByte();
+
             // Now process the decompressed result.
+            System.out.println("First 512 bytes:");
+            System.out.println(ByteBufUtil.prettyHexDump(decompressed, 0, 512));
+
             while (decompressed.isReadable()) {
                 int length = decompressed.readInt();
                 ByteBuf data = decompressed.readSlice(length);
@@ -43,19 +53,15 @@ public class McpeBatch implements RakNetPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        ByteBuf destination = null;
         ByteBuf source = PooledByteBufAllocator.DEFAULT.directBuffer();
 
         try {
-            if (!buffer.isDirect()) {
-                // Not a direct buffer, work on a temporary direct buffer and then write the contents out.
-                destination = PooledByteBufAllocator.DEFAULT.directBuffer();
-            } else {
-                destination = buffer;
-            }
+            // Voxelwind uses default compression
+            source.writeByte(0x78);
+            source.writeByte(0x9c);
 
             for (RakNetPackage netPackage : packages) {
-                ByteBuf encodedPackage = PacketRegistry.tryEncode(netPackage, PacketType.MCPE);
+                ByteBuf encodedPackage = PacketRegistry.tryEncode(netPackage);
                 source.writeInt(encodedPackage.readableBytes());
                 source.writeBytes(encodedPackage);
                 encodedPackage.release();
@@ -65,9 +71,6 @@ public class McpeBatch implements RakNetPackage {
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to deflate batch data", e);
         } finally {
-            if (destination != null && destination != buffer) {
-                source.release();
-            }
             source.release();
         }
     }
