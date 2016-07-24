@@ -26,6 +26,6 @@ Debian-based Linux distribution (Debian 8 or Ubuntu 16.04) for two reasons:
 
 * Voxelwind can use multiple threads to listen to the same port on Linux (`SO_REUSEPORT`). **JDK 9 includes native support
 for this flag, so it is likely this will appear in a future Netty version.**
-* Voxelwind can take advantage of native compression support. (A solution needs to be sought for native encryption support.)
+* Voxelwind can take advantage of native compression and encryption support.
 
 Voxelwind will work on other configurations outside 64-bit Debian/Ubuntu, but scalability and throughput will be affected.

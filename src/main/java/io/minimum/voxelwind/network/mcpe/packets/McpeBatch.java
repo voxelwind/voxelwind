@@ -11,6 +11,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Adler32;
 import java.util.zip.DataFormatException;
 
 @BatchDisallowed // You don't batch a batch packet, it makes no sense.
@@ -19,10 +20,10 @@ public class McpeBatch implements RakNetPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        // Ensure that this buffer is direct.
         ByteBuf decompressed = null;
         try {
-            decompressed = CompressionUtil.inflate(buffer);
+            int compressedSize = buffer.readInt();
+            decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
 
             if (decompressed.readByte() != 0x78) {
                 throw new DataFormatException("Found invalid zlib header byte (should be 0x78)");
@@ -67,7 +68,9 @@ public class McpeBatch implements RakNetPackage {
                 encodedPackage.release();
             }
 
-            CompressionUtil.deflate(source, buffer);
+            int originalWriterIndex = buffer.writerIndex();
+            long adler = CompressionUtil.deflate(source, buffer);
+            buffer.writeLong(adler);
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to deflate batch data", e);
         } finally {

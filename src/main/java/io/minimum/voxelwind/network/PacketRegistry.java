@@ -32,12 +32,12 @@ public class PacketRegistry {
                             .put(0x1c, UnconnectedPongPacket.class)
                             .put(0xa0, NakPacket.class)
                             .put(0xc0, AckPacket.class)
+                            .put(0xfe, McpeWrapper.class) // Technically not an MCPE packet, but here for convenience
                             .build())
                     .put(PacketType.MCPE, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
                             .put(0x01, McpeLogin.class)
                             .put(0x03, McpeServerHandshake.class)
                             .put(0x06, McpeBatch.class)
-                            .put(0xfe, McpeWrapper.class)
                             .build())
                     .build();
 

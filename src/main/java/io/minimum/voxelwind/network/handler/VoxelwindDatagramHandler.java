@@ -53,7 +53,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
                     if (possiblyReassembled.isPresent()) {
                         ByteBuf reassembled = possiblyReassembled.get();
                         try {
-                            RakNetPackage pkg = bruteForceDecode(reassembled);
+                            RakNetPackage pkg = PacketRegistry.tryDecode(reassembled, PacketType.RAKNET);
                             handlePackage(pkg, session);
                         } finally {
                             reassembled.release();
@@ -61,46 +61,11 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
                     }
                 } else {
                     // Try to decode the full packet.
-                    RakNetPackage pkg = bruteForceDecode(packet.getBuffer());
+                    RakNetPackage pkg = PacketRegistry.tryDecode(packet.getBuffer(), PacketType.RAKNET);
                     handlePackage(pkg, session);
                 }
             }
         }
-    }
-
-    private RakNetPackage bruteForceDecode(ByteBuf buf) throws Exception {
-        ByteBuf smallSlice = buf.slice(0, Math.min(buf.readableBytes(), 16));
-
-        for (PacketType type : PacketType.values()) {
-            RakNetPackage pkg;
-
-            buf.markReaderIndex();
-            try {
-                pkg = PacketRegistry.tryDecode(buf, type);
-            } catch (Exception e) {
-                System.out.println("Can't decode with " + type + ": " + ByteBufUtil.hexDump(smallSlice) + " (" + buf + ")");
-                e.printStackTrace();
-                buf.resetReaderIndex();
-                continue;
-            }
-
-            if (pkg == null) {
-                System.out.println("Invalid package type with " + type + ": " + ByteBufUtil.hexDump(smallSlice) + " (" + buf + ")");
-                buf.resetReaderIndex();
-                continue;
-            }
-
-            if (buf.isReadable()) {
-                // Not all data was read?
-                System.out.println("When using " + type + ", bytes were left: " + ByteBufUtil.hexDump(buf) + " (" + buf + ")");
-                buf.resetReaderIndex();
-            } else {
-                return pkg;
-            }
-        }
-
-        throw new Exception("Unable to create packet for ID " + Integer.toHexString(smallSlice.getUnsignedByte(0)) + " (first 16 bytes: " + ByteBufUtil.hexDump(smallSlice) + ", " +
-                "buffer: " + buf + ").");
     }
 
     private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
@@ -118,12 +83,12 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             try {
                 if (session.isEncrypted()) {
                     cleartext = PooledByteBufAllocator.DEFAULT.buffer();
-                    EncryptionUtil.aesEncrypt(((McpeWrapper) netPackage).getWrapped(), cleartext, session.getDecryptionCipher());
+                    session.getDecryptionCipher().cipher(((McpeWrapper) netPackage).getWrapped(), cleartext);
                 } else {
                     cleartext = ((McpeWrapper) netPackage).getWrapped();
                 }
 
-                RakNetPackage pkg = bruteForceDecode(cleartext);
+                RakNetPackage pkg = PacketRegistry.tryDecode(cleartext, PacketType.MCPE);
                 handlePackage(pkg, session);
             } finally {
                 if (cleartext != null && cleartext != ((McpeWrapper) netPackage).getWrapped()) {

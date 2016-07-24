@@ -5,6 +5,7 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import io.minimum.voxelwind.VoxelwindServer;
+import io.minimum.voxelwind.network.Native;
 import io.minimum.voxelwind.network.PacketRegistry;
 import io.minimum.voxelwind.network.handler.NetworkPacketHandler;
 import io.minimum.voxelwind.network.mcpe.annotations.ForceClearText;
@@ -21,6 +22,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
+import net.md_5.bungee.jni.cipher.BungeeCipher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,8 +61,8 @@ public class UserSession {
     private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
     private final Channel channel;
     private final VoxelwindServer server;
-    private Cipher encryptionCipher;
-    private Cipher decryptionCipher;
+    private BungeeCipher encryptionCipher;
+    private BungeeCipher decryptionCipher;
 
     public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
         this.remoteAddress = remoteAddress;
@@ -197,7 +199,7 @@ public class UserSession {
         if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
             toEncapsulate = PooledByteBufAllocator.DEFAULT.buffer();
             try {
-                EncryptionUtil.aesEncrypt(buf, toEncapsulate, encryptionCipher);
+                encryptionCipher.cipher(buf, toEncapsulate);
             } catch (GeneralSecurityException e) {
                 toEncapsulate.release();
                 throw new RuntimeException("Unable to encipher package", e);
@@ -295,12 +297,12 @@ public class UserSession {
         byte[] iv = Arrays.copyOf(sharedSecret, 16);
         SecretKey key = new SecretKeySpec(sharedSecret, "AES");
         try {
-            encryptionCipher = Cipher.getInstance("AES/CFB8/NoPadding");
-            decryptionCipher = Cipher.getInstance("AES/CFB8/NoPadding");
+            encryptionCipher = Native.cipher.newInstance();
+            decryptionCipher = Native.cipher.newInstance();
 
-            encryptionCipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
-            decryptionCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException | InvalidKeyException e) {
+            encryptionCipher.init(true, key, iv);
+            decryptionCipher.init(false, key, iv);
+        } catch (GeneralSecurityException e) {
             throw new RuntimeException("Unable to initialize ciphers", e);
         }
     }
@@ -313,11 +315,11 @@ public class UserSession {
         server.getSessionManager().remove(remoteAddress);
     }
 
-    public Cipher getEncryptionCipher() {
+    public BungeeCipher getEncryptionCipher() {
         return encryptionCipher;
     }
 
-    public Cipher getDecryptionCipher() {
+    public BungeeCipher getDecryptionCipher() {
         return decryptionCipher;
     }
 }

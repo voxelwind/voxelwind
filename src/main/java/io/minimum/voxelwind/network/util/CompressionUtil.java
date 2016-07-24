@@ -80,8 +80,9 @@ public class CompressionUtil {
      * @param toCompress the buffer to compress
      * @param into the buffer to compress into
      * @throws DataFormatException if data could not be deflated
+     * @return the Adler32 value of the {@code ByteBuf}
      */
-    public static void deflate(ByteBuf toCompress, ByteBuf into) throws DataFormatException {
+    public static long deflate(ByteBuf toCompress, ByteBuf into) throws DataFormatException {
         ByteBuf destination = null;
         ByteBuf source = null;
 
@@ -101,11 +102,13 @@ public class CompressionUtil {
                 destination = into;
             }
 
-            deflaterLocal.get().process(source, destination);
+            long adler32 = deflaterLocal.get().process(source, destination);
 
             if (destination != into) {
                 into.writeBytes(destination);
             }
+
+            return adler32;
         } finally {
             if (source != null && source != toCompress) {
                 source.release();
