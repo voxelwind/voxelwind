@@ -24,6 +24,8 @@ public class PacketRegistry {
                             .put(0x09, ConnectionRequestPacket.class)
                             .put(0x10, ConnectionResponsePacket.class)
                             .put(0x1c, UnconnectedPongPacket.class)
+                            .put(0xa0, NakPacket.class)
+                            .put(0xc0, AckPacket.class)
                             .build())
                     .put(PacketType.MCPE, ImmutableBiMap.of())
                     .build();
@@ -60,7 +62,7 @@ public class PacketRegistry {
         }
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
-        buf.writeByte(id);
+        buf.writeByte((id & 0xFF));
         pkg.encode(buf);
 
         return buf;

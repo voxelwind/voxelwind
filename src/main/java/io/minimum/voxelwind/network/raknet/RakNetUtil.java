@@ -78,17 +78,4 @@ public class RakNetUtil {
         writeAddress(buf, address.getAddress());
         buf.writeShort(address.getPort());
     }
-
-    public static int readTriad(ByteBuf buf) {
-        byte one = buf.readByte();
-        byte two = buf.readByte();
-        byte three = buf.readByte();
-        return one | two << 8 | three << 16;
-    }
-
-    public static void writeTriad(ByteBuf buf, int value) {
-        buf.writeByte((byte) value);
-        buf.writeByte((byte) (value >> 8));
-        buf.writeByte((byte) (value >> 16));
-    }
 }

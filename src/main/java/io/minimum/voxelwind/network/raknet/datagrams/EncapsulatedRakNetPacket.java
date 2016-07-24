@@ -3,7 +3,9 @@ package io.minimum.voxelwind.network.raknet.datagrams;
 import io.minimum.voxelwind.network.raknet.RakNetUtil;
 import io.minimum.voxelwind.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,17 +96,17 @@ public class EncapsulatedRakNetPacket {
     public void encode(ByteBuf buf) {
         int flags = reliability.ordinal();
         buf.writeByte((byte) ((flags << 5) | (hasSplit ? 0b00010000 : 0x00))); // flags
-        buf.writeShort(buf.readableBytes() * 8); // size
+        buf.order(ByteOrder.LITTLE_ENDIAN).writeShort(buf.readableBytes() * 8); // size
 
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
                 reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            RakNetUtil.writeTriad(buf, reliabilityNumber);
+            buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(reliabilityNumber);
         }
 
         if (reliability == RakNetReliability.UNRELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_SEQUENCED ||
                 reliability == RakNetReliability.RELIABLE_ORDERED || reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            RakNetUtil.writeTriad(buf, orderingIndex);
+            buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(orderingIndex);
             buf.writeByte(orderingChannel);
         }
 
@@ -118,20 +120,20 @@ public class EncapsulatedRakNetPacket {
     }
 
     public void decode(ByteBuf buf) {
-        byte flags = buf.readByte();
-        reliability = RakNetReliability.values()[((flags & 0b00010000) >> 5)];
+        short flags = buf.readUnsignedByte();
+        reliability = RakNetReliability.values()[((flags & 0b11100000) >> 5)];
         hasSplit = ((flags & 0b00010000) > 0);
-        short size = (short) Math.ceil(buf.readUnsignedShort() / 8D);
+        short size = (short) Math.ceil(buf.readShort() / 8D);
 
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
                 reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            reliabilityNumber = RakNetUtil.readTriad(buf);
+            reliabilityNumber = buf.order(ByteOrder.LITTLE_ENDIAN).readMedium();
         }
 
         if (reliability == RakNetReliability.UNRELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_SEQUENCED ||
                 reliability == RakNetReliability.RELIABLE_ORDERED || reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            orderingIndex = RakNetUtil.readTriad(buf);
+            orderingIndex = buf.order(ByteOrder.LITTLE_ENDIAN).readMedium();
             orderingChannel = buf.readByte();
         }
 
@@ -141,7 +143,7 @@ public class EncapsulatedRakNetPacket {
             partIndex = buf.readInt();
         }
 
-        buffer = buf.readSlice(buf.readableBytes());
+        buffer = buf.readSlice(size);
     }
 
     public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, UserSession session) {

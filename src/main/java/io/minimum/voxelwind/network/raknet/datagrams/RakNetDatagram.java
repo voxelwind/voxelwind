@@ -3,6 +3,7 @@ package io.minimum.voxelwind.network.raknet.datagrams;
 import io.minimum.voxelwind.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +15,7 @@ public class RakNetDatagram {
 
     public void decode(ByteBuf buf) {
         flags = new RakNetDatagramFlags(buf.readByte());
-        datagramSequenceNumber = RakNetUtil.readTriad(buf);
+        datagramSequenceNumber = buf.order(ByteOrder.LITTLE_ENDIAN).readMedium();
         while (buf.isReadable()) {
             EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
             packet.decode(buf);
@@ -24,7 +25,7 @@ public class RakNetDatagram {
 
     public void encode(ByteBuf buf) {
         buf.writeByte(flags.getFlagByte());
-        RakNetUtil.writeTriad(buf, datagramSequenceNumber);
+        buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(datagramSequenceNumber);
         for (EncapsulatedRakNetPacket packet : packets) {
             packet.encode(buf);
         }

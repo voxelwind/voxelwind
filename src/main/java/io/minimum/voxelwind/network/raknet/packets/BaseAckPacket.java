@@ -6,6 +6,7 @@ import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.ByteOrder;
 import java.util.*;
 
 public abstract class BaseAckPacket implements RakNetPackage {
@@ -15,11 +16,11 @@ public abstract class BaseAckPacket implements RakNetPackage {
     public void decode(ByteBuf buffer) {
         for (int i = 0; i < buffer.readShort(); i++) {
             boolean isSingleton = buffer.readBoolean();
-            int lower = RakNetUtil.readTriad(buffer);
+            int lower = buffer.order(ByteOrder.LITTLE_ENDIAN).readMedium();
             if (isSingleton) {
                 ids.add(Range.singleton(lower));
             } else {
-                int upper = RakNetUtil.readTriad(buffer);
+                int upper = buffer.order(ByteOrder.LITTLE_ENDIAN).readMedium();
                 ids.add(Range.closed(lower, upper));
             }
         }
@@ -31,9 +32,9 @@ public abstract class BaseAckPacket implements RakNetPackage {
         for (Range<Integer> id : ids) {
             boolean singleton = id.lowerEndpoint().equals(id.upperEndpoint());
             buffer.writeBoolean(singleton);
-            RakNetUtil.writeTriad(buffer, id.lowerEndpoint());
+            buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.lowerEndpoint());
             if (!singleton) {
-                RakNetUtil.writeTriad(buffer, id.upperEndpoint());
+                buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.upperEndpoint());
             }
         }
     }
