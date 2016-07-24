@@ -23,6 +23,7 @@ public class PacketRegistry {
                             .put(0x08, OpenConnectionResponse2Packet.class)
                             .put(0x09, ConnectionRequestPacket.class)
                             .put(0x10, ConnectionResponsePacket.class)
+                            .put(0x15, DisconnectNotificationPacket.class)
                             .put(0x1c, UnconnectedPongPacket.class)
                             .put(0xa0, NakPacket.class)
                             .put(0xc0, AckPacket.class)

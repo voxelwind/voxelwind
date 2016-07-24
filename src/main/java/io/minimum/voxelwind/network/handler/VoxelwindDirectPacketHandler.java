@@ -8,9 +8,6 @@ import io.minimum.voxelwind.network.session.UserSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.net.InetAddress;
-import java.util.Arrays;
-
 public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<DirectAddressedRakNetPacket> {
     private static final long SERVER_ID = 68382;
     private final VoxelwindServer server;
@@ -49,7 +46,7 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
             response.setServerSecurity((byte) 0);
             response.setClientAddress(packet.sender());
             response.setServerId(SERVER_ID);
-            session = new UserSession(packet.sender(), request.getMtuSize(), new InitialNetworkPacketHandler(), ctx.channel());
+            session = new UserSession(packet.sender(), request.getMtuSize(), new InitialNetworkPacketHandler(), ctx.channel(), server);
             server.getSessionManager().add(packet.sender(), session);
             ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()));
             return;

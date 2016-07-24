@@ -3,6 +3,7 @@ package io.minimum.voxelwind.network.session;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
+import io.minimum.voxelwind.VoxelwindServer;
 import io.minimum.voxelwind.network.handler.NetworkPacketHandler;
 import io.minimum.voxelwind.network.mcpe.annotations.ForceClearText;
 import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
@@ -44,7 +45,7 @@ public class UserSession {
     private String username;
     private final short mtu;
     private NetworkPacketHandler handler;
-    private volatile SessionState state = SessionState.CONNECTING;
+    private volatile SessionState state = SessionState.INITIAL_CONNECTION;
     private final AtomicLong lastKnownUpdate = new AtomicLong(System.currentTimeMillis());
     private final ConcurrentMap<Short, Queue<EncapsulatedRakNetPacket>> splitPackets = new ConcurrentHashMap<>();
     private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
@@ -54,14 +55,16 @@ public class UserSession {
     private final Queue<Integer> ackQueue = new ArrayDeque<>();
     private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
     private final Channel channel;
+    private final VoxelwindServer server;
     private Cipher encryptionCipher;
     private Cipher decryptionCipher;
 
-    public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel) {
+    public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
         this.remoteAddress = remoteAddress;
         this.mtu = mtu;
         this.handler = handler;
         this.channel = channel;
+        this.server = server;
     }
 
     public InetSocketAddress getRemoteAddress() {
@@ -214,7 +217,10 @@ public class UserSession {
             }
         }
 
+        datagrams.add(datagram);
+
         for (RakNetDatagram netDatagram : datagrams) {
+            System.out.println("[Attempt Send] " + netDatagram);
             channel.write(new AddressedRakNetDatagram(netDatagram, remoteAddress), channel.voidPromise());
             datagramAcks.put(datagram.getDatagramSequenceNumber(), new SentDatagram(datagram));
         }
@@ -282,6 +288,8 @@ public class UserSession {
             ackQueue.clear();
         }
 
+        System.out.println("Doing ACK: " + ranges);
+
         AckPacket packet = new AckPacket();
         packet.getIds().addAll(ranges);
         sendDirectPackage(packet);
@@ -299,5 +307,13 @@ public class UserSession {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException | InvalidKeyException e) {
             throw new RuntimeException("Unable to initialize ciphers", e);
         }
+    }
+
+    public boolean isEncrypted() {
+        return encryptionCipher != null;
+    }
+
+    public void close() {
+        server.getSessionManager().remove(remoteAddress);
     }
 }

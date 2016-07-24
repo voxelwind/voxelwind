@@ -14,7 +14,8 @@ public abstract class BaseAckPacket implements RakNetPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        for (int i = 0; i < buffer.readShort(); i++) {
+        short size = buffer.readShort();
+        for (int i = 0; i < size; i++) {
             boolean isSingleton = buffer.readBoolean();
             int lower = buffer.order(ByteOrder.LITTLE_ENDIAN).readMedium();
             if (isSingleton) {

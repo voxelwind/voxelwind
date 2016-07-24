@@ -1,6 +1,7 @@
 package io.minimum.voxelwind.network.session;
 
 public enum SessionState {
-    CONNECTING,
+    INITIAL_CONNECTION,
+    LOGGING_IN,
     CONNECTED
 }

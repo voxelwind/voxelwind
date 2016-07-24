@@ -24,6 +24,7 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
     protected void encode(ChannelHandlerContext ctx, AddressedRakNetDatagram datagram, List<Object> list) throws Exception {
         ByteBuf buf = ctx.alloc().buffer();
         datagram.content().encode(buf);
+        System.out.println("[Sent] " + datagram);
         list.add(new DatagramPacket(buf, datagram.recipient(), datagram.sender()));
     }
 

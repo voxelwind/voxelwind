@@ -163,12 +163,14 @@ public class EncapsulatedRakNetPacket {
         // Now create the packets.
         List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
         short splitId = (short) (System.nanoTime() % Short.MAX_VALUE);
+        int orderNumber = session.isEncrypted() ? session.getOrderSequenceGenerator().incrementAndGet() : 0;
         for (int i = 0; i < bufs.size(); i++) {
             // NB: When we add encryption support, you must use RELIABLE_ORDERED
             EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
             packet.setBuffer(bufs.get(i));
-            packet.setReliability(RakNetReliability.RELIABLE);
+            packet.setReliability(session.isEncrypted() ? RakNetReliability.RELIABLE_ORDERED : RakNetReliability.RELIABLE);
             packet.setReliabilityNumber(session.getReliabilitySequenceGenerator().incrementAndGet());
+            packet.setOrderingIndex(orderNumber);
             if (bufs.size() > 1) {
                 packet.setHasSplit(true);
                 packet.setPartIndex(i);

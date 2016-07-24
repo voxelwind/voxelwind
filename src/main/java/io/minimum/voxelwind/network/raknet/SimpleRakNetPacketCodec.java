@@ -21,7 +21,7 @@ public class SimpleRakNetPacketCodec extends MessageToMessageCodec<DatagramPacke
     protected void encode(ChannelHandlerContext ctx, DirectAddressedRakNetPacket pkg, List<Object> list) throws Exception {
         // Certain RakNet packets do not require special encapsulation. This encoder tries to handle them.
         Integer id = PacketRegistry.getId(pkg.content(), PacketType.RAKNET);
-        if (id != null && id < USER_ID_START) {
+        if (id != null) {
             ByteBuf buf = PacketRegistry.tryEncode(pkg.content(), PacketType.RAKNET);
             list.add(new DatagramPacket(buf, pkg.recipient(), pkg.sender()));
         }

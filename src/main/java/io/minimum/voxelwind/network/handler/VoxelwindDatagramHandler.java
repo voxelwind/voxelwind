@@ -7,10 +7,8 @@ import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
 import io.minimum.voxelwind.network.mcpe.packets.McpeLogin;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.datagrams.EncapsulatedRakNetPacket;
-import io.minimum.voxelwind.network.raknet.datagrams.RakNetDatagramFlags;
 import io.minimum.voxelwind.network.raknet.enveloped.AddressedRakNetDatagram;
 import io.minimum.voxelwind.network.raknet.packets.*;
-import io.minimum.voxelwind.network.session.SessionState;
 import io.minimum.voxelwind.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -48,46 +46,72 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             System.out.println("[RakNet Datagram] " + datagram);
             for (EncapsulatedRakNetPacket packet : datagram.content().getPackets()) {
                 System.out.println("[Encapsulated Packet] " + packet + ":\n" + ByteBufUtil.prettyHexDump(packet.getBuffer()));
+
+                // Try to figure out what packet got sent.
                 if (packet.isHasSplit()) {
                     Optional<ByteBuf> possiblyReassembled = session.addSplitPacket(packet);
                     if (possiblyReassembled.isPresent()) {
                         ByteBuf reassembled = possiblyReassembled.get();
                         try {
-                            RakNetPackage pkg = PacketRegistry.tryDecode(reassembled, PacketType.MCPE);
-                            if (pkg != null) {
-                                handlePackage(pkg, session);
-                            }
+                            RakNetPackage pkg = bruteForceDecode(reassembled);
+                            handlePackage(pkg, session);
                         } finally {
                             reassembled.release();
                         }
                     }
                 } else {
                     // Try to decode the full packet.
-                    RakNetPackage pkg = PacketRegistry.tryDecode(packet.getBuffer(), PacketType.MCPE);
-                    if (pkg != null) {
-                        handlePackage(pkg, session);
-                    }
+                    RakNetPackage pkg = bruteForceDecode(packet.getBuffer());
+                    handlePackage(pkg, session);
                 }
             }
         }
     }
 
-    private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
-        System.out.println(netPackage);
+    private RakNetPackage bruteForceDecode(ByteBuf buf) throws Exception {
+        RakNetPackage pkg;
 
-        // Special cases we need to handle in DatagramHandler.
-        if (netPackage instanceof McpeBatch) {
-            for (RakNetPackage aPackage : ((McpeBatch) netPackage).getPackages()) {
-                handlePackage(aPackage, session);
+        for (PacketType type : PacketType.values()) {
+            ByteBuf slice = buf.slice();
+            try {
+                pkg = PacketRegistry.tryDecode(slice, type);
+            } catch (Exception e) {
+                continue;
             }
-            return;
+
+            if (pkg == null)
+                continue;
+
+            if (slice.isReadable()) {
+                // Not all data was read?
+                LOGGER.error("When using " + type + ", bytes were left: " + ByteBufUtil.hexDump(slice));
+            } else {
+                return pkg;
+            }
         }
+
+        ByteBuf smallSlice = buf.slice(0, Math.min(buf.readableBytes(), 16));
+        throw new Exception("Unable to create packet for ID " + Integer.toHexString(smallSlice.getUnsignedByte(0)) + " (first 16 bytes: " + ByteBufUtil.hexDump(smallSlice) + ").");
+    }
+
+    private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
+        System.out.println("[Package] " + netPackage);
 
         if (session.getHandler() == null) {
             LOGGER.error("Session " + session.getRemoteAddress() + " has no handler!?!?!");
             return;
         }
 
+        // Special cases we need to handle here.
+
+        // McpeBatch: Multiple packets. This method will handle everything.
+        if (netPackage instanceof McpeBatch) {
+            for (RakNetPackage aPackage : ((McpeBatch) netPackage).getPackages()) {
+                handlePackage(aPackage, session);
+            }
+            return;
+        }
+        // Connected Ping
         if (netPackage instanceof ConnectedPingPacket) {
             ConnectedPingPacket request = (ConnectedPingPacket) netPackage;
             ConnectedPongPacket response = new ConnectedPongPacket();
@@ -96,7 +120,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             session.sendUrgentPackage(response);
             return;
         }
-
+        // Connection Request
         if (netPackage instanceof ConnectionRequestPacket) {
             ConnectionRequestPacket request = (ConnectionRequestPacket) netPackage;
             ConnectionResponsePacket response = new ConnectionResponsePacket();
@@ -110,7 +134,13 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             session.sendUrgentPackage(response);
             return;
         }
+        // Disconnection
+        if (netPackage instanceof DisconnectNotificationPacket) {
+            session.close();
+            return;
+        }
 
+        // Dispatch block...
         if (netPackage instanceof McpeLogin) {
             session.getHandler().handle((McpeLogin) netPackage);
         }
