@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -125,9 +126,9 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             ConnectionResponsePacket response = new ConnectionResponsePacket();
             response.setIncomingTimestamp(request.getTimestamp());
             response.setSystemTimestamp(System.currentTimeMillis());
-            response.setSystemAddress(InetAddress.getLoopbackAddress());
-            InetAddress[] addresses = new InetAddress[10];
-            Arrays.fill(addresses, InetAddresses.forString("255.255.255.255"));
+            response.setSystemAddress(new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132));
+            InetSocketAddress[] addresses = new InetSocketAddress[10];
+            Arrays.fill(addresses, new InetSocketAddress(InetAddresses.forString("255.255.255.255"), 19132));
             response.setSystemAddresses(addresses);
             response.setSystemIndex(0);
             session.sendUrgentPackage(response);

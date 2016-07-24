@@ -4,22 +4,22 @@ import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public class ConnectionResponsePacket implements RakNetPackage {
-    private InetAddress systemAddress;
+    private InetSocketAddress systemAddress;
     private int systemIndex;
-    private InetAddress[] systemAddresses;
+    private InetSocketAddress[] systemAddresses;
     private long incomingTimestamp;
     private long systemTimestamp;
 
     @Override
     public void decode(ByteBuf buffer) {
-        systemAddress = RakNetUtil.readAddress(buffer);
+        systemAddress = RakNetUtil.readSocketAddress(buffer);
         systemIndex = buffer.readInt();
-        systemAddresses = new InetAddress[10];
+        systemAddresses = new InetSocketAddress[10];
         for (int i = 0; i < 10; i++) {
-            systemAddresses[i] = RakNetUtil.readAddress(buffer);
+            systemAddresses[i] = RakNetUtil.readSocketAddress(buffer);
         }
         incomingTimestamp = buffer.readLong();
         systemTimestamp = buffer.readLong();
@@ -27,20 +27,20 @@ public class ConnectionResponsePacket implements RakNetPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        RakNetUtil.writeAddress(buffer, systemAddress);
+        RakNetUtil.writeSocketAddress(buffer, systemAddress);
         buffer.writeInt(systemIndex);
-        for (InetAddress address : systemAddresses) {
-            RakNetUtil.writeAddress(buffer, address);
+        for (InetSocketAddress address : systemAddresses) {
+            RakNetUtil.writeSocketAddress(buffer, address);
         }
         buffer.writeLong(incomingTimestamp);
         buffer.writeLong(systemTimestamp);
     }
 
-    public InetAddress getSystemAddress() {
+    public InetSocketAddress getSystemAddress() {
         return systemAddress;
     }
 
-    public void setSystemAddress(InetAddress systemAddress) {
+    public void setSystemAddress(InetSocketAddress systemAddress) {
         this.systemAddress = systemAddress;
     }
 
@@ -52,11 +52,11 @@ public class ConnectionResponsePacket implements RakNetPackage {
         this.systemIndex = systemIndex;
     }
 
-    public InetAddress[] getSystemAddresses() {
+    public InetSocketAddress[] getSystemAddresses() {
         return systemAddresses;
     }
 
-    public void setSystemAddresses(InetAddress[] systemAddresses) {
+    public void setSystemAddresses(InetSocketAddress[] systemAddresses) {
         this.systemAddresses = systemAddresses;
     }
 
