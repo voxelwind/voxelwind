@@ -22,7 +22,7 @@ public class McpeBatch implements RakNetPackage {
     public void decode(ByteBuf buffer) {
         ByteBuf decompressed = null;
         try {
-            int compressedSize = buffer.readInt();
+            int compressedSize = buffer.readInt() - 4; // skips Adler32
             decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
 
             if (decompressed.readByte() != 0x78) {
@@ -68,9 +68,19 @@ public class McpeBatch implements RakNetPackage {
                 encodedPackage.release();
             }
 
-            int originalWriterIndex = buffer.writerIndex();
-            long adler = CompressionUtil.deflate(source, buffer);
-            buffer.writeLong(adler);
+            // Write a temporary size here. We'll replace it later.
+            int lengthPosition = buffer.writerIndex();
+            buffer.writeInt(0);
+
+            // Compress the buffer
+            int afterLength = buffer.writerIndex();
+            int adler = CompressionUtil.deflate(source, buffer);
+
+            // Replace the dummy length we wrote
+            buffer.setInt(lengthPosition, buffer.writerIndex() - afterLength);
+
+            // Write Adler32 checksum
+            buffer.writeInt(adler);
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to deflate batch data", e);
         } finally {
