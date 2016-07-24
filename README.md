@@ -1,5 +1,7 @@
 # Voxelwind
 
+[![Join the chat at https://gitter.im/minecrafter/voxelwind](https://badges.gitter.im/minecrafter/voxelwind.svg)](https://gitter.im/minecrafter/voxelwind?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 **Current version**: version 0.0.1 (_Layer of Fog_)
 
 Voxelwind is an upcoming _Minecraft: Pocket Edition_ server project written in Java. It aims to provide a Java-first API,
