@@ -18,6 +18,7 @@ import io.minimum.voxelwind.network.raknet.enveloped.DirectAddressedRakNetPacket
 import io.minimum.voxelwind.network.raknet.packets.AckPacket;
 import io.minimum.voxelwind.network.util.EncryptionUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
@@ -208,11 +209,13 @@ public class UserSession {
             toEncapsulate = buf;
         }
 
+        System.out.println("[Encoded Data] " + ByteBufUtil.hexDump(buf));
+
         List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(toEncapsulate, this);
         List<RakNetDatagram> datagrams = new ArrayList<>();
         for (EncapsulatedRakNetPacket packet : addressed) {
             RakNetDatagram datagram = new RakNetDatagram();
-            datagram.setDatagramSequenceNumber(datagramSequenceGenerator.incrementAndGet());
+            datagram.setDatagramSequenceNumber(datagramSequenceGenerator.getAndIncrement());
             if (!datagram.tryAddPacket(packet, mtu)) {
                 throw new RuntimeException("Packet too large to fit in MTU (size: " + packet.totalLength() + ", MTU: " + mtu + ")");
             }
@@ -220,7 +223,6 @@ public class UserSession {
         }
 
         for (RakNetDatagram netDatagram : datagrams) {
-            System.out.println("[Attempt Send] " + netDatagram);
             channel.write(new AddressedRakNetDatagram(netDatagram, remoteAddress), channel.voidPromise());
             datagramAcks.put(netDatagram.getDatagramSequenceNumber(), new SentDatagram(netDatagram));
         }

@@ -163,13 +163,13 @@ public class EncapsulatedRakNetPacket {
         // Now create the packets.
         List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
         short splitId = (short) (System.nanoTime() % Short.MAX_VALUE);
-        int orderNumber = session.isEncrypted() ? session.getOrderSequenceGenerator().incrementAndGet() : 0;
+        int orderNumber = session.isEncrypted() ? session.getOrderSequenceGenerator().getAndIncrement() : 0;
         for (int i = 0; i < bufs.size(); i++) {
             // NB: When we add encryption support, you must use RELIABLE_ORDERED
             EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
             packet.setBuffer(bufs.get(i));
             packet.setReliability(session.isEncrypted() ? RakNetReliability.RELIABLE_ORDERED : RakNetReliability.RELIABLE);
-            packet.setReliabilityNumber(session.getReliabilitySequenceGenerator().incrementAndGet());
+            packet.setReliabilityNumber(session.getReliabilitySequenceGenerator().getAndIncrement());
             packet.setOrderingIndex(orderNumber);
             if (bufs.size() > 1) {
                 packet.setHasSplit(true);
@@ -177,6 +177,7 @@ public class EncapsulatedRakNetPacket {
                 packet.setPartCount(bufs.size());
                 packet.setPartId(splitId);
             }
+            packets.add(packet);
         }
         return packets;
     }
@@ -191,7 +192,7 @@ public class EncapsulatedRakNetPacket {
 
     public int totalLength() {
         // Back of the envelope calculation, YMMV
-        return buffer.readableBytes() + 24;
+        return buffer.writerIndex() + 24;
     }
 
     @Override
