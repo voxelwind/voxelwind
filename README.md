@@ -24,8 +24,8 @@ Voxelwind upstream so that the larger community can benefit from them.
 To run Voxelwind, Java 8 is required. Additionally, it is strongly recommended you run Voxelwind on a recent 64-bit x86
 Debian-based Linux distribution (Debian 8 or Ubuntu 16.04) for two reasons:
 
-* Voxelwind can use multiple threads to listen to the same port on Linux (`SO_REUSEPORT`). **JDK 9 includes more native
-support for SO_REUSPORT, so it will work on any modern Unix-like OS.**
+* Voxelwind can use multiple threads to listen to the same port on Linux (`SO_REUSEPORT`). **JDK 9 includes native support
+for this flag, so it is likely this will appear in a future Netty version.**
 * Voxelwind can take advantage of native compression support. (A solution needs to be sought for native encryption support.)
 
 Voxelwind will work on other configurations outside 64-bit Debian/Ubuntu, but scalability and throughput will be affected.
