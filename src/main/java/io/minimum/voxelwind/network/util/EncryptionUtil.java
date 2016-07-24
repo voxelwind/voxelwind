@@ -57,8 +57,7 @@ public class EncryptionUtil {
 
         byte[] heapOut = heapOutLocal.get();
         int outputSize = cipher.getOutputSize( readableBytes );
-        if ( heapOut.length < outputSize )
-        {
+        if ( heapOut.length < outputSize ) {
             heapOut = new byte[ outputSize ];
             heapOutLocal.set( heapOut );
         }

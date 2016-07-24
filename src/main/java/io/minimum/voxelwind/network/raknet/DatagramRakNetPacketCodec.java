@@ -25,7 +25,6 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
     protected void encode(ChannelHandlerContext ctx, AddressedRakNetDatagram datagram, List<Object> list) throws Exception {
         ByteBuf buf = ctx.alloc().buffer();
         datagram.content().encode(buf);
-        System.out.println("[Sent] " + datagram + "\n" + ByteBufUtil.prettyHexDump(buf));
         list.add(new DatagramPacket(buf, datagram.recipient(), datagram.sender()));
     }
 
@@ -44,12 +43,7 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
         if (flags.isValid() && !flags.isAck() && !flags.isNak()) {
             //System.out.println("[RakNet Datagram] " + packet + ":\n " + ByteBufUtil.prettyHexDump(packet.content()));
             RakNetDatagram datagram = new RakNetDatagram();
-            datagram.decode(packet.content().retain()); // Must be retained since packet body is a slice
-
-            System.out.println("[RakNet Datagram] " + datagram);
-            for (EncapsulatedRakNetPacket packet1 : datagram.getPackets()) {
-                System.out.println("[Encapsulated Packet] " + packet + ":\n" + ByteBufUtil.prettyHexDump(packet1.getBuffer()));
-            }
+            datagram.decode(packet.content().retain()); // Must be retained since packet bodies are slices
             list.add(new AddressedRakNetDatagram(datagram, packet.recipient(), packet.sender()));
         }
     }

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import io.minimum.voxelwind.network.mcpe.packets.McpeLogin;
 import io.minimum.voxelwind.network.mcpe.packets.McpeServerHandshake;
+import io.minimum.voxelwind.network.mcpe.packets.McpeWrapper;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.packets.*;
 import io.netty.buffer.ByteBuf;
@@ -34,6 +35,7 @@ public class PacketRegistry {
                     .put(PacketType.MCPE, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
                             .put(0x01, McpeLogin.class)
                             .put(0x03, McpeServerHandshake.class)
+                            .put(0xfe, McpeWrapper.class)
                             .build())
                     .build();
 

@@ -30,8 +30,6 @@ public class SimpleRakNetPacketCodec extends MessageToMessageCodec<DatagramPacke
     @Override
     protected void decode(ChannelHandlerContext ctx, DatagramPacket packet, List<Object> list) throws Exception {
         // Certain RakNet packets do not require special encapsulation. This encoder tries to handle them.
-        System.out.println("[In] " + packet + ": \n" + ByteBufUtil.prettyHexDump(packet.content()));
-
         ByteBuf buf = packet.content();
         buf.markReaderIndex();
         int id = buf.readUnsignedByte();

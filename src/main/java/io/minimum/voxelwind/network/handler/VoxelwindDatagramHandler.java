@@ -6,13 +6,16 @@ import io.minimum.voxelwind.network.PacketRegistry;
 import io.minimum.voxelwind.network.PacketType;
 import io.minimum.voxelwind.network.mcpe.packets.McpeBatch;
 import io.minimum.voxelwind.network.mcpe.packets.McpeLogin;
+import io.minimum.voxelwind.network.mcpe.packets.McpeWrapper;
 import io.minimum.voxelwind.network.raknet.RakNetPackage;
 import io.minimum.voxelwind.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import io.minimum.voxelwind.network.raknet.enveloped.AddressedRakNetDatagram;
 import io.minimum.voxelwind.network.raknet.packets.*;
 import io.minimum.voxelwind.network.session.UserSession;
+import io.minimum.voxelwind.network.util.EncryptionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.logging.log4j.LogManager;
@@ -69,26 +72,29 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         RakNetPackage pkg;
 
         for (PacketType type : PacketType.values()) {
-            ByteBuf slice = buf.slice();
+            buf.markReaderIndex();
             try {
-                pkg = PacketRegistry.tryDecode(slice, type);
+                pkg = PacketRegistry.tryDecode(buf, type);
             } catch (Exception e) {
+                buf.resetReaderIndex();
                 continue;
             }
 
             if (pkg == null)
                 continue;
 
-            if (slice.isReadable()) {
+            if (buf.isReadable()) {
                 // Not all data was read?
-                LOGGER.error("When using " + type + ", bytes were left: " + ByteBufUtil.hexDump(slice));
+                System.out.println("When using " + type + ", bytes were left: " + ByteBufUtil.hexDump(buf) + " (" + buf + ")");
+                buf.resetReaderIndex();
             } else {
                 return pkg;
             }
         }
 
         ByteBuf smallSlice = buf.slice(0, Math.min(buf.readableBytes(), 16));
-        throw new Exception("Unable to create packet for ID " + Integer.toHexString(smallSlice.getUnsignedByte(0)) + " (first 16 bytes: " + ByteBufUtil.hexDump(smallSlice) + ").");
+        throw new Exception("Unable to create packet for ID " + Integer.toHexString(smallSlice.getUnsignedByte(0)) + " (first 16 bytes: " + ByteBufUtil.hexDump(smallSlice) + ", " +
+                "buffer: " + buf + ").");
     }
 
     private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
@@ -100,6 +106,26 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         }
 
         // Special cases we need to handle here.
+        // McpeWrapper: Encrypted packet.
+        if (netPackage instanceof McpeWrapper) {
+            ByteBuf cleartext = null;
+            try {
+                if (session.isEncrypted()) {
+                    cleartext = PooledByteBufAllocator.DEFAULT.buffer();
+                    EncryptionUtil.aesEncrypt(((McpeWrapper) netPackage).getWrapped(), cleartext, session.getDecryptionCipher());
+                } else {
+                    cleartext = ((McpeWrapper) netPackage).getWrapped();
+                }
+
+                RakNetPackage pkg = bruteForceDecode(cleartext);
+                handlePackage(pkg, session);
+            } finally {
+                if (cleartext != null && cleartext != ((McpeWrapper) netPackage).getWrapped()) {
+                    cleartext.release();
+                }
+            }
+            return;
+        }
 
         // McpeBatch: Multiple packets. This method will handle everything.
         if (netPackage instanceof McpeBatch) {

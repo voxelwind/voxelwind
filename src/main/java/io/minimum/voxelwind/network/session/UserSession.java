@@ -208,8 +208,6 @@ public class UserSession {
             toEncapsulate = buf;
         }
 
-        System.out.println("[Encoded Data] " + ByteBufUtil.hexDump(buf));
-
         List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(toEncapsulate, this);
         List<RakNetDatagram> datagrams = new ArrayList<>();
         for (EncapsulatedRakNetPacket packet : addressed) {
@@ -313,5 +311,13 @@ public class UserSession {
 
     public void close() {
         server.getSessionManager().remove(remoteAddress);
+    }
+
+    public Cipher getEncryptionCipher() {
+        return encryptionCipher;
+    }
+
+    public Cipher getDecryptionCipher() {
+        return decryptionCipher;
     }
 }

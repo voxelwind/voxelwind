@@ -5,26 +5,27 @@ import io.minimum.voxelwind.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public class NewIncomingConnectionPacket implements RakNetPackage {
-    private InetAddress clientAddress;
-    private InetAddress[] systemAddresses;
+    private InetSocketAddress clientAddress;
+    private InetSocketAddress[] systemAddresses;
     private long clientTimestamp;
     private long serverTimestamp;
 
-    public InetAddress getClientAddress() {
+    public InetSocketAddress getClientAddress() {
         return clientAddress;
     }
 
-    public void setClientAddress(InetAddress clientAddress) {
+    public void setClientAddress(InetSocketAddress clientAddress) {
         this.clientAddress = clientAddress;
     }
 
-    public InetAddress[] getSystemAddresses() {
+    public InetSocketAddress[] getSystemAddresses() {
         return systemAddresses;
     }
 
-    public void setSystemAddresses(InetAddress[] systemAddresses) {
+    public void setSystemAddresses(InetSocketAddress[] systemAddresses) {
         this.systemAddresses = systemAddresses;
     }
 
@@ -46,10 +47,10 @@ public class NewIncomingConnectionPacket implements RakNetPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        clientAddress = RakNetUtil.readAddress(buffer);
-        systemAddresses = new InetAddress[10];
+        clientAddress = RakNetUtil.readSocketAddress(buffer);
+        systemAddresses = new InetSocketAddress[10];
         for (int i = 0; i < 10; i++) {
-            systemAddresses[i] = RakNetUtil.readAddress(buffer);
+            systemAddresses[i] = RakNetUtil.readSocketAddress(buffer);
         }
         clientTimestamp = buffer.readLong();
         serverTimestamp = buffer.readLong();
@@ -57,9 +58,9 @@ public class NewIncomingConnectionPacket implements RakNetPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        RakNetUtil.writeAddress(buffer, clientAddress);
-        for (InetAddress address : systemAddresses) {
-            RakNetUtil.writeAddress(buffer, address);
+        RakNetUtil.writeSocketAddress(buffer, clientAddress);
+        for (InetSocketAddress address : systemAddresses) {
+            RakNetUtil.writeSocketAddress(buffer, address);
         }
         buffer.writeLong(clientTimestamp);
         buffer.writeLong(serverTimestamp);
