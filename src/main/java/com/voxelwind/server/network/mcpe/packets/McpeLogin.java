@@ -4,6 +4,7 @@ import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 
 import java.util.zip.DataFormatException;
@@ -40,13 +41,14 @@ public class McpeLogin implements RakNetPackage {
     @Override
     public void decode(ByteBuf buffer) {
         protocolVersion = buffer.readInt();
-        int bodyLength = buffer.readInt();
+        int bodyLength = (buffer.readInt() & 0xFF);
         ByteBuf body = buffer.readSlice(bodyLength);
 
         // Decompress the body
         ByteBuf result = null;
         try {
             result = CompressionUtil.inflate(body);
+            System.out.println(ByteBufUtil.prettyHexDump(result));
             chainData = McpeUtil.readLELengthString(result);
             skinData = McpeUtil.readLELengthString(result);
         } catch (DataFormatException e) {

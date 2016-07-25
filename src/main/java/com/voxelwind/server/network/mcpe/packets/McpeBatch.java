@@ -35,7 +35,7 @@ public class McpeBatch implements RakNetPackage {
             System.out.println(ByteBufUtil.prettyHexDump(decompressed, 0, 512));
 
             while (decompressed.isReadable()) {
-                int length = decompressed.readInt();
+                int length = (decompressed.readInt() & 0xFF);
                 ByteBuf data = decompressed.readSlice(length);
 
                 RakNetPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE);
