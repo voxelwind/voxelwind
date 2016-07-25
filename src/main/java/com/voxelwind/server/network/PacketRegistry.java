@@ -3,6 +3,7 @@ package com.voxelwind.server.network;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
 import com.voxelwind.server.network.mcpe.packets.McpeWrapper;
 import com.voxelwind.server.network.raknet.packets.*;
@@ -50,6 +51,29 @@ public class PacketRegistry {
         Class<? extends RakNetPackage> pkgClass = PACKAGE_BY_ID.get(type).get(id);
         if (pkgClass == null)
             return null;
+
+        RakNetPackage netPackage;
+        try {
+            netPackage = pkgClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("Unable to create packet instance", e);
+        }
+
+        netPackage.decode(buf);
+        return netPackage;
+    }
+
+    public static RakNetPackage tryDecode(ByteBuf buf, PacketType type, boolean fromBatch) {
+        int id = buf.readUnsignedByte();
+        Class<? extends RakNetPackage> pkgClass = PACKAGE_BY_ID.get(type).get(id);
+        if (pkgClass == null)
+            return null;
+
+        if (fromBatch) {
+            if (pkgClass.isAnnotationPresent(BatchDisallowed.class)) {
+                return null;
+            }
+        }
 
         RakNetPackage netPackage;
         try {

@@ -21,26 +21,32 @@ public class McpeBatch implements RakNetPackage {
     public void decode(ByteBuf buffer) {
         ByteBuf decompressed = null;
         try {
+            System.out.println("[Before Decompress]\n" + buffer);
+
             int compressedSize = buffer.readInt() - 4; // skips Adler32
             decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
-
-            if (decompressed.readByte() != 0x78) {
-                throw new DataFormatException("Found invalid zlib header byte (should be 0x78)");
-            }
-
-            decompressed.readByte();
+            System.out.println("[After Decompress]\n" + decompressed);
 
             // Now process the decompressed result.
-            System.out.println("First 512 bytes:");
-            System.out.println(ByteBufUtil.prettyHexDump(decompressed, 0, 512));
-
             while (decompressed.isReadable()) {
-                int length = (decompressed.readInt() & 0xFF);
+                int length = (decompressed.readInt() & 0xFF); // WTF
                 ByteBuf data = decompressed.readSlice(length);
 
-                RakNetPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE);
-                if (pkg != null && !(pkg instanceof McpeBatch))
+                if (data.readableBytes() == 0) {
+                    throw new DataFormatException("Contained batch packet is empty.");
+                }
+
+                System.out.println("[Decompressed]:\n" + ByteBufUtil.prettyHexDump(data));
+
+                RakNetPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE, true);
+                if (pkg != null) {
                     packages.add(pkg);
+                } else {
+                    data.readerIndex(0);
+                    McpeUnknown unknown = new McpeUnknown();
+                    unknown.decode(data);
+                    packages.add(unknown);
+                }
             }
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to inflate batch data", e);
@@ -61,6 +67,9 @@ public class McpeBatch implements RakNetPackage {
             source.writeByte(0x9c);
 
             for (RakNetPackage netPackage : packages) {
+                if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class)) {
+                    throw new DataFormatException("Packet " + netPackage + " does not permit batching.");
+                }
                 ByteBuf encodedPackage = PacketRegistry.tryEncode(netPackage);
                 source.writeInt(encodedPackage.readableBytes());
                 source.writeBytes(encodedPackage);

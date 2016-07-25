@@ -13,7 +13,7 @@ public class CompressionUtil {
         @Override
         protected net.md_5.bungee.jni.zlib.BungeeZlib initialValue() {
             BungeeZlib zlib = Native.zlib.newInstance();
-            zlib.init(true, Deflater.DEFAULT_COMPRESSION);
+            zlib.init(false, Deflater.DEFAULT_COMPRESSION);
             return zlib;
         }
     };
@@ -21,7 +21,7 @@ public class CompressionUtil {
         @Override
         protected net.md_5.bungee.jni.zlib.BungeeZlib initialValue() {
             BungeeZlib zlib = Native.zlib.newInstance();
-            zlib.init(false, Deflater.DEFAULT_COMPRESSION);
+            zlib.init(true, Deflater.DEFAULT_COMPRESSION);
             return zlib;
         }
     };

@@ -32,7 +32,8 @@ public class VoxelwindServer {
 
         LOGGER.info("Voxelwind is now running.");
 
-        timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
+        // NiclasOlofsson recommends using 10ms at maximum
+        timerService.scheduleAtFixedRate(sessionManager::onTick, 10, 10, TimeUnit.MILLISECONDS);
 
         Thread.sleep(10000000);
     }
@@ -42,12 +43,15 @@ public class VoxelwindServer {
         System.setProperty("java.net.preferIPv4Stack", "true");
 
         if (!Epoll.isAvailable()) {
-            LOGGER.error("Your platform does not support epoll. The server will still work, but server throughput and performance may suffer.");
-            LOGGER.error("To resolve this issue, run your server on Linux.");
+            LOGGER.error("Your platform does not support epoll. Server throughput and performance may suffer. To resolve this issue, run your server on Linux.");
         }
 
         if (!Native.zlib.load()) {
-            LOGGER.error("Your platform does not support native compression. To resolve this issue, make sure you're using 64-bit Linux.");
+            LOGGER.error("Your platform does not support native compression. Server throughput and performance may suffer. To resolve this issue, make sure you're using 64-bit Linux.");
+        }
+
+        if (!Native.cipher.load()) {
+            LOGGER.error("Your platform does not support native encryption. Server throughput and performance may suffer. To resolve this issue, make sure you're using 64-bit Debian/Ubuntu.");
         }
 
         VoxelwindServer server = new VoxelwindServer();

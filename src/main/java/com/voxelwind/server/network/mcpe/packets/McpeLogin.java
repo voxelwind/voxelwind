@@ -41,7 +41,7 @@ public class McpeLogin implements RakNetPackage {
     @Override
     public void decode(ByteBuf buffer) {
         protocolVersion = buffer.readInt();
-        int bodyLength = (buffer.readInt() & 0xFF);
+        int bodyLength = buffer.readInt();
         ByteBuf body = buffer.readSlice(bodyLength);
 
         // Decompress the body
