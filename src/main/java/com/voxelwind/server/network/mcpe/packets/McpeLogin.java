@@ -41,13 +41,17 @@ public class McpeLogin implements RakNetPackage {
     @Override
     public void decode(ByteBuf buffer) {
         protocolVersion = buffer.readInt();
-        int bodyLength = buffer.readInt();
-        ByteBuf body = buffer.readSlice(bodyLength);
+        int bodyLength = (buffer.readInt() & 0xFF);
+        ByteBuf body = buffer.slice();
+
+        System.out.println(ByteBufUtil.hexDump(body));
 
         // Decompress the body
         ByteBuf result = null;
         try {
+            System.out.println(body);
             result = CompressionUtil.inflate(body);
+            System.out.println(result);
             System.out.println(ByteBufUtil.prettyHexDump(result));
             chainData = McpeUtil.readLELengthString(result);
             skinData = McpeUtil.readLELengthString(result);
@@ -71,12 +75,21 @@ public class McpeLogin implements RakNetPackage {
 
             ByteBuf compressed = CompressionUtil.deflate(body);
 
-            buffer.writeInt(compressed.readableBytes());
+            buffer.writeInt(compressed.readableBytes() & 0xFF);
             buffer.writeBytes(compressed);
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to compress login data body", e);
         } finally {
             body.release();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "McpeLogin{" +
+                "protocolVersion=" + protocolVersion +
+                ", chainData='" + chainData + '\'' +
+                ", skinData='" + skinData + '\'' +
+                '}';
     }
 }

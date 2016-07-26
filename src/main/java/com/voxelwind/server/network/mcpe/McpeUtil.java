@@ -15,14 +15,14 @@ public class McpeUtil {
     public static void writeLELengthString(ByteBuf buffer, String string) {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
-        buffer.order(ByteOrder.LITTLE_ENDIAN).writeShort((string.length() & 0xFF));
+        buffer.order(ByteOrder.LITTLE_ENDIAN).writeInt(string.length());
         ByteBufUtil.writeUtf8(buffer, string);
     }
 
     public static String readLELengthString(ByteBuf buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
 
-        int length = buffer.order(ByteOrder.LITTLE_ENDIAN).readUnsignedShort();
+        int length = (buffer.order(ByteOrder.LITTLE_ENDIAN).readInt());
         byte[] bytes = new byte[length];
         buffer.readBytes(bytes);
         return new String(bytes, StandardCharsets.UTF_8);

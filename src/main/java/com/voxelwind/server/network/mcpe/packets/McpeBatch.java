@@ -23,20 +23,20 @@ public class McpeBatch implements RakNetPackage {
         try {
             System.out.println("[Before Decompress]\n" + buffer);
 
-            int compressedSize = buffer.readInt() - 4; // skips Adler32
+            int compressedSize = buffer.readInt();
             decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
             System.out.println("[After Decompress]\n" + decompressed);
 
             // Now process the decompressed result.
             while (decompressed.isReadable()) {
-                int length = (decompressed.readInt() & 0xFF); // WTF
+                System.out.println("[Decompressed]: " + ByteBufUtil.hexDump(decompressed));
+
+                int length = Math.toIntExact(decompressed.readUnsignedInt()); // WTF
                 ByteBuf data = decompressed.readSlice(length);
 
                 if (data.readableBytes() == 0) {
                     throw new DataFormatException("Contained batch packet is empty.");
                 }
-
-                System.out.println("[Decompressed]:\n" + ByteBufUtil.prettyHexDump(data));
 
                 RakNetPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE, true);
                 if (pkg != null) {
@@ -63,9 +63,6 @@ public class McpeBatch implements RakNetPackage {
 
         try {
             // Voxelwind uses default compression
-            source.writeByte(0x78);
-            source.writeByte(0x9c);
-
             for (RakNetPackage netPackage : packages) {
                 if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class)) {
                     throw new DataFormatException("Packet " + netPackage + " does not permit batching.");
@@ -88,7 +85,8 @@ public class McpeBatch implements RakNetPackage {
             buffer.setInt(lengthPosition, buffer.writerIndex() - afterLength);
 
             // Write Adler32 checksum
-            buffer.writeInt(adler);
+            // TODO: Doesn't zlib do this for us?
+            //buffer.writeInt(adler);
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to deflate batch data", e);
         } finally {
