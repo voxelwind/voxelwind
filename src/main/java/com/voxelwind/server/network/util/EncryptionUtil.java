@@ -1,5 +1,8 @@
 package com.voxelwind.server.network.util;
 
+import com.voxelwind.server.network.mcpe.packets.McpeServerHandshake;
+import io.netty.buffer.Unpooled;
+
 import javax.crypto.*;
 import java.security.*;
 
@@ -9,6 +12,7 @@ public class EncryptionUtil {
     }
 
     private static final KeyPair serverKey;
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     static {
         try {
@@ -18,7 +22,7 @@ public class EncryptionUtil {
         }
     }
 
-    public static byte[] getSharedSecret(PublicKey clientKey) {
+    public static byte[] getSharedSecret(PublicKey clientKey) throws InvalidKeyException {
         KeyAgreement agreement;
         try {
             agreement = KeyAgreement.getInstance("ECDH");
@@ -26,17 +30,24 @@ public class EncryptionUtil {
             throw new AssertionError(e);
         }
 
-        try {
-            agreement.init(serverKey.getPrivate());
-            agreement.doPhase(clientKey, true);
-        } catch (InvalidKeyException e) {
-            throw new AssertionError(e);
-        }
-
+        agreement.init(serverKey.getPrivate());
+        agreement.doPhase(clientKey, true);
         return agreement.generateSecret();
     }
 
     public static KeyPair getServerKey() {
         return serverKey;
+    }
+
+    public static McpeServerHandshake createHandshakePacket() {
+        McpeServerHandshake handshake = new McpeServerHandshake();
+        handshake.setKey(serverKey.getPublic());
+
+        // Generate 16 cryptographically-secure random bytes
+        byte[] token = new byte[16];
+        secureRandom.nextBytes(token);
+
+        handshake.setToken(Unpooled.wrappedBuffer(token));
+        return handshake;
     }
 }

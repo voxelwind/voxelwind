@@ -17,6 +17,7 @@ import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
+import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -39,7 +40,7 @@ public class UserSession {
     private static final Logger LOGGER = LogManager.getLogger(UserSession.class);
 
     private final InetSocketAddress remoteAddress;
-    private String username;
+    private UserAuthenticationProfile authenticationProfile;
     private final short mtu;
     private NetworkPacketHandler handler;
     private volatile SessionState state = SessionState.INITIAL_CONNECTION;
@@ -84,12 +85,12 @@ public class UserSession {
         return lastKnownUpdate;
     }
 
-    public String getUsername() {
-        return username;
+    public UserAuthenticationProfile getAuthenticationProfile() {
+        return authenticationProfile;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAuthenticationProfile(UserAuthenticationProfile authenticationProfile) {
+        this.authenticationProfile = authenticationProfile;
     }
 
     public NetworkPacketHandler getHandler() {
@@ -285,7 +286,7 @@ public class UserSession {
         sendDirectPackage(packet);
     }
 
-    protected void beginEncrypting(byte[] sharedSecret) {
+    protected void enableEncryption(byte[] sharedSecret) {
         byte[] iv = Arrays.copyOf(sharedSecret, 16);
         SecretKey key = new SecretKeySpec(sharedSecret, "AES");
         try {

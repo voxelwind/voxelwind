@@ -46,7 +46,8 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
             response.setServerSecurity((byte) 0);
             response.setClientAddress(packet.sender());
             response.setServerId(SERVER_ID);
-            session = new UserSession(packet.sender(), request.getMtuSize(), new InitialNetworkPacketHandler(), ctx.channel(), server);
+            session = new UserSession(packet.sender(), request.getMtuSize(), null, ctx.channel(), server);
+            session.setHandler(new InitialNetworkPacketHandler(session));
             server.getSessionManager().add(packet.sender(), session);
             ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()));
             return;

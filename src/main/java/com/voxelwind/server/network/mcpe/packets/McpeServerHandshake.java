@@ -1,5 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
+import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
@@ -11,6 +13,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+@ForceClearText
+@BatchDisallowed
 public class McpeServerHandshake implements RakNetPackage {
     private PublicKey key;
     private ByteBuf token;
