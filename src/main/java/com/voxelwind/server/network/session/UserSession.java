@@ -45,7 +45,7 @@ public class UserSession {
     private NetworkPacketHandler handler;
     private volatile SessionState state = SessionState.INITIAL_CONNECTION;
     private final AtomicLong lastKnownUpdate = new AtomicLong(System.currentTimeMillis());
-    private final ConcurrentMap<Short, Queue<EncapsulatedRakNetPacket>> splitPackets = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Short, SplitPacketHelper> splitPackets = new ConcurrentHashMap<>();
     private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
     private final AtomicInteger reliabilitySequenceGenerator = new AtomicInteger();
     private final AtomicInteger orderSequenceGenerator = new AtomicInteger();
@@ -114,34 +114,13 @@ public class UserSession {
     }
 
     public Optional<ByteBuf> addSplitPacket(EncapsulatedRakNetPacket packet) {
-        Queue<EncapsulatedRakNetPacket> packets = splitPackets.computeIfAbsent(packet.getPartId(), (k) -> new ConcurrentLinkedQueue<>());
-        packets.add(packet);
-
-        // Is the packet collection complete?
-        BitSet found = new BitSet(packet.getPartCount());
-        for (EncapsulatedRakNetPacket netPacket : packets) {
-            if (found.get(netPacket.getPartIndex()))
-                throw new RuntimeException("Multiple parts found for " + netPacket.getPartId() + " at #" + netPacket.getPartId());
-
-            found.set(netPacket.getPartIndex(), true);
+        System.out.println("[SPLIT ADD] " + packet);
+        SplitPacketHelper helper = splitPackets.computeIfAbsent(packet.getPartId(), (k) -> new SplitPacketHelper());
+        Optional<ByteBuf> result = helper.add(packet);
+        if (result.isPresent()) {
+            splitPackets.remove(packet.getPartId());
         }
-
-        for (int i = 0; i < packet.getPartCount(); i++) {
-            if (!found.get(i)) {
-                return Optional.empty();
-            }
-        }
-
-        // It is, concatenate all packet data and return it.
-        splitPackets.remove(packet.getPartId());
-
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
-        List<EncapsulatedRakNetPacket> sorted = new ArrayList<>(packets);
-        sorted.sort((p, p1) -> Integer.compare(p.getPartIndex(), p1.getPartIndex()));
-        for (EncapsulatedRakNetPacket netPacket : sorted) {
-            buf.writeBytes(netPacket.getBuffer());
-        }
-        return Optional.of(buf);
+        return result;
     }
 
     public void onAck(List<Range<Integer>> acked) {
@@ -298,6 +277,7 @@ public class UserSession {
     }
 
     protected void enableEncryption(byte[] sharedSecret) {
+        System.out.println("ECDH Shared Secret: " + sharedSecret.length);
         byte[] iv = Arrays.copyOf(sharedSecret, 16);
         SecretKey key = new SecretKeySpec(sharedSecret, "AES");
         try {

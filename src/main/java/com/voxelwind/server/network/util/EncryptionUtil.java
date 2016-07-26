@@ -16,8 +16,10 @@ public class EncryptionUtil {
 
     static {
         try {
-            serverKey = KeyPairGenerator.getInstance("EC").generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("EC", "BC");
+            generator.initialize(192);
+            serverKey = generator.generateKeyPair();
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
@@ -25,8 +27,8 @@ public class EncryptionUtil {
     public static byte[] getSharedSecret(PublicKey clientKey) throws InvalidKeyException {
         KeyAgreement agreement;
         try {
-            agreement = KeyAgreement.getInstance("ECDH");
-        } catch (NoSuchAlgorithmException e) {
+            agreement = KeyAgreement.getInstance("ECDH", "BC");
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new AssertionError(e);
         }
 

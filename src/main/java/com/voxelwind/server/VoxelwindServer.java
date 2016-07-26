@@ -8,7 +8,9 @@ import com.voxelwind.server.network.session.SessionManager;
 import io.netty.channel.epoll.Epoll;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyPairGeneratorSpi;
 
+import java.security.Security;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +29,11 @@ public class VoxelwindServer {
     }
 
     public void boot() throws Exception {
+        Security.addProvider( new org.bouncycastle.jce.provider.BouncyCastleProvider() );
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
+
+        //KeyPairGeneratorSpi
 
         LOGGER.info("Voxelwind is now running.");
 

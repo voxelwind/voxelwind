@@ -16,10 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -33,7 +30,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     static {
         try {
             MOJANG_PUBLIC_KEY = getKey(MOJANG_PUBLIC_KEY_BASE64);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new AssertionError(e);
         }
     }
@@ -68,12 +65,12 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             // ...and begin encrypting the connection.
             session.enableEncryption(EncryptionUtil.getSharedSecret(key));
             session.sendUrgentPackage(EncryptionUtil.createHandshakePacket());
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) {
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
         }
     }
 
-    private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
         if (data.size() == 1) {
@@ -112,8 +109,8 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload));
     }
 
-    private static PublicKey getKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return KeyFactory.getInstance("EC").generatePublic(
+    private static PublicKey getKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+        return KeyFactory.getInstance("EC", "BC").generatePublic(
                 new X509EncodedKeySpec(Base64.getDecoder().decode(b64)));
     }
 }
