@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
+import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import io.jsonwebtoken.Header;
@@ -59,10 +60,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         }
 
         try {
-            UserAuthenticationProfile profile = validateChainData(certChainData);
-            session.setAuthenticationProfile(profile);
+            JwtPayload payload = validateChainData(certChainData);
+            session.setAuthenticationProfile(payload.getExtraData());
             // Get the key to use for encrypting the connection
-            PublicKey key = getKey(profile.getIdentityPublicKey());
+            PublicKey key = getKey(payload.getIdentityPublicKey());
 
             // ...and begin encrypting the connection.
             session.enableEncryption(EncryptionUtil.getSharedSecret(key));
@@ -72,15 +73,16 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         }
     }
 
-    private UserAuthenticationProfile validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
         if (data.size() == 1) {
             // The data is self-signed. We'll have to take the client at face value.
             JsonNode payload = getPayload(data.get(0).asText());
-            UserAuthenticationProfile profile = VoxelwindServer.MAPPER.convertValue(payload, UserAuthenticationProfile.class);
-            Preconditions.checkArgument(profile.getXuid() == null, "Self-signed client tried to provide an XUID");
-            return profile;
+            JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
+            System.out.println("[Payload] " + payload);
+            Preconditions.checkArgument(jwtPayload.getExtraData().getXuid() == null, "Self-signed client tried to provide an XUID");
+            return jwtPayload;
         } else {
             // The data has been signed by Mojang. Validate the chain.
             PublicKey currentKey = MOJANG_PUBLIC_KEY;
@@ -94,7 +96,8 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             }
 
             JsonNode payload = getPayload(data.get(data.size() - 1).asText());
-            return VoxelwindServer.MAPPER.convertValue(payload, UserAuthenticationProfile.class);
+            System.out.println("[Payload] " + payload);
+            return VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
         }
     }
 

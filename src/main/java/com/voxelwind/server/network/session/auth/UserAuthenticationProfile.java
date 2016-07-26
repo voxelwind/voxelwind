@@ -6,20 +6,11 @@ import java.util.UUID;
 
 public class UserAuthenticationProfile {
     @JsonProperty
-    private final String displayName;
+    private String displayName;
     @JsonProperty
-    private final UUID identity;
-    @JsonProperty
-    private final String identityPublicKey;
+    private UUID identity;
     @JsonProperty(value = "XUID")
-    private final Long xuid;
-
-    public UserAuthenticationProfile(String displayName, UUID identity, String identityPublicKey, Long xuid) {
-        this.displayName = displayName;
-        this.identity = identity;
-        this.identityPublicKey = identityPublicKey;
-        this.xuid = xuid;
-    }
+    private Long xuid;
 
     public String getDisplayName() {
         return displayName;
@@ -29,11 +20,19 @@ public class UserAuthenticationProfile {
         return identity;
     }
 
-    public String getIdentityPublicKey() {
-        return identityPublicKey;
-    }
-
     public Long getXuid() {
         return xuid;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public void setIdentity(UUID identity) {
+        this.identity = identity;
+    }
+
+    public void setXuid(Long xuid) {
+        this.xuid = xuid;
     }
 }
