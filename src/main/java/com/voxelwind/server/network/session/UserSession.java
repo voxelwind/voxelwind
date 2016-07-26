@@ -158,12 +158,11 @@ public class UserSession {
     public void onNak(List<Range<Integer>> acked) {
         for (Range<Integer> range : acked) {
             for (Integer integer : ContiguousSet.create(range, DiscreteDomain.integers())) {
-                SentDatagram datagram = datagramAcks.remove(integer);
+                SentDatagram datagram = datagramAcks.get(integer);
                 if (datagram != null) {
                     LOGGER.error("Must resend datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
-                    datagram.refreshForResend(this);
+                    datagram.refreshForResend();
                     channel.write(datagram, channel.voidPromise());
-                    datagramAcks.put(datagram.getDatagram().getDatagramSequenceNumber(), datagram);
                 }
             }
         }
@@ -227,6 +226,7 @@ public class UserSession {
     public void onTick() {
         sendQueued();
         sendAckQueue();
+        resendStalePackets();
     }
 
     private void sendQueued() {
@@ -261,6 +261,17 @@ public class UserSession {
 
         if (!batch.getPackages().isEmpty()) {
             internalSendPackage(batch);
+        }
+        channel.flush();
+    }
+
+    private void resendStalePackets() {
+        for (SentDatagram datagram : datagramAcks.values()) {
+            if (datagram.isStale()) {
+                LOGGER.warn("Datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " for " + remoteAddress + " is stale, resending!");
+                datagram.refreshForResend();
+                channel.write(new AddressedRakNetDatagram(datagram.getDatagram(), remoteAddress));
+            }
         }
         channel.flush();
     }

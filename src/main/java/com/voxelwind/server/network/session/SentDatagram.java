@@ -25,9 +25,8 @@ class SentDatagram {
         return stopwatch.elapsed(TimeUnit.SECONDS) >= 5;
     }
 
-    void refreshForResend(UserSession session) {
+    void refreshForResend() {
         stopwatch.reset();
-        datagram.setDatagramSequenceNumber(session.getDatagramSequenceGenerator().getAndIncrement());
         for (EncapsulatedRakNetPacket packet : datagram.getPackets()) {
             packet.getBuffer().retain(); // because the re-write will cause a decrement of the reference count
         }
