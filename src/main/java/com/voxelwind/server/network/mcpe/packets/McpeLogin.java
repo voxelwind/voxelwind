@@ -41,18 +41,13 @@ public class McpeLogin implements RakNetPackage {
     @Override
     public void decode(ByteBuf buffer) {
         protocolVersion = buffer.readInt();
-        int bodyLength = (buffer.readInt() & 0xFF);
+        int bodyLength = (buffer.readInt() & 0xFF); // TODO What's wrong with this?
         ByteBuf body = buffer.slice();
-
-        System.out.println(ByteBufUtil.hexDump(body));
 
         // Decompress the body
         ByteBuf result = null;
         try {
-            System.out.println(body);
             result = CompressionUtil.inflate(body);
-            System.out.println(result);
-            System.out.println(ByteBufUtil.prettyHexDump(result));
             chainData = McpeUtil.readLELengthString(result);
             skinData = McpeUtil.readLELengthString(result);
         } catch (DataFormatException e) {

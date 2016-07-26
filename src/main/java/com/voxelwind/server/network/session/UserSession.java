@@ -277,7 +277,6 @@ public class UserSession {
     }
 
     protected void enableEncryption(byte[] sharedSecret) {
-        System.out.println("ECDH Shared Secret: " + sharedSecret.length);
         byte[] iv = Arrays.copyOf(sharedSecret, 16);
         SecretKey key = new SecretKeySpec(sharedSecret, "AES");
         try {

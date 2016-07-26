@@ -21,16 +21,11 @@ public class McpeBatch implements RakNetPackage {
     public void decode(ByteBuf buffer) {
         ByteBuf decompressed = null;
         try {
-            System.out.println("[Before Decompress]\n" + buffer);
-
             int compressedSize = buffer.readInt();
             decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
-            System.out.println("[After Decompress]\n" + decompressed);
 
             // Now process the decompressed result.
             while (decompressed.isReadable()) {
-                System.out.println("[Decompressed]: " + ByteBufUtil.hexDump(decompressed));
-
                 int length = Math.toIntExact(decompressed.readUnsignedInt()); // WTF
                 ByteBuf data = decompressed.readSlice(length);
 
