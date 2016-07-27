@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
+import com.voxelwind.server.network.mcpe.packets.McpeDisconnect;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.util.EncryptionUtil;
@@ -63,7 +64,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
             // ...and begin encrypting the connection.
             session.enableEncryption(EncryptionUtil.getSharedSecret(key));
-            session.sendUrgentPackage(EncryptionUtil.createHandshakePacket());
+            //session.sendUrgentPackage(EncryptionUtil.createHandshakePacket());
+            McpeDisconnect disconnect = new McpeDisconnect();
+            disconnect.setMessage("This is a test.");
+            session.sendUrgentPackage(disconnect);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
         }

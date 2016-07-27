@@ -1,12 +1,14 @@
 package com.voxelwind.server.network.raknet.packets;
 
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
+import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
 
 @BatchDisallowed
 @ForceClearText
+@DisallowWrapping
 public class ConnectedPongPacket implements RakNetPackage {
     private long pingTime;
     private long pongTime;

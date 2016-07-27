@@ -4,11 +4,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
-import com.voxelwind.server.network.mcpe.packets.McpeLogin;
-import com.voxelwind.server.network.mcpe.packets.McpeWrapper;
+import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.raknet.packets.*;
-import com.voxelwind.server.network.mcpe.packets.McpeBatch;
-import com.voxelwind.server.network.mcpe.packets.McpeServerHandshake;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -38,6 +35,8 @@ public class PacketRegistry {
                     .put(PacketType.MCPE, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
                             .put(0x01, McpeLogin.class)
                             .put(0x03, McpeServerHandshake.class)
+                            .put(0x04, McpeClientMagic.class)
+                            .put(0x05, McpeDisconnect.class)
                             .put(0x06, McpeBatch.class)
                             .build())
                     .build();

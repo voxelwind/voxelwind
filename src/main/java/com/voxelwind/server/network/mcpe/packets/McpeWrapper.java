@@ -1,8 +1,10 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
 
+@DisallowWrapping // this is the wrapper!
 public class McpeWrapper implements RakNetPackage {
     private ByteBuf wrapped;
 
