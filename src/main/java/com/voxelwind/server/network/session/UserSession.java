@@ -19,6 +19,7 @@ import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import net.md_5.bungee.jni.cipher.BungeeCipher;
@@ -50,7 +51,7 @@ public class UserSession {
     private final AtomicInteger reliabilitySequenceGenerator = new AtomicInteger();
     private final AtomicInteger orderSequenceGenerator = new AtomicInteger();
     private final Queue<RakNetPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
-    private final Queue<Integer> ackQueue = new ArrayDeque<>();
+    private final Set<Integer> ackQueue = new HashSet<>();
     private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
     private final Channel channel;
     private final VoxelwindServer server;
@@ -115,6 +116,7 @@ public class UserSession {
 
     public Optional<ByteBuf> addSplitPacket(EncapsulatedRakNetPacket packet) {
         System.out.println("[SPLIT ADD] " + packet);
+        System.out.println("[SPLIT CONTENTS]\n" + ByteBufUtil.hexDump(packet.getBuffer()));
         SplitPacketHelper helper = splitPackets.computeIfAbsent(packet.getPartId(), (k) -> new SplitPacketHelper());
         Optional<ByteBuf> result = helper.add(packet);
         if (result.isPresent()) {
@@ -165,6 +167,8 @@ public class UserSession {
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
         buf.writeByte((id & 0xFF));
         netPackage.encode(buf);
+
+        System.out.println("[Sending]\n" + ByteBufUtil.prettyHexDump(buf));
 
         ByteBuf toEncapsulate;
         if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
@@ -270,6 +274,8 @@ public class UserSession {
             ranges = AckPacket.intoRanges(ackQueue);
             ackQueue.clear();
         }
+
+        System.out.println("[ACK] " + ranges);
 
         AckPacket packet = new AckPacket();
         packet.getIds().addAll(ranges);

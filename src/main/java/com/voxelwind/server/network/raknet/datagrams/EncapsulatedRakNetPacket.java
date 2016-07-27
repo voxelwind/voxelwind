@@ -126,12 +126,12 @@ public class EncapsulatedRakNetPacket {
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
                 reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            reliabilityNumber = buf.order(ByteOrder.LITTLE_ENDIAN).readMedium();
+            reliabilityNumber = buf.order(ByteOrder.LITTLE_ENDIAN).readUnsignedMedium();
         }
 
         if (reliability == RakNetReliability.UNRELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_SEQUENCED ||
                 reliability == RakNetReliability.RELIABLE_ORDERED || reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            orderingIndex = buf.order(ByteOrder.LITTLE_ENDIAN).readMedium();
+            orderingIndex = buf.order(ByteOrder.LITTLE_ENDIAN).readUnsignedMedium();
             orderingChannel = buf.readByte();
         }
 

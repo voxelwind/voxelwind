@@ -6,7 +6,6 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
 import com.voxelwind.server.network.session.auth.JwtPayload;
-import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwt;

@@ -1,8 +1,10 @@
 package com.voxelwind.server.network.handler;
 
+import com.google.common.collect.Range;
 import com.google.common.net.InetAddresses;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
+import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.PacketRegistry;
@@ -40,7 +42,11 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             return;
 
         // Acknowledge receipt of the datagram.
-        session.enqueueAck(datagram.content().getDatagramSequenceNumber());
+        //session.enqueueAck(datagram.content().getDatagramSequenceNumber());
+        // Temporary hack:
+        AckPacket ackPacket = new AckPacket();
+        ackPacket.getIds().add(Range.singleton(datagram.content().getDatagramSequenceNumber()));
+        ctx.writeAndFlush(new DirectAddressedRakNetPacket(ackPacket, datagram.sender()));
 
         // Check the datagram contents.
         if (datagram.content().getFlags().isValid()) {
