@@ -64,10 +64,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
             // ...and begin encrypting the connection.
             session.enableEncryption(EncryptionUtil.getSharedSecret(key));
-            //session.sendUrgentPackage(EncryptionUtil.createHandshakePacket());
-            McpeDisconnect disconnect = new McpeDisconnect();
-            disconnect.setMessage("This is a test.");
-            session.sendUrgentPackage(disconnect);
+            session.sendUrgentPackage(EncryptionUtil.createHandshakePacket());
+            //McpeDisconnect disconnect = new McpeDisconnect();
+            //disconnect.setMessage("This is a test.");
+            //session.sendUrgentPackage(disconnect);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
         }

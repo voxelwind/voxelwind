@@ -17,7 +17,7 @@ public class EncryptionUtil {
     static {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("EC", "BC");
-            generator.initialize(192);
+            generator.initialize(256);
             serverKey = generator.generateKeyPair();
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new ExceptionInInitializerError(e);

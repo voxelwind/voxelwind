@@ -15,6 +15,7 @@ import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -75,6 +76,10 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
     private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
         System.out.println("[Package] " + netPackage);
 
+        if (netPackage == null) {
+            return;
+        }
+
         if (session.getHandler() == null) {
             LOGGER.error("Session " + session.getRemoteAddress() + " has no handler!?!?!");
             return;
@@ -88,10 +93,12 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
                 if (session.isEncrypted()) {
                     cleartext = PooledByteBufAllocator.DEFAULT.buffer();
                     session.getDecryptionCipher().cipher(((McpeWrapper) netPackage).getWrapped(), cleartext);
+                    System.out.println("Allocated new buffer and decrypted.");
                 } else {
                     cleartext = ((McpeWrapper) netPackage).getWrapped();
                 }
 
+                System.out.println("[WRAPPED]\n" + ByteBufUtil.prettyHexDump(cleartext));
                 RakNetPackage pkg = PacketRegistry.tryDecode(cleartext, PacketType.MCPE);
                 handlePackage(pkg, session);
             } finally {
