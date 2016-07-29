@@ -64,6 +64,7 @@ public class UserSession {
     private BungeeCipher encryptionCipher;
     private BungeeCipher decryptionCipher;
     private boolean closed = false;
+    private PlayerSession playerSession;
     private byte[] serverKey;
     private static final ThreadLocal<byte[]> CHECKSUM_BUFFER_LOCAL = new ThreadLocal<byte[]>() {
         @Override
@@ -389,5 +390,21 @@ public class UserSession {
 
         byte[] digested = digest.digest();
         return Arrays.copyOf(digested, 8);
+    }
+
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public PlayerSession getPlayerSession() {
+        return playerSession;
+    }
+
+    public PlayerSession initializePlayerSession() {
+        checkForClosed();
+        Preconditions.checkState(playerSession != null, "Player session already initialized");
+
+        playerSession = new PlayerSession(this);
+        return playerSession;
     }
 }

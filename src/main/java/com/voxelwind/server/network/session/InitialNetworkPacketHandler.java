@@ -6,10 +6,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
-import com.voxelwind.server.network.mcpe.packets.McpeAdventureSettings;
-import com.voxelwind.server.network.mcpe.packets.McpeLogin;
-import com.voxelwind.server.network.mcpe.packets.McpePlayStatus;
-import com.voxelwind.server.network.mcpe.packets.McpeStartGame;
+import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import io.jsonwebtoken.Header;
@@ -94,10 +91,14 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             McpeAdventureSettings settings = new McpeAdventureSettings();
             settings.setPlayerPermissions(3);
             session.sendUrgentPackage(settings);
-
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
         }
+    }
+
+    @Override
+    public void handle(McpeRequestChunkRadius packet) {
+
     }
 
     private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {

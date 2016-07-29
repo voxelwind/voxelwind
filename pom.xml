@@ -115,5 +115,11 @@
             <version>1.0.2</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

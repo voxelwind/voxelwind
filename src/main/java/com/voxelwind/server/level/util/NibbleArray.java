@@ -1,6 +1,6 @@
 package com.voxelwind.server.level.util;
 
-public class NibbleArray implements Cloneable {
+public class NibbleArray {
     private final byte[] data;
 
     public NibbleArray(int length) {
@@ -21,8 +21,7 @@ public class NibbleArray implements Cloneable {
         data[index / 2] |= (byte) (value << (index %2 * 4));
     }
 
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return new NibbleArray(data.clone());
+    public byte[] getData() {
+        return data;
     }
 }
