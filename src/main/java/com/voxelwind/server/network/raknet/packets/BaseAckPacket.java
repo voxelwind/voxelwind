@@ -59,7 +59,7 @@ public abstract class BaseAckPacket implements RakNetPackage {
         int start = ids.get(0);
         int cur = start;
 
-        for (Integer id : ids) {
+        for (Integer id : ids.subList(1, ids.size())) {
             if (cur + 1 == id) {
                 cur = id;
             } else {

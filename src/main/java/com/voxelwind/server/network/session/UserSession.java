@@ -6,6 +6,7 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
+import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
@@ -186,7 +187,7 @@ public class UserSession {
         Preconditions.checkArgument(id != null, "Package " + netPackage + " has no ID.");
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
-        if (encryptionCipher != null) {
+        if (encryptionCipher != null && !netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
             buf.writeByte(0xFE);
         }
         buf.writeByte((id & 0xFF));
@@ -382,6 +383,7 @@ public class UserSession {
         digest.update(tempBuf, 0, readable);
         digest.update(serverKey);
 
-        return digest.digest();
+        byte[] digested = digest.digest();
+        return Arrays.copyOf(digested, 8);
     }
 }
