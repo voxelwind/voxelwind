@@ -6,9 +6,7 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
-import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
-import com.voxelwind.server.network.mcpe.packets.McpeWrapper;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
@@ -31,7 +29,11 @@ import org.apache.logging.log4j.Logger;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -52,6 +54,7 @@ public class UserSession {
     private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
     private final AtomicInteger reliabilitySequenceGenerator = new AtomicInteger();
     private final AtomicInteger orderSequenceGenerator = new AtomicInteger();
+    private final AtomicLong encryptedSentPacketGenerator = new AtomicLong();
     private final Queue<RakNetPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
     private final Set<Integer> ackQueue = new HashSet<>();
     private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
@@ -59,6 +62,14 @@ public class UserSession {
     private final VoxelwindServer server;
     private BungeeCipher encryptionCipher;
     private BungeeCipher decryptionCipher;
+    private boolean closed = false;
+    private byte[] serverKey;
+    private static final ThreadLocal<byte[]> CHECKSUM_BUFFER_LOCAL = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+            return new byte[512];
+        }
+    };
 
     public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
         this.remoteAddress = remoteAddress;
@@ -93,6 +104,7 @@ public class UserSession {
     }
 
     public void setAuthenticationProfile(UserAuthenticationProfile authenticationProfile) {
+        Preconditions.checkNotNull(authenticationProfile, "authenticationProfile");
         this.authenticationProfile = authenticationProfile;
     }
 
@@ -101,6 +113,8 @@ public class UserSession {
     }
 
     public void setHandler(NetworkPacketHandler handler) {
+        checkForClosed();
+        Preconditions.checkNotNull(handler, "handler");
         this.handler = handler;
     }
 
@@ -117,8 +131,7 @@ public class UserSession {
     }
 
     public Optional<ByteBuf> addSplitPacket(EncapsulatedRakNetPacket packet) {
-        System.out.println("[SPLIT ADD] " + packet);
-        System.out.println("[SPLIT CONTENTS]\n" + ByteBufUtil.hexDump(packet.getBuffer()));
+        checkForClosed();
         SplitPacketHelper helper = splitPackets.computeIfAbsent(packet.getPartId(), (k) -> new SplitPacketHelper());
         Optional<ByteBuf> result = helper.add(packet);
         if (result.isPresent()) {
@@ -128,6 +141,7 @@ public class UserSession {
     }
 
     public void onAck(List<Range<Integer>> acked) {
+        checkForClosed();
         for (Range<Integer> range : acked) {
             for (Integer integer : ContiguousSet.create(range, DiscreteDomain.integers())) {
                 SentDatagram datagram = datagramAcks.remove(integer);
@@ -139,6 +153,7 @@ public class UserSession {
     }
 
     public void onNak(List<Range<Integer>> acked) {
+        checkForClosed();
         for (Range<Integer> range : acked) {
             for (Integer integer : ContiguousSet.create(range, DiscreteDomain.integers())) {
                 SentDatagram datagram = datagramAcks.get(integer);
@@ -154,10 +169,14 @@ public class UserSession {
     }
 
     public void queuePackageForSend(RakNetPackage netPackage) {
+        checkForClosed();
+        Preconditions.checkNotNull(netPackage, "netPackage");
         currentlyQueued.add(netPackage);
     }
 
     public void sendUrgentPackage(RakNetPackage netPackage) {
+        checkForClosed();
+        Preconditions.checkNotNull(netPackage, "netPackage");
         internalSendPackage(netPackage);
         channel.flush();
     }
@@ -177,6 +196,7 @@ public class UserSession {
 
         ByteBuf toEncapsulate;
         if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
+            buf.writeBytes(generateTrailer(buf));
             toEncapsulate = PooledByteBufAllocator.DEFAULT.buffer();
             toEncapsulate.writeByte(0xFE);
             try {
@@ -209,10 +229,15 @@ public class UserSession {
     }
 
     public void sendDirectPackage(RakNetPackage netPackage) {
+        checkForClosed();
         channel.writeAndFlush(new DirectAddressedRakNetPacket(netPackage, remoteAddress));
     }
 
     public void onTick() {
+        if (closed) {
+            return;
+        }
+
         sendQueued();
         sendAckQueue();
         resendStalePackets();
@@ -266,6 +291,8 @@ public class UserSession {
     }
 
     public void enqueueAck(int ack) {
+        checkForClosed();
+
         synchronized (ackQueue) {
             ackQueue.add(ack);
         }
@@ -288,9 +315,12 @@ public class UserSession {
         sendDirectPackage(packet);
     }
 
-    protected void enableEncryption(byte[] sharedSecret) {
-        byte[] iv = Arrays.copyOf(sharedSecret, 16);
-        SecretKey key = new SecretKeySpec(sharedSecret, "AES");
+    protected void enableEncryption(byte[] secretKey) {
+        checkForClosed();
+
+        serverKey = secretKey;
+        byte[] iv = Arrays.copyOf(secretKey, 16);
+        SecretKey key = new SecretKeySpec(secretKey, "AES");
         try {
             encryptionCipher = Native.cipher.newInstance();
             decryptionCipher = Native.cipher.newInstance();
@@ -307,7 +337,18 @@ public class UserSession {
     }
 
     public void close() {
+        checkForClosed();
+
         server.getSessionManager().remove(remoteAddress);
+        closed = true;
+
+        // Free native resources if required
+        if (encryptionCipher != null) {
+            encryptionCipher.free();
+        }
+        if (decryptionCipher != null) {
+            decryptionCipher.free();
+        }
     }
 
     public BungeeCipher getEncryptionCipher() {
@@ -316,5 +357,31 @@ public class UserSession {
 
     public BungeeCipher getDecryptionCipher() {
         return decryptionCipher;
+    }
+
+    private void checkForClosed() {
+        Preconditions.checkState(!closed, "Session already closed");
+    }
+
+    private byte[] generateTrailer(ByteBuf buf) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(e);
+        }
+
+        digest.update(ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(encryptedSentPacketGenerator.getAndIncrement()));
+        // TODO: This is bad -  maybe we can make this native code?
+        byte[] tempBuf = CHECKSUM_BUFFER_LOCAL.get();
+        int readable = buf.readableBytes();
+        if (tempBuf.length < readable) {
+            CHECKSUM_BUFFER_LOCAL.set(new byte[readable]);
+        }
+        buf.readBytes(tempBuf);
+        digest.update(tempBuf, 0, readable);
+        digest.update(serverKey);
+
+        return digest.digest();
     }
 }

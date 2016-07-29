@@ -24,7 +24,22 @@ public class EncryptionUtil {
         }
     }
 
-    public static byte[] getSharedSecret(PublicKey clientKey) throws InvalidKeyException {
+    public static byte[] getServerKey(PublicKey key, byte[] token) throws InvalidKeyException {
+        byte[] sharedSecret = getSharedSecret(key);
+
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(e);
+        }
+
+        digest.update(token);
+        digest.update(sharedSecret);
+        return digest.digest();
+    }
+
+    private static byte[] getSharedSecret(PublicKey clientKey) throws InvalidKeyException {
         KeyAgreement agreement;
         try {
             agreement = KeyAgreement.getInstance("ECDH", "BC");
@@ -41,15 +56,16 @@ public class EncryptionUtil {
         return serverKey;
     }
 
-    public static McpeServerHandshake createHandshakePacket() {
+    public static McpeServerHandshake createHandshakePacket(byte[] token) {
         McpeServerHandshake handshake = new McpeServerHandshake();
         handshake.setKey(serverKey.getPublic());
-
-        // Generate 16 cryptographically-secure random bytes
-        byte[] token = new byte[16];
-        secureRandom.nextBytes(token);
-
         handshake.setToken(Unpooled.wrappedBuffer(token));
         return handshake;
+    }
+
+    public static byte[] generateRandomToken() {
+        byte[] token = new byte[32];
+        secureRandom.nextBytes(token);
+        return token;
     }
 }
