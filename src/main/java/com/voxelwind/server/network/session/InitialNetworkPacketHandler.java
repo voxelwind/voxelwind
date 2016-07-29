@@ -6,6 +6,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
+import com.voxelwind.server.network.mcpe.packets.McpeAdventureSettings;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
 import com.voxelwind.server.network.mcpe.packets.McpePlayStatus;
 import com.voxelwind.server.network.mcpe.packets.McpeStartGame;
@@ -66,8 +67,8 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             PublicKey key = getKey(payload.getIdentityPublicKey());
 
             // ...and begin encrypting the connection.
-            byte[] token = EncryptionUtil.generateRandomToken();
-            byte[] serverKey = EncryptionUtil.getServerKey(key, token);
+            //byte[] token = EncryptionUtil.generateRandomToken();
+            //byte[] serverKey = EncryptionUtil.getServerKey(key, token);
 
             // TODO: Fix encryption later
             //session.enableEncryption(serverKey);
@@ -90,11 +91,12 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             startGame.setPosition(new Vector3d(0, 4, 0));
             session.sendUrgentPackage(startGame);
 
+            McpeAdventureSettings settings = new McpeAdventureSettings();
+            settings.setPlayerPermissions(3);
+            session.sendUrgentPackage(settings);
 
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
         }
     }
 
