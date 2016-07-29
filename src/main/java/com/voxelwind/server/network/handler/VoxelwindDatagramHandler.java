@@ -3,6 +3,7 @@ package com.voxelwind.server.network.handler;
 import com.google.common.collect.Range;
 import com.google.common.net.InetAddresses;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
+import com.voxelwind.server.network.mcpe.packets.McpeRequestChunkRadius;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.*;
@@ -93,7 +94,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
                 if (session.isEncrypted()) {
                     System.out.println("[BEFORE]\n" + ByteBufUtil.prettyHexDump(((McpeWrapper) netPackage).getWrapped()));
 
-                    cleartext = PooledByteBufAllocator.DEFAULT.buffer();
+                    cleartext = PooledByteBufAllocator.DEFAULT.directBuffer();
                     session.getDecryptionCipher().cipher(((McpeWrapper) netPackage).getWrapped(), cleartext);
                     cleartext = cleartext.slice(0, cleartext.readableBytes() - 8);
                     System.out.println("Allocated new buffer and decrypted.");
@@ -152,6 +153,9 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         // Dispatch block...
         if (netPackage instanceof McpeLogin) {
             session.getHandler().handle((McpeLogin) netPackage);
+        }
+        if (netPackage instanceof McpeRequestChunkRadius) {
+            session.getHandler().handle((McpeRequestChunkRadius) netPackage);
         }
     }
 }

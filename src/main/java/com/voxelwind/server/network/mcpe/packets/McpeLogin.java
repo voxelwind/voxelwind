@@ -63,7 +63,7 @@ public class McpeLogin implements RakNetPackage {
     public void encode(ByteBuf buffer) {
         buffer.writeInt(protocolVersion);
 
-        ByteBuf body = PooledByteBufAllocator.DEFAULT.buffer();
+        ByteBuf body = PooledByteBufAllocator.DEFAULT.directBuffer();
         try {
             McpeUtil.writeLELengthString(body, chainData);
             McpeUtil.writeLELengthString(body, skinData);

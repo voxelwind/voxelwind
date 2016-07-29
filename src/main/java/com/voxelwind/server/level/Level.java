@@ -1,5 +1,6 @@
 package com.voxelwind.server.level;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.server.level.chunk.Chunk;
 import com.voxelwind.server.level.provider.ChunkProvider;
@@ -18,6 +19,10 @@ public class Level {
     public Level(ChunkProvider chunkProvider, UUID uuid) {
         this.chunkProvider = chunkProvider;
         this.uuid = uuid;
+    }
+
+    public Vector3d getSpawnLocation() {
+        return chunkProvider.getSpawn();
     }
 
     public CompletableFuture<Chunk> getChunk(int x, int z) {

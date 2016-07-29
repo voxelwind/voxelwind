@@ -78,19 +78,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);
             session.sendUrgentPackage(status);
 
-            McpeStartGame startGame = new McpeStartGame();
-            startGame.setSeed(-1);
-            startGame.setDimension((byte) 0);
-            startGame.setGenerator(1);
-            startGame.setGamemode(0);
-            startGame.setEntityId(1);
-            startGame.setSpawnLocation(new Vector3i(0, 4, 0));
-            startGame.setPosition(new Vector3d(0, 4, 0));
-            session.sendUrgentPackage(startGame);
-
-            McpeAdventureSettings settings = new McpeAdventureSettings();
-            settings.setPlayerPermissions(3);
-            session.sendUrgentPackage(settings);
+            // Put the player in the default level
+            PlayerSession playerSession = session.initializePlayerSession();
+            playerSession.doInitialSpawn(session.getServer().getDefaultLevel());
+            session.setHandler(playerSession.getPacketHandler());
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
         }

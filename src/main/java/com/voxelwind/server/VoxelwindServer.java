@@ -2,6 +2,8 @@ package com.voxelwind.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
 import com.voxelwind.server.network.session.SessionManager;
@@ -10,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.security.Security;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +25,7 @@ public class VoxelwindServer {
     private final ScheduledExecutorService timerService = Executors.unconfigurableScheduledExecutorService(
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private NettyVoxelwindNetworkListener listener;
+    private Level defaultLevel;
 
     public SessionManager getSessionManager() {
         return sessionManager;
@@ -31,6 +35,8 @@ public class VoxelwindServer {
         Security.addProvider( new org.bouncycastle.jce.provider.BouncyCastleProvider() );
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
+
+        defaultLevel = new Level(FlatworldChunkProvider.INSTANCE, UUID.randomUUID());
 
         LOGGER.info("Voxelwind is now running.");
 
@@ -57,5 +63,9 @@ public class VoxelwindServer {
 
         VoxelwindServer server = new VoxelwindServer();
         server.boot();
+    }
+
+    public Level getDefaultLevel() {
+        return defaultLevel;
     }
 }

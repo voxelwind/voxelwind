@@ -191,7 +191,7 @@ public class UserSession {
         Integer id = PacketRegistry.getId(netPackage);
         Preconditions.checkArgument(id != null, "Package " + netPackage + " has no ID.");
 
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
+        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
         if (encryptionCipher != null && !netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
             buf.writeByte(0xFE);
         }
@@ -203,7 +203,7 @@ public class UserSession {
         ByteBuf toEncapsulate;
         if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
             buf.writeBytes(generateTrailer(buf));
-            toEncapsulate = PooledByteBufAllocator.DEFAULT.buffer();
+            toEncapsulate = PooledByteBufAllocator.DEFAULT.directBuffer();
             toEncapsulate.writeByte(0xFE);
             try {
                 encryptionCipher.cipher(buf, toEncapsulate);
@@ -402,9 +402,17 @@ public class UserSession {
 
     public PlayerSession initializePlayerSession() {
         checkForClosed();
-        Preconditions.checkState(playerSession != null, "Player session already initialized");
+        Preconditions.checkState(playerSession == null, "Player session already initialized");
 
         playerSession = new PlayerSession(this);
         return playerSession;
+    }
+
+    public VoxelwindServer getServer() {
+        return server;
+    }
+
+    public Channel getChannel() {
+        return channel;
     }
 }

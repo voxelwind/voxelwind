@@ -33,7 +33,7 @@ public class SplitPacketHelper {
         packets.clear();
         sortedPackets.sort((o1, o2) -> Integer.compare(o1.getPartIndex(), o2.getPartIndex()));
 
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
+        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
         for (EncapsulatedRakNetPacket netPacket : sortedPackets) {
             buf.writeBytes(netPacket.getBuffer());
         }

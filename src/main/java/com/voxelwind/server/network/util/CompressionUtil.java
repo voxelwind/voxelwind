@@ -70,7 +70,7 @@ public class CompressionUtil {
      * @throws DataFormatException if data could not be deflated
      */
     public static ByteBuf deflate(ByteBuf buffer) throws DataFormatException {
-        ByteBuf dest = PooledByteBufAllocator.DEFAULT.buffer();
+        ByteBuf dest = PooledByteBufAllocator.DEFAULT.directBuffer();
         deflate(buffer, dest);
         return dest;
     }

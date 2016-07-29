@@ -149,11 +149,12 @@ public class EncapsulatedRakNetPacket {
         List<ByteBuf> bufs = new ArrayList<>();
         int by = session.getMtu() - 100; // TODO: This could be lowered to as little as 24, but needs to be checked.
         if (buffer.readableBytes() > by) { // accounting for bookkeeping
+            ByteBuf from = buffer.slice();
             // Split the buffer up
             int split = (int) Math.ceil(buffer.readableBytes() / by);
             for (int i = 0; i < split; i++) {
                 // Need to retain, in the event that we need to send due to NAK.
-                bufs.add(buffer.slice(i * by, Math.min(buffer.readableBytes(), (i + 1) * by)).retain());
+                bufs.add(from.readSlice(Math.min(by, from.readableBytes())).retain());
             }
         } else {
             bufs.add(buffer);
