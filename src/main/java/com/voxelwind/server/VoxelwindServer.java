@@ -8,7 +8,6 @@ import com.voxelwind.server.network.session.SessionManager;
 import io.netty.channel.epoll.Epoll;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyPairGeneratorSpi;
 
 import java.security.Security;
 import java.util.concurrent.Executors;
@@ -33,12 +32,9 @@ public class VoxelwindServer {
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
 
-        //KeyPairGeneratorSpi
-
         LOGGER.info("Voxelwind is now running.");
 
-        // NiclasOlofsson recommends using 10ms at maximum
-        timerService.scheduleAtFixedRate(sessionManager::onTick, 10, 10, TimeUnit.MILLISECONDS);
+        timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
 
         Thread.sleep(10000000);
     }
