@@ -172,6 +172,10 @@ public class UserSession {
     public void queuePackageForSend(RakNetPackage netPackage) {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
+
+        Integer id = PacketRegistry.getId(netPackage);
+        Preconditions.checkArgument(id != null, "Package " + netPackage + " has no ID.");
+
         currentlyQueued.add(netPackage);
     }
 

@@ -34,10 +34,12 @@ public class PacketRegistry {
                             .build())
                     .put(PacketType.MCPE, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
                             .put(0x01, McpeLogin.class)
+                            .put(0x02, McpePlayStatus.class)
                             .put(0x03, McpeServerHandshake.class)
                             .put(0x04, McpeClientMagic.class)
                             .put(0x05, McpeDisconnect.class)
                             .put(0x06, McpeBatch.class)
+                            .put(0x09, McpeStartGame.class)
                             .build())
                     .build();
 

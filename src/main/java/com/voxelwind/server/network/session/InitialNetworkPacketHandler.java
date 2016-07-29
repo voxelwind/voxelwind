@@ -2,9 +2,13 @@ package com.voxelwind.server.network.session;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.McpeLogin;
+import com.voxelwind.server.network.mcpe.packets.McpePlayStatus;
+import com.voxelwind.server.network.mcpe.packets.McpeStartGame;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import io.jsonwebtoken.Header;
@@ -65,20 +69,39 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             byte[] token = EncryptionUtil.generateRandomToken();
             byte[] serverKey = EncryptionUtil.getServerKey(key, token);
 
-            session.enableEncryption(serverKey);
-            session.sendUrgentPackage(EncryptionUtil.createHandshakePacket(token));
+            // TODO: Fix encryption later
+            //session.enableEncryption(serverKey);
+            //session.sendUrgentPackage(EncryptionUtil.createHandshakePacket(token));
             //McpeDisconnect disconnect = new McpeDisconnect();
             //disconnect.setMessage("This is a test.");
             //session.sendUrgentPackage(disconnect);
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | NoSuchProviderException e) {
+
+            McpePlayStatus status = new McpePlayStatus();
+            status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);
+            session.sendUrgentPackage(status);
+
+            McpeStartGame startGame = new McpeStartGame();
+            startGame.setSeed(-1);
+            startGame.setDimension((byte) 0);
+            startGame.setGenerator(1);
+            startGame.setGamemode(0);
+            startGame.setEntityId(1);
+            startGame.setSpawnLocation(new Vector3i(0, 4, 0));
+            startGame.setPosition(new Vector3d(0, 4, 0));
+            session.sendUrgentPackage(startGame);
+
+
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
         }
     }
 
     private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
-        if (data.size() == 1) {
+        /*if (data.size() == 1) {
             // The data is self-signed. We'll have to take the client at face value.
             JsonNode payload = getPayload(data.get(0).asText());
             JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
@@ -100,7 +123,12 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             JsonNode payload = getPayload(data.get(data.size() - 1).asText());
             System.out.println("[Payload] " + payload);
             return VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
-        }
+        }*/
+        JsonNode payload = getPayload(data.get(data.size() - 1).asText());
+        JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
+        System.out.println("[Payload] " + payload);
+        //Preconditions.checkArgument(jwtPayload.getExtraData().getXuid() == null, "Self-signed client tried to provide an XUID");
+        return jwtPayload;
     }
 
     // ¯\_(ツ)_/¯

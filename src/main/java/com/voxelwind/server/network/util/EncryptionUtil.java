@@ -64,7 +64,7 @@ public class EncryptionUtil {
     }
 
     public static byte[] generateRandomToken() {
-        byte[] token = new byte[32];
+        byte[] token = new byte[16];
         secureRandom.nextBytes(token);
         return token;
     }
