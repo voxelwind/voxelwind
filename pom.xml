@@ -104,12 +104,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk14</artifactId>
-            <version>1.54</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.flowpowered</groupId>
             <artifactId>flow-math</artifactId>
             <version>1.0.2</version>

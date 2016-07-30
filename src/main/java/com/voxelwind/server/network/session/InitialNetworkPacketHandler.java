@@ -31,7 +31,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     static {
         try {
             MOJANG_PUBLIC_KEY = getKey(MOJANG_PUBLIC_KEY_BASE64);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException e) {
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }
     }
@@ -70,17 +70,13 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             // TODO: Fix encryption later
             session.enableEncryption(serverKey);
             session.sendUrgentPackage(EncryptionUtil.createHandshakePacket(token));
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | InvalidKeyException e) {
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) {
             LOGGER.error("Unable to enable encryption", e);
         }
     }
 
     @Override
     public void handle(McpeClientMagic packet) {
-        McpePlayStatus status = new McpePlayStatus();
-        status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);
-        session.addToSendQueue(status);
-
         initializePlayerSession();
     }
 
@@ -95,12 +91,16 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     }
 
     private void initializePlayerSession() {
+        McpePlayStatus status = new McpePlayStatus();
+        status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);
+        session.addToSendQueue(status);
+
         PlayerSession playerSession = session.initializePlayerSession();
         session.setHandler(playerSession.getPacketHandler());
         playerSession.doInitialSpawn(session.getServer().getDefaultLevel());
     }
 
-    private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
+    private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
         /*if (data.size() == 1) {
@@ -144,8 +144,8 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload));
     }
 
-    private static PublicKey getKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-        return KeyFactory.getInstance("EC", "BC").generatePublic(
+    private static PublicKey getKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return KeyFactory.getInstance("EC").generatePublic(
                 new X509EncodedKeySpec(Base64.getDecoder().decode(b64)));
     }
 }

@@ -11,7 +11,6 @@ import io.netty.channel.epoll.Epoll;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.security.Security;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,7 +31,6 @@ public class VoxelwindServer {
     }
 
     public void boot() throws Exception {
-        Security.addProvider( new org.bouncycastle.jce.provider.BouncyCastleProvider() );
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
 
