@@ -388,7 +388,7 @@ public class UserSession {
         if (tempBuf.length < readable) {
             CHECKSUM_BUFFER_LOCAL.set(new byte[readable]);
         }
-        buf.readBytes(tempBuf);
+        buf.readBytes(tempBuf, 0, buf.readableBytes());
         digest.update(tempBuf, 0, readable);
         digest.update(serverKey);
 

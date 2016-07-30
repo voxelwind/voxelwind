@@ -2,6 +2,7 @@ package com.voxelwind.server.network.util;
 
 import com.voxelwind.server.network.mcpe.packets.McpeServerHandshake;
 import io.netty.buffer.Unpooled;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 
 import javax.crypto.*;
 import java.security.*;
@@ -16,10 +17,10 @@ public class EncryptionUtil {
 
     static {
         try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("EC", "BC");
-            generator.initialize(256);
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("ECDH", "BC");
+            generator.initialize(new ECNamedCurveGenParameterSpec("secp384r1"));
             serverKey = generator.generateKeyPair();
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
