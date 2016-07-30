@@ -30,7 +30,7 @@ public class EncryptionUtil {
 
         MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance("SHA256");
+            digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }

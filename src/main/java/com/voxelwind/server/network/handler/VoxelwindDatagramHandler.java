@@ -89,12 +89,9 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             ByteBuf cleartext = null;
             try {
                 if (session.isEncrypted()) {
-                    System.out.println("[BEFORE]\n" + ByteBufUtil.prettyHexDump(((McpeWrapper) netPackage).getWrapped()));
-
                     cleartext = PooledByteBufAllocator.DEFAULT.directBuffer();
                     session.getDecryptionCipher().cipher(((McpeWrapper) netPackage).getWrapped(), cleartext);
                     cleartext = cleartext.slice(0, cleartext.readableBytes() - 8);
-                    System.out.println("Allocated new buffer and decrypted.");
                 } else {
                     cleartext = ((McpeWrapper) netPackage).getWrapped();
                 }

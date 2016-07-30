@@ -376,7 +376,7 @@ public class UserSession {
     private byte[] generateTrailer(ByteBuf buf) {
         MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance("SHA256");
+            digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }
@@ -388,7 +388,7 @@ public class UserSession {
         if (tempBuf.length < readable) {
             CHECKSUM_BUFFER_LOCAL.set(new byte[readable]);
         }
-        buf.readBytes(tempBuf, 0, buf.readableBytes());
+        buf.getBytes(0, tempBuf, 0, readable);
         digest.update(tempBuf, 0, readable);
         digest.update(serverKey);
 
