@@ -61,7 +61,7 @@ public class RakNetUtil {
 
     public static InetSocketAddress readSocketAddress(ByteBuf buf) {
         InetAddress address = readAddress(buf);
-        short port = buf.readShort();
+        int port = buf.readUnsignedShort();
         return new InetSocketAddress(address, port);
     }
 

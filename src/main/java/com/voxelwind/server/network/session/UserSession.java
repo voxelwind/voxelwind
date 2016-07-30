@@ -198,7 +198,7 @@ public class UserSession {
         buf.writeByte((id & 0xFF));
         netPackage.encode(buf);
 
-        System.out.println("[Sending]\n" + ByteBufUtil.prettyHexDump(buf));
+        System.out.println("[Network Send] " + netPackage);
 
         ByteBuf toEncapsulate;
         if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
