@@ -192,19 +192,26 @@ public class UserSession {
         Preconditions.checkArgument(id != null, "Package " + netPackage + " has no ID.");
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
-        if (encryptionCipher != null && !netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
-            buf.writeByte(0xFE);
-        }
-        buf.writeByte((id & 0xFF));
-        netPackage.encode(buf);
 
         System.out.println("[Network Send] " + netPackage);
 
         ByteBuf toEncapsulate;
-        if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
+        if (encryptionCipher == null || netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
+            if (!netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
+                buf.writeByte(0xFE);
+            }
+            buf.writeByte((id & 0xFF));
+            netPackage.encode(buf);
+
+            toEncapsulate = buf;
+        } else {
+            buf.writeByte((id & 0xFF));
+            netPackage.encode(buf);
             buf.writeBytes(generateTrailer(buf));
+
             toEncapsulate = PooledByteBufAllocator.DEFAULT.directBuffer();
             toEncapsulate.writeByte(0xFE);
+
             try {
                 encryptionCipher.cipher(buf, toEncapsulate);
             } catch (GeneralSecurityException e) {
@@ -213,8 +220,6 @@ public class UserSession {
             } finally {
                 buf.release();
             }
-        } else {
-            toEncapsulate = buf;
         }
 
         List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(toEncapsulate, this);
