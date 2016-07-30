@@ -3,13 +3,14 @@ package com.voxelwind.server.network.raknet.packets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteOrder;
 import java.util.*;
 
 public abstract class BaseAckPacket implements RakNetPackage {
-    private final List<Range<Integer>> ids = new ArrayList<>();
+    private final List<IntRange> ids = new ArrayList<>();
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -18,10 +19,10 @@ public abstract class BaseAckPacket implements RakNetPackage {
             boolean isSingleton = buffer.readBoolean();
             int lower = buffer.order(ByteOrder.LITTLE_ENDIAN).readMedium();
             if (isSingleton) {
-                ids.add(Range.singleton(lower));
+                ids.add(new IntRange(lower, lower));
             } else {
                 int upper = buffer.order(ByteOrder.LITTLE_ENDIAN).readMedium();
-                ids.add(Range.closed(lower, upper));
+                ids.add(new IntRange(lower, upper));
             }
         }
     }
@@ -29,32 +30,31 @@ public abstract class BaseAckPacket implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeShort(ids.size());
-        for (Range<Integer> id : ids) {
-            boolean singleton = id.lowerEndpoint().equals(id.upperEndpoint());
+        for (IntRange id : ids) {
+            boolean singleton = id.getStart() == id.getEnd();
             buffer.writeBoolean(singleton);
-            buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.lowerEndpoint());
+            buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.getStart());
             if (!singleton) {
-                buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.upperEndpoint());
+                buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.getEnd());
             }
         }
     }
 
-    public List<Range<Integer>> getIds() {
+    public List<IntRange> getIds() {
         return ids;
     }
 
-    public static List<Range<Integer>> intoRanges(Collection<Integer> knownIds) {
+    public static List<IntRange> intoRanges(Collection<Integer> knownIds) {
         if (knownIds.isEmpty()) {
             throw new NoSuchElementException();
         }
 
-        List<Range<Integer>> ranges = new ArrayList<>();
+        List<IntRange> ranges = new ArrayList<>();
         List<Integer> ids = new ArrayList<>(knownIds);
-        Collections.sort(ids);
-
         if (ids.size() == 1) {
-            return ImmutableList.of(Range.singleton(ids.get(0)));
+            return ImmutableList.of(new IntRange(ids.get(0)));
         }
+        Collections.sort(ids);
 
         int start = ids.get(0);
         int cur = start;
@@ -63,16 +63,16 @@ public abstract class BaseAckPacket implements RakNetPackage {
             if (cur + 1 == id) {
                 cur = id;
             } else {
-                ranges.add(Range.closed(start, cur));
+                ranges.add(new IntRange(start, cur));
                 start = id;
                 cur = id;
             }
         }
 
         if (start == cur) {
-            ranges.add(Range.singleton(start));
+            ranges.add(new IntRange(start));
         } else {
-            ranges.add(Range.closed(start, cur));
+            ranges.add(new IntRange(start, cur));
         }
 
         return ranges;

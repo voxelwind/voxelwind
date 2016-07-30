@@ -1,14 +1,12 @@
 package com.voxelwind.server.network.session;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Range;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
+import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.AckPacket;
@@ -20,7 +18,6 @@ import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import net.md_5.bungee.jni.cipher.BungeeCipher;
@@ -142,11 +139,11 @@ public class UserSession {
         return result;
     }
 
-    public void onAck(List<Range<Integer>> acked) {
+    public void onAck(List<IntRange> acked) {
         checkForClosed();
-        for (Range<Integer> range : acked) {
-            for (Integer integer : ContiguousSet.create(range, DiscreteDomain.integers())) {
-                SentDatagram datagram = datagramAcks.remove(integer);
+        for (IntRange range : acked) {
+            for (int i = range.getStart(); i <= range.getEnd(); i++) {
+                SentDatagram datagram = datagramAcks.remove(i);
                 if (datagram != null) {
                     datagram.tryRelease();
                 }
@@ -154,11 +151,11 @@ public class UserSession {
         }
     }
 
-    public void onNak(List<Range<Integer>> acked) {
+    public void onNak(List<IntRange> acked) {
         checkForClosed();
-        for (Range<Integer> range : acked) {
-            for (Integer integer : ContiguousSet.create(range, DiscreteDomain.integers())) {
-                SentDatagram datagram = datagramAcks.get(integer);
+        for (IntRange range : acked) {
+            for (int i = range.getStart(); i <= range.getEnd(); i++) {
+                SentDatagram datagram = datagramAcks.get(i);
                 if (datagram != null) {
                     LOGGER.error("Must resend datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
                     datagram.refreshForResend();
@@ -309,7 +306,7 @@ public class UserSession {
     }
 
     private void sendAckQueue() {
-        List<Range<Integer>> ranges;
+        List<IntRange> ranges;
         synchronized (ackQueue) {
             if (ackQueue.isEmpty())
                 return;
@@ -317,8 +314,6 @@ public class UserSession {
             ranges = AckPacket.intoRanges(ackQueue);
             ackQueue.clear();
         }
-
-        System.out.println("[ACK] " + ranges);
 
         AckPacket packet = new AckPacket();
         packet.getIds().addAll(ranges);
@@ -386,7 +381,8 @@ public class UserSession {
         byte[] tempBuf = CHECKSUM_BUFFER_LOCAL.get();
         int readable = buf.readableBytes();
         if (tempBuf.length < readable) {
-            CHECKSUM_BUFFER_LOCAL.set(new byte[readable]);
+            tempBuf = new byte[readable];
+            CHECKSUM_BUFFER_LOCAL.set(tempBuf);
         }
         buf.getBytes(0, tempBuf, 0, readable);
         digest.update(tempBuf, 0, readable);
