@@ -2,16 +2,13 @@ package com.voxelwind.server.network.handler;
 
 import com.google.common.collect.Range;
 import com.google.common.net.InetAddresses;
-import com.voxelwind.server.network.mcpe.packets.McpeLogin;
-import com.voxelwind.server.network.mcpe.packets.McpeRequestChunkRadius;
+import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.PacketType;
-import com.voxelwind.server.network.mcpe.packets.McpeBatch;
-import com.voxelwind.server.network.mcpe.packets.McpeWrapper;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.session.UserSession;
@@ -154,8 +151,14 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         if (netPackage instanceof McpeLogin) {
             session.getHandler().handle((McpeLogin) netPackage);
         }
+        if (netPackage instanceof McpeClientMagic) {
+            session.getHandler().handle((McpeClientMagic) netPackage);
+        }
         if (netPackage instanceof McpeRequestChunkRadius) {
             session.getHandler().handle((McpeRequestChunkRadius) netPackage);
+        }
+        if (netPackage instanceof McpePlayerAction) {
+            session.getHandler().handle((McpePlayerAction) netPackage);
         }
     }
 }

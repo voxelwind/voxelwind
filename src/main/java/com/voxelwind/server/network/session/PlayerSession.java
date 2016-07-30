@@ -108,6 +108,11 @@ public class PlayerSession {
         }
 
         @Override
+        public void handle(McpeClientMagic packet) {
+            throw new IllegalStateException("Client packet received but player session is currently active!");
+        }
+
+        @Override
         public void handle(McpeRequestChunkRadius packet) {
             Preconditions.checkState(level != null, "Player has not been spawned into a level.");
             Preconditions.checkState(position != null, "Player has no set position.");

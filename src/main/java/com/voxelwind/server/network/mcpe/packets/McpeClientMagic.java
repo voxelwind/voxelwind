@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 public class McpeClientMagic implements RakNetPackage {
     @Override
     public void decode(ByteBuf buffer) {
-
+        buffer.skipBytes(buffer.readableBytes());
     }
 
     @Override

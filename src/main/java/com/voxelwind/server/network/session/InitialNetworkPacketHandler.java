@@ -64,27 +64,24 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             PublicKey key = getKey(payload.getIdentityPublicKey());
 
             // ...and begin encrypting the connection.
-            //byte[] token = EncryptionUtil.generateRandomToken();
-            //byte[] serverKey = EncryptionUtil.getServerKey(key, token);
+            byte[] token = EncryptionUtil.generateRandomToken();
+            byte[] serverKey = EncryptionUtil.getServerKey(key, token);
 
             // TODO: Fix encryption later
-            //session.enableEncryption(serverKey);
-            //session.sendUrgentPackage(EncryptionUtil.createHandshakePacket(token));
-            //McpeDisconnect disconnect = new McpeDisconnect();
-            //disconnect.setMessage("This is a test.");
-            //session.sendUrgentPackage(disconnect);
-
-            McpePlayStatus status = new McpePlayStatus();
-            status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);
-            session.sendUrgentPackage(status);
-
-            // Put the player in the default level
-            PlayerSession playerSession = session.initializePlayerSession();
-            session.setHandler(playerSession.getPacketHandler());
-            playerSession.doInitialSpawn(session.getServer().getDefaultLevel());
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
+            session.enableEncryption(serverKey);
+            session.sendUrgentPackage(EncryptionUtil.createHandshakePacket(token));
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | InvalidKeyException e) {
             LOGGER.error("Unable to enable encryption", e);
         }
+    }
+
+    @Override
+    public void handle(McpeClientMagic packet) {
+        McpePlayStatus status = new McpePlayStatus();
+        status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);
+        session.addToSendQueue(status);
+
+        initializePlayerSession();
     }
 
     @Override
@@ -95,6 +92,12 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     @Override
     public void handle(McpePlayerAction packet) {
         throw new IllegalStateException("Got unexpected McpePlayerAction");
+    }
+
+    private void initializePlayerSession() {
+        PlayerSession playerSession = session.initializePlayerSession();
+        session.setHandler(playerSession.getPacketHandler());
+        playerSession.doInitialSpawn(session.getServer().getDefaultLevel());
     }
 
     private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {
