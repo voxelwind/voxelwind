@@ -2,7 +2,7 @@ package com.voxelwind.server.network.session;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
@@ -80,8 +80,8 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
             // Put the player in the default level
             PlayerSession playerSession = session.initializePlayerSession();
-            playerSession.doInitialSpawn(session.getServer().getDefaultLevel());
             session.setHandler(playerSession.getPacketHandler());
+            playerSession.doInitialSpawn(session.getServer().getDefaultLevel());
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException e) {
             LOGGER.error("Unable to enable encryption", e);
         }

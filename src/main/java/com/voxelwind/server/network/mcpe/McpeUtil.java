@@ -1,6 +1,6 @@
 package com.voxelwind.server.network.mcpe;
 
-import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
@@ -60,16 +60,16 @@ public class McpeUtil {
         return new Vector3i(x, y, z);
     }
 
-    public static void writeVector3d(ByteBuf buf, Vector3d vector3d) {
-        buf.writeDouble(vector3d.getX());
-        buf.writeDouble(vector3d.getY());
-        buf.writeDouble(vector3d.getZ());
+    public static void writeVector3f(ByteBuf buf, Vector3f Vector3f) {
+        buf.writeFloat(Vector3f.getX());
+        buf.writeFloat(Vector3f.getY());
+        buf.writeFloat(Vector3f.getZ());
     }
 
-    public static Vector3d readVector3d(ByteBuf buf) {
-        double x = buf.readDouble();
-        double y = buf.readDouble();
-        double z = buf.readDouble();
-        return new Vector3d(x, y, z);
+    public static Vector3f readVector3f(ByteBuf buf) {
+        double x = buf.readFloat();
+        double y = buf.readFloat();
+        double z = buf.readFloat();
+        return new Vector3f(x, y, z);
     }
 }

@@ -170,7 +170,7 @@ public class UserSession {
         channel.flush();
     }
 
-    public void queuePackageForSend(RakNetPackage netPackage) {
+    public void addToSendQueue(RakNetPackage netPackage) {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
 
@@ -197,8 +197,6 @@ public class UserSession {
         }
         buf.writeByte((id & 0xFF));
         netPackage.encode(buf);
-
-        System.out.println("[Sending]\n" + ByteBufUtil.prettyHexDump(buf));
 
         ByteBuf toEncapsulate;
         if (!netPackage.getClass().isAnnotationPresent(ForceClearText.class) && encryptionCipher != null) {
@@ -253,6 +251,8 @@ public class UserSession {
         RakNetPackage netPackage;
         McpeBatch batch = new McpeBatch();
         while ((netPackage = currentlyQueued.poll()) != null) {
+            System.out.println("[Sending] " + netPackage);
+
             if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class) ||
                     netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
                 // We hit a un-batchable packet. Send the current batch and then send the un-batchable packet.
@@ -263,14 +263,11 @@ public class UserSession {
 
                 internalSendPackage(netPackage);
 
-                if (netPackage instanceof McpeBatch) {
-                    try {
-                        // Delay things a tiny bit
-                        // TODO: Investigate other solutions, including batching
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        LOGGER.error("Interrupted", e);
-                    }
+                try {
+                    // Delay things a tiny bit
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Interrupted", e);
                 }
 
                 continue;

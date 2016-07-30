@@ -1,6 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetPackage;
@@ -15,7 +15,7 @@ public class McpeStartGame implements RakNetPackage {
     private int gamemode;
     private long entityId;
     private Vector3i spawnLocation;
-    private Vector3d position;
+    private Vector3f position;
 
     private static final byte[] UNKNOWN = DatatypeConverter.parseHexBinary("01010000000000000000000000");
 
@@ -27,7 +27,7 @@ public class McpeStartGame implements RakNetPackage {
         gamemode = buffer.readInt();
         entityId = buffer.readLong();
         spawnLocation = McpeUtil.readVector3i(buffer, false);
-        position = McpeUtil.readVector3d(buffer);
+        position = McpeUtil.readVector3f(buffer);
         buffer.skipBytes(UNKNOWN.length);
     }
 
@@ -39,7 +39,7 @@ public class McpeStartGame implements RakNetPackage {
         buffer.writeInt(gamemode);
         buffer.writeLong(entityId);
         McpeUtil.writeVector3i(buffer, spawnLocation, false);
-        McpeUtil.writeVector3d(buffer, position);
+        McpeUtil.writeVector3f(buffer, position);
         buffer.writeBytes(UNKNOWN);
     }
 
@@ -91,11 +91,11 @@ public class McpeStartGame implements RakNetPackage {
         this.spawnLocation = spawnLocation;
     }
 
-    public Vector3d getPosition() {
+    public Vector3f getPosition() {
         return position;
     }
 
-    public void setPosition(Vector3d position) {
+    public void setPosition(Vector3f position) {
         this.position = position;
     }
 }

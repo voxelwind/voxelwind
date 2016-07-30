@@ -1,11 +1,10 @@
 package com.voxelwind.server.network.session;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.level.Level;
-import com.voxelwind.server.level.chunk.Chunk;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import org.apache.logging.log4j.LogManager;
@@ -22,7 +21,7 @@ public class PlayerSession {
 
     private final UserSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private Vector3d position;
+    private Vector3f position;
     private Level level;
 
     public PlayerSession(UserSession session) {
@@ -30,7 +29,7 @@ public class PlayerSession {
     }
 
     public void doInitialSpawn(Level level) {
-        Vector3d spawn = level.getSpawnLocation();
+        Vector3f spawn = level.getSpawnLocation();
         this.level = level;
         this.position = spawn;
 
@@ -42,18 +41,20 @@ public class PlayerSession {
         startGame.setEntityId(1);
         startGame.setSpawnLocation(spawn.toInt());
         startGame.setPosition(spawn);
-        session.sendUrgentPackage(startGame);
+        session.addToSendQueue(startGame);
 
         McpeAdventureSettings settings = new McpeAdventureSettings();
         settings.setPlayerPermissions(3);
-        session.sendUrgentPackage(settings);
-
-        sendRadius(5, true);
+        session.addToSendQueue(settings);
 
         session.getChannel().eventLoop().schedule(() -> {
             McpePlayStatus status = new McpePlayStatus();
             status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
-            session.sendUrgentPackage(status);
+            session.addToSendQueue(status);
+
+            McpeRespawn respawn = new McpeRespawn();
+            respawn.setPosition(spawn);
+            session.addToSendQueue(respawn);
         }, 1, TimeUnit.SECONDS);
     }
 
@@ -88,8 +89,7 @@ public class PlayerSession {
                         LOGGER.error("Unable to load chunk", throwable);
                         return;
                     }
-                    // this won't use any compression
-                    session.queuePackageForSend(chunk.getChunkDataPacket());
+                    session.addToSendQueue(chunk.getChunkDataPacket());
                 });
             }
         }
@@ -111,11 +111,11 @@ public class PlayerSession {
             Preconditions.checkState(position != null, "Player has no set position.");
 
             int radius = Math.max(5, Math.min(16, packet.getRadius()));
-            sendRadius(Math.max(5, Math.min(16, packet.getRadius())), true);
-
             McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
             updated.setRadius(radius);
-            session.queuePackageForSend(updated);
+            session.addToSendQueue(updated);
+
+            sendRadius(radius, true);
         }
     }
 }

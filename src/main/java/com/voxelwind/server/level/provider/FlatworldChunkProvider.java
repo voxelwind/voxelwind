@@ -1,7 +1,7 @@
 package com.voxelwind.server.level.provider;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.server.level.chunk.Chunk;
 
 import java.util.Map;
@@ -28,8 +28,8 @@ public class FlatworldChunkProvider implements ChunkProvider {
     }
 
     @Override
-    public Vector3d getSpawn() {
-        return new Vector3d(0, 5, 0);
+    public Vector3f getSpawn() {
+        return new Vector3f(0, 5, 0);
     }
 
     private Chunk generate(Vector2i vector2i) {
