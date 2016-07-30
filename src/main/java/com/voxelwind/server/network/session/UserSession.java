@@ -376,7 +376,7 @@ public class UserSession {
             throw new AssertionError(e);
         }
 
-        digest.update(ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(encryptedSentPacketGenerator.getAndIncrement()));
+        digest.update(ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(encryptedSentPacketGenerator.getAndIncrement()).array());
         // TODO: This is bad -  maybe we can make this native code?
         byte[] tempBuf = CHECKSUM_BUFFER_LOCAL.get();
         int readable = buf.readableBytes();
