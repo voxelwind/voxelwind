@@ -43,10 +43,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     }
 
     @Override
-    public void handle(McpeLogin login) {
+    public void handle(McpeLogin packet) {
         JsonNode certData;
         try {
-            certData = VoxelwindServer.MAPPER.readTree(login.getChainData());
+            certData = VoxelwindServer.MAPPER.readTree(packet.getChainData());
         } catch (IOException e) {
             throw new RuntimeException("Certificate JSON can not be read.");
         }
@@ -89,7 +89,12 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
     @Override
     public void handle(McpeRequestChunkRadius packet) {
+        throw new IllegalStateException("Got unexpected McpeRequestChunkRadius");
+    }
 
+    @Override
+    public void handle(McpePlayerAction packet) {
+        throw new IllegalStateException("Got unexpected McpePlayerAction");
     }
 
     private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException {

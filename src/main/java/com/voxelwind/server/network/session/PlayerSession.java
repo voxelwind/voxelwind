@@ -23,6 +23,8 @@ public class PlayerSession {
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private Vector3f position;
     private Level level;
+    private boolean sprinting = false;
+    private boolean sneaking = false;
 
     public PlayerSession(UserSession session) {
         this.session = session;
@@ -101,7 +103,7 @@ public class PlayerSession {
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
         @Override
-        public void handle(McpeLogin login) {
+        public void handle(McpeLogin packet) {
             throw new IllegalStateException("Login packet received but player session is currently active!");
         }
 
@@ -116,6 +118,55 @@ public class PlayerSession {
             session.addToSendQueue(updated);
 
             sendRadius(radius, true);
+        }
+
+        @Override
+        public void handle(McpePlayerAction packet) {
+            switch (packet.getAction()) {
+                case ACTION_START_BREAK:
+                    // Fire interact
+                    break;
+                case ACTION_ABORT_BREAK:
+                    // No-op
+                    break;
+                case ACTION_STOP_BREAK:
+                    // No-op
+                    break;
+                case ACTION_RELEASE_ITEM:
+                    // Drop item, shoot bow, or dump bucket?
+                    break;
+                case ACTION_STOP_SLEEPING:
+                    // Stop sleeping
+                    break;
+                case ACTION_SPAWN_SAME_DIMENSION:
+                    // Clean up attributes?
+                    break;
+                case ACTION_JUMP:
+                    // No-op
+                    break;
+                case ACTION_START_SPRINT:
+                    sprinting = true;
+                    // TODO: Update entity attributes
+                    break;
+                case ACTION_STOP_SPRINT:
+                    sprinting = false;
+                    // TODO: Update entity attributes
+                    break;
+                case ACTION_START_SNEAK:
+                    sneaking = true;
+                    // TODO: Update entity attributes
+                    break;
+                case ACTION_STOP_SNEAK:
+                    sneaking = false;
+                    // TODO: Update entity attributes
+                    break;
+                case ACTION_SPAWN_OVERWORLD:
+                    // Clean up attributes?
+                    break;
+                case ACTION_SPAWN_NETHER:
+                    // Clean up attributes?
+                    break;
+            }
         }
     }
 }

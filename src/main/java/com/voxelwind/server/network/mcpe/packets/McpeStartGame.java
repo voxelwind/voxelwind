@@ -26,7 +26,7 @@ public class McpeStartGame implements RakNetPackage {
         generator = buffer.readInt();
         gamemode = buffer.readInt();
         entityId = buffer.readLong();
-        spawnLocation = McpeUtil.readVector3i(buffer, false);
+        spawnLocation = McpeUtil.readVector3i(buffer);
         position = McpeUtil.readVector3f(buffer);
         buffer.skipBytes(UNKNOWN.length);
     }

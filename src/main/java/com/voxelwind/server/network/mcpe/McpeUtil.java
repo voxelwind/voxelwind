@@ -37,26 +37,29 @@ public class McpeUtil {
     public static void writeVector3i(ByteBuf buf, Vector3i vector3i, boolean yIsByte) {
         buf.writeInt(vector3i.getX());
         if (yIsByte) {
+            buf.writeInt(vector3i.getZ());
             buf.writeByte(vector3i.getY());
         } else {
             buf.writeInt(vector3i.getY());
+            buf.writeInt(vector3i.getZ());
         }
-        buf.writeInt(vector3i.getZ());
     }
 
     public static Vector3i readVector3i(ByteBuf buf) {
-        return readVector3i(buf, true);
+        return readVector3i(buf, false);
     }
 
     public static Vector3i readVector3i(ByteBuf buf, boolean yIsByte) {
         int x = buf.readInt();
         int y;
+        int z;
         if (yIsByte) {
+            z = buf.readInt();
             y = buf.readByte();
         } else {
             y = buf.readInt();
+            z = buf.readInt();
         }
-        int z = buf.readInt();
         return new Vector3i(x, y, z);
     }
 
