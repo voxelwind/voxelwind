@@ -4,10 +4,7 @@ import com.voxelwind.server.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import java.awt.*;
-import java.io.IOException;
 import java.util.Arrays;
 
 public class Chunk {

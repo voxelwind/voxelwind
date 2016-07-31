@@ -44,15 +44,22 @@ public class PlayerSession extends BaseEntity {
         settings.setPlayerPermissions(3);
         session.addToSendQueue(settings);
 
-        session.getChannel().eventLoop().schedule(() -> {
-            McpePlayStatus status = new McpePlayStatus();
-            status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
-            session.addToSendQueue(status);
+        McpePlayStatus status = new McpePlayStatus();
+        status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
+        session.addToSendQueue(status);
 
-            /*McpeRespawn respawn = new McpeRespawn();
-            respawn.setPosition(getPosition());
-            session.addToSendQueue(respawn);*/
-        }, 1, TimeUnit.SECONDS);
+        McpeSetSpawnPosition spawnPosition = new McpeSetSpawnPosition();
+        spawnPosition.setPosition(getLevel().getChunkProvider().getSpawn().toInt());
+        session.addToSendQueue(spawnPosition);
+
+        McpeSetTime setTime = new McpeSetTime();
+        setTime.setTime(0);
+        setTime.setRunning(true);
+        session.addToSendQueue(setTime);
+
+        McpeRespawn respawn = new McpeRespawn();
+        respawn.setPosition(getLevel().getChunkProvider().getSpawn());
+        session.addToSendQueue(respawn);
     }
 
     public UserSession getUserSession() {

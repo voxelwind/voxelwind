@@ -7,7 +7,7 @@ public class NibbleArray {
         data = new byte[length / 2];
     }
 
-    private NibbleArray(byte[] array) {
+    public NibbleArray(byte[] array) {
         data = array;
     }
 

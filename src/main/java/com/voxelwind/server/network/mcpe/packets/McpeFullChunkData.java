@@ -58,4 +58,14 @@ public class McpeFullChunkData implements RakNetPackage {
     public void setData(ByteBuf data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "McpeFullChunkData{" +
+                "chunkX=" + chunkX +
+                ", chunkZ=" + chunkZ +
+                ", order=" + order +
+                ", data=" + data +
+                '}';
+    }
 }
