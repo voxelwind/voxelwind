@@ -49,9 +49,9 @@ public class PlayerSession extends BaseEntity {
             status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
             session.addToSendQueue(status);
 
-            McpeRespawn respawn = new McpeRespawn();
+            /*McpeRespawn respawn = new McpeRespawn();
             respawn.setPosition(getPosition());
-            session.addToSendQueue(respawn);
+            session.addToSendQueue(respawn);*/
         }, 1, TimeUnit.SECONDS);
     }
 

@@ -3,6 +3,7 @@ package com.voxelwind.server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.LevelCreator;
 import com.voxelwind.server.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
@@ -34,7 +35,7 @@ public class VoxelwindServer {
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
 
-        defaultLevel = new Level(FlatworldChunkProvider.INSTANCE, UUID.randomUUID());
+        defaultLevel = new Level(new LevelCreator("test", FlatworldChunkProvider.INSTANCE));
 
         LOGGER.info("Voxelwind is now running.");
 

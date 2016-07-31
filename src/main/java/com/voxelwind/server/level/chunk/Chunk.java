@@ -22,7 +22,7 @@ public class Chunk {
     private final int z;
     private final byte[] biomeId = new byte[256];
     private final int[] biomeColor = new int[256];
-    private final byte[] height = new byte[256];
+    //private final byte[] height = new byte[256];
     private McpeFullChunkData chunkDataPacket;
     private boolean stale = true;
 
@@ -30,8 +30,7 @@ public class Chunk {
         this.x = x;
         this.z = z;
         Arrays.fill(biomeId, (byte) 1);
-        Arrays.fill(biomeColor, Color.GREEN.getRGB());
-        Arrays.fill(height, (byte) 0xFF);
+        Arrays.fill(biomeColor, 0x0185b24a);
     }
 
     public int getX() {
@@ -70,7 +69,9 @@ public class Chunk {
             chunkData.writeBytes(blockMetadata.getData());
             chunkData.writeBytes(skyLightData.getData());
             chunkData.writeBytes(blockLightData.getData());
-            chunkData.writeBytes(height);
+            for (int i = 0; i < 256; i++) {
+                chunkData.writeByte(0xFF);
+            }
             for (int i : biomeColor) {
                 chunkData.writeInt(i);
             }
