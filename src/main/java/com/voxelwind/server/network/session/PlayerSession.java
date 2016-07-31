@@ -25,13 +25,11 @@ public class PlayerSession extends BaseEntity {
     private boolean sneaking = false;
 
     public PlayerSession(UserSession session, Level level) {
-        super(-1, level, level.getSpawnLocation()); // not yet actually spawned
+        super(level, level.getChunkProvider().getSpawn()); // not yet actually spawned
         this.session = session;
     }
 
     public void doInitialSpawn() {
-        getLevel().spawnEntity(this);
-
         McpeStartGame startGame = new McpeStartGame();
         startGame.setSeed(-1);
         startGame.setDimension((byte) 0);
@@ -87,7 +85,7 @@ public class PlayerSession extends BaseEntity {
                     }
                 }
 
-                getLevel().getChunk(newChunkX, newChunkZ).whenComplete((chunk, throwable) -> {
+                getLevel().getChunkProvider().get(newChunkX, newChunkZ).whenComplete((chunk, throwable) -> {
                     if (throwable != null) {
                         LOGGER.error("Unable to load chunk", throwable);
                         return;
@@ -100,6 +98,19 @@ public class PlayerSession extends BaseEntity {
         if (updateSent) {
             sentChunks.retainAll(chunksForRadius);
         }
+    }
+
+    public void disconnect(String reason) {
+        McpeDisconnect packet = new McpeDisconnect();
+        packet.setMessage(reason);
+        session.sendUrgentPackage(packet);
+
+        // Wait a little bit and close their session
+        session.getChannel().eventLoop().schedule(() -> {
+            if (!session.isClosed()) {
+                session.close();
+            }
+        }, 500, TimeUnit.MILLISECONDS);
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {

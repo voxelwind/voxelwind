@@ -5,6 +5,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.server.level.chunk.Chunk;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +21,11 @@ public class FlatworldChunkProvider implements ChunkProvider {
     @Override
     public CompletableFuture<Chunk> get(int x, int z) {
         return CompletableFuture.completedFuture(chunks.computeIfAbsent(new Vector2i(x, z), this::generate));
+    }
+
+    @Override
+    public Optional<Chunk> getIfLoaded(int x, int z) {
+        return Optional.ofNullable(chunks.get(new Vector2i(x, z)));
     }
 
     @Override
