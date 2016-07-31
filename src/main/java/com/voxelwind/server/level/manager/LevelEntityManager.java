@@ -54,4 +54,8 @@ public class LevelEntityManager {
 
         return sessions;
     }
+
+    public long allocateEntityId() {
+        return entityIdAllocator.incrementAndGet();
+    }
 }

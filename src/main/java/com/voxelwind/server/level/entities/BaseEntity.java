@@ -14,6 +14,7 @@ public class BaseEntity {
     public BaseEntity(Level level, Vector3f position) {
         this.level = Preconditions.checkNotNull(level, "level");
         this.position = Preconditions.checkNotNull(position, position);
+        this.entityId = level.getEntityManager().allocateEntityId();
         this.rotation = Rotation.ZERO;
     }
 
