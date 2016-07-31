@@ -1,10 +1,10 @@
 package com.voxelwind.server.network.session;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.entities.BaseEntity;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import org.apache.logging.log4j.LogManager;
@@ -16,33 +16,30 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class PlayerSession {
+public class PlayerSession extends BaseEntity {
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
     private final UserSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private Vector3f position;
-    private Level level;
     private boolean sprinting = false;
     private boolean sneaking = false;
 
-    public PlayerSession(UserSession session) {
+    public PlayerSession(UserSession session, Level level) {
+        super(-1, level, level.getSpawnLocation()); // not yet actually spawned
         this.session = session;
     }
 
-    public void doInitialSpawn(Level level) {
-        Vector3f spawn = level.getSpawnLocation();
-        this.level = level;
-        this.position = spawn;
+    public void doInitialSpawn() {
+        getLevel().spawnEntity(this);
 
         McpeStartGame startGame = new McpeStartGame();
         startGame.setSeed(-1);
         startGame.setDimension((byte) 0);
         startGame.setGenerator(1);
         startGame.setGamemode(0);
-        startGame.setEntityId(1);
-        startGame.setSpawnLocation(spawn.toInt());
-        startGame.setPosition(spawn);
+        startGame.setEntityId(getEntityId());
+        startGame.setSpawnLocation(getPosition().toInt());
+        startGame.setPosition(getPosition());
         session.addToSendQueue(startGame);
 
         McpeAdventureSettings settings = new McpeAdventureSettings();
@@ -55,9 +52,13 @@ public class PlayerSession {
             session.addToSendQueue(status);
 
             McpeRespawn respawn = new McpeRespawn();
-            respawn.setPosition(spawn);
+            respawn.setPosition(getPosition());
             session.addToSendQueue(respawn);
         }, 1, TimeUnit.SECONDS);
+    }
+
+    public UserSession getUserSession() {
+        return session;
     }
 
     NetworkPacketHandler getPacketHandler() {
@@ -66,7 +67,7 @@ public class PlayerSession {
 
     private void sendRadius(int radius, boolean updateSent) {
         // Get current player's position in chunks.
-        Vector3i positionAsInt = position.toInt();
+        Vector3i positionAsInt = getPosition().toInt();
         int chunkX = positionAsInt.getX() >> 4;
         int chunkZ = positionAsInt.getZ() >> 4;
 
@@ -86,7 +87,7 @@ public class PlayerSession {
                     }
                 }
 
-                level.getChunk(newChunkX, newChunkZ).whenComplete((chunk, throwable) -> {
+                getLevel().getChunk(newChunkX, newChunkZ).whenComplete((chunk, throwable) -> {
                     if (throwable != null) {
                         LOGGER.error("Unable to load chunk", throwable);
                         return;
@@ -114,9 +115,6 @@ public class PlayerSession {
 
         @Override
         public void handle(McpeRequestChunkRadius packet) {
-            Preconditions.checkState(level != null, "Player has not been spawned into a level.");
-            Preconditions.checkState(position != null, "Player has no set position.");
-
             int radius = Math.max(5, Math.min(16, packet.getRadius()));
             McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
             updated.setRadius(radius);
@@ -172,6 +170,12 @@ public class PlayerSession {
                     // Clean up attributes?
                     break;
             }
+        }
+
+        @Override
+        public void handle(McpeAnimate packet) {
+            // TODO: Broadcast to all people that have spawned...
+            //session.addToSendQueue(packet);
         }
     }
 }

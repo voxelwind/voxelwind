@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.session;
 
 import com.google.common.base.Preconditions;
+import com.voxelwind.server.level.Level;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
@@ -204,7 +205,8 @@ public class UserSession {
         } else {
             buf.writeByte((id & 0xFF));
             netPackage.encode(buf);
-            buf.writeBytes(generateTrailer(buf));
+            byte[] trailer = generateTrailer(buf);
+            buf.writeBytes(trailer);
 
             toEncapsulate = PooledByteBufAllocator.DEFAULT.directBuffer();
             toEncapsulate.writeByte(0xFE);
@@ -400,11 +402,11 @@ public class UserSession {
         return playerSession;
     }
 
-    public PlayerSession initializePlayerSession() {
+    public PlayerSession initializePlayerSession(Level level) {
         checkForClosed();
         Preconditions.checkState(playerSession == null, "Player session already initialized");
 
-        playerSession = new PlayerSession(this);
+        playerSession = new PlayerSession(this, level);
         return playerSession;
     }
 

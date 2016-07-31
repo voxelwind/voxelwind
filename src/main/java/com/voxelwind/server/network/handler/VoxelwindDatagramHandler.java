@@ -157,5 +157,8 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         if (netPackage instanceof McpePlayerAction) {
             session.getHandler().handle((McpePlayerAction) netPackage);
         }
+        if (netPackage instanceof McpeAnimate) {
+            session.getHandler().handle((McpeAnimate) netPackage);
+        }
     }
 }
