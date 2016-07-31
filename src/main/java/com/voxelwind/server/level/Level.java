@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Level {
     private final ChunkProvider chunkProvider;
     private final UUID uuid;
+    private final List<BaseEntity> entities = new ArrayList<>();
     private final List<PlayerSession> players = new ArrayList<>();
     private final AtomicLong entityIdGenerator = new AtomicLong();
 
@@ -48,9 +49,15 @@ public class Level {
         players.remove(playerSession);
     }
 
+    public synchronized List<BaseEntity> getEntities() {
+        return ImmutableList.copyOf(entities);
+    }
+
     public synchronized void spawnEntity(BaseEntity entity) {
+        entity.setEntityId(entityIdGenerator.incrementAndGet());
         if (entity instanceof PlayerSession) {
-            entity.setEntityId(entityIdGenerator.incrementAndGet());
+            players.add((PlayerSession) entity);
         }
+        entities.add(entity);
     }
 }
