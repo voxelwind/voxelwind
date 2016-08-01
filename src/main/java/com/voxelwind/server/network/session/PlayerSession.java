@@ -3,16 +3,17 @@ package com.voxelwind.server.network.session;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.spotify.futures.CompletableFutures;
 import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.chunk.Chunk;
 import com.voxelwind.server.level.entities.BaseEntity;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +24,7 @@ public class PlayerSession extends BaseEntity {
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private boolean sprinting = false;
     private boolean sneaking = false;
+    private boolean firstChunksSent = false;
 
     public PlayerSession(UserSession session, Level level) {
         super(level, level.getChunkProvider().getSpawn()); // not yet actually spawned
@@ -44,22 +46,9 @@ public class PlayerSession extends BaseEntity {
         settings.setPlayerPermissions(3);
         session.addToSendQueue(settings);
 
-        McpePlayStatus status = new McpePlayStatus();
-        status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
-        session.addToSendQueue(status);
-
         McpeSetSpawnPosition spawnPosition = new McpeSetSpawnPosition();
         spawnPosition.setPosition(getLevel().getChunkProvider().getSpawn().toInt());
         session.addToSendQueue(spawnPosition);
-
-        McpeSetTime setTime = new McpeSetTime();
-        setTime.setTime(0);
-        setTime.setRunning(true);
-        session.addToSendQueue(setTime);
-
-        McpeRespawn respawn = new McpeRespawn();
-        respawn.setPosition(getLevel().getChunkProvider().getSpawn());
-        session.addToSendQueue(respawn);
     }
 
     public UserSession getUserSession() {
@@ -70,7 +59,7 @@ public class PlayerSession extends BaseEntity {
         return new PlayerSessionNetworkPacketHandler();
     }
 
-    private void sendRadius(int radius, boolean updateSent) {
+    private CompletableFuture<List<Chunk>> sendRadius(int radius, boolean updateSent) {
         // Get current player's position in chunks.
         Vector3i positionAsInt = getPosition().toInt();
         int chunkX = positionAsInt.getX() >> 4;
@@ -78,6 +67,7 @@ public class PlayerSession extends BaseEntity {
 
         // Now get and send chunk data.
         Set<Vector2i> chunksForRadius = new HashSet<>();
+        List<CompletableFuture<Chunk>> completableFutures = new ArrayList<>();
 
         for (int x = -radius; x <= radius; x++) {
             for (int z = -radius; z <= radius; z++) {
@@ -92,19 +82,15 @@ public class PlayerSession extends BaseEntity {
                     }
                 }
 
-                getLevel().getChunkProvider().get(newChunkX, newChunkZ).whenComplete((chunk, throwable) -> {
-                    if (throwable != null) {
-                        LOGGER.error("Unable to load chunk", throwable);
-                        return;
-                    }
-                    session.addToSendQueue(chunk.getChunkDataPacket());
-                });
+                completableFutures.add(getLevel().getChunkProvider().get(newChunkX, newChunkZ));
             }
         }
 
         if (updateSent) {
             sentChunks.retainAll(chunksForRadius);
         }
+
+        return CompletableFutures.allAsList(completableFutures);
     }
 
     public void disconnect(String reason) {
@@ -138,7 +124,35 @@ public class PlayerSession extends BaseEntity {
             updated.setRadius(radius);
             session.addToSendQueue(updated);
 
-            sendRadius(radius, true);
+            sendRadius(radius, true).whenComplete((chunks, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
+                    disconnect("Internal server error");
+                    return;
+                }
+
+                chunks.stream().map(Chunk::getChunkDataPacket).forEach(session::addToSendQueue);
+
+                if (!firstChunksSent) {
+                    firstChunksSent = true;
+
+                    // Ensure these will be in a future batch
+                    session.getChannel().eventLoop().schedule(() -> {
+                        McpePlayStatus status = new McpePlayStatus();
+                        status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
+                        session.addToSendQueue(status);
+
+                        McpeSetTime setTime = new McpeSetTime();
+                        setTime.setTime(0);
+                        setTime.setRunning(true);
+                        session.addToSendQueue(setTime);
+
+                        //McpeRespawn respawn = new McpeRespawn();
+                        //respawn.setPosition(getLevel().getChunkProvider().getSpawn());
+                        //session.addToSendQueue(respawn);
+                    }, 500, TimeUnit.MILLISECONDS);
+                }
+            });
         }
 
         @Override
