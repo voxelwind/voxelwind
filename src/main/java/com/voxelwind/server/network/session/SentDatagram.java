@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.session;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
@@ -26,7 +27,9 @@ class SentDatagram {
     }
 
     void refreshForResend() {
+        Preconditions.checkState(!released, "Already released");
         stopwatch.reset();
+        stopwatch.start();
         for (EncapsulatedRakNetPacket packet : datagram.getPackets()) {
             packet.getBuffer().retain(); // because the re-write will cause a decrement of the reference count
         }
