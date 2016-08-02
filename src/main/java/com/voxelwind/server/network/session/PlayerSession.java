@@ -205,8 +205,7 @@ public class PlayerSession extends LivingEntity {
 
         @Override
         public void handle(McpeAnimate packet) {
-            // TODO: Broadcast to all people that have spawned...
-            //session.addToSendQueue(packet);
+            getLevel().getPacketManager().queuePacketForPlayers(packet);
         }
     }
 }

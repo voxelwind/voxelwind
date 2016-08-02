@@ -45,4 +45,8 @@ public class LevelPacketManager {
     public synchronized void queuePacketForViewers(BaseEntity entity, RakNetPackage netPackage) {
         specificEntityViewerQueue.computeIfAbsent(entity.getEntityId(), (k) -> new ArrayDeque<>()).add(netPackage);
     }
+
+    public synchronized void queuePacketForPlayers(RakNetPackage netPackage) {
+        broadcastQueue.add(netPackage);
+    }
 }

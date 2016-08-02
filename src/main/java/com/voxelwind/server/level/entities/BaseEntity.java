@@ -6,6 +6,8 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.server.level.Level;
 import com.voxelwind.server.util.Rotation;
 
+import java.util.BitSet;
+
 public class BaseEntity {
     private long entityId;
     private Level level;
@@ -14,6 +16,9 @@ public class BaseEntity {
     private Rotation rotation;
     private boolean stale = true;
     private boolean teleported = false;
+    private boolean sprinting = false;
+    private boolean sneaking = false;
+    private boolean invisible = false;
 
     public BaseEntity(Level level, Vector3f position) {
         this.level = Preconditions.checkNotNull(level, "level");
@@ -43,6 +48,18 @@ public class BaseEntity {
         return motion;
     }
 
+    public boolean isSprinting() {
+        return sprinting;
+    }
+
+    public boolean isSneaking() {
+        return sneaking;
+    }
+
+    public boolean isInvisible() {
+        return invisible;
+    }
+
     protected void setPosition(Vector3f position) {
         if (!this.position.equals(position)) {
             this.position = position;
@@ -62,6 +79,38 @@ public class BaseEntity {
             this.rotation = rotation;
             stale = true;
         }
+    }
+
+    public void setSprinting(boolean sprinting) {
+        if (this.sprinting != sprinting) {
+            this.sprinting = sprinting;
+            stale = true;
+        }
+    }
+
+    public void setSneaking(boolean sneaking) {
+        if (this.sneaking != sneaking) {
+            this.sneaking = sneaking;
+            stale = true;
+        }
+    }
+
+    public void setInvisible(boolean invisible) {
+        if (this.invisible != invisible) {
+            this.invisible = invisible;
+            stale = true;
+        }
+    }
+
+    public byte getMetadataValue() {
+        BitSet set = new BitSet(1);
+        set.set(0, false); // On fire (not implemented)
+        set.set(1, sneaking); // Sneaking
+        set.set(2, false); // Riding (not implemented)
+        set.set(3, sprinting); // Sprinting
+        set.set(4, false); // In action(?)
+        set.set(5, invisible); // Invisible
+        return set.toByteArray()[0];
     }
 
     public boolean isStale() {
