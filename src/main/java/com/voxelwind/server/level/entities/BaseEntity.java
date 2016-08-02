@@ -13,6 +13,7 @@ public class BaseEntity {
     private Vector3f motion;
     private Rotation rotation;
     private boolean stale = true;
+    private boolean teleported = false;
 
     public BaseEntity(Level level, Vector3f position) {
         this.level = Preconditions.checkNotNull(level, "level");
@@ -67,17 +68,47 @@ public class BaseEntity {
         return stale;
     }
 
-    public void setStale(boolean stale) {
-        this.stale = stale;
-    }
-
     public void onTick() {
         // Does nothing
+    }
+
+    public boolean isOnGround() {
+        return isOnGround(level, position);
+    }
+
+    public boolean isTeleported() {
+        return teleported;
     }
 
     protected static boolean isOnGround(Level level, Vector3f position) {
         Vector3i blockPosition = position.sub(0f, 0.1f, 0f).toInt();
         // TODO: Implement.
         return true;
+    }
+
+    public void resetStale() {
+        stale = false;
+        teleported = false;
+    }
+
+    public void teleport(Vector3f position) {
+        teleport(level, position, rotation);
+    }
+
+    public void teleport(Level level, Vector3f position) {
+        teleport(level, position, rotation);
+    }
+
+    public void teleport(Level level, Vector3f position, Rotation rotation) {
+        Level oldLevel = this.level;
+        if (oldLevel != level) {
+            throw new UnsupportedOperationException();
+            // TODO: Fix?
+            //oldLevel.getEntityManager().unregister(this);
+        }
+        this.level = level;
+        setPosition(position);
+        setRotation(rotation);
+        this.teleported = true;
     }
 }

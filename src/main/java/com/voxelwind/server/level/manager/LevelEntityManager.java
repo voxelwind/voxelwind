@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.entities.BaseEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
+import com.voxelwind.server.network.mcpe.packets.McpeMovePlayer;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;
 import com.voxelwind.server.network.session.PlayerSession;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +43,13 @@ public class LevelEntityManager {
                 if (entity.isStale()) {
                     // Need to send packets.
                     if (entity instanceof PlayerSession) {
-                        // TODO: Player move packet.
+                        McpeMovePlayer movePlayerPacket = new McpeMovePlayer();
+                        movePlayerPacket.setEntityId(entity.getEntityId());
+                        movePlayerPacket.setPosition(entity.getPosition());
+                        movePlayerPacket.setRotation(entity.getRotation());
+                        movePlayerPacket.setMode(entity.isTeleported());
+                        movePlayerPacket.setOnGround(entity.isOnGround());
+                        ((PlayerSession) entity).getUserSession().addToSendQueue(movePlayerPacket);
                     }
 
                     McpeMoveEntity moveEntityPacket = new McpeMoveEntity();
@@ -55,7 +62,7 @@ public class LevelEntityManager {
                     motionPacket.getMotionList().add(new McpeSetEntityMotion.EntityMotion(entity.getEntityId(), entity.getMotion()));
                     level.getPacketManager().queuePacketForViewers(entity, motionPacket);
 
-                    entity.setStale(false);
+                    entity.resetStale();
                 }
             } catch (Exception e) {
                 LOGGER.error("Unable to tick entity", e);
@@ -90,5 +97,9 @@ public class LevelEntityManager {
 
     public synchronized Optional<BaseEntity> findEntityById(long id) {
         return entities.stream().filter(e -> e.getEntityId() == id).findFirst();
+    }
+
+    public synchronized void unregister(BaseEntity entity) {
+        entities.remove(entity);
     }
 }
