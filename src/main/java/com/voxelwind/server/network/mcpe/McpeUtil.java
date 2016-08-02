@@ -3,6 +3,7 @@ package com.voxelwind.server.network.mcpe;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.server.util.Rotation;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 
@@ -63,10 +64,10 @@ public class McpeUtil {
         return new Vector3i(x, y, z);
     }
 
-    public static void writeVector3f(ByteBuf buf, Vector3f Vector3f) {
-        buf.writeFloat(Vector3f.getX());
-        buf.writeFloat(Vector3f.getY());
-        buf.writeFloat(Vector3f.getZ());
+    public static void writeVector3f(ByteBuf buf, Vector3f vector3f) {
+        buf.writeFloat(vector3f.getX());
+        buf.writeFloat(vector3f.getY());
+        buf.writeFloat(vector3f.getZ());
     }
 
     public static Vector3f readVector3f(ByteBuf buf) {
@@ -74,5 +75,26 @@ public class McpeUtil {
         double y = buf.readFloat();
         double z = buf.readFloat();
         return new Vector3f(x, y, z);
+    }
+
+    public static Rotation readRotation(ByteBuf buf) {
+        byte pitchByte = buf.readByte();
+        byte yawByte = buf.readByte();
+        byte headYawByte = buf.readByte();
+        return new Rotation(rotationByteToAngle(pitchByte), rotationByteToAngle(yawByte), rotationByteToAngle(headYawByte));
+    }
+
+    public static void writeRotation(ByteBuf buf, Rotation rotation) {
+        buf.writeByte(rotationAngleToByte(rotation.getPitch()));
+        buf.writeByte(rotationAngleToByte(rotation.getYaw()));
+        buf.writeByte(rotationAngleToByte(rotation.getHeadYaw()));
+    }
+
+    private static byte rotationAngleToByte(float angle) {
+        return (byte) Math.ceil(angle / 360 * 255);
+    }
+
+    private static float rotationByteToAngle(byte angle) {
+        return angle / 255f * 360f;
     }
 }

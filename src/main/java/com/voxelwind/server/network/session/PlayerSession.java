@@ -2,11 +2,10 @@ package com.voxelwind.server.network.session;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Preconditions;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.chunk.Chunk;
-import com.voxelwind.server.level.entities.BaseEntity;
+import com.voxelwind.server.level.entities.LivingEntity;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class PlayerSession extends BaseEntity {
+public class PlayerSession extends LivingEntity {
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
     private final UserSession session;

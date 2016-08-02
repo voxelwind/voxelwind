@@ -44,4 +44,9 @@ public class Level {
     public LevelPacketManager getPacketManager() {
         return packetManager;
     }
+
+    public void onTick() {
+        entityManager.onTick();
+        packetManager.onTick();
+    }
 }

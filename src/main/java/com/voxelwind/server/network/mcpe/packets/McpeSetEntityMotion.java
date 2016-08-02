@@ -28,6 +28,10 @@ public class McpeSetEntityMotion implements RakNetPackage {
         }
     }
 
+    public List<EntityMotion> getMotionList() {
+        return motionList;
+    }
+
     public static class EntityMotion {
         private final long entityId;
         private final Vector3f motion;

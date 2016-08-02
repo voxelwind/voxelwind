@@ -1,5 +1,8 @@
 package com.voxelwind.server.util;
 
+/**
+ * This class represents a rotation. Pocket Edition uses degrees to measure angles.
+ */
 public class Rotation {
     public static final Rotation ZERO = new Rotation(0f, 0f, 0f);
 
