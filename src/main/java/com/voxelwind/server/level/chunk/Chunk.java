@@ -42,6 +42,10 @@ public class Chunk {
         return z;
     }
 
+    public synchronized byte getBlock(int x, int y, int z) {
+        return blockData[xyzIdx(x, y, z)];
+    }
+
     public synchronized void setBlock(int x, int y, int z, byte id) {
         byte old = blockData[xyzIdx(x, y, z)];
         if (old != id) {

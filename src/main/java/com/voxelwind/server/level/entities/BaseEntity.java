@@ -4,9 +4,11 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.chunk.Chunk;
 import com.voxelwind.server.util.Rotation;
 
 import java.util.BitSet;
+import java.util.Optional;
 
 public class BaseEntity {
     private long entityId;
@@ -30,8 +32,13 @@ public class BaseEntity {
 
     protected static boolean isOnGround(Level level, Vector3f position) {
         Vector3i blockPosition = position.sub(0f, 0.1f, 0f).toInt();
-        // TODO: Implement.
-        return true;
+        int chunkX = blockPosition.getX() >> 4;
+        int chunkZ = blockPosition.getZ() >> 4;
+        int chunkInX = blockPosition.getX() % 16;
+        int chunkInZ = blockPosition.getZ() % 16;
+
+        Optional<Chunk> chunkOptional = level.getChunkProvider().getIfLoaded(chunkX, chunkZ);
+        return chunkOptional.isPresent() && chunkOptional.get().getBlock(chunkInX, blockPosition.getY(), chunkInZ) != 0;
     }
 
     public long getEntityId() {
