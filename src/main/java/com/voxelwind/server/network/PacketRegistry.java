@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.packets.*;
-import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.raknet.packets.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 

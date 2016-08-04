@@ -6,7 +6,7 @@ public class RakNetDatagramFlags {
     private final BitSet flags;
 
     public RakNetDatagramFlags(byte flag) {
-        this.flags = BitSet.valueOf(new byte[]{ flag });
+        this.flags = BitSet.valueOf(new byte[]{flag});
     }
 
     public boolean isValid() {

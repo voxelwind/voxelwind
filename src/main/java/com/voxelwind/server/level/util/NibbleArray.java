@@ -12,13 +12,13 @@ public class NibbleArray {
     }
 
     public byte get(int index) {
-        return (byte) (data[index / 2] >> ((index) %2 * 4) & 0xF);
+        return (byte) (data[index / 2] >> ((index) % 2 * 4) & 0xF);
     }
 
     public void set(int index, byte value) {
         value &= 0xF;
         data[index / 2] &= (byte) (0xF << ((index + 1) % 2 * 4));
-        data[index / 2] |= (byte) (value << (index %2 * 4));
+        data[index / 2] |= (byte) (value << (index % 2 * 4));
     }
 
     public byte[] getData() {

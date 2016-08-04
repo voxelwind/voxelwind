@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class RakNetDatagram {
+    private final List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
     private RakNetDatagramFlags flags = new RakNetDatagramFlags((byte) 0x84);
     private int datagramSequenceNumber;
-    private final List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
 
     public void decode(ByteBuf buf) {
         flags = new RakNetDatagramFlags(buf.readByte());

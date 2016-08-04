@@ -28,6 +28,12 @@ public class BaseEntity {
         this.motion = Vector3f.ZERO;
     }
 
+    protected static boolean isOnGround(Level level, Vector3f position) {
+        Vector3i blockPosition = position.sub(0f, 0.1f, 0f).toInt();
+        // TODO: Implement.
+        return true;
+    }
+
     public long getEntityId() {
         return entityId;
     }
@@ -40,26 +46,6 @@ public class BaseEntity {
         return position;
     }
 
-    public Rotation getRotation() {
-        return rotation;
-    }
-
-    public Vector3f getMotion() {
-        return motion;
-    }
-
-    public boolean isSprinting() {
-        return sprinting;
-    }
-
-    public boolean isSneaking() {
-        return sneaking;
-    }
-
-    public boolean isInvisible() {
-        return invisible;
-    }
-
     protected void setPosition(Vector3f position) {
         if (!this.position.equals(position)) {
             this.position = position;
@@ -67,11 +53,8 @@ public class BaseEntity {
         }
     }
 
-    public void setMotion(Vector3f motion) {
-        if (!this.motion.equals(motion)) {
-            this.motion = motion;
-            stale = true;
-        }
+    public Rotation getRotation() {
+        return rotation;
     }
 
     public void setRotation(Rotation rotation) {
@@ -81,6 +64,21 @@ public class BaseEntity {
         }
     }
 
+    public Vector3f getMotion() {
+        return motion;
+    }
+
+    public void setMotion(Vector3f motion) {
+        if (!this.motion.equals(motion)) {
+            this.motion = motion;
+            stale = true;
+        }
+    }
+
+    public boolean isSprinting() {
+        return sprinting;
+    }
+
     public void setSprinting(boolean sprinting) {
         if (this.sprinting != sprinting) {
             this.sprinting = sprinting;
@@ -88,11 +86,19 @@ public class BaseEntity {
         }
     }
 
+    public boolean isSneaking() {
+        return sneaking;
+    }
+
     public void setSneaking(boolean sneaking) {
         if (this.sneaking != sneaking) {
             this.sneaking = sneaking;
             stale = true;
         }
+    }
+
+    public boolean isInvisible() {
+        return invisible;
     }
 
     public void setInvisible(boolean invisible) {
@@ -127,12 +133,6 @@ public class BaseEntity {
 
     public boolean isTeleported() {
         return teleported;
-    }
-
-    protected static boolean isOnGround(Level level, Vector3f position) {
-        Vector3i blockPosition = position.sub(0f, 0.1f, 0f).toInt();
-        // TODO: Implement.
-        return true;
     }
 
     public void resetStale() {

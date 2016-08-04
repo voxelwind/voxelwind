@@ -19,6 +19,44 @@ public class EncapsulatedRakNetPacket {
     private int partIndex;
     private ByteBuf buffer;
 
+    public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, UserSession session) {
+        // Potentially split the package..
+        List<ByteBuf> bufs = new ArrayList<>();
+        int by = session.getMtu() - 100; // TODO: This could be lowered to as little as 24, but needs to be checked.
+        if (buffer.readableBytes() > by) { // accounting for bookkeeping
+            ByteBuf from = buffer.slice();
+            // Split the buffer up
+            int split = (int) Math.ceil(buffer.readableBytes() / by);
+            for (int i = 0; i < split; i++) {
+                // Need to retain, in the event that we need to send due to NAK.
+                bufs.add(from.readSlice(Math.min(by, from.readableBytes())).retain());
+            }
+        } else {
+            bufs.add(buffer);
+        }
+
+        // Now create the packets.
+        List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
+        short splitId = (short) (System.nanoTime() % Short.MAX_VALUE);
+        int orderNumber = session.isEncrypted() ? session.getOrderSequenceGenerator().getAndIncrement() : 0;
+        for (int i = 0; i < bufs.size(); i++) {
+            // NB: When we add encryption support, you must use RELIABLE_ORDERED
+            EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
+            packet.setBuffer(bufs.get(i));
+            packet.setReliability(session.isEncrypted() ? RakNetReliability.RELIABLE_ORDERED : RakNetReliability.RELIABLE);
+            packet.setReliabilityNumber(session.getReliabilitySequenceGenerator().getAndIncrement());
+            packet.setOrderingIndex(orderNumber);
+            if (bufs.size() > 1) {
+                packet.setHasSplit(true);
+                packet.setPartIndex(i);
+                packet.setPartCount(bufs.size());
+                packet.setPartId(splitId);
+            }
+            packets.add(packet);
+        }
+        return packets;
+    }
+
     public RakNetReliability getReliability() {
         return reliability;
     }
@@ -142,44 +180,6 @@ public class EncapsulatedRakNetPacket {
         }
 
         buffer = buf.readSlice(size);
-    }
-
-    public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, UserSession session) {
-        // Potentially split the package..
-        List<ByteBuf> bufs = new ArrayList<>();
-        int by = session.getMtu() - 100; // TODO: This could be lowered to as little as 24, but needs to be checked.
-        if (buffer.readableBytes() > by) { // accounting for bookkeeping
-            ByteBuf from = buffer.slice();
-            // Split the buffer up
-            int split = (int) Math.ceil(buffer.readableBytes() / by);
-            for (int i = 0; i < split; i++) {
-                // Need to retain, in the event that we need to send due to NAK.
-                bufs.add(from.readSlice(Math.min(by, from.readableBytes())).retain());
-            }
-        } else {
-            bufs.add(buffer);
-        }
-
-        // Now create the packets.
-        List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
-        short splitId = (short) (System.nanoTime() % Short.MAX_VALUE);
-        int orderNumber = session.isEncrypted() ? session.getOrderSequenceGenerator().getAndIncrement() : 0;
-        for (int i = 0; i < bufs.size(); i++) {
-            // NB: When we add encryption support, you must use RELIABLE_ORDERED
-            EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
-            packet.setBuffer(bufs.get(i));
-            packet.setReliability(session.isEncrypted() ? RakNetReliability.RELIABLE_ORDERED : RakNetReliability.RELIABLE);
-            packet.setReliabilityNumber(session.getReliabilitySequenceGenerator().getAndIncrement());
-            packet.setOrderingIndex(orderNumber);
-            if (bufs.size() > 1) {
-                packet.setHasSplit(true);
-                packet.setPartIndex(i);
-                packet.setPartCount(bufs.size());
-                packet.setPartId(splitId);
-            }
-            packets.add(packet);
-        }
-        return packets;
     }
 
     public ByteBuf getBuffer() {

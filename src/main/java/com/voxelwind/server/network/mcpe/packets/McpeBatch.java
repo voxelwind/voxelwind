@@ -6,7 +6,6 @@ import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 
 import java.util.ArrayList;

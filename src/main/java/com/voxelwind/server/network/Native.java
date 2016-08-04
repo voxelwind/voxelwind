@@ -9,11 +9,10 @@ import net.md_5.bungee.jni.zlib.JavaZlib;
 import net.md_5.bungee.jni.zlib.NativeZlib;
 
 public class Native {
+    public static final NativeCode<BungeeZlib> zlib = new NativeCode("native-compress", JavaZlib.class, NativeZlib.class);
+    public static final NativeCode<BungeeCipher> cipher = new NativeCode("native-cipher", JavaCipher.class, NativeCipher.class);
+
     private Native() {
 
     }
-
-    public static final NativeCode<BungeeZlib> zlib = new NativeCode("native-compress", JavaZlib.class, NativeZlib.class);
-
-    public static final NativeCode<BungeeCipher> cipher = new NativeCode("native-cipher", JavaCipher.class, NativeCipher.class);
 }

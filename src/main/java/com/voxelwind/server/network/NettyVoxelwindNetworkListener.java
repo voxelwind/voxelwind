@@ -1,9 +1,9 @@
 package com.voxelwind.server.network;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.handler.VoxelwindDatagramHandler;
 import com.voxelwind.server.network.handler.VoxelwindDirectPacketHandler;
-import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.raknet.DatagramRakNetPacketCodec;
 import com.voxelwind.server.network.raknet.SimpleRakNetPacketCodec;
 import io.netty.bootstrap.Bootstrap;

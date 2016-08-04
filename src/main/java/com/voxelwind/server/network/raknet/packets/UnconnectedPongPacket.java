@@ -3,6 +3,7 @@ package com.voxelwind.server.network.raknet.packets;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+
 import static com.voxelwind.server.network.raknet.RakNetConstants.RAKNET_UNCONNECTED_MAGIC;
 
 public class UnconnectedPongPacket implements RakNetPackage {

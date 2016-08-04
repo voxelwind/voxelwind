@@ -9,6 +9,7 @@ import io.netty.buffer.ByteBuf;
 import javax.xml.bind.DatatypeConverter;
 
 public class McpeStartGame implements RakNetPackage {
+    private static final byte[] UNKNOWN = DatatypeConverter.parseHexBinary("01010000000000000000000000");
     private int seed;
     private byte dimension;
     private int generator;
@@ -16,8 +17,6 @@ public class McpeStartGame implements RakNetPackage {
     private long entityId;
     private Vector3i spawnLocation;
     private Vector3f position;
-
-    private static final byte[] UNKNOWN = DatatypeConverter.parseHexBinary("01010000000000000000000000");
 
     @Override
     public void decode(ByteBuf buffer) {

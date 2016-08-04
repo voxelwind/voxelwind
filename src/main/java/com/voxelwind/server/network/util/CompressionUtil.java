@@ -32,6 +32,7 @@ public class CompressionUtil {
 
     /**
      * Decompresses a buffer.
+     *
      * @param buffer the buffer to decompress
      * @return the decompressed buffer
      * @throws DataFormatException if data could not be inflated
@@ -65,6 +66,7 @@ public class CompressionUtil {
 
     /**
      * Compresses a buffer.
+     *
      * @param buffer the buffer to compress
      * @return a new compressed buffer
      * @throws DataFormatException if data could not be deflated
@@ -77,10 +79,11 @@ public class CompressionUtil {
 
     /**
      * Compresses a {@link ByteBuf}.
+     *
      * @param toCompress the buffer to compress
-     * @param into the buffer to compress into
-     * @throws DataFormatException if data could not be deflated
+     * @param into       the buffer to compress into
      * @return the Adler32 value of the {@code ByteBuf}
+     * @throws DataFormatException if data could not be deflated
      */
     public static int deflate(ByteBuf toCompress, ByteBuf into) throws DataFormatException {
         ByteBuf destination = null;

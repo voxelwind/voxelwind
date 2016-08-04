@@ -30,6 +30,10 @@ public class Chunk {
         Arrays.fill(biomeColor, 0x0185b24a);
     }
 
+    private static int xyzIdx(int x, int y, int z) {
+        return (x * 2048) + (z * 128) + y;
+    }
+
     public int getX() {
         return x;
     }
@@ -44,10 +48,6 @@ public class Chunk {
             blockData[xyzIdx(x, y, z)] = id;
             stale = true;
         }
-    }
-
-    private static int xyzIdx(int x, int y, int z) {
-        return (x * 2048) + (z * 128) + y;
     }
 
     public synchronized McpeFullChunkData getChunkDataPacket() {

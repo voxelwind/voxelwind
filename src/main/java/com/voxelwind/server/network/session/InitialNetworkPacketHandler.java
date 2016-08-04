@@ -2,22 +2,20 @@ package com.voxelwind.server.network.session;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.flowpowered.math.vector.Vector3f;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.util.EncryptionUtil;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwt;
-import com.voxelwind.server.VoxelwindServer;
-import io.jsonwebtoken.Jwts;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -41,6 +39,11 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
     public InitialNetworkPacketHandler(UserSession session) {
         this.session = session;
+    }
+
+    private static PublicKey getKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return KeyFactory.getInstance("EC").generatePublic(
+                new X509EncodedKeySpec(Base64.getDecoder().decode(b64)));
     }
 
     @Override
@@ -154,10 +157,5 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     private JsonNode getPayload(String token) throws IOException {
         String payload = token.split("\\.")[1];
         return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload));
-    }
-
-    private static PublicKey getKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return KeyFactory.getInstance("EC").generatePublic(
-                new X509EncodedKeySpec(Base64.getDecoder().decode(b64)));
     }
 }

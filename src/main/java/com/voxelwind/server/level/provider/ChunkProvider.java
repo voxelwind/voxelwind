@@ -8,7 +8,10 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ChunkProvider {
     CompletableFuture<Chunk> get(int x, int z);
+
     Optional<Chunk> getIfLoaded(int x, int z);
+
     boolean unload(int x, int z);
+
     Vector3f getSpawn();
 }

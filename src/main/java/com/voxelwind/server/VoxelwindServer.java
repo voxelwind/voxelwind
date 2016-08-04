@@ -7,47 +7,23 @@ import com.voxelwind.server.level.LevelCreator;
 import com.voxelwind.server.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
-import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import com.voxelwind.server.network.session.SessionManager;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.epoll.Epoll;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class VoxelwindServer {
-    private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
     public static final ObjectMapper MAPPER = new ObjectMapper();
-
+    private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
     private final SessionManager sessionManager = new SessionManager();
     private final ScheduledExecutorService timerService = Executors.unconfigurableScheduledExecutorService(
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private NettyVoxelwindNetworkListener listener;
     private Level defaultLevel;
-
-    public SessionManager getSessionManager() {
-        return sessionManager;
-    }
-
-    public void boot() throws Exception {
-        listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
-        listener.bind();
-
-        defaultLevel = new Level(new LevelCreator("test", FlatworldChunkProvider.INSTANCE));
-
-        LOGGER.info("Voxelwind is now running.");
-
-        timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
-
-        Thread.sleep(10000000);
-    }
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6
@@ -67,6 +43,23 @@ public class VoxelwindServer {
 
         VoxelwindServer server = new VoxelwindServer();
         server.boot();
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
+
+    public void boot() throws Exception {
+        listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
+        listener.bind();
+
+        defaultLevel = new Level(new LevelCreator("test", FlatworldChunkProvider.INSTANCE));
+
+        LOGGER.info("Voxelwind is now running.");
+
+        timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
+
+        Thread.sleep(10000000);
     }
 
     public Level getDefaultLevel() {

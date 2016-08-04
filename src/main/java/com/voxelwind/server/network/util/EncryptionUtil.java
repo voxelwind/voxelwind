@@ -3,15 +3,11 @@ package com.voxelwind.server.network.util;
 import com.voxelwind.server.network.mcpe.packets.McpeServerHandshake;
 import io.netty.buffer.Unpooled;
 
-import javax.crypto.*;
+import javax.crypto.KeyAgreement;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 
 public class EncryptionUtil {
-    private EncryptionUtil() {
-
-    }
-
     private static final KeyPair serverKey;
     private static final SecureRandom secureRandom = new SecureRandom();
 
@@ -23,6 +19,10 @@ public class EncryptionUtil {
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
             throw new ExceptionInInitializerError(e);
         }
+    }
+
+    private EncryptionUtil() {
+
     }
 
     public static byte[] getServerKey(PublicKey key, byte[] token) throws InvalidKeyException {

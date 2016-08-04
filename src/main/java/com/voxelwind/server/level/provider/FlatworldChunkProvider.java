@@ -11,12 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FlatworldChunkProvider implements ChunkProvider {
     public static final FlatworldChunkProvider INSTANCE = new FlatworldChunkProvider();
+    private final Map<Vector2i, Chunk> chunks = new ConcurrentHashMap<>();
 
     private FlatworldChunkProvider() {
 
     }
-
-    private final Map<Vector2i, Chunk> chunks = new ConcurrentHashMap<>();
 
     @Override
     public CompletableFuture<Chunk> get(int x, int z) {

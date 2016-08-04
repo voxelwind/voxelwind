@@ -1,16 +1,16 @@
 package com.voxelwind.server.network.handler;
 
 import com.google.common.net.InetAddresses;
-import com.voxelwind.server.network.mcpe.packets.*;
-import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
-import com.voxelwind.server.network.raknet.datastructs.IntRange;
-import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
-import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.PacketType;
+import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
+import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
+import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
+import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<AddressedRakNetDatagram> {
-    private final VoxelwindServer server;
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindDatagramHandler.class);
+    private final VoxelwindServer server;
 
     public VoxelwindDatagramHandler(VoxelwindServer server) {
         this.server = server;

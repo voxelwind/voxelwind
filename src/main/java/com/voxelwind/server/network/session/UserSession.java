@@ -1,22 +1,22 @@
 package com.voxelwind.server.network.session;
 
 import com.google.common.base.Preconditions;
+import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.level.Level;
+import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
+import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
+import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
+import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
+import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.AckPacket;
-import com.voxelwind.server.VoxelwindServer;
-import com.voxelwind.server.network.Native;
-import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
-import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
-import com.voxelwind.server.network.raknet.RakNetPackage;
-import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -42,12 +42,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class UserSession {
     private static final Logger LOGGER = LogManager.getLogger(UserSession.class);
-
+    private static final ThreadLocal<byte[]> CHECKSUM_BUFFER_LOCAL = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+            return new byte[512];
+        }
+    };
     private final InetSocketAddress remoteAddress;
-    private UserAuthenticationProfile authenticationProfile;
     private final short mtu;
-    private NetworkPacketHandler handler;
-    private volatile SessionState state = SessionState.INITIAL_CONNECTION;
     private final AtomicLong lastKnownUpdate = new AtomicLong(System.currentTimeMillis());
     private final ConcurrentMap<Short, SplitPacketHelper> splitPackets = new ConcurrentHashMap<>();
     private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
@@ -59,17 +61,14 @@ public class UserSession {
     private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
     private final Channel channel;
     private final VoxelwindServer server;
+    private UserAuthenticationProfile authenticationProfile;
+    private NetworkPacketHandler handler;
+    private volatile SessionState state = SessionState.INITIAL_CONNECTION;
     private BungeeCipher encryptionCipher;
     private BungeeCipher decryptionCipher;
     private boolean closed = false;
     private PlayerSession playerSession;
     private byte[] serverKey;
-    private static final ThreadLocal<byte[]> CHECKSUM_BUFFER_LOCAL = new ThreadLocal<byte[]>() {
-        @Override
-        protected byte[] initialValue() {
-            return new byte[512];
-        }
-    };
 
     public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
         this.remoteAddress = remoteAddress;
