@@ -105,6 +105,11 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         throw new IllegalStateException("Got unexpected McpeAnimate");
     }
 
+    @Override
+    public void handle(McpeText packet) {
+        throw new IllegalStateException("Got unexpected McpeText");
+    }
+
     private void initializePlayerSession() {
         McpePlayStatus status = new McpePlayStatus();
         status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);

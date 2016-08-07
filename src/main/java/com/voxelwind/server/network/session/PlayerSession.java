@@ -207,5 +207,13 @@ public class PlayerSession extends LivingEntity {
         public void handle(McpeAnimate packet) {
             getLevel().getPacketManager().queuePacketForPlayers(packet);
         }
+
+        @Override
+        public void handle(McpeText packet) {
+            System.out.println("[Chat] " + packet);
+
+            // By default, queue this packet for all players in the world.
+            getLevel().getPacketManager().queuePacketForPlayers(packet);
+        }
     }
 }

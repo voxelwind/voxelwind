@@ -39,6 +39,7 @@ public class PacketRegistry {
                             .put(0x04, McpeClientMagic.class)
                             .put(0x05, McpeDisconnect.class)
                             .put(0x06, McpeBatch.class)
+                            .put(0x07, McpeText.class)
                             .put(0x08, McpeSetTime.class)
                             .put(0x09, McpeStartGame.class)
                             .put(0x0f, McpeMoveEntity.class)
