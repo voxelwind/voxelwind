@@ -28,6 +28,7 @@ public class BaseEntity {
         this.entityId = level.getEntityManager().allocateEntityId();
         this.rotation = Rotation.ZERO;
         this.motion = Vector3f.ZERO;
+        this.level.getEntityManager().register(this);
     }
 
     protected static boolean isOnGround(Level level, Vector3f position) {

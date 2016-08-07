@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.LevelCreator;
+import com.voxelwind.server.level.LevelManager;
 import com.voxelwind.server.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
@@ -20,6 +21,7 @@ public class VoxelwindServer {
     public static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
     private final SessionManager sessionManager = new SessionManager();
+    private final LevelManager levelManager = new LevelManager();
     private final ScheduledExecutorService timerService = Executors.unconfigurableScheduledExecutorService(
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private NettyVoxelwindNetworkListener listener;
@@ -54,6 +56,8 @@ public class VoxelwindServer {
         listener.bind();
 
         defaultLevel = new Level(new LevelCreator("test", FlatworldChunkProvider.INSTANCE));
+        levelManager.register(defaultLevel);
+        levelManager.start(defaultLevel);
 
         LOGGER.info("Voxelwind is now running.");
 

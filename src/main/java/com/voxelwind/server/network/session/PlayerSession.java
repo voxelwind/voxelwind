@@ -105,6 +105,13 @@ public class PlayerSession extends LivingEntity {
         }, 500, TimeUnit.MILLISECONDS);
     }
 
+    public void sendMessage(String message) {
+        McpeText text = new McpeText();
+        text.setType(McpeText.TextType.RAW);
+        text.setMessage(message);
+        session.addToSendQueue(text);
+    }
+
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
         @Override
         public void handle(McpeLogin packet) {
