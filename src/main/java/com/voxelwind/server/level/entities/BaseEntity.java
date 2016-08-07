@@ -24,7 +24,7 @@ public class BaseEntity {
 
     public BaseEntity(Level level, Vector3f position) {
         this.level = Preconditions.checkNotNull(level, "level");
-        this.position = Preconditions.checkNotNull(position, position);
+        this.position = Preconditions.checkNotNull(position, "position");
         this.entityId = level.getEntityManager().allocateEntityId();
         this.rotation = Rotation.ZERO;
         this.motion = Vector3f.ZERO;
@@ -159,9 +159,12 @@ public class BaseEntity {
     public void teleport(Level level, Vector3f position, Rotation rotation) {
         Level oldLevel = this.level;
         if (oldLevel != level) {
-            throw new UnsupportedOperationException();
-            // TODO: Fix?
-            //oldLevel.getEntityManager().unregister(this);
+            // Once the entity manager finishes ticking the old level, it will deregister the queued entity.
+            oldLevel.getEntityManager().markForUnregister(this);
+            level.getEntityManager().register(this);
+
+            // Mark as stale so that the destination level's entity manager will send the appropriate packets.
+            this.stale = true;
         }
         this.level = level;
         setPosition(position);

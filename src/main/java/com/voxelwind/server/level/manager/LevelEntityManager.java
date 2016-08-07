@@ -23,6 +23,7 @@ public class LevelEntityManager {
     private static final Logger LOGGER = LogManager.getLogger(LevelEntityManager.class);
 
     private final List<BaseEntity> entities = new ArrayList<>();
+    private final List<BaseEntity> entitiesToUnregister = new ArrayList<>();
     private final AtomicLong entityIdAllocator = new AtomicLong();
     private final Level level;
 
@@ -39,6 +40,11 @@ public class LevelEntityManager {
         for (BaseEntity entity : entities) {
             try {
                 entity.onTick();
+
+                if (entitiesToUnregister.contains(entity)) {
+                    // Ignore this entity. We will deregister it later.
+                    continue;
+                }
 
                 if (entity.isStale()) {
                     // Need to send packets.
@@ -73,6 +79,9 @@ public class LevelEntityManager {
         for (BaseEntity baseEntity : failedToTick) {
             // TODO: Despawn entities.
         }
+
+        entities.removeAll(entitiesToUnregister);
+        entitiesToUnregister.clear();;
     }
 
     public synchronized List<PlayerSession> getPlayers() {
@@ -101,5 +110,9 @@ public class LevelEntityManager {
 
     public synchronized void unregister(BaseEntity entity) {
         entities.remove(entity);
+    }
+
+    public synchronized void markForUnregister(BaseEntity entity) {
+        entitiesToUnregister.add(entity);
     }
 }
