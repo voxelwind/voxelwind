@@ -30,6 +30,20 @@ public class PlayerSession extends LivingEntity {
         this.session = session;
     }
 
+    @Override
+    public boolean onTick() {
+        if (!super.onTick()) {
+            return false;
+        }
+
+        // If the upstream session is closed, the player session should no longer be alive.
+        if (session.isClosed()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public void doInitialSpawn() {
         McpeStartGame startGame = new McpeStartGame();
         startGame.setSeed(-1);

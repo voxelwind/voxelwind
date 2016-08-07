@@ -131,8 +131,9 @@ public class BaseEntity {
         return stale;
     }
 
-    public void onTick() {
-        // Does nothing
+    public boolean onTick() {
+        // Continue ticking this entity
+        return true;
     }
 
     public boolean isOnGround() {
@@ -159,8 +160,7 @@ public class BaseEntity {
     public void teleport(Level level, Vector3f position, Rotation rotation) {
         Level oldLevel = this.level;
         if (oldLevel != level) {
-            // Once the entity manager finishes ticking the old level, it will deregister the queued entity.
-            oldLevel.getEntityManager().markForUnregister(this);
+            oldLevel.getEntityManager().unregister(this);
             level.getEntityManager().register(this);
 
             // Mark as stale so that the destination level's entity manager will send the appropriate packets.

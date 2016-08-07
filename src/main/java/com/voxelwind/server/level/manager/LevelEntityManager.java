@@ -23,7 +23,7 @@ public class LevelEntityManager {
     private static final Logger LOGGER = LogManager.getLogger(LevelEntityManager.class);
 
     private final List<BaseEntity> entities = new ArrayList<>();
-    private final List<BaseEntity> entitiesToUnregister = new ArrayList<>();
+    private final Object entityLock = new Object();
     private final AtomicLong entityIdAllocator = new AtomicLong();
     private final Level level;
 
@@ -31,18 +31,24 @@ public class LevelEntityManager {
         this.level = level;
     }
 
-    public synchronized void register(BaseEntity entity) {
-        entities.add(entity);
+    public void register(BaseEntity entity) {
+        synchronized (entityLock) {
+            entities.add(entity);
+        }
     }
 
-    public synchronized void onTick() {
-        List<BaseEntity> failedToTick = new ArrayList<>();
-        for (BaseEntity entity : entities) {
-            try {
-                entity.onTick();
+    public void onTick() {
+        List<BaseEntity> currentEntityList;
+        synchronized (entityLock) {
+            currentEntityList = ImmutableList.copyOf(entities);
+        }
 
-                if (entitiesToUnregister.contains(entity)) {
-                    // Ignore this entity. We will deregister it later.
+        List<BaseEntity> toRemove = new ArrayList<>();
+        for (BaseEntity entity : currentEntityList) {
+            try {
+                if (!entity.onTick()) {
+                    // Entity should be despawned
+                    toRemove.add(entity);
                     continue;
                 }
 
@@ -72,22 +78,24 @@ public class LevelEntityManager {
                 }
             } catch (Exception e) {
                 LOGGER.error("Unable to tick entity", e);
-                failedToTick.add(entity);
+                toRemove.add(entity);
             }
         }
 
-        for (BaseEntity baseEntity : failedToTick) {
-            // TODO: Despawn entities.
+        synchronized (entityLock) {
+            entities.removeAll(toRemove);
         }
-
-        entities.removeAll(entitiesToUnregister);
-        entitiesToUnregister.clear();;
     }
 
-    public synchronized List<PlayerSession> getPlayers() {
+    public List<PlayerSession> getPlayers() {
+        List<BaseEntity> currentEntityList;
+        synchronized (entityLock) {
+            currentEntityList = ImmutableList.copyOf(entities);
+        }
+
         List<PlayerSession> sessions = new ArrayList<>();
 
-        for (BaseEntity entity : entities) {
+        for (BaseEntity entity : currentEntityList) {
             if (entity instanceof PlayerSession) {
                 sessions.add((PlayerSession) entity);
             }
@@ -100,19 +108,21 @@ public class LevelEntityManager {
         return entityIdAllocator.incrementAndGet();
     }
 
-    public synchronized Collection<BaseEntity> getAllEntities() {
-        return ImmutableList.copyOf(entities);
+    public Collection<BaseEntity> getAllEntities() {
+        synchronized (entityLock) {
+            return ImmutableList.copyOf(entities);
+        }
     }
 
-    public synchronized Optional<BaseEntity> findEntityById(long id) {
-        return entities.stream().filter(e -> e.getEntityId() == id).findFirst();
+    public Optional<BaseEntity> findEntityById(long id) {
+        synchronized (entityLock) {
+            return entities.stream().filter(e -> e.getEntityId() == id).findFirst();
+        }
     }
 
-    public synchronized void unregister(BaseEntity entity) {
-        entities.remove(entity);
-    }
-
-    public synchronized void markForUnregister(BaseEntity entity) {
-        entitiesToUnregister.add(entity);
+    public void unregister(BaseEntity entity) {
+        synchronized (entityLock) {
+            entities.remove(entity);
+        }
     }
 }
