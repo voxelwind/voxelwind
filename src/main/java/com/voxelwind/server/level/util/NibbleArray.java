@@ -1,5 +1,7 @@
 package com.voxelwind.server.level.util;
 
+import com.google.common.base.Preconditions;
+
 public class NibbleArray {
     private final byte[] data;
 
@@ -12,10 +14,13 @@ public class NibbleArray {
     }
 
     public byte get(int index) {
+        Preconditions.checkElementIndex(index, data.length * 2);
         return (byte) (data[index / 2] >> ((index) % 2 * 4) & 0xF);
     }
 
     public void set(int index, byte value) {
+        Preconditions.checkArgument(value >= 0 && value < 16, "Nibbles must have a value between 0 and 15.");
+        Preconditions.checkElementIndex(index, data.length * 2);
         value &= 0xF;
         data[index / 2] &= (byte) (0xF << ((index + 1) % 2 * 4));
         data[index / 2] |= (byte) (value << (index % 2 * 4));
