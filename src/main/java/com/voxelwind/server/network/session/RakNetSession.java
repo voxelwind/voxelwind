@@ -201,6 +201,13 @@ public class RakNetSession {
     protected void close() {
         checkForClosed();
         closed = true;
+
+        // Perform resource clean up.
+        splitPackets.values().forEach(SplitPacketHelper::release);
+        splitPackets.clear();
+
+        datagramAcks.values().forEach(SentDatagram::tryRelease);
+        datagramAcks.clear();
     }
 
     void checkForClosed() {
