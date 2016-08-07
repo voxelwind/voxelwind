@@ -22,6 +22,7 @@ public class PlayerSession extends LivingEntity {
 
     private final UserSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private boolean spawned = false;
     private boolean sprinting = false;
     private boolean sneaking = false;
     private boolean firstChunksSent = false;
@@ -34,6 +35,11 @@ public class PlayerSession extends LivingEntity {
 
     @Override
     public boolean onTick() {
+        if (!spawned) {
+            // Don't tick until the player has truly been spawned into the world.
+            return true;
+        }
+
         if (!super.onTick()) {
             return false;
         }
@@ -173,9 +179,11 @@ public class PlayerSession extends LivingEntity {
                         setTime.setRunning(true);
                         session.addToSendQueue(setTime);
 
-                        //McpeRespawn respawn = new McpeRespawn();
-                        //respawn.setPosition(getLevel().getChunkProvider().getSpawn());
-                        //session.addToSendQueue(respawn);
+                        spawned = true;
+
+                        McpeRespawn respawn = new McpeRespawn();
+                        respawn.setPosition(getLevel().getChunkProvider().getSpawn());
+                        session.addToSendQueue(respawn);
                     }, 500, TimeUnit.MILLISECONDS);
                 }
             });

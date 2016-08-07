@@ -217,6 +217,8 @@ public class UserSession extends RakNetSession {
     public void close() {
         super.close();
 
+        getServer().getSessionManager().remove(getRemoteAddress());
+
         // Free native resources if required
         if (encryptionCipher != null) {
             encryptionCipher.free();
