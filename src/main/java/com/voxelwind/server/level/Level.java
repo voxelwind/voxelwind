@@ -16,6 +16,7 @@ public class Level {
     private final UUID uuid;
     private final LevelEntityManager entityManager;
     private final LevelPacketManager packetManager;
+    private long currentTick;
 
     public Level(LevelCreator creator) {
         chunkProvider = creator.getChunkProvider();
@@ -45,7 +46,12 @@ public class Level {
         return packetManager;
     }
 
+    public long getCurrentTick() {
+        return currentTick;
+    }
+
     public void onTick() {
+        currentTick++;
         entityManager.onTick();
         packetManager.onTick();
     }

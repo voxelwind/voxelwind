@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.session;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.server.level.Level;
@@ -26,7 +27,8 @@ public class PlayerSession extends LivingEntity {
     private boolean firstChunksSent = false;
 
     public PlayerSession(UserSession session, Level level) {
-        super(level, level.getChunkProvider().getSpawn()); // not yet actually spawned
+        super(level, level.getChunkProvider().getSpawn().add(0, 1, 0));
+        setMotion(new Vector3f(0, -1, 0));
         this.session = session;
     }
 
@@ -39,6 +41,10 @@ public class PlayerSession extends LivingEntity {
         // If the upstream session is closed, the player session should no longer be alive.
         if (session.isClosed()) {
             return false;
+        }
+
+        if (getLevel().getCurrentTick() % 20 == 0) {
+            System.out.println("Position: " + getPosition());
         }
 
         return true;
@@ -232,6 +238,15 @@ public class PlayerSession extends LivingEntity {
         @Override
         public void handle(McpeText packet) {
             System.out.println("[Chat] " + packet);
+
+            if (packet.getMessage().startsWith("/")) {
+                switch (packet.getMessage()) {
+                    case "/pos":
+                        sendMessage("Level: " + getLevel().getName());
+                        sendMessage("Position: " + getPosition());
+                        return;
+                }
+            }
 
             // By default, queue this packet for all players in the world.
             getLevel().getPacketManager().queuePacketForPlayers(packet);

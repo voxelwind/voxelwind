@@ -43,10 +43,12 @@ public class Chunk {
     }
 
     public synchronized byte getBlock(int x, int y, int z) {
+        checkPosition(x, y, z);
         return blockData[xyzIdx(x, y, z)];
     }
 
     public synchronized void setBlock(int x, int y, int z, byte id) {
+        checkPosition(x, y, z);
         byte old = blockData[xyzIdx(x, y, z)];
         if (old != id) {
             blockData[xyzIdx(x, y, z)] = id;
@@ -83,5 +85,19 @@ public class Chunk {
 
         chunkDataPacket.getData().retain();
         return chunkDataPacket;
+    }
+
+    private static void checkPosition(int x, int y, int z) {
+        if (x < 0 || x >= 16) {
+            throw new IllegalArgumentException("x not in range (0 to 15)");
+        }
+
+        if (z < 0 || z >= 16) {
+            throw new IllegalArgumentException("z not in range (0 to 15)");
+        }
+
+        if (y < 0 || y > 128) {
+            throw new IllegalArgumentException("y not in range (0 to 128)");
+        }
     }
 }
