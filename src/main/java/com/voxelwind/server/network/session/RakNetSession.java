@@ -151,6 +151,17 @@ public class RakNetSession {
 
         sendAckQueue();
         resendStalePackets();
+        cleanSplitPackets();
+    }
+
+    private void cleanSplitPackets() {
+        for (Iterator<SplitPacketHelper> it = splitPackets.values().iterator(); it.hasNext(); ) {
+            SplitPacketHelper sph = it.next();
+            if (sph.expired()) {
+                sph.release();
+                it.remove();
+            }
+        }
     }
 
     private void resendStalePackets() {

@@ -10,10 +10,13 @@ import java.util.*;
 public class SplitPacketHelper {
     private final Queue<EncapsulatedRakNetPacket> packets = new ArrayDeque<>();
     private final BitSet contained = new BitSet();
+    private final long created = System.currentTimeMillis();
+    private boolean released = false;
 
     public synchronized Optional<ByteBuf> add(EncapsulatedRakNetPacket packet) {
         Preconditions.checkNotNull(packet, "packet");
         Preconditions.checkArgument(packet.isHasSplit(), "packet is not split");
+        Preconditions.checkState(!released, "packet has been released");
 
         if (contained.get(packet.getPartIndex())) {
             // Duplicate packet, ignore it.
@@ -38,5 +41,20 @@ public class SplitPacketHelper {
             buf.writeBytes(netPacket.getBuffer());
         }
         return Optional.of(buf);
+    }
+
+    boolean expired() {
+        // If we're waiting on a split packet for more than 30 seconds, the client on the other end is either severely
+        // lagging, or has died.
+        Preconditions.checkState(!released, "packet has been released");
+        return System.currentTimeMillis() - created >= 30000;
+    }
+
+    void release() {
+        Preconditions.checkState(!released, "packet has been released");
+
+        for (EncapsulatedRakNetPacket packet : packets) {
+            packet.getBuffer().release();
+        }
     }
 }
