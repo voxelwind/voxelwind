@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class UserSession {
+public class UserSession extends RakNetSession {
     private static final Logger LOGGER = LogManager.getLogger(UserSession.class);
     private static final ThreadLocal<byte[]> CHECKSUM_BUFFER_LOCAL = new ThreadLocal<byte[]>() {
         @Override
@@ -48,42 +48,19 @@ public class UserSession {
             return new byte[512];
         }
     };
-    private final InetSocketAddress remoteAddress;
-    private final short mtu;
-    private final AtomicLong lastKnownUpdate = new AtomicLong(System.currentTimeMillis());
-    private final ConcurrentMap<Short, SplitPacketHelper> splitPackets = new ConcurrentHashMap<>();
-    private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
-    private final AtomicInteger reliabilitySequenceGenerator = new AtomicInteger();
-    private final AtomicInteger orderSequenceGenerator = new AtomicInteger();
     private final AtomicLong encryptedSentPacketGenerator = new AtomicLong();
     private final Queue<RakNetPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
-    private final Set<Integer> ackQueue = new HashSet<>();
-    private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
-    private final Channel channel;
-    private final VoxelwindServer server;
     private UserAuthenticationProfile authenticationProfile;
     private NetworkPacketHandler handler;
     private volatile SessionState state = SessionState.INITIAL_CONNECTION;
     private BungeeCipher encryptionCipher;
     private BungeeCipher decryptionCipher;
-    private boolean closed = false;
     private PlayerSession playerSession;
     private byte[] serverKey;
 
     public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
-        this.remoteAddress = remoteAddress;
-        this.mtu = mtu;
+        super(remoteAddress, mtu, channel, server);
         this.handler = handler;
-        this.channel = channel;
-        this.server = server;
-    }
-
-    public InetSocketAddress getRemoteAddress() {
-        return remoteAddress;
-    }
-
-    public short getMtu() {
-        return mtu;
     }
 
     public SessionState getState() {
@@ -92,10 +69,6 @@ public class UserSession {
 
     public void setState(SessionState state) {
         this.state = state;
-    }
-
-    public AtomicLong getLastKnownUpdate() {
-        return lastKnownUpdate;
     }
 
     public UserAuthenticationProfile getAuthenticationProfile() {
@@ -117,56 +90,6 @@ public class UserSession {
         this.handler = handler;
     }
 
-    public AtomicInteger getDatagramSequenceGenerator() {
-        return datagramSequenceGenerator;
-    }
-
-    public AtomicInteger getReliabilitySequenceGenerator() {
-        return reliabilitySequenceGenerator;
-    }
-
-    public AtomicInteger getOrderSequenceGenerator() {
-        return orderSequenceGenerator;
-    }
-
-    public Optional<ByteBuf> addSplitPacket(EncapsulatedRakNetPacket packet) {
-        checkForClosed();
-        SplitPacketHelper helper = splitPackets.computeIfAbsent(packet.getPartId(), (k) -> new SplitPacketHelper());
-        Optional<ByteBuf> result = helper.add(packet);
-        if (result.isPresent()) {
-            splitPackets.remove(packet.getPartId());
-        }
-        return result;
-    }
-
-    public void onAck(List<IntRange> acked) {
-        checkForClosed();
-        for (IntRange range : acked) {
-            for (int i = range.getStart(); i <= range.getEnd(); i++) {
-                SentDatagram datagram = datagramAcks.remove(i);
-                if (datagram != null) {
-                    datagram.tryRelease();
-                }
-            }
-        }
-    }
-
-    public void onNak(List<IntRange> acked) {
-        checkForClosed();
-        for (IntRange range : acked) {
-            for (int i = range.getStart(); i <= range.getEnd(); i++) {
-                SentDatagram datagram = datagramAcks.get(i);
-                if (datagram != null) {
-                    LOGGER.error("Must resend datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
-                    datagram.refreshForResend();
-                    channel.write(datagram, channel.voidPromise());
-                }
-            }
-        }
-
-        channel.flush();
-    }
-
     public void addToSendQueue(RakNetPackage netPackage) {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
@@ -181,7 +104,7 @@ public class UserSession {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
         internalSendPackage(netPackage);
-        channel.flush();
+        getChannel().flush();
     }
 
     private void internalSendPackage(RakNetPackage netPackage) {
@@ -220,36 +143,17 @@ public class UserSession {
             }
         }
 
-        List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(toEncapsulate, this);
-        List<RakNetDatagram> datagrams = new ArrayList<>();
-        for (EncapsulatedRakNetPacket packet : addressed) {
-            RakNetDatagram datagram = new RakNetDatagram();
-            datagram.setDatagramSequenceNumber(datagramSequenceGenerator.getAndIncrement());
-            if (!datagram.tryAddPacket(packet, mtu)) {
-                throw new RuntimeException("Packet too large to fit in MTU (size: " + packet.totalLength() + ", MTU: " + mtu + ")");
-            }
-            datagrams.add(datagram);
-        }
-
-        for (RakNetDatagram netDatagram : datagrams) {
-            channel.write(new AddressedRakNetDatagram(netDatagram, remoteAddress), channel.voidPromise());
-            datagramAcks.put(netDatagram.getDatagramSequenceNumber(), new SentDatagram(netDatagram));
-        }
-    }
-
-    public void sendDirectPackage(RakNetPackage netPackage) {
-        checkForClosed();
-        channel.writeAndFlush(new DirectAddressedRakNetPacket(netPackage, remoteAddress));
+        internalSendRakNetPackage(toEncapsulate);
     }
 
     public void onTick() {
-        if (closed) {
+        if (isClosed()) {
             return;
         }
 
+        super.onTick();
+
         sendQueued();
-        sendAckQueue();
-        resendStalePackets();
     }
 
     private void sendQueued() {
@@ -284,41 +188,8 @@ public class UserSession {
         if (!batch.getPackages().isEmpty()) {
             internalSendPackage(batch);
         }
-        channel.flush();
-    }
 
-    private void resendStalePackets() {
-        for (SentDatagram datagram : datagramAcks.values()) {
-            if (datagram.isStale()) {
-                LOGGER.warn("Datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " for " + remoteAddress + " is stale, resending!");
-                datagram.refreshForResend();
-                channel.write(new AddressedRakNetDatagram(datagram.getDatagram(), remoteAddress));
-            }
-        }
-        channel.flush();
-    }
-
-    public void enqueueAck(int ack) {
-        checkForClosed();
-
-        synchronized (ackQueue) {
-            ackQueue.add(ack);
-        }
-    }
-
-    private void sendAckQueue() {
-        List<IntRange> ranges;
-        synchronized (ackQueue) {
-            if (ackQueue.isEmpty())
-                return;
-
-            ranges = AckPacket.intoRanges(ackQueue);
-            ackQueue.clear();
-        }
-
-        AckPacket packet = new AckPacket();
-        packet.getIds().addAll(ranges);
-        sendDirectPackage(packet);
+        getChannel().flush();
     }
 
     protected void enableEncryption(byte[] secretKey) {
@@ -342,11 +213,9 @@ public class UserSession {
         return encryptionCipher != null;
     }
 
+    @Override
     public void close() {
-        checkForClosed();
-
-        server.getSessionManager().remove(remoteAddress);
-        closed = true;
+        super.close();
 
         // Free native resources if required
         if (encryptionCipher != null) {
@@ -363,10 +232,6 @@ public class UserSession {
 
     public BungeeCipher getDecryptionCipher() {
         return decryptionCipher;
-    }
-
-    private void checkForClosed() {
-        Preconditions.checkState(!closed, "Session already closed");
     }
 
     private byte[] generateTrailer(ByteBuf buf) {
@@ -393,10 +258,6 @@ public class UserSession {
         return Arrays.copyOf(digested, 8);
     }
 
-    public boolean isClosed() {
-        return closed;
-    }
-
     public PlayerSession getPlayerSession() {
         return playerSession;
     }
@@ -407,13 +268,5 @@ public class UserSession {
 
         playerSession = new PlayerSession(this, level);
         return playerSession;
-    }
-
-    public VoxelwindServer getServer() {
-        return server;
-    }
-
-    public Channel getChannel() {
-        return channel;
     }
 }
