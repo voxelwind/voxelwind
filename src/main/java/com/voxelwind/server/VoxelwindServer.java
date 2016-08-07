@@ -10,6 +10,7 @@ import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
 import com.voxelwind.server.network.session.SessionManager;
 import io.netty.channel.epoll.Epoll;
+import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,6 +30,7 @@ public class VoxelwindServer {
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED);
         System.setProperty("java.net.preferIPv4Stack", "true");
 
         if (!Epoll.isAvailable()) {

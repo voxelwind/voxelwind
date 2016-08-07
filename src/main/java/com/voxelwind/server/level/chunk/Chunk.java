@@ -4,7 +4,10 @@ import com.voxelwind.server.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class Chunk {
@@ -62,28 +65,30 @@ public class Chunk {
                 chunkDataPacket = new McpeFullChunkData();
                 chunkDataPacket.setChunkX(x);
                 chunkDataPacket.setChunkZ(z);
-            } else {
-                chunkDataPacket.getData().release();
             }
 
             // Generate the inner data
-            ByteBuf chunkData = PooledByteBufAllocator.DEFAULT.buffer();
-            chunkData.writeBytes(blockData);
-            chunkData.writeBytes(blockMetadata.getData());
-            chunkData.writeBytes(skyLightData.getData());
-            chunkData.writeBytes(blockLightData.getData());
-            for (int i = 0; i < 256; i++) {
-                chunkData.writeByte(0xFF);
-            }
-            for (int i : biomeColor) {
-                chunkData.writeInt(i);
-            }
-            chunkData.writeInt(0);
+            ByteArrayOutputStream memoryStream = new ByteArrayOutputStream(83204);
 
-            chunkDataPacket.setData(chunkData);
+            try (DataOutputStream dos = new DataOutputStream(memoryStream)) {
+                dos.write(blockData);
+                dos.write(blockMetadata.getData());
+                dos.write(skyLightData.getData());
+                dos.write(blockLightData.getData());
+                for (int i = 0; i < 256; i++) {
+                    dos.writeByte(0xFF);
+                }
+                for (int i : biomeColor) {
+                    dos.writeInt(i);
+                }
+                dos.writeInt(0);
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+
+            chunkDataPacket.setData(memoryStream.toByteArray());
         }
 
-        chunkDataPacket.getData().retain();
         return chunkDataPacket;
     }
 

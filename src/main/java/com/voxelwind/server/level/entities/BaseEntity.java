@@ -33,6 +33,11 @@ public class BaseEntity {
 
     protected static boolean isOnGround(Level level, Vector3f position) {
         Vector3i blockPosition = position.sub(0f, 0.1f, 0f).toInt();
+
+        if (blockPosition.getY() < 0) {
+            return false;
+        }
+
         int chunkX = blockPosition.getX() >> 4;
         int chunkZ = blockPosition.getZ() >> 4;
         int chunkInX = blockPosition.getX() % 16;

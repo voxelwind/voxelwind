@@ -7,7 +7,7 @@ public class McpeFullChunkData implements RakNetPackage {
     private int chunkX;
     private int chunkZ;
     private byte order;
-    private ByteBuf data;
+    private byte[] data;
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -15,7 +15,8 @@ public class McpeFullChunkData implements RakNetPackage {
         chunkZ = buffer.readInt();
         order = buffer.readByte();
         short length = buffer.readShort();
-        data = buffer.readSlice(length);
+        data = new byte[length];
+        buffer.readBytes(data);
     }
 
     @Override
@@ -23,7 +24,7 @@ public class McpeFullChunkData implements RakNetPackage {
         buffer.writeInt(chunkX);
         buffer.writeInt(chunkZ);
         buffer.writeByte(order);
-        buffer.writeShort(data.readableBytes());
+        buffer.writeShort(data.length);
         buffer.writeBytes(data);
     }
 
@@ -51,21 +52,11 @@ public class McpeFullChunkData implements RakNetPackage {
         this.order = order;
     }
 
-    public ByteBuf getData() {
+    public byte[] getData() {
         return data;
     }
 
-    public void setData(ByteBuf data) {
+    public void setData(byte[] data) {
         this.data = data;
-    }
-
-    @Override
-    public String toString() {
-        return "McpeFullChunkData{" +
-                "chunkX=" + chunkX +
-                ", chunkZ=" + chunkZ +
-                ", order=" + order +
-                ", data=" + data +
-                '}';
     }
 }
