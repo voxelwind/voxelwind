@@ -91,11 +91,11 @@ public class Chunk {
             }
 
             // Finally, write an empty NBT compound.
-            try (NBTOutputStream outputStream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
+            /*try (NBTOutputStream outputStream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
                 outputStream.writeTag(new ListTag<>("", CompoundTag.class, ImmutableList.of()));
             } catch (IOException e) {
                 throw new AssertionError(e);
-            }
+            }*/
 
             chunkDataPacket.setData(memoryStream.toByteArray());
         }

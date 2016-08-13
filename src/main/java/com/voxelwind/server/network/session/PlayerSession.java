@@ -28,8 +28,7 @@ public class PlayerSession extends LivingEntity {
     private boolean firstChunksSent = false;
 
     public PlayerSession(UserSession session, Level level) {
-        super(level, level.getChunkProvider().getSpawn().add(0, 1, 0));
-        setMotion(new Vector3f(0, -1, 0));
+        super(level, level.getChunkProvider().getSpawn());
         this.session = session;
     }
 
@@ -64,7 +63,7 @@ public class PlayerSession extends LivingEntity {
         startGame.setGamemode(0);
         startGame.setEntityId(getEntityId());
         startGame.setSpawnLocation(getPosition().toInt());
-        startGame.setPosition(getPosition());
+        startGame.setPosition(getPosition().add(0, 1.62, 0));
         session.addToSendQueue(startGame);
 
         McpeAdventureSettings settings = new McpeAdventureSettings();

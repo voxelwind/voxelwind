@@ -14,7 +14,7 @@ public class McpeFullChunkData implements RakNetPackage {
         chunkX = buffer.readInt();
         chunkZ = buffer.readInt();
         order = buffer.readByte();
-        short length = buffer.readShort();
+        int length = buffer.readInt();
         data = new byte[length];
         buffer.readBytes(data);
     }
@@ -24,7 +24,7 @@ public class McpeFullChunkData implements RakNetPackage {
         buffer.writeInt(chunkX);
         buffer.writeInt(chunkZ);
         buffer.writeByte(order);
-        buffer.writeShort(data.length);
+        buffer.writeInt(data.length);
         buffer.writeBytes(data);
     }
 
