@@ -45,7 +45,7 @@ public class FlatworldChunkProvider implements ChunkProvider {
                 for (int y = 1; y < 4; y++) {
                     chunk.setBlock(x, y, z, (byte) 3);
                 }
-                chunk.setBlock(x, 10, z, (byte) 2);
+                chunk.setBlock(x, 4, z, (byte) 2);
             }
         }
         return chunk;

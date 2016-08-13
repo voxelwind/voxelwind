@@ -123,6 +123,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
+        // TODO: Actually validate this
         /*if (data.size() == 1) {
             // The data is self-signed. We'll have to take the client at face value.
             JsonNode payload = getPayload(data.get(0).asText());

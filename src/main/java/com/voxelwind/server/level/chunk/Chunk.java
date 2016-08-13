@@ -2,8 +2,6 @@ package com.voxelwind.server.level.chunk;
 
 import com.voxelwind.server.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.DataOutputStream;
@@ -22,7 +20,7 @@ public class Chunk {
     private final int z;
     private final byte[] biomeId = new byte[256];
     private final int[] biomeColor = new int[256];
-    //private final byte[] height = new byte[256];
+    private final byte[] height = new byte[256];
     private McpeFullChunkData chunkDataPacket;
     private boolean stale = true;
 
@@ -31,6 +29,7 @@ public class Chunk {
         this.z = z;
         Arrays.fill(biomeId, (byte) 1);
         Arrays.fill(biomeColor, 0x0185b24a);
+        Arrays.fill(height, (byte) 0xFF);
     }
 
     private static int xyzIdx(int x, int y, int z) {
@@ -75,9 +74,7 @@ public class Chunk {
                 dos.write(blockMetadata.getData());
                 dos.write(skyLightData.getData());
                 dos.write(blockLightData.getData());
-                for (int i = 0; i < 256; i++) {
-                    dos.writeByte(0xFF);
-                }
+                dos.write(height);
                 for (int i : biomeColor) {
                     dos.writeInt(i);
                 }
