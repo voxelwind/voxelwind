@@ -32,11 +32,6 @@ public class FlatworldChunkProvider implements ChunkProvider {
         return chunks.remove(new Vector2i(x, z)) != null;
     }
 
-    @Override
-    public Vector3f getSpawn() {
-        return new Vector3f(0, 5, 0);
-    }
-
     private Chunk generate(Vector2i vector2i) {
         Chunk chunk = new Chunk(vector2i.getX(), vector2i.getY());
         for (int x = 0; x < 16; x++) {

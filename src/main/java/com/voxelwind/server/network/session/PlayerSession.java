@@ -30,7 +30,7 @@ public class PlayerSession extends LivingEntity {
     private int viewDistance = 5;
 
     public PlayerSession(UserSession session, Level level) {
-        super(level, level.getChunkProvider().getSpawn());
+        super(level, level.getSpawnLocation());
         this.session = session;
     }
 
@@ -109,7 +109,7 @@ public class PlayerSession extends LivingEntity {
         session.addToSendQueue(settings);
 
         McpeSetSpawnPosition spawnPosition = new McpeSetSpawnPosition();
-        spawnPosition.setPosition(getLevel().getChunkProvider().getSpawn().toInt());
+        spawnPosition.setPosition(getLevel().getSpawnLocation().toInt());
         session.addToSendQueue(spawnPosition);
     }
 
@@ -215,7 +215,7 @@ public class PlayerSession extends LivingEntity {
                         session.sendUrgentPackage(status);
 
                         McpeSetTime setTime = new McpeSetTime();
-                        setTime.setTime(0);
+                        setTime.setTime(getLevel().getTime());
                         setTime.setRunning(true);
                         session.sendUrgentPackage(setTime);
 

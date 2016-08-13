@@ -12,6 +12,4 @@ public interface ChunkProvider {
     Optional<Chunk> getIfLoaded(int x, int z);
 
     boolean unload(int x, int z);
-
-    Vector3f getSpawn();
 }

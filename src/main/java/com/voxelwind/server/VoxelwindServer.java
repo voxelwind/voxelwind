@@ -6,6 +6,7 @@ import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.LevelCreator;
 import com.voxelwind.server.level.LevelManager;
 import com.voxelwind.server.level.provider.FlatworldChunkProvider;
+import com.voxelwind.server.level.provider.MemoryLevelDataProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
 import com.voxelwind.server.network.session.SessionManager;
@@ -57,7 +58,7 @@ public class VoxelwindServer {
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
 
-        defaultLevel = new Level(new LevelCreator("test", FlatworldChunkProvider.INSTANCE));
+        defaultLevel = new Level(new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
         levelManager.register(defaultLevel);
         levelManager.start(defaultLevel);
 
