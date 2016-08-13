@@ -71,6 +71,7 @@ public class Chunk {
                 chunkDataPacket = new McpeFullChunkData();
                 chunkDataPacket.setChunkX(x);
                 chunkDataPacket.setChunkZ(z);
+                chunkDataPacket.setOrder((byte) 0);
             }
 
             // Generate the inner data
@@ -85,6 +86,7 @@ public class Chunk {
                 for (int i : biomeColor) {
                     dos.writeInt(i);
                 }
+                // extra data, we have none
                 dos.writeInt(0);
             } catch (IOException e) {
                 throw new AssertionError(e);

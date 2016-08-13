@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class PlayerSession extends LivingEntity {
+    private static final int REQUIRED_TO_SPAWN = 56;
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
     private final UserSession session;
@@ -25,7 +26,6 @@ public class PlayerSession extends LivingEntity {
     private boolean spawned = false;
     private boolean sprinting = false;
     private boolean sneaking = false;
-    private boolean firstChunksSent = false;
 
     public PlayerSession(UserSession session, Level level) {
         super(level, level.getChunkProvider().getSpawn());
@@ -162,30 +162,30 @@ public class PlayerSession extends LivingEntity {
                     return;
                 }
 
+                int sent = 0;
+
                 for (Chunk chunk : chunks) {
-                    session.addToSendQueue(chunk.getChunkDataPacket());
-                }
+                    McpeBatch batch = new McpeBatch();
+                    batch.getPackages().add(chunk.getChunkDataPacket());
+                    session.sendUrgentPackage(batch);
+                    sent++;
 
-                if (!firstChunksSent) {
-                    firstChunksSent = true;
-
-                    // Ensure these will be in a future batch
-                    session.getChannel().eventLoop().schedule(() -> {
+                    if (!spawned && sent >= REQUIRED_TO_SPAWN) {
                         McpePlayStatus status = new McpePlayStatus();
                         status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
-                        session.addToSendQueue(status);
+                        session.sendUrgentPackage(status);
 
                         McpeSetTime setTime = new McpeSetTime();
                         setTime.setTime(0);
                         setTime.setRunning(true);
-                        session.addToSendQueue(setTime);
+                        session.sendUrgentPackage(setTime);
 
                         spawned = true;
 
                         McpeRespawn respawn = new McpeRespawn();
-                        respawn.setPosition(getLevel().getChunkProvider().getSpawn());
-                        session.addToSendQueue(respawn);
-                    }, 500, TimeUnit.MILLISECONDS);
+                        respawn.setPosition(getPosition());
+                        session.sendUrgentPackage(respawn);
+                    }
                 }
             });
         }
