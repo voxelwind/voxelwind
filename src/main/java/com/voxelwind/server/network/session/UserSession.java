@@ -268,6 +268,7 @@ public class UserSession extends RakNetSession {
         checkForClosed();
         Preconditions.checkState(playerSession == null, "Player session already initialized");
 
+        state = SessionState.CONNECTED;
         playerSession = new PlayerSession(this, level);
         return playerSession;
     }

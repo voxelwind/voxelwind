@@ -3,12 +3,17 @@ package com.voxelwind.server.network.mcpe;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.server.level.util.Attribute;
+import com.voxelwind.server.network.raknet.RakNetUtil;
 import com.voxelwind.server.util.Rotation;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class McpeUtil {
     private McpeUtil() {
@@ -96,5 +101,31 @@ public class McpeUtil {
 
     private static float rotationByteToAngle(byte angle) {
         return angle / 255f * 360f;
+    }
+
+    public static Collection<Attribute> readAttributes(ByteBuf buf) {
+        List<Attribute> attributes = new ArrayList<>();
+        short size = buf.readShort();
+
+        for (int i = 0; i < size; i++) {
+            float min = buf.readFloat();
+            float max = buf.readFloat();
+            float val = buf.readFloat();
+            String name = RakNetUtil.readString(buf);
+
+            attributes.add(new Attribute(name, min, max, val));
+        }
+
+        return attributes;
+    }
+
+    public static void writeAttributes(ByteBuf buf, Collection<Attribute> attributeList) {
+        buf.writeShort(attributeList.size());
+        for (Attribute attribute : attributeList) {
+            buf.writeFloat(attribute.getMinimumValue());
+            buf.writeFloat(attribute.getMaximumValue());
+            buf.writeFloat(attribute.getValue());
+            RakNetUtil.writeString(buf, attribute.getName());
+        }
     }
 }
