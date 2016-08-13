@@ -116,7 +116,12 @@ public class LevelEntityManager {
 
     public Optional<BaseEntity> findEntityById(long id) {
         synchronized (entityLock) {
-            return entities.stream().filter(e -> e.getEntityId() == id).findFirst();
+            for (BaseEntity entity : entities) {
+                if (entity.getEntityId() == id) {
+                    return Optional.of(entity);
+                }
+            }
+            return Optional.empty();
         }
     }
 
