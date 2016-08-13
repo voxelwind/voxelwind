@@ -29,6 +29,8 @@ public class LevelPacketManager {
             if (entityById.isPresent()) {
                 BaseEntity entity = entityById.get();
                 for (PlayerSession session : playersInWorld) {
+                    if (session == entity) continue; // Don't move ourselves
+
                     if (session.getPosition().distance(entity.getPosition()) <= 64F) {
                         for (RakNetPackage aPackage : entry.getValue()) {
                             session.getUserSession().addToSendQueue(aPackage);

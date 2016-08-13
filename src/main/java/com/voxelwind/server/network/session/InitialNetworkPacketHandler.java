@@ -110,6 +110,11 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         throw new IllegalStateException("Got unexpected McpeText");
     }
 
+    @Override
+    public void handle(McpeMovePlayer packet) {
+        throw new IllegalStateException("Got unexpected McpeMovePlayer");
+    }
+
     private void initializePlayerSession() {
         McpePlayStatus status = new McpePlayStatus();
         status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);

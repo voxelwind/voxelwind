@@ -54,16 +54,6 @@ public class LevelEntityManager {
 
                 if (entity.isStale()) {
                     // Need to send packets.
-                    if (entity instanceof PlayerSession) {
-                        McpeMovePlayer movePlayerPacket = new McpeMovePlayer();
-                        movePlayerPacket.setEntityId(entity.getEntityId());
-                        movePlayerPacket.setPosition(entity.getPosition());
-                        movePlayerPacket.setRotation(entity.getRotation());
-                        movePlayerPacket.setMode(entity.isTeleported());
-                        movePlayerPacket.setOnGround(entity.isOnGround());
-                        ((PlayerSession) entity).getUserSession().addToSendQueue(movePlayerPacket);
-                    }
-
                     McpeMoveEntity moveEntityPacket = new McpeMoveEntity();
                     moveEntityPacket.setEntityId(entity.getEntityId());
                     moveEntityPacket.setPosition(entity.getPosition());

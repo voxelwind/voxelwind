@@ -9,6 +9,7 @@ import com.voxelwind.server.level.chunk.Chunk;
 import com.voxelwind.server.level.entities.LivingEntity;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
+import com.voxelwind.server.util.Rotation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,6 +27,7 @@ public class PlayerSession extends LivingEntity {
     private boolean spawned = false;
     private boolean sprinting = false;
     private boolean sneaking = false;
+    private int viewDistance = 5;
 
     public PlayerSession(UserSession session, Level level) {
         super(level, level.getChunkProvider().getSpawn());
@@ -53,6 +55,42 @@ public class PlayerSession extends LivingEntity {
         }
 
         return true;
+    }
+
+    @Override
+    protected void setPosition(Vector3f position) {
+        setPosition(position, false);
+    }
+
+    private void setPosition(Vector3f position, boolean internal) {
+        super.setPosition(position);
+
+        if (!internal) {
+            sendMovePlayerPacket();
+        }
+    }
+
+    @Override
+    public void setRotation(Rotation rotation) {
+        setRotation(rotation, false);
+    }
+
+    private void setRotation(Rotation rotation, boolean internal) {
+        super.setRotation(rotation);
+
+        if (!internal) {
+            sendMovePlayerPacket();
+        }
+    }
+
+    private void sendMovePlayerPacket() {
+        McpeMovePlayer movePlayerPacket = new McpeMovePlayer();
+        movePlayerPacket.setEntityId(getEntityId());
+        movePlayerPacket.setPosition(getPosition().add(0, 1.62, 0));
+        movePlayerPacket.setRotation(getRotation());
+        movePlayerPacket.setMode(isTeleported());
+        movePlayerPacket.setOnGround(isOnGround());
+        session.addToSendQueue(movePlayerPacket);
     }
 
     public void doInitialSpawn() {
@@ -154,6 +192,7 @@ public class PlayerSession extends LivingEntity {
             McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
             updated.setRadius(radius);
             session.addToSendQueue(updated);
+            viewDistance = radius;
 
             sendRadius(radius, true).whenComplete((chunks, throwable) -> {
                 if (throwable != null) {
@@ -259,6 +298,27 @@ public class PlayerSession extends LivingEntity {
 
             // By default, queue this packet for all players in the world.
             getLevel().getPacketManager().queuePacketForPlayers(packet);
+        }
+
+        @Override
+        public void handle(McpeMovePlayer packet) {
+            // TODO: We may do well to perform basic anti-cheat
+            setPosition(packet.getPosition().sub(0, 1.62, 0), true);
+            setRotation(packet.getRotation(), true);
+
+            sendRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
+                    disconnect("Internal server error");
+                    return;
+                }
+
+                for (Chunk chunk : chunks) {
+                    McpeBatch batch = new McpeBatch();
+                    batch.getPackages().add(chunk.getChunkDataPacket());
+                    session.sendUrgentPackage(batch);
+                }
+            });
         }
     }
 }

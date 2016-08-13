@@ -14,4 +14,6 @@ public interface NetworkPacketHandler {
     void handle(McpeAnimate packet);
 
     void handle(McpeText packet);
+
+    void handle(McpeMovePlayer packet);
 }
