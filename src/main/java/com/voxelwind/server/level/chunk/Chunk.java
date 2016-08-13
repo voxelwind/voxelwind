@@ -1,11 +1,17 @@
 package com.voxelwind.server.level.chunk;
 
+import com.flowpowered.nbt.CompoundMap;
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.ListTag;
+import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.voxelwind.server.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 public class Chunk {
@@ -83,10 +89,32 @@ public class Chunk {
                 throw new AssertionError(e);
             }
 
+            // Finally, write an empty NBT compound.
+            try (NBTOutputStream outputStream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
+                outputStream.writeTag(new CompoundTag("", new CompoundMap()));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+
             chunkDataPacket.setData(memoryStream.toByteArray());
         }
 
         return chunkDataPacket;
+    }
+
+    public void writeTo(OutputStream stream) {
+        try (DataOutputStream dos = new DataOutputStream(stream)) {
+            dos.write(blockData);
+            dos.write(blockMetadata.getData());
+            dos.write(skyLightData.getData());
+            dos.write(blockLightData.getData());
+            dos.write(height);
+            for (int i : biomeColor) {
+                dos.writeInt(i);
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 
     private static void checkPosition(int x, int y, int z) {
