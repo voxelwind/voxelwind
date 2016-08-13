@@ -175,6 +175,10 @@ public class RakNetSession {
         channel.flush();
     }
 
+    public void touch() {
+        lastKnownUpdate.set(System.currentTimeMillis());
+    }
+
     public void enqueueAck(int ack) {
         checkForClosed();
 

@@ -47,6 +47,9 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         ackPacket.getIds().add(new IntRange(datagram.content().getDatagramSequenceNumber()));
         ctx.writeAndFlush(new DirectAddressedRakNetPacket(ackPacket, datagram.sender()));
 
+        // Update session touch time.
+        session.touch();
+
         // Check the datagram contents.
         if (datagram.content().getFlags().isValid()) {
             for (EncapsulatedRakNetPacket packet : datagram.content().getPackets()) {
