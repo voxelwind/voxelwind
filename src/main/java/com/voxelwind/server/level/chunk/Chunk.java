@@ -71,7 +71,7 @@ public class Chunk {
                 chunkDataPacket = new McpeFullChunkData();
                 chunkDataPacket.setChunkX(x);
                 chunkDataPacket.setChunkZ(z);
-                chunkDataPacket.setOrder((byte) 0);
+                chunkDataPacket.setOrder((byte) 1);
             }
 
             // Generate the inner data
