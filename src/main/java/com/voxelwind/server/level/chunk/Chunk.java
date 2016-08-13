@@ -4,6 +4,7 @@ import com.flowpowered.nbt.CompoundMap;
 import com.flowpowered.nbt.CompoundTag;
 import com.flowpowered.nbt.ListTag;
 import com.flowpowered.nbt.stream.NBTOutputStream;
+import com.google.common.collect.ImmutableList;
 import com.voxelwind.server.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -39,7 +40,7 @@ public class Chunk {
     }
 
     private static int xyzIdx(int x, int y, int z) {
-        return (x * 2048) + (z * 128) + y;
+        return x + 16 * (z + 16 * y);
     }
 
     public int getX() {
@@ -91,7 +92,7 @@ public class Chunk {
 
             // Finally, write an empty NBT compound.
             try (NBTOutputStream outputStream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
-                outputStream.writeTag(new CompoundTag("", new CompoundMap()));
+                outputStream.writeTag(new ListTag<>("", CompoundTag.class, ImmutableList.of()));
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
