@@ -162,7 +162,9 @@ public class PlayerSession extends LivingEntity {
                     return;
                 }
 
-                chunks.stream().map(Chunk::getChunkDataPacket).forEach(session::addToSendQueue);
+                for (Chunk chunk : chunks) {
+                    session.addToSendQueue(chunk.getChunkDataPacket());
+                }
 
                 if (!firstChunksSent) {
                     firstChunksSent = true;

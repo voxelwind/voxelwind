@@ -40,6 +40,9 @@ public class SplitPacketHelper {
         for (EncapsulatedRakNetPacket netPacket : sortedPackets) {
             buf.writeBytes(netPacket.getBuffer());
         }
+
+        release();
+
         return Optional.of(buf);
     }
 
