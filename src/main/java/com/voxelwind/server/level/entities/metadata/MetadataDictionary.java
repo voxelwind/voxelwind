@@ -8,15 +8,65 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class MetadataDictionary {
     private final Map<Integer, Object> typeMap = new HashMap<>();
+
+    public Optional get(int index) {
+        return Optional.ofNullable(typeMap.get(index));
+    }
+
+    public void put(int index, Object o) {
+        Preconditions.checkNotNull(o, "o");
+        Preconditions.checkArgument(isAcceptable(o), "object can not be serialized");
+
+        typeMap.put(index, o);
+    }
 
     public void writeTo(ByteBuf buf) {
         for (Map.Entry<Integer, Object> entry : typeMap.entrySet()) {
             serialize(buf, entry.getKey(), entry.getValue());
         }
         buf.writeByte(0x7F);
+    }
+
+    private static boolean isAcceptable(Object o) {
+        return o instanceof Byte || o instanceof Short || o instanceof Integer || o instanceof Float || o
+                instanceof String || o instanceof Vector3i;
+    }
+
+    public static MetadataDictionary deserialize(ByteBuf buf) {
+        byte read;
+        MetadataDictionary dictionary = new MetadataDictionary();
+        while ((read = buf.readByte()) != 0x7F) {
+            int idx = read & 0x1f;
+            int type = read >> 5;
+
+            switch (type) {
+                case EntityMetadataConstants.DATA_TYPE_BYTE:
+                    dictionary.put(idx, buf.readByte());
+                    break;
+                case EntityMetadataConstants.DATA_TYPE_SHORT:
+                    dictionary.put(idx, buf.readShort());
+                    break;
+                case EntityMetadataConstants.DATA_TYPE_INT:
+                    dictionary.put(idx, buf.readInt());
+                    break;
+                case EntityMetadataConstants.DATA_TYPE_FLOAT:
+                    dictionary.put(idx, buf.readFloat());
+                    break;
+                case EntityMetadataConstants.DATA_TYPE_STRING:
+                    dictionary.put(idx, RakNetUtil.readString(buf));
+                    break;
+                case EntityMetadataConstants.DATA_TYPE_POS:
+                    dictionary.put(idx, McpeUtil.readVector3i(buf, false));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Type " + type + " is not recognized.");
+            }
+        }
+        return dictionary;
     }
 
     private static void serialize(ByteBuf buf, int idx, Object o) {
@@ -43,7 +93,7 @@ public class MetadataDictionary {
             String s = (String) o;
             buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_STRING, idx));
             RakNetUtil.writeString(buf, s);
-        } // TODO: Implement slots.
+        } // TODO: Implement slots. (Requires item type)
         else if (o instanceof Vector3i) {
             Vector3i vector3i = (Vector3i) o;
             buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_POS, idx));
