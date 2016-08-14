@@ -179,7 +179,7 @@ public class PlayerSession extends LivingEntity {
         session.addToSendQueue(text);
     }
 
-    private void updateViewableEntities() {
+    public void updateViewableEntities() {
         synchronized (isViewing) {
             Collection<BaseEntity> inView = getLevel().getEntityManager().getEntitiesInDistance(getPosition(), 64);
             Collection<Long> mustRemove = new ArrayList<>();

@@ -73,14 +73,15 @@ public class LevelEntityManager {
             }
         }
 
-        for (BaseEntity entity : toRemove) {
-            McpeRemoveEntity removeEntity = new McpeRemoveEntity();
-            removeEntity.setEntityId(entity.getEntityId());
-            level.getPacketManager().queuePacketForViewers(entity, removeEntity);
-        }
-
         synchronized (entityLock) {
             entities.removeAll(toRemove);
+        }
+
+        if (!toRemove.isEmpty()) {
+            // Perform a view check so that the entities are removed on the client side.
+            for (PlayerSession session : getPlayers()) {
+                session.updateViewableEntities();
+            }
         }
     }
 
