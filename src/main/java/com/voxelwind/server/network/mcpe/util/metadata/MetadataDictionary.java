@@ -107,4 +107,22 @@ public final class MetadataDictionary {
 
         throw new IllegalArgumentException("Unsupported type " + o);
     }
+
+    @Override
+    public String toString() {
+        return typeMap.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MetadataDictionary that = (MetadataDictionary) o;
+        return java.util.Objects.equals(typeMap, that.typeMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(typeMap);
+    }
 }
