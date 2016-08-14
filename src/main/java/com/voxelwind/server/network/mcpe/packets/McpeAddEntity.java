@@ -27,10 +27,10 @@ public class McpeAddEntity implements RakNetPackage {
         entityType = buffer.readInt();
         position = McpeUtil.readVector3f(buffer);
         velocity = McpeUtil.readVector3f(buffer);
-        yaw = buffer.readByte();
+        yaw = buffer.readFloat();
         pitch = buffer.readFloat();
-        metadata.putAll(MetadataDictionary.deserialize(buffer));
         attributes.addAll(McpeUtil.readAttributes(buffer));
+        metadata.putAll(MetadataDictionary.deserialize(buffer));
     }
 
     @Override
@@ -41,8 +41,8 @@ public class McpeAddEntity implements RakNetPackage {
         McpeUtil.writeVector3f(buffer, velocity);
         buffer.writeFloat(yaw);
         buffer.writeFloat(pitch);
-        metadata.writeTo(buffer);
         McpeUtil.writeAttributes(buffer, attributes);
+        metadata.writeTo(buffer);
     }
 
     public long getEntityId() {
