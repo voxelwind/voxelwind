@@ -72,10 +72,14 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
                 }
             }
         }
+
+        if (datagram.refCnt() > 1) {
+            datagram.release();
+        }
     }
 
     private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
-        //System.out.println("[Package] " + netPackage);
+        System.out.println("[Package] " + netPackage);
 
         if (netPackage == null) {
             return;
@@ -109,17 +113,6 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             return;
         }
 
-        // McpeBatch: Multiple packets. This method will handle everything.
-        if (netPackage instanceof McpeUnknown) {
-            System.out.println("[Unknown Packet] ID: " + Integer.toHexString(((McpeUnknown) netPackage).getId()));
-            System.out.println(ByteBufUtil.prettyHexDump(((McpeUnknown) netPackage).getBuf()));
-        }
-        if (netPackage instanceof McpeBatch) {
-            for (RakNetPackage aPackage : ((McpeBatch) netPackage).getPackages()) {
-                handlePackage(aPackage, session);
-            }
-            return;
-        }
         // Connected Ping
         if (netPackage instanceof ConnectedPingPacket) {
             ConnectedPingPacket request = (ConnectedPingPacket) netPackage;
@@ -147,6 +140,21 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         // Disconnection
         if (netPackage instanceof DisconnectNotificationPacket) {
             session.close();
+            return;
+        }
+
+        // Unknown
+        if (netPackage instanceof McpeUnknown) {
+            System.out.println("[Unknown Packet] ID: " + Integer.toHexString(((McpeUnknown) netPackage).getId()));
+            System.out.println(ByteBufUtil.prettyHexDump(((McpeUnknown) netPackage).getBuf()));
+            ((McpeUnknown) netPackage).getBuf().release();
+        }
+
+        // McpeBatch: Multiple packets. This method will handle everything.
+        if (netPackage instanceof McpeBatch) {
+            for (RakNetPackage aPackage : ((McpeBatch) netPackage).getPackages()) {
+                handlePackage(aPackage, session);
+            }
             return;
         }
 

@@ -130,8 +130,7 @@ public class RakNetSession {
             if (!datagram.tryAddPacket(packet, mtu)) {
                 throw new RuntimeException("Packet too large to fit in MTU (size: " + packet.totalLength() + ", MTU: " + mtu + ")");
             }
-            datagram.retain(); // retain in case we need to resend it
-            datagrams.add(datagram);
+            datagrams.add(datagram.retain()); // retain in case we need to resend it
         }
 
         for (RakNetDatagram netDatagram : datagrams) {

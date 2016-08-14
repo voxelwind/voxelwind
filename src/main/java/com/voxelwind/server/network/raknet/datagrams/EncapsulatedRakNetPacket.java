@@ -5,6 +5,7 @@ import com.voxelwind.server.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.AbstractReferenceCounted;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.ReferenceCounted;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -22,6 +23,20 @@ public class EncapsulatedRakNetPacket extends AbstractReferenceCounted {
     private int partIndex;
     private ByteBuf buffer;
 
+    @Override
+    public EncapsulatedRakNetPacket retain() {
+        super.retain();
+        buffer.retain();
+        return this;
+    }
+
+    @Override
+    public EncapsulatedRakNetPacket retain(int increment) {
+        super.retain(increment);
+        buffer.retain(increment);
+        return this;
+    }
+
     public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, RakNetSession session) {
         // Potentially split the package..
         List<ByteBuf> bufs = new ArrayList<>();
@@ -32,7 +47,7 @@ public class EncapsulatedRakNetPacket extends AbstractReferenceCounted {
             int split = (int) Math.ceil(buffer.readableBytes() / by);
             for (int i = 0; i < split; i++) {
                 // Need to retain, in the event that we need to send due to NAK.
-                bufs.add(from.readSlice(Math.min(by, from.readableBytes())).retain());
+                bufs.add(from.readSlice(Math.min(by, from.readableBytes())));
             }
         } else {
             bufs.add(buffer);

@@ -67,20 +67,7 @@ public class PacketRegistry {
     }
 
     public static RakNetPackage tryDecode(ByteBuf buf, PacketType type) {
-        int id = buf.readUnsignedByte();
-        Class<? extends RakNetPackage> pkgClass = PACKAGE_BY_ID.get(type).get(id);
-        if (pkgClass == null)
-            return null;
-
-        RakNetPackage netPackage;
-        try {
-            netPackage = pkgClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Unable to create packet instance", e);
-        }
-
-        netPackage.decode(buf);
-        return netPackage;
+        return tryDecode(buf, type, false);
     }
 
     public static RakNetPackage tryDecode(ByteBuf buf, PacketType type, boolean fromBatch) {
