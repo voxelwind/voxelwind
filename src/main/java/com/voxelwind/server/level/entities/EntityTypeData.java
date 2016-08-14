@@ -1,7 +1,7 @@
 package com.voxelwind.server.level.entities;
 
 public enum EntityTypeData {
-    PLAYER(63, 1.f),
+    PLAYER(63, 1.62f),
     
     CHICKEN(10, 0.7f),
     COW(11, 1.3f),
