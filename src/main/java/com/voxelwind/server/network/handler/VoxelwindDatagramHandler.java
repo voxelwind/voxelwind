@@ -110,6 +110,10 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         }
 
         // McpeBatch: Multiple packets. This method will handle everything.
+        if (netPackage instanceof McpeUnknown) {
+            System.out.println("[Unknown Packet] ID: " + Integer.toHexString(((McpeUnknown) netPackage).getId()));
+            System.out.println(ByteBufUtil.prettyHexDump(((McpeUnknown) netPackage).getBuf()));
+        }
         if (netPackage instanceof McpeBatch) {
             for (RakNetPackage aPackage : ((McpeBatch) netPackage).getPackages()) {
                 handlePackage(aPackage, session);

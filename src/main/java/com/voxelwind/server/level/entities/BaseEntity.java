@@ -22,8 +22,8 @@ public class BaseEntity {
     private Rotation rotation;
     private boolean stale = true;
     private boolean teleported = false;
-    private boolean sprinting = false;
-    private boolean sneaking = false;
+    protected boolean sprinting = false;
+    protected boolean sneaking = false;
     private boolean invisible = false;
     private boolean removed = false;
 

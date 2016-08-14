@@ -43,6 +43,10 @@ public class FlatworldChunkProvider implements ChunkProvider {
                 chunk.setBlock(x, 4, z, (byte) 2);
             }
         }
+
+        if (vector2i.equals(Vector2i.ZERO)) {
+            chunk.setBlock(0, 4, 0, (byte) 7);
+        }
         return chunk;
     }
 }

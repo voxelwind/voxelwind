@@ -10,6 +10,7 @@ import com.voxelwind.server.level.entities.BaseEntity;
 import com.voxelwind.server.level.entities.EntityTypeData;
 import com.voxelwind.server.level.entities.LivingEntity;
 import com.voxelwind.server.level.entities.ZombieEntity;
+import com.voxelwind.server.level.util.Attribute;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.util.Rotation;
@@ -29,8 +30,6 @@ public class PlayerSession extends LivingEntity {
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<Long> isViewing = new HashSet<>();
     private boolean spawned = false;
-    private boolean sprinting = false;
-    private boolean sneaking = false;
     private int viewDistance = 5;
 
     public PlayerSession(UserSession session, Level level) {
@@ -95,6 +94,47 @@ public class PlayerSession extends LivingEntity {
     @Override
     public boolean isRemoved() {
         return session.isClosed();
+    }
+
+    @Override
+    public void setHealth(float health) {
+        super.setHealth(health);
+
+        sendAttributes();
+    }
+
+    @Override
+    protected void doDeath() {
+        McpeEntityEvent event = new McpeEntityEvent();
+        event.setEntityId(getEntityId());
+        event.setEvent((byte) 3);
+        getLevel().getPacketManager().queuePacketForViewers(this, event);
+
+        Vector3f respawnLocation = getLevel().getSpawnLocation();
+
+        McpeRespawn respawn = new McpeRespawn();
+        respawn.setPosition(respawnLocation);
+        session.addToSendQueue(respawn);
+
+        setPosition(respawnLocation, true);
+    }
+
+    private void sendAttributes() {
+        // Supported by MiNET:
+        // - generic.health
+        // - player.hunger
+        // - player.level
+        // - player.experience
+        // - generic.movementSpeed
+        // - generic.absorption
+        Attribute health = new Attribute("generic.health", 0f, getMaximumHealth(), getHealth());
+        Attribute hunger = new Attribute("player.hunger", 0f, 20f, 20f); // TODO: Implement hunger
+        // TODO: Implement levels, movement speed, and absorption.
+
+        McpeUpdateAttributes packet = new McpeUpdateAttributes();
+        packet.getAttributes().add(health);
+        packet.getAttributes().add(hunger);
+        session.addToSendQueue(packet);
     }
 
     private void sendMovePlayerPacket() {
@@ -279,6 +319,7 @@ public class PlayerSession extends LivingEntity {
                         session.sendUrgentPackage(respawn);
 
                         updateViewableEntities();
+                        sendAttributes();
                     }
                 }
             });
@@ -331,6 +372,10 @@ public class PlayerSession extends LivingEntity {
                     // Clean up attributes?
                     break;
             }
+
+            McpeSetEntityData dataPacket = new McpeSetEntityData();
+            dataPacket.getMetadata().put(0, getFlagValue());
+            getLevel().getPacketManager().queuePacketForViewers(PlayerSession.this, dataPacket);
         }
 
         @Override
@@ -353,6 +398,10 @@ public class PlayerSession extends LivingEntity {
                         ZombieEntity entity = new ZombieEntity(getLevel(), getPosition());
                         getLevel().getEntityManager().register(entity);
                         updateViewableEntities();
+                        return;
+                    case "/die":
+                        sendMessage("You have committed suicide.");
+                        setHealth(0f);
                         return;
                 }
             }

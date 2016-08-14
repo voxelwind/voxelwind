@@ -24,4 +24,12 @@ public class McpeUnknown implements RakNetPackage {
     public String toString() {
         return "UNKNOWN - " + Integer.toHexString(id) + " - Hex: " + ByteBufUtil.hexDump(buf);
     }
+
+    public short getId() {
+        return id;
+    }
+
+    public ByteBuf getBuf() {
+        return buf;
+    }
 }
