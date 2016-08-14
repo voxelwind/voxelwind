@@ -18,7 +18,7 @@ public class McpeAddEntity implements RakNetPackage {
     private float yaw;
     private float pitch;
     // TODO: Attributes and metadata.
-    private final MetadataDictionary dictionary = new MetadataDictionary();
+    private final MetadataDictionary metadata = new MetadataDictionary();
     private final Collection<Attribute> attributes = new ArrayList<>();
 
     @Override
@@ -29,7 +29,7 @@ public class McpeAddEntity implements RakNetPackage {
         velocity = McpeUtil.readVector3f(buffer);
         yaw = buffer.readByte();
         pitch = buffer.readFloat();
-        dictionary.putAll(MetadataDictionary.deserialize(buffer));
+        metadata.putAll(MetadataDictionary.deserialize(buffer));
         attributes.addAll(McpeUtil.readAttributes(buffer));
     }
 
@@ -41,7 +41,7 @@ public class McpeAddEntity implements RakNetPackage {
         McpeUtil.writeVector3f(buffer, velocity);
         buffer.writeFloat(yaw);
         buffer.writeFloat(pitch);
-        dictionary.writeTo(buffer);
+        metadata.writeTo(buffer);
         McpeUtil.writeAttributes(buffer, attributes);
     }
 
@@ -93,8 +93,8 @@ public class McpeAddEntity implements RakNetPackage {
         this.pitch = pitch;
     }
 
-    public MetadataDictionary getDictionary() {
-        return dictionary;
+    public MetadataDictionary getMetadata() {
+        return metadata;
     }
 
     public Collection<Attribute> getAttributes() {

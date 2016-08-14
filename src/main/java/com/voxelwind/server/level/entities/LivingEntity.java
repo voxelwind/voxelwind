@@ -8,7 +8,7 @@ public class LivingEntity extends BaseEntity {
     protected float gravity = 0.08f;
 
     public LivingEntity(Level level, Vector3f position) {
-        super(level, position);
+        super(entityType, position, level);
     }
 
     @Override
