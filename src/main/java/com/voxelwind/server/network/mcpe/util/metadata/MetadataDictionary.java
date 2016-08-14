@@ -1,4 +1,4 @@
-package com.voxelwind.server.level.entities.metadata;
+package com.voxelwind.server.network.mcpe.util.metadata;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
@@ -10,8 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class MetadataDictionary {
+public final class MetadataDictionary {
     private final Map<Integer, Object> typeMap = new HashMap<>();
+
+    public void putAll(MetadataDictionary dictionary) {
+        Preconditions.checkNotNull(dictionary, "dictionary");
+        typeMap.putAll(dictionary.typeMap);
+    }
 
     public Optional get(int index) {
         return Optional.ofNullable(typeMap.get(index));

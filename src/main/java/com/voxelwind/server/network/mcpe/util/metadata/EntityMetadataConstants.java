@@ -1,4 +1,4 @@
-package com.voxelwind.server.level.entities.metadata;
+package com.voxelwind.server.network.mcpe.util.metadata;
 
 public class EntityMetadataConstants {
     private EntityMetadataConstants() {
