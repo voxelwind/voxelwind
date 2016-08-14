@@ -78,6 +78,18 @@ public class LevelEntityManager {
         }
 
         if (!toRemove.isEmpty()) {
+            for (BaseEntity entity : toRemove) {
+                if (entity instanceof PlayerSession) {
+                    // The player should already be disconnected.
+                    continue;
+                }
+
+                // If the entity isn't already removed, do it now.
+                if (!entity.isRemoved()) {
+                    entity.remove();
+                }
+            }
+
             // Perform a view check so that the entities are removed on the client side.
             for (PlayerSession session : getPlayers()) {
                 session.updateViewableEntities();

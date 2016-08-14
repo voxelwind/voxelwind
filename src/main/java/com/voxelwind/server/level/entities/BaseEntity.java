@@ -25,6 +25,7 @@ public class BaseEntity {
     private boolean sprinting = false;
     private boolean sneaking = false;
     private boolean invisible = false;
+    private boolean removed = false;
 
     public BaseEntity(EntityTypeData data, Vector3f position, Level level) {
         this.data = data;
@@ -69,6 +70,8 @@ public class BaseEntity {
     }
 
     protected void setPosition(Vector3f position) {
+        checkIfAlive();
+
         if (!this.position.equals(position)) {
             this.position = position;
             stale = true;
@@ -80,6 +83,8 @@ public class BaseEntity {
     }
 
     public void setRotation(Rotation rotation) {
+        checkIfAlive();
+
         if (!this.rotation.equals(rotation)) {
             this.rotation = rotation;
             stale = true;
@@ -91,6 +96,8 @@ public class BaseEntity {
     }
 
     public void setMotion(Vector3f motion) {
+        checkIfAlive();
+
         if (!this.motion.equals(motion)) {
             this.motion = motion;
             stale = true;
@@ -102,6 +109,8 @@ public class BaseEntity {
     }
 
     public void setSprinting(boolean sprinting) {
+        checkIfAlive();
+
         if (this.sprinting != sprinting) {
             this.sprinting = sprinting;
             stale = true;
@@ -113,6 +122,8 @@ public class BaseEntity {
     }
 
     public void setSneaking(boolean sneaking) {
+        checkIfAlive();
+
         if (this.sneaking != sneaking) {
             this.sneaking = sneaking;
             stale = true;
@@ -124,6 +135,8 @@ public class BaseEntity {
     }
 
     public void setInvisible(boolean invisible) {
+        checkIfAlive();
+
         if (this.invisible != invisible) {
             this.invisible = invisible;
             stale = true;
@@ -144,6 +157,8 @@ public class BaseEntity {
     }
 
     public MetadataDictionary getMetadata() {
+        checkIfAlive();
+
         // TODO: Implement more than this.
         MetadataDictionary dictionary = new MetadataDictionary();
         dictionary.put(EntityMetadataConstants.DATA_FLAGS, getFlagValue());
@@ -160,6 +175,8 @@ public class BaseEntity {
     }
 
     public McpeAddEntity createAddEntityPacket() {
+        checkIfAlive();
+
         McpeAddEntity packet = new McpeAddEntity();
         packet.setEntityId(getEntityId());
         packet.setEntityType(data.getType());
@@ -176,6 +193,11 @@ public class BaseEntity {
     }
 
     public boolean onTick() {
+        if (removed) {
+            // Remove the entity.
+            return false;
+        }
+
         // Continue ticking this entity
         return true;
     }
@@ -189,6 +211,8 @@ public class BaseEntity {
     }
 
     public void resetStale() {
+        checkIfAlive();
+
         stale = false;
         teleported = false;
     }
@@ -202,6 +226,8 @@ public class BaseEntity {
     }
 
     public void teleport(Level level, Vector3f position, Rotation rotation) {
+        checkIfAlive();
+
         Level oldLevel = this.level;
         if (oldLevel != level) {
             oldLevel.getEntityManager().unregister(this);
@@ -214,5 +240,18 @@ public class BaseEntity {
         setPosition(position);
         setRotation(rotation);
         this.teleported = true;
+    }
+
+    public void remove() {
+        checkIfAlive();
+        removed = true;
+    }
+
+    public boolean isRemoved() {
+        return removed;
+    }
+
+    protected final void checkIfAlive() {
+        Preconditions.checkState(!removed, "Entity has been removed.");
     }
 }

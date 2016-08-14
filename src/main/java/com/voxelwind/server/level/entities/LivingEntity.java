@@ -13,6 +13,8 @@ public class LivingEntity extends BaseEntity {
 
     @Override
     public boolean onTick() {
+        super.onTick();
+
         if (getMotion().lengthSquared() > 0) {
             boolean onGroundPreviously = isOnGround(getLevel(), getPosition());
             setPosition(getPosition().add(getMotion()));

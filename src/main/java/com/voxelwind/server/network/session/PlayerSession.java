@@ -87,6 +87,16 @@ public class PlayerSession extends LivingEntity {
         }
     }
 
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Do not use remove() on player sessions. Use disconnect() instead.");
+    }
+
+    @Override
+    public boolean isRemoved() {
+        return session.isClosed();
+    }
+
     private void sendMovePlayerPacket() {
         McpeMovePlayer movePlayerPacket = new McpeMovePlayer();
         movePlayerPacket.setEntityId(getEntityId());
