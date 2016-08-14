@@ -127,7 +127,7 @@ public class BaseEntity {
     }
 
     public byte getFlagValue() {
-        BitSet set = new BitSet(1);
+        BitSet set = new BitSet();
         set.set(0, false); // On fire (not implemented)
         set.set(1, sneaking); // Sneaking
         set.set(2, false); // Riding (not implemented)

@@ -42,6 +42,8 @@ public class PacketRegistry {
                             .put(0x07, McpeText.class)
                             .put(0x08, McpeSetTime.class)
                             .put(0x09, McpeStartGame.class)
+                            .put(0x0b, McpeAddEntity.class)
+                            .put(0x0c, McpeRemoveEntity.class)
                             .put(0x0f, McpeMoveEntity.class)
                             .put(0x10, McpeMovePlayer.class)
                             .put(0x13, McpeUpdateBlock.class)
