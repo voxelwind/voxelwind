@@ -7,8 +7,8 @@ public class LivingEntity extends BaseEntity {
     protected float drag = 0.02f;
     protected float gravity = 0.08f;
 
-    public LivingEntity(int entityType, Level level, Vector3f position) {
-        super(entityType, position, level);
+    public LivingEntity(EntityTypeData data, Level level, Vector3f position) {
+        super(data, position, level);
     }
 
     @Override

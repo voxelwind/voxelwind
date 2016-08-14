@@ -7,6 +7,7 @@ import com.spotify.futures.CompletableFutures;
 import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.chunk.Chunk;
 import com.voxelwind.server.level.entities.BaseEntity;
+import com.voxelwind.server.level.entities.EntityTypeData;
 import com.voxelwind.server.level.entities.LivingEntity;
 import com.voxelwind.server.level.entities.ZombieEntity;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
@@ -33,7 +34,7 @@ public class PlayerSession extends LivingEntity {
     private int viewDistance = 5;
 
     public PlayerSession(UserSession session, Level level) {
-        super(63, level, level.getSpawnLocation());
+        super(EntityTypeData.PLAYER, level, level.getSpawnLocation());
         this.session = session;
     }
 
@@ -89,7 +90,7 @@ public class PlayerSession extends LivingEntity {
     private void sendMovePlayerPacket() {
         McpeMovePlayer movePlayerPacket = new McpeMovePlayer();
         movePlayerPacket.setEntityId(getEntityId());
-        movePlayerPacket.setPosition(getPosition().add(0, 1.62, 0));
+        movePlayerPacket.setPosition(getGamePosition());
         movePlayerPacket.setRotation(getRotation());
         movePlayerPacket.setMode(isTeleported());
         movePlayerPacket.setOnGround(isOnGround());
@@ -104,7 +105,7 @@ public class PlayerSession extends LivingEntity {
         startGame.setGamemode(0);
         startGame.setEntityId(getEntityId());
         startGame.setSpawnLocation(getPosition().toInt());
-        startGame.setPosition(getPosition().add(0, 1.62, 0));
+        startGame.setPosition(getGamePosition());
         session.addToSendQueue(startGame);
 
         McpeAdventureSettings settings = new McpeAdventureSettings();

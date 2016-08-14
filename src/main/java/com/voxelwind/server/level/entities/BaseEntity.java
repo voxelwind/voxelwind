@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class BaseEntity {
     private long entityId;
-    private final int entityType;
+    private final EntityTypeData data;
     private Level level;
     private Vector3f position;
     private Vector3f motion;
@@ -26,8 +26,8 @@ public class BaseEntity {
     private boolean sneaking = false;
     private boolean invisible = false;
 
-    public BaseEntity(int entityType, Vector3f position, Level level) {
-        this.entityType = entityType;
+    public BaseEntity(EntityTypeData data, Vector3f position, Level level) {
+        this.data = data;
         this.level = Preconditions.checkNotNull(level, "level");
         this.position = Preconditions.checkNotNull(position, "position");
         this.entityId = level.getEntityManager().allocateEntityId();
@@ -62,6 +62,10 @@ public class BaseEntity {
 
     public Vector3f getPosition() {
         return position;
+    }
+
+    public Vector3f getGamePosition() {
+        return getPosition().add(0, data.getHeight(), 0);
     }
 
     protected void setPosition(Vector3f position) {
@@ -158,8 +162,8 @@ public class BaseEntity {
     public McpeAddEntity createAddEntityPacket() {
         McpeAddEntity packet = new McpeAddEntity();
         packet.setEntityId(getEntityId());
-        packet.setEntityType(entityType);
-        packet.setPosition(getPosition());
+        packet.setEntityType(data.getType());
+        packet.setPosition(getGamePosition());
         packet.setVelocity(getMotion());
         packet.setPitch(getRotation().getPitch());
         packet.setYaw(getRotation().getPitch());
