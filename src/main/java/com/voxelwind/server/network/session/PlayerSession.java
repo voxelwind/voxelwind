@@ -182,7 +182,6 @@ public class PlayerSession extends LivingEntity {
     private void updateViewableEntities() {
         synchronized (isViewing) {
             Collection<BaseEntity> inView = getLevel().getEntityManager().getEntitiesInDistance(getPosition(), 64);
-            System.out.println("[Viewable] In view: " + inView);
             Collection<Long> mustRemove = new ArrayList<>();
             Collection<BaseEntity> mustAdd = new ArrayList<>();
             for (Long id : isViewing) {
@@ -268,6 +267,8 @@ public class PlayerSession extends LivingEntity {
                         McpeRespawn respawn = new McpeRespawn();
                         respawn.setPosition(getPosition());
                         session.sendUrgentPackage(respawn);
+
+                        updateViewableEntities();
                     }
                 }
             });
@@ -353,9 +354,17 @@ public class PlayerSession extends LivingEntity {
         @Override
         public void handle(McpeMovePlayer packet) {
             // TODO: We may do well to perform basic anti-cheat
-            setPosition(packet.getPosition().sub(0, 1.62, 0), true);
+            Vector3f originalPosition = getPosition();
+            Vector3f newPosition = packet.getPosition().sub(0, 1.62, 0);
+
+            setPosition(newPosition, true);
             setRotation(packet.getRotation(), true);
-            updateViewableEntities();
+
+            // If we haven't moved in the X or Z axis, don't update viewable entities - they haven't changed.
+            if (Float.compare(originalPosition.getX(), newPosition.getX()) != 0 ||
+                    Float.compare(originalPosition.getZ(), newPosition.getZ()) != 0) {
+                updateViewableEntities();
+            }
 
             sendRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
                 if (throwable != null) {
