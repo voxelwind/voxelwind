@@ -175,7 +175,7 @@ public class PlayerSession extends LivingEntity {
         return new PlayerSessionNetworkPacketHandler();
     }
 
-    private CompletableFuture<List<Chunk>> sendRadius(int radius, boolean updateSent) {
+    private CompletableFuture<List<Chunk>> getChunksForRadius(int radius, boolean updateSent) {
         // Get current player's position in chunks.
         Vector3i positionAsInt = getPosition().toInt();
         int chunkX = positionAsInt.getX() >> 4;
@@ -287,12 +287,26 @@ public class PlayerSession extends LivingEntity {
             session.addToSendQueue(updated);
             viewDistance = radius;
 
-            sendRadius(radius, true).whenComplete((chunks, throwable) -> {
+            getChunksForRadius(radius, true).whenComplete((chunks, throwable) -> {
                 if (throwable != null) {
                     LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
                     disconnect("Internal server error");
                     return;
                 }
+
+                // Sort the chunks to be sent by whichever is closest to the spawn chunk for smoother loading.
+                Vector3f spawnPosition = getPosition();
+                int spawnChunkX = spawnPosition.getFloorX() >> 4;
+                int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
+                Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
+                Collections.sort(chunks, (o1, o2) -> {
+                    Vector2i o1Coord = new Vector2i(o1.getX(), o1.getZ());
+                    Vector2i o2Coord = new Vector2i(o2.getX(), o2.getZ());
+
+                    // Use whichever is closest to the origin.
+                    return Integer.compare(o1Coord.distanceSquared(originCoord),
+                            o2Coord.distanceSquared(originCoord));
+                });
 
                 int sent = 0;
 
@@ -425,7 +439,7 @@ public class PlayerSession extends LivingEntity {
                 updateViewableEntities();
             }
 
-            sendRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
+            getChunksForRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
                 if (throwable != null) {
                     LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
                     disconnect("Internal server error");
