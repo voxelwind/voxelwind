@@ -142,12 +142,14 @@ public class LevelEntityManager {
     }
 
     public Collection<BaseEntity> getEntitiesInDistance(Vector3f origin, double distance) {
-        Collection<BaseEntity> entities = new ArrayList<>();
-        for (BaseEntity entity : getAllEntities()) {
-            if (entity.getPosition().distance(origin) <= distance) {
-                entities.add(entity);
+        Collection<BaseEntity> inDistance = new ArrayList<>();
+        synchronized (entityLock) {
+            for (BaseEntity entity : entities) {
+                if (entity.getPosition().distance(origin) <= distance) {
+                    inDistance.add(entity);
+                }
             }
         }
-        return entities;
+        return inDistance;
     }
 }
