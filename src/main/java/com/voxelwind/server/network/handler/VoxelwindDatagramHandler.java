@@ -75,7 +75,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
     }
 
     private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
-        System.out.println("[Package] " + netPackage);
+        //System.out.println("[Package] " + netPackage);
 
         if (netPackage == null) {
             return;

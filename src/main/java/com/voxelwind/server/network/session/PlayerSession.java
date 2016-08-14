@@ -6,7 +6,9 @@ import com.flowpowered.math.vector.Vector3i;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.chunk.Chunk;
+import com.voxelwind.server.level.entities.BaseEntity;
 import com.voxelwind.server.level.entities.LivingEntity;
+import com.voxelwind.server.level.entities.ZombieEntity;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.util.Rotation;
@@ -24,13 +26,14 @@ public class PlayerSession extends LivingEntity {
 
     private final UserSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<Long> isViewing = new HashSet<>();
     private boolean spawned = false;
     private boolean sprinting = false;
     private boolean sneaking = false;
     private int viewDistance = 5;
 
     public PlayerSession(UserSession session, Level level) {
-        super(level, level.getSpawnLocation());
+        super(63, level, level.getSpawnLocation());
         this.session = session;
     }
 
@@ -175,6 +178,46 @@ public class PlayerSession extends LivingEntity {
         session.addToSendQueue(text);
     }
 
+    private void updateViewableEntities() {
+        synchronized (isViewing) {
+            Collection<BaseEntity> inView = getLevel().getEntityManager().getEntitiesInDistance(getPosition(), 64);
+            System.out.println("[Viewable] In view: " + inView);
+            Collection<Long> mustRemove = new ArrayList<>();
+            Collection<BaseEntity> mustAdd = new ArrayList<>();
+            for (Long id : isViewing) {
+                Optional<BaseEntity> optional = getLevel().getEntityManager().findEntityById(id);
+                if (optional.isPresent()) {
+                    if (!inView.contains(optional.get())) {
+                        mustRemove.add(id);
+                    }
+                } else {
+                    mustRemove.add(id);
+                }
+            }
+
+            for (BaseEntity entity : inView) {
+                if (entity.getEntityId() == getEntityId()) {
+                    continue;
+                }
+
+                if (isViewing.add(entity.getEntityId())) {
+                    mustAdd.add(entity);
+                }
+            }
+            isViewing.removeAll(mustRemove);
+
+            for (Long id : mustRemove) {
+                McpeRemoveEntity entity = new McpeRemoveEntity();
+                entity.setEntityId(id);
+                session.addToSendQueue(entity);
+            }
+
+            for (BaseEntity entity : mustAdd) {
+                session.addToSendQueue(entity.createAddEntityPacket());
+            }
+        }
+    }
+
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
         @Override
         public void handle(McpeLogin packet) {
@@ -287,11 +330,17 @@ public class PlayerSession extends LivingEntity {
         public void handle(McpeText packet) {
             System.out.println("[Chat] " + packet);
 
+            // Debugging commands.
             if (packet.getMessage().startsWith("/")) {
                 switch (packet.getMessage()) {
                     case "/pos":
                         sendMessage("Level: " + getLevel().getName());
                         sendMessage("Position: " + getPosition());
+                        return;
+                    case "/testspawn":
+                        ZombieEntity entity = new ZombieEntity(getLevel(), getPosition());
+                        getLevel().getEntityManager().register(entity);
+                        updateViewableEntities();
                         return;
                 }
             }
@@ -305,6 +354,7 @@ public class PlayerSession extends LivingEntity {
             // TODO: We may do well to perform basic anti-cheat
             setPosition(packet.getPosition().sub(0, 1.62, 0), true);
             setRotation(packet.getRotation(), true);
+            updateViewableEntities();
 
             sendRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
                 if (throwable != null) {

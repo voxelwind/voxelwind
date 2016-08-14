@@ -15,4 +15,12 @@ public class McpeRemoveEntity implements RakNetPackage {
     public void encode(ByteBuf buffer) {
         buffer.writeLong(entityId);
     }
+
+    public long getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(long entityId) {
+        this.entityId = entityId;
+    }
 }

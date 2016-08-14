@@ -103,9 +103,9 @@ public final class MetadataDictionary {
             Vector3i vector3i = (Vector3i) o;
             buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_POS, idx));
             McpeUtil.writeVector3i(buf, vector3i, false);
+        } else {
+            throw new IllegalArgumentException("Unsupported type " + o.getClass().getName());
         }
-
-        throw new IllegalArgumentException("Unsupported type " + o);
     }
 
     @Override

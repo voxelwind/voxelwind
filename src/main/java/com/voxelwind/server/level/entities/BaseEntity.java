@@ -127,14 +127,16 @@ public class BaseEntity {
     }
 
     public byte getFlagValue() {
-        BitSet set = new BitSet();
+        BitSet set = new BitSet(8);
         set.set(0, false); // On fire (not implemented)
         set.set(1, sneaking); // Sneaking
         set.set(2, false); // Riding (not implemented)
         set.set(3, sprinting); // Sprinting
         set.set(4, false); // In action(?)
         set.set(5, invisible); // Invisible
-        return set.toByteArray()[0];
+
+        byte[] array = set.toByteArray();
+        return array.length == 0 ? 0 : array[0];
     }
 
     public MetadataDictionary getMetadata() {

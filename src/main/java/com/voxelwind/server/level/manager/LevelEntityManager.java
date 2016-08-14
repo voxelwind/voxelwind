@@ -1,10 +1,11 @@
 package com.voxelwind.server.level.manager;
 
+import com.flowpowered.math.vector.Vector3f;
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.entities.BaseEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
-import com.voxelwind.server.network.mcpe.packets.McpeMovePlayer;
+import com.voxelwind.server.network.mcpe.packets.McpeRemoveEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;
 import com.voxelwind.server.network.session.PlayerSession;
 import org.apache.logging.log4j.LogManager;
@@ -72,6 +73,12 @@ public class LevelEntityManager {
             }
         }
 
+        for (BaseEntity entity : toRemove) {
+            McpeRemoveEntity removeEntity = new McpeRemoveEntity();
+            removeEntity.setEntityId(entity.getEntityId());
+            level.getPacketManager().queuePacketForViewers(entity, removeEntity);
+        }
+
         synchronized (entityLock) {
             entities.removeAll(toRemove);
         }
@@ -119,5 +126,15 @@ public class LevelEntityManager {
         synchronized (entityLock) {
             entities.remove(entity);
         }
+    }
+
+    public Collection<BaseEntity> getEntitiesInDistance(Vector3f origin, double distance) {
+        Collection<BaseEntity> entities = new ArrayList<>();
+        for (BaseEntity entity : getAllEntities()) {
+            if (entity.getPosition().distance(origin) <= distance) {
+                entities.add(entity);
+            }
+        }
+        return entities;
     }
 }
