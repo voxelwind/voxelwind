@@ -99,7 +99,6 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
                     cleartext = ((McpeWrapper) netPackage).getWrapped();
                 }
 
-                System.out.println("[WRAPPED]\n" + ByteBufUtil.prettyHexDump(cleartext));
                 RakNetPackage pkg = PacketRegistry.tryDecode(cleartext, PacketType.MCPE);
                 handlePackage(pkg, session);
             } finally {

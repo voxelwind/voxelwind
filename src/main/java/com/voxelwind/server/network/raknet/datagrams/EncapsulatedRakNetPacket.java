@@ -3,12 +3,14 @@ package com.voxelwind.server.network.raknet.datagrams;
 import com.voxelwind.server.network.session.RakNetSession;
 import com.voxelwind.server.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
+import io.netty.util.AbstractReferenceCounted;
+import io.netty.util.ReferenceCountUtil;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EncapsulatedRakNetPacket {
+public class EncapsulatedRakNetPacket extends AbstractReferenceCounted {
     private RakNetReliability reliability;
     private int reliabilityNumber;
     private int sequenceIndex;
@@ -213,5 +215,10 @@ public class EncapsulatedRakNetPacket {
                 ", buffer=" + buffer +
                 ", totalLength=" + totalLength() +
                 '}';
+    }
+
+    @Override
+    protected void deallocate() {
+        ReferenceCountUtil.release(buffer);
     }
 }

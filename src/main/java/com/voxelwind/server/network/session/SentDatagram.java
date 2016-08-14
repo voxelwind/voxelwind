@@ -31,7 +31,7 @@ class SentDatagram {
         stopwatch.reset();
         stopwatch.start();
         for (EncapsulatedRakNetPacket packet : datagram.getPackets()) {
-            packet.getBuffer().retain(); // because the re-write will cause a decrement of the reference count
+            packet.retain();
         }
     }
 
@@ -41,7 +41,7 @@ class SentDatagram {
         }
 
         for (EncapsulatedRakNetPacket packet : datagram.getPackets()) {
-            ReferenceCountUtil.safeRelease(packet.getBuffer());
+            ReferenceCountUtil.release(packet);
         }
 
         stopwatch.stop();

@@ -42,7 +42,7 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
             //System.out.println("[RakNet Datagram] " + packet + ":\n " + ByteBufUtil.prettyHexDump(packet.content()));
             RakNetDatagram datagram = new RakNetDatagram();
             datagram.decode(packet.content().retain()); // Must be retained since packet bodies are slices
-            list.add(new AddressedRakNetDatagram(datagram, packet.recipient(), packet.sender()));
+            list.add(new AddressedRakNetDatagram(datagram, packet.recipient(), packet.sender()).retain());
         }
     }
 }
