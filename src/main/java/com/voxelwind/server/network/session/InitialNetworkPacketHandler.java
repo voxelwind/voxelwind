@@ -8,6 +8,10 @@ import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.util.EncryptionUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -128,35 +132,28 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
-        // TODO: Actually validate this
-        /*if (data.size() == 1) {
+        if (data.size() == 1 || !USE_ENCRYPTION) {
             // The data is self-signed. We'll have to take the client at face value.
-            JsonNode payload = getPayload(data.get(0).asText());
+            JsonNode payload = getPayload(data.get(data.size() - 1).asText());
             JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
             System.out.println("[Payload] " + payload);
-            Preconditions.checkArgument(jwtPayload.getExtraData().getXuid() == null, "Self-signed client tried to provide an XUID");
+            // Don't provide an XUID
+            jwtPayload.getExtraData().setXuid(null);
             return jwtPayload;
         } else {
             // The data has been signed by Mojang. Validate the chain.
-            PublicKey currentKey = MOJANG_PUBLIC_KEY;
-            Jwt<Header, String> last;
+            Jwt<Header, Claims> last;
             for (JsonNode node : data) {
+                PublicKey currentKey = getKey(getHeader(node.asText()).get("x5u").asText());
                 last = Jwts.parser()
                         .setSigningKey(currentKey)
-                        .parsePlaintextJwt(node.asText());
-
-                currentKey = getKey((String) last.getHeader().get("x5u"));
+                        .parseClaimsJwt(node.asText());
             }
 
             JsonNode payload = getPayload(data.get(data.size() - 1).asText());
             System.out.println("[Payload] " + payload);
             return VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
-        }*/
-        JsonNode payload = getPayload(data.get(data.size() - 1).asText());
-        JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
-        System.out.println("[Payload] " + payload);
-        //Preconditions.checkArgument(jwtPayload.getExtraData().getXuid() == null, "Self-signed client tried to provide an XUID");
-        return jwtPayload;
+        }
     }
 
     // ¯\_(ツ)_/¯
