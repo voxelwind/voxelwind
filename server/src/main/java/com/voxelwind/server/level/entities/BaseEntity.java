@@ -9,6 +9,7 @@ import com.voxelwind.server.network.mcpe.packets.McpeAddEntity;
 import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import com.voxelwind.server.util.Rotation;
+import com.voxelwind.server.util.Rotation;
 
 import java.util.BitSet;
 import java.util.Optional;

@@ -2,7 +2,6 @@ package com.voxelwind.server.network.handler;
 
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
-import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.network.session.InitialNetworkPacketHandler;
 import com.voxelwind.server.network.session.UserSession;
 import io.netty.channel.ChannelHandlerContext;

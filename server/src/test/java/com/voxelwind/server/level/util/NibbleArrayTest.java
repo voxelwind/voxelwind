@@ -1,5 +1,6 @@
 package com.voxelwind.server.level.util;
 
+import com.voxelwind.server.level.util.NibbleArray;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
