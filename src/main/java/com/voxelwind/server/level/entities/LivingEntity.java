@@ -2,7 +2,7 @@ package com.voxelwind.server.level.entities;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
-import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.VoxelwindLevel;
 import com.voxelwind.server.network.mcpe.packets.McpeEntityEvent;
 
 public class LivingEntity extends BaseEntity {
@@ -11,7 +11,7 @@ public class LivingEntity extends BaseEntity {
     private float health;
     private float maximumHealth;
 
-    public LivingEntity(EntityTypeData data, Level level, Vector3f position) {
+    public LivingEntity(EntityTypeData data, VoxelwindLevel level, Vector3f position) {
         super(data, position, level);
         // TODO: Set health.
     }

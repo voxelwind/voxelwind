@@ -2,10 +2,10 @@ package com.voxelwind.server.level.manager;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.collect.ImmutableList;
-import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.VoxelwindLevel;
 import com.voxelwind.server.level.entities.BaseEntity;
+import com.voxelwind.server.level.entities.Entity;
 import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
-import com.voxelwind.server.network.mcpe.packets.McpeRemoveEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;
 import com.voxelwind.server.network.session.PlayerSession;
 import org.apache.logging.log4j.LogManager;
@@ -26,9 +26,9 @@ public class LevelEntityManager {
     private final List<BaseEntity> entities = new ArrayList<>();
     private final Object entityLock = new Object();
     private final AtomicLong entityIdAllocator = new AtomicLong();
-    private final Level level;
+    private final VoxelwindLevel level;
 
-    public LevelEntityManager(Level level) {
+    public LevelEntityManager(VoxelwindLevel level) {
         this.level = level;
     }
 
@@ -78,7 +78,7 @@ public class LevelEntityManager {
         }
 
         if (!toRemove.isEmpty()) {
-            for (BaseEntity entity : toRemove) {
+            for (Entity entity : toRemove) {
                 if (entity instanceof PlayerSession) {
                     // The player should already be disconnected.
                     continue;

@@ -14,7 +14,7 @@ public class LevelManager {
         levels.add(level);
     }
 
-    public synchronized void start(Level level) {
+    public synchronized void start(VoxelwindLevel level) {
         Preconditions.checkNotNull(level, "level");
         Preconditions.checkState(!levelTasks.containsKey(level), "level already being ticked");
         LevelTicker ticker = new LevelTicker(level);
@@ -30,9 +30,9 @@ public class LevelManager {
 
     private class LevelTicker extends TimerTask {
         private final Timer timer;
-        private final Level level;
+        private final VoxelwindLevel level;
 
-        private LevelTicker(Level level) {
+        private LevelTicker(VoxelwindLevel level) {
             this.level = level;
             this.timer = new Timer("Voxelwind level ticker - " + level.getName(), true);
             this.timer.scheduleAtFixedRate(this, 50, 50);

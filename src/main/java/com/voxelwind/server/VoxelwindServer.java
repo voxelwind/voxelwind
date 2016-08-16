@@ -2,9 +2,9 @@ package com.voxelwind.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.voxelwind.server.level.Level;
 import com.voxelwind.server.level.LevelCreator;
 import com.voxelwind.server.level.LevelManager;
+import com.voxelwind.server.level.VoxelwindLevel;
 import com.voxelwind.server.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.level.provider.MemoryLevelDataProvider;
 import com.voxelwind.server.network.Native;
@@ -27,7 +27,7 @@ public class VoxelwindServer {
     private final ScheduledExecutorService timerService = Executors.unconfigurableScheduledExecutorService(
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private NettyVoxelwindNetworkListener listener;
-    private Level defaultLevel;
+    private VoxelwindLevel defaultLevel;
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6
@@ -58,7 +58,7 @@ public class VoxelwindServer {
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
 
-        defaultLevel = new Level(new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
+        defaultLevel = new VoxelwindLevel(new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
         levelManager.register(defaultLevel);
         levelManager.start(defaultLevel);
 
@@ -69,7 +69,7 @@ public class VoxelwindServer {
         Thread.sleep(10000000);
     }
 
-    public Level getDefaultLevel() {
+    public VoxelwindLevel getDefaultLevel() {
         return defaultLevel;
     }
 }

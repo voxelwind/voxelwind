@@ -3,7 +3,7 @@ package com.voxelwind.server.level.entities;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
-import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.VoxelwindLevel;
 import com.voxelwind.server.level.chunk.Chunk;
 import com.voxelwind.server.network.mcpe.packets.McpeAddEntity;
 import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
@@ -13,10 +13,10 @@ import com.voxelwind.server.util.Rotation;
 import java.util.BitSet;
 import java.util.Optional;
 
-public class BaseEntity {
+public class BaseEntity implements Entity {
     private long entityId;
     private final EntityTypeData data;
-    private Level level;
+    private VoxelwindLevel level;
     private Vector3f position;
     private Vector3f motion;
     private Rotation rotation;
@@ -27,7 +27,7 @@ public class BaseEntity {
     private boolean invisible = false;
     private boolean removed = false;
 
-    public BaseEntity(EntityTypeData data, Vector3f position, Level level) {
+    public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level) {
         this.data = data;
         this.level = Preconditions.checkNotNull(level, "level");
         this.position = Preconditions.checkNotNull(position, "position");
@@ -37,7 +37,7 @@ public class BaseEntity {
         this.level.getEntityManager().register(this);
     }
 
-    protected static boolean isOnGround(Level level, Vector3f position) {
+    protected static boolean isOnGround(VoxelwindLevel level, Vector3f position) {
         Vector3i blockPosition = position.sub(0f, 0.1f, 0f).toInt();
 
         if (blockPosition.getY() < 0) {
@@ -53,18 +53,22 @@ public class BaseEntity {
         return chunkOptional.isPresent() && chunkOptional.get().getBlock(chunkInX, blockPosition.getY(), chunkInZ) != 0;
     }
 
+    @Override
     public long getEntityId() {
         return entityId;
     }
 
-    public Level getLevel() {
+    @Override
+    public VoxelwindLevel getLevel() {
         return level;
     }
 
+    @Override
     public Vector3f getPosition() {
         return position;
     }
 
+    @Override
     public Vector3f getGamePosition() {
         return getPosition().add(0, data.getHeight(), 0);
     }
@@ -78,10 +82,12 @@ public class BaseEntity {
         }
     }
 
+    @Override
     public Rotation getRotation() {
         return rotation;
     }
 
+    @Override
     public void setRotation(Rotation rotation) {
         checkIfAlive();
 
@@ -91,10 +97,12 @@ public class BaseEntity {
         }
     }
 
+    @Override
     public Vector3f getMotion() {
         return motion;
     }
 
+    @Override
     public void setMotion(Vector3f motion) {
         checkIfAlive();
 
@@ -104,10 +112,12 @@ public class BaseEntity {
         }
     }
 
+    @Override
     public boolean isSprinting() {
         return sprinting;
     }
 
+    @Override
     public void setSprinting(boolean sprinting) {
         checkIfAlive();
 
@@ -117,10 +127,12 @@ public class BaseEntity {
         }
     }
 
+    @Override
     public boolean isSneaking() {
         return sneaking;
     }
 
+    @Override
     public void setSneaking(boolean sneaking) {
         checkIfAlive();
 
@@ -130,10 +142,12 @@ public class BaseEntity {
         }
     }
 
+    @Override
     public boolean isInvisible() {
         return invisible;
     }
 
+    @Override
     public void setInvisible(boolean invisible) {
         checkIfAlive();
 
@@ -192,6 +206,7 @@ public class BaseEntity {
         return stale;
     }
 
+    @Override
     public boolean onTick() {
         if (removed) {
             // Remove the entity.
@@ -202,6 +217,7 @@ public class BaseEntity {
         return true;
     }
 
+    @Override
     public boolean isOnGround() {
         return isOnGround(level, position);
     }
@@ -217,18 +233,21 @@ public class BaseEntity {
         teleported = false;
     }
 
+    @Override
     public void teleport(Vector3f position) {
         teleport(level, position, rotation);
     }
 
-    public void teleport(Level level, Vector3f position) {
+    @Override
+    public void teleport(VoxelwindLevel level, Vector3f position) {
         teleport(level, position, rotation);
     }
 
-    public void teleport(Level level, Vector3f position, Rotation rotation) {
+    @Override
+    public void teleport(VoxelwindLevel level, Vector3f position, Rotation rotation) {
         checkIfAlive();
 
-        Level oldLevel = this.level;
+        VoxelwindLevel oldLevel = this.level;
         if (oldLevel != level) {
             oldLevel.getEntityManager().unregister(this);
             level.getEntityManager().register(this);
@@ -242,11 +261,13 @@ public class BaseEntity {
         this.teleported = true;
     }
 
+    @Override
     public void remove() {
         checkIfAlive();
         removed = true;
     }
 
+    @Override
     public boolean isRemoved() {
         return removed;
     }

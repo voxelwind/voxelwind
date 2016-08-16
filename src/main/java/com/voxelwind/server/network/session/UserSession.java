@@ -2,7 +2,7 @@ package com.voxelwind.server.network.session;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.VoxelwindServer;
-import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.VoxelwindLevel;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
@@ -11,12 +11,6 @@ import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.raknet.RakNetPackage;
-import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
-import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
-import com.voxelwind.server.network.raknet.datastructs.IntRange;
-import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
-import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
-import com.voxelwind.server.network.raknet.packets.AckPacket;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -34,10 +28,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UserSession extends RakNetSession {
@@ -264,7 +255,7 @@ public class UserSession extends RakNetSession {
         return playerSession;
     }
 
-    public PlayerSession initializePlayerSession(Level level) {
+    public PlayerSession initializePlayerSession(VoxelwindLevel level) {
         checkForClosed();
         Preconditions.checkState(playerSession == null, "Player session already initialized");
 

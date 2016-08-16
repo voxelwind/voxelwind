@@ -4,12 +4,9 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.spotify.futures.CompletableFutures;
-import com.voxelwind.server.level.Level;
+import com.voxelwind.server.level.VoxelwindLevel;
 import com.voxelwind.server.level.chunk.Chunk;
-import com.voxelwind.server.level.entities.BaseEntity;
-import com.voxelwind.server.level.entities.EntityTypeData;
-import com.voxelwind.server.level.entities.LivingEntity;
-import com.voxelwind.server.level.entities.ZombieEntity;
+import com.voxelwind.server.level.entities.*;
 import com.voxelwind.server.level.util.Attribute;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
@@ -32,7 +29,7 @@ public class PlayerSession extends LivingEntity {
     private boolean spawned = false;
     private int viewDistance = 5;
 
-    public PlayerSession(UserSession session, Level level) {
+    public PlayerSession(UserSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation());
         this.session = session;
     }
