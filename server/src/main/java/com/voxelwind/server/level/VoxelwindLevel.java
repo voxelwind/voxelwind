@@ -1,6 +1,8 @@
 package com.voxelwind.server.level;
 
 import com.flowpowered.math.vector.Vector3f;
+import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.Level;
 import com.voxelwind.server.level.manager.LevelEntityManager;
 import com.voxelwind.server.level.manager.LevelPacketManager;
 import com.voxelwind.server.level.provider.ChunkProvider;
@@ -9,7 +11,9 @@ import com.voxelwind.server.network.mcpe.packets.McpeSetTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class VoxelwindLevel implements Level {
     private static final int FULL_TIME = 24000;
@@ -67,6 +71,16 @@ public class VoxelwindLevel implements Level {
     @Override
     public int getTime() {
         return (int) ((currentTick + dataProvider.getSavedTime()) % FULL_TIME);
+    }
+
+    @Override
+    public Optional<Chunk> getChunkIfLoaded(int x, int z) {
+        return chunkProvider.getIfLoaded(x, z);
+    }
+
+    @Override
+    public CompletableFuture<Chunk> getChunk(int x, int z) {
+        return chunkProvider.get(x, z);
     }
 
     public void onTick() {

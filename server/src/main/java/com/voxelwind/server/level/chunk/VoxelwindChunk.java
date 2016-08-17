@@ -1,5 +1,8 @@
 package com.voxelwind.server.level.chunk;
 
+import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.block.BlockState;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -9,7 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-public class Chunk {
+public class VoxelwindChunk implements Chunk {
     private static final int FULL_CHUNK_SIZE = 16 * 16 * 128; // 32768
 
     private final byte[] blockData = new byte[FULL_CHUNK_SIZE];
@@ -25,7 +28,7 @@ public class Chunk {
     private McpeFullChunkData chunkDataPacket;
     private boolean stale = true;
 
-    public Chunk(int x, int z) {
+    public VoxelwindChunk(int x, int z) {
         this.x = x;
         this.z = z;
         Arrays.fill(biomeId, (byte) 1);
@@ -45,9 +48,16 @@ public class Chunk {
         return z;
     }
 
-    public synchronized byte getBlock(int x, int y, int z) {
+    public synchronized BlockState getBlock(int x, int y, int z) {
         checkPosition(x, y, z);
-        return blockData[xyzIdx(x, y, z)];
+        byte data = blockData[xyzIdx(x, y, z)];
+
+        return BlockTypes.forId(data);
+    }
+
+    @Override
+    public void setType(int x, int y, int z, BlockState type) {
+        setBlock(x, y, z, (byte) type.getBlockType().getId());
     }
 
     public synchronized void setBlock(int x, int y, int z, byte id) {

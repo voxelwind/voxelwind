@@ -3,13 +3,14 @@ package com.voxelwind.server.level.entities;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.level.Level;
 import com.voxelwind.server.level.VoxelwindLevel;
-import com.voxelwind.server.level.chunk.Chunk;
+import com.voxelwind.server.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.network.mcpe.packets.McpeAddEntity;
 import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
-import com.voxelwind.server.util.Rotation;
-import com.voxelwind.server.util.Rotation;
+import com.voxelwind.api.util.Rotation;
 
 import java.util.BitSet;
 import java.util.Optional;
@@ -36,22 +37,6 @@ public class BaseEntity implements Entity {
         this.rotation = Rotation.ZERO;
         this.motion = Vector3f.ZERO;
         this.level.getEntityManager().register(this);
-    }
-
-    protected static boolean isOnGround(VoxelwindLevel level, Vector3f position) {
-        Vector3i blockPosition = position.sub(0f, 0.1f, 0f).toInt();
-
-        if (blockPosition.getY() < 0) {
-            return false;
-        }
-
-        int chunkX = blockPosition.getX() >> 4;
-        int chunkZ = blockPosition.getZ() >> 4;
-        int chunkInX = blockPosition.getX() % 16;
-        int chunkInZ = blockPosition.getZ() % 16;
-
-        Optional<Chunk> chunkOptional = level.getChunkProvider().getIfLoaded(chunkX, chunkZ);
-        return chunkOptional.isPresent() && chunkOptional.get().getBlock(chunkInX, blockPosition.getY(), chunkInZ) != 0;
     }
 
     @Override
@@ -218,11 +203,6 @@ public class BaseEntity implements Entity {
         return true;
     }
 
-    @Override
-    public boolean isOnGround() {
-        return isOnGround(level, position);
-    }
-
     public boolean isTeleported() {
         return teleported;
     }
@@ -240,23 +220,25 @@ public class BaseEntity implements Entity {
     }
 
     @Override
-    public void teleport(VoxelwindLevel level, Vector3f position) {
+    public void teleport(Level level, Vector3f position) {
         teleport(level, position, rotation);
     }
 
     @Override
-    public void teleport(VoxelwindLevel level, Vector3f position, Rotation rotation) {
+    public void teleport(Level level, Vector3f position, Rotation rotation) {
+        Preconditions.checkArgument(level instanceof VoxelwindLevel, "Not a valid level.");
+
         checkIfAlive();
 
         VoxelwindLevel oldLevel = this.level;
         if (oldLevel != level) {
             oldLevel.getEntityManager().unregister(this);
-            level.getEntityManager().register(this);
+            ((VoxelwindLevel) level).getEntityManager().register(this);
 
             // Mark as stale so that the destination level's entity manager will send the appropriate packets.
             this.stale = true;
         }
-        this.level = level;
+        this.level = (VoxelwindLevel) level;
         setPosition(position);
         setRotation(rotation);
         this.teleported = true;

@@ -5,7 +5,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.level.util.Attribute;
 import com.voxelwind.server.network.raknet.RakNetUtil;
-import com.voxelwind.server.util.Rotation;
+import com.voxelwind.api.util.Rotation;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 

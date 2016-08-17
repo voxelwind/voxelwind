@@ -1,6 +1,7 @@
 package com.voxelwind.server.level;
 
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.level.Level;
 
 import java.util.*;
 

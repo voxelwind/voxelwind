@@ -4,13 +4,14 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.spotify.futures.CompletableFutures;
+import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.server.level.VoxelwindLevel;
-import com.voxelwind.server.level.chunk.Chunk;
+import com.voxelwind.server.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.level.entities.*;
 import com.voxelwind.server.level.util.Attribute;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
-import com.voxelwind.server.util.Rotation;
+import com.voxelwind.api.util.Rotation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -309,7 +310,7 @@ public class PlayerSession extends LivingEntity {
 
                 for (Chunk chunk : chunks) {
                     McpeBatch batch = new McpeBatch();
-                    batch.getPackages().add(chunk.getChunkDataPacket());
+                    batch.getPackages().add(((VoxelwindChunk) chunk).getChunkDataPacket());
                     session.sendUrgentPackage(batch);
                     sent++;
 
@@ -445,7 +446,7 @@ public class PlayerSession extends LivingEntity {
 
                 for (Chunk chunk : chunks) {
                     McpeBatch batch = new McpeBatch();
-                    batch.getPackages().add(chunk.getChunkDataPacket());
+                    batch.getPackages().add(((VoxelwindChunk) chunk).getChunkDataPacket());
                     session.sendUrgentPackage(batch);
                 }
             });

@@ -1,6 +1,6 @@
 package com.voxelwind.server.level.provider;
 
-import com.voxelwind.server.level.chunk.Chunk;
+import com.voxelwind.api.game.level.Chunk;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

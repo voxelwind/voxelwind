@@ -21,9 +21,9 @@ public class LivingEntity extends BaseEntity {
         super.onTick();
 
         if (getMotion().lengthSquared() > 0) {
-            boolean onGroundPreviously = isOnGround(getLevel(), getPosition());
+            boolean onGroundPreviously = isOnGround();
             setPosition(getPosition().add(getMotion()));
-            boolean onGroundNow = isOnGround(getLevel(), getPosition());
+            boolean onGroundNow = isOnGround();
 
             if (!onGroundPreviously && onGroundNow) {
                 setPosition(new Vector3f(getPosition().getX(), getPosition().getFloorY(), getPosition().getZ()));

@@ -1,7 +1,8 @@
 package com.voxelwind.server.level.provider;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.voxelwind.server.level.chunk.Chunk;
+import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.server.level.chunk.VoxelwindChunk;
 
 import java.util.Map;
 import java.util.Optional;
@@ -10,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FlatworldChunkProvider implements ChunkProvider {
     public static final FlatworldChunkProvider INSTANCE = new FlatworldChunkProvider();
-    private final Map<Vector2i, Chunk> chunks = new ConcurrentHashMap<>();
+    private final Map<Vector2i, VoxelwindChunk> chunks = new ConcurrentHashMap<>();
 
     private FlatworldChunkProvider() {
 
@@ -31,8 +32,8 @@ public class FlatworldChunkProvider implements ChunkProvider {
         return chunks.remove(new Vector2i(x, z)) != null;
     }
 
-    private Chunk generate(Vector2i vector2i) {
-        Chunk chunk = new Chunk(vector2i.getX(), vector2i.getY());
+    private VoxelwindChunk generate(Vector2i vector2i) {
+        VoxelwindChunk chunk = new VoxelwindChunk(vector2i.getX(), vector2i.getY());
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 chunk.setBlock(x, 0, z, (byte) 7);

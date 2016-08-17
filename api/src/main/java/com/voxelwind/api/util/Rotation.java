@@ -1,4 +1,4 @@
-package com.voxelwind.server.util;
+package com.voxelwind.api.util;
 
 /**
  * This class represents a rotation. Pocket Edition uses degrees to measure angles.

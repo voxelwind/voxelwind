@@ -1,7 +1,8 @@
 package com.voxelwind.server.level.manager;
 
 import com.voxelwind.server.level.VoxelwindLevel;
-import com.voxelwind.server.level.entities.Entity;
+import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.server.level.entities.BaseEntity;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.session.PlayerSession;
 
@@ -25,7 +26,7 @@ public class LevelPacketManager {
 
         List<PlayerSession> playersInWorld = level.getEntityManager().getPlayers();
         for (Map.Entry<Long, Queue<RakNetPackage>> entry : specificEntityViewerQueue.entrySet()) {
-            Optional<Entity> entityById = level.getEntityManager().findEntityById(entry.getKey());
+            Optional<BaseEntity> entityById = level.getEntityManager().findEntityById(entry.getKey());
             if (entityById.isPresent()) {
                 Entity entity = entityById.get();
                 for (PlayerSession session : playersInWorld) {

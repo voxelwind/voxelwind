@@ -3,7 +3,7 @@ package com.voxelwind.server.network.mcpe.packets;
 import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetPackage;
-import com.voxelwind.server.util.Rotation;
+import com.voxelwind.api.util.Rotation;
 import io.netty.buffer.ByteBuf;
 
 public class McpeMovePlayer implements RakNetPackage {
