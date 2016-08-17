@@ -1,7 +1,10 @@
 package com.voxelwind.api.util;
 
+import com.flowpowered.math.vector.Vector3f;
+import com.google.common.base.Preconditions;
+
 /**
- * This class represents a rotation. Pocket Edition uses degrees to measure angles.
+ * This class represents a rotation. Pocket Edition uses degrees to measure angles. This class is immutable.
  */
 public class Rotation {
     public static final Rotation ZERO = new Rotation(0f, 0f, 0f);
@@ -26,6 +29,25 @@ public class Rotation {
 
     public float getHeadYaw() {
         return headYaw;
+    }
+
+    /**
+     * Returns the values contained in this object as a {@link Vector3f}. The X value will be the pitch, the Y value
+     * is the yaw, and the Z value will be the head yaw.
+     * @return a {@link Vector3f} instance
+     */
+    public Vector3f toVector3f() {
+        return new Vector3f(pitch, yaw, headYaw);
+    }
+
+    /**
+     * Copies the value from a specified {@link Vector3f} instance into a {@link Rotation} instance.
+     * @param vector3f the vector to use
+     * @return the Rotation instance
+     */
+    public static Rotation fromVector3f(Vector3f vector3f) {
+        Preconditions.checkNotNull(vector3f, "vector3f");
+        return new Rotation(vector3f.getX(), vector3f.getY(), vector3f.getZ());
     }
 
     @Override
