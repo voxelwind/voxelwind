@@ -2,11 +2,11 @@ package com.voxelwind.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.voxelwind.server.level.LevelCreator;
-import com.voxelwind.server.level.LevelManager;
-import com.voxelwind.server.level.VoxelwindLevel;
-import com.voxelwind.server.level.provider.FlatworldChunkProvider;
-import com.voxelwind.server.level.provider.MemoryLevelDataProvider;
+import com.voxelwind.server.game.level.LevelCreator;
+import com.voxelwind.server.game.level.LevelManager;
+import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
+import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
 import com.voxelwind.server.network.session.SessionManager;

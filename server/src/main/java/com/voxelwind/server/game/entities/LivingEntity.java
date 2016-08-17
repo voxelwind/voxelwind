@@ -1,8 +1,8 @@
-package com.voxelwind.server.level.entities;
+package com.voxelwind.server.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
-import com.voxelwind.server.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.mcpe.packets.McpeEntityEvent;
 
 public class LivingEntity extends BaseEntity {

@@ -1,9 +1,9 @@
-package com.voxelwind.server.level.chunk;
+package com.voxelwind.server.game.level.chunk;
 
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockTypes;
-import com.voxelwind.server.level.util.NibbleArray;
+import com.voxelwind.server.game.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 

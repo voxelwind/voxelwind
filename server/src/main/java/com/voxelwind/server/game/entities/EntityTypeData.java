@@ -1,4 +1,4 @@
-package com.voxelwind.server.level.entities;
+package com.voxelwind.server.game.entities;
 
 public enum EntityTypeData {
     PLAYER(63, 1.62f),

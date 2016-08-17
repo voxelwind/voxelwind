@@ -1,4 +1,4 @@
-package com.voxelwind.server.level.provider;
+package com.voxelwind.server.game.level.provider;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;

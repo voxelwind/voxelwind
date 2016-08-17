@@ -1,8 +1,8 @@
-package com.voxelwind.server.level.provider;
+package com.voxelwind.server.game.level.provider;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.voxelwind.api.game.level.Chunk;
-import com.voxelwind.server.level.chunk.VoxelwindChunk;
+import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 
 import java.util.Map;
 import java.util.Optional;

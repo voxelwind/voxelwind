@@ -1,19 +1,16 @@
-package com.voxelwind.server.level.entities;
+package com.voxelwind.server.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Level;
-import com.voxelwind.server.level.VoxelwindLevel;
-import com.voxelwind.server.level.chunk.VoxelwindChunk;
+import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.mcpe.packets.McpeAddEntity;
 import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import com.voxelwind.api.util.Rotation;
 
 import java.util.BitSet;
-import java.util.Optional;
 
 public class BaseEntity implements Entity {
     private long entityId;

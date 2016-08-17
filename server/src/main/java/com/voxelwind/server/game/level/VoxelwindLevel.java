@@ -1,12 +1,12 @@
-package com.voxelwind.server.level;
+package com.voxelwind.server.game.level;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
-import com.voxelwind.server.level.manager.LevelEntityManager;
-import com.voxelwind.server.level.manager.LevelPacketManager;
-import com.voxelwind.server.level.provider.ChunkProvider;
-import com.voxelwind.server.level.provider.LevelDataProvider;
+import com.voxelwind.server.game.level.manager.LevelEntityManager;
+import com.voxelwind.server.game.level.manager.LevelPacketManager;
+import com.voxelwind.server.game.level.provider.ChunkProvider;
+import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import com.voxelwind.server.network.mcpe.packets.McpeSetTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

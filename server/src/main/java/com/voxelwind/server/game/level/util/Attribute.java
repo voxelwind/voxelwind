@@ -1,4 +1,4 @@
-package com.voxelwind.server.level.util;
+package com.voxelwind.server.game.level.util;
 
 import java.util.Objects;
 

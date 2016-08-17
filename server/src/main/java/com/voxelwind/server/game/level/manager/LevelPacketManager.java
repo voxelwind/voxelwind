@@ -1,8 +1,8 @@
-package com.voxelwind.server.level.manager;
+package com.voxelwind.server.game.level.manager;
 
-import com.voxelwind.server.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.api.game.entities.Entity;
-import com.voxelwind.server.level.entities.BaseEntity;
+import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.session.PlayerSession;
 

@@ -1,7 +1,7 @@
-package com.voxelwind.server.level.entities;
+package com.voxelwind.server.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.voxelwind.server.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.VoxelwindLevel;
 
 public class ZombieEntity extends LivingEntity {
     public ZombieEntity(VoxelwindLevel level, Vector3f position) {

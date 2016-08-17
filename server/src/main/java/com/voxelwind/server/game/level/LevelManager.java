@@ -1,4 +1,4 @@
-package com.voxelwind.server.level;
+package com.voxelwind.server.game.level;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.level.Level;

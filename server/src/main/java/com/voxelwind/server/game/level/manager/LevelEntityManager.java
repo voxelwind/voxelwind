@@ -1,9 +1,9 @@
-package com.voxelwind.server.level.manager;
+package com.voxelwind.server.game.level.manager;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.collect.ImmutableList;
-import com.voxelwind.server.level.VoxelwindLevel;
-import com.voxelwind.server.level.entities.BaseEntity;
+import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;

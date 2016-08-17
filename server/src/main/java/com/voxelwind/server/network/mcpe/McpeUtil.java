@@ -3,7 +3,7 @@ package com.voxelwind.server.network.mcpe;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
-import com.voxelwind.server.level.util.Attribute;
+import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import com.voxelwind.api.util.Rotation;
 import io.netty.buffer.ByteBuf;

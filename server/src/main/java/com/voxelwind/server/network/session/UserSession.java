@@ -2,7 +2,7 @@ package com.voxelwind.server.network.session;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.VoxelwindServer;
-import com.voxelwind.server.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;

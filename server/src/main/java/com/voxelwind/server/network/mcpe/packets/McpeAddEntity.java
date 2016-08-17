@@ -1,7 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.voxelwind.server.level.util.Attribute;
+import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import com.voxelwind.server.network.raknet.RakNetPackage;

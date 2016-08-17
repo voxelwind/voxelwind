@@ -1,7 +1,7 @@
-package com.voxelwind.server.level;
+package com.voxelwind.server.game.level;
 
-import com.voxelwind.server.level.provider.ChunkProvider;
-import com.voxelwind.server.level.provider.LevelDataProvider;
+import com.voxelwind.server.game.level.provider.ChunkProvider;
+import com.voxelwind.server.game.level.provider.LevelDataProvider;
 
 public class LevelCreator {
     private final String name;
