@@ -309,9 +309,7 @@ public class PlayerSession extends LivingEntity {
                 int sent = 0;
 
                 for (Chunk chunk : chunks) {
-                    McpeBatch batch = new McpeBatch();
-                    batch.getPackages().add(((VoxelwindChunk) chunk).getChunkDataPacket());
-                    session.sendUrgentPackage(batch);
+                    session.sendUrgentPackage(((VoxelwindChunk) chunk).getChunkDataPacket());
                     sent++;
 
                     if (!spawned && sent >= REQUIRED_TO_SPAWN) {
@@ -445,9 +443,7 @@ public class PlayerSession extends LivingEntity {
                 }
 
                 for (Chunk chunk : chunks) {
-                    McpeBatch batch = new McpeBatch();
-                    batch.getPackages().add(((VoxelwindChunk) chunk).getChunkDataPacket());
-                    session.sendUrgentPackage(batch);
+                    session.sendUrgentPackage(((VoxelwindChunk) chunk).getChunkDataPacket());
                 }
             });
         }

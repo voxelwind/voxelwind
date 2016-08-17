@@ -4,6 +4,7 @@ import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.level.util.NibbleArray;
+import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
@@ -25,7 +26,7 @@ public class VoxelwindChunk implements Chunk {
     private final byte[] biomeId = new byte[256];
     private final int[] biomeColor = new int[256];
     private final byte[] height = new byte[256];
-    private McpeFullChunkData chunkDataPacket;
+    private McpeBatch chunkDataPacket;
     private boolean stale = true;
 
     public VoxelwindChunk(int x, int z) {
@@ -69,16 +70,20 @@ public class VoxelwindChunk implements Chunk {
         }
     }
 
-    public synchronized McpeFullChunkData getChunkDataPacket() {
-        if (stale || chunkDataPacket == null) {
+    public synchronized McpeBatch getChunkDataPacket() {
+        if (stale) {
             if (chunkDataPacket == null) {
-                chunkDataPacket = new McpeFullChunkData();
-                chunkDataPacket.setChunkX(x);
-                chunkDataPacket.setChunkZ(z);
-                chunkDataPacket.setOrder((byte) 1);
+                chunkDataPacket = new McpeBatch();
+            } else {
+                chunkDataPacket.releasePrecompressed();
+                chunkDataPacket.getPackages().clear();
             }
 
             // Generate the inner data
+            McpeFullChunkData data = new McpeFullChunkData();
+            data.setChunkX(x);
+            data.setChunkZ(z);
+            data.setOrder((byte) 1);
             ByteArrayOutputStream memoryStream = new ByteArrayOutputStream(83204);
 
             try (DataOutputStream dos = new DataOutputStream(memoryStream)) {
@@ -103,7 +108,9 @@ public class VoxelwindChunk implements Chunk {
                 throw new AssertionError(e);
             }*/
 
-            chunkDataPacket.setData(memoryStream.toByteArray());
+            data.setData(memoryStream.toByteArray());
+            chunkDataPacket.getPackages().add(data);
+            chunkDataPacket.precompress();
         }
 
         return chunkDataPacket;

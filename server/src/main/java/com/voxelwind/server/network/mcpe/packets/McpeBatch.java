@@ -14,6 +14,7 @@ import java.util.zip.DataFormatException;
 
 @BatchDisallowed // You don't batch a batch packet, it makes no sense.
 public class McpeBatch implements RakNetPackage {
+    private byte[] precompressed;
     private final List<RakNetPackage> packages = new ArrayList<>();
 
     @Override
@@ -53,10 +54,21 @@ public class McpeBatch implements RakNetPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
+        if (this.precompressed == null) {
+            compress(buffer);
+        } else {
+            buffer.writeBytes(precompressed);
+        }
+    }
+
+    public List<RakNetPackage> getPackages() {
+        return packages;
+    }
+
+    private void compress(ByteBuf buffer) {
         ByteBuf source = PooledByteBufAllocator.DEFAULT.directBuffer();
 
         try {
-            // Voxelwind uses default compression
             for (RakNetPackage netPackage : packages) {
                 if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class)) {
                     throw new DataFormatException("Packet " + netPackage + " does not permit batching.");
@@ -73,14 +85,10 @@ public class McpeBatch implements RakNetPackage {
 
             // Compress the buffer
             int afterLength = buffer.writerIndex();
-            int adler = CompressionUtil.deflate(source, buffer);
+            CompressionUtil.deflate(source, buffer);
 
             // Replace the dummy length we wrote
             buffer.setInt(lengthPosition, buffer.writerIndex() - afterLength);
-
-            // Write Adler32 checksum
-            // TODO: Doesn't zlib do this for us?
-            //buffer.writeInt(adler);
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to deflate batch data", e);
         } finally {
@@ -88,7 +96,21 @@ public class McpeBatch implements RakNetPackage {
         }
     }
 
-    public List<RakNetPackage> getPackages() {
-        return packages;
+    public void precompress() {
+        ByteBuf out = PooledByteBufAllocator.DEFAULT.directBuffer();
+        try {
+            compress(out);
+            precompressed = new byte[out.readableBytes()];
+            out.readBytes(precompressed);
+        } finally {
+            out.release();
+        }
+    }
+
+    public void releasePrecompressed() {
+        if (precompressed == null) {
+            throw new IllegalStateException("Can't release precompressed packet if none exists.");
+        }
+        precompressed = null;
     }
 }
