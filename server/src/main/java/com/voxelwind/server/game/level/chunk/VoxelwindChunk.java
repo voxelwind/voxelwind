@@ -1,8 +1,11 @@
 package com.voxelwind.server.game.level.chunk;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
@@ -49,16 +52,19 @@ public class VoxelwindChunk implements Chunk {
         return z;
     }
 
-    public synchronized BlockState getBlock(int x, int y, int z) {
+    public synchronized Block getBlock(int x, int y, int z) {
         checkPosition(x, y, z);
         byte data = blockData[xyzIdx(x, y, z)];
 
-        return BlockTypes.forId(data);
+        Vector3i full = new Vector3i(x + (this.x * 16), y, z + (this.z * 16));
+        // TODO: Add level
+        return new VoxelwindBlock(null, this, full, BlockTypes.forId(data));
     }
 
     @Override
-    public void setType(int x, int y, int z, BlockState type) {
-        setBlock(x, y, z, (byte) type.getBlockType().getId());
+    public Block setType(int x, int y, int z, BlockState state) {
+        setBlock(x, y, z, (byte) state.getBlockType().getId());
+        return getBlock(x, y, z);
     }
 
     public synchronized void setBlock(int x, int y, int z, byte id) {

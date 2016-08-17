@@ -1,5 +1,6 @@
 package com.voxelwind.api.game.level;
 
+import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 
 public interface Chunk {
@@ -7,7 +8,7 @@ public interface Chunk {
 
     int getZ();
 
-    BlockState getBlock(int x, int y, int z);
+    Block getBlock(int x, int y, int z);
 
-    void setType(int x, int y, int z, BlockState type);
+    Block setType(int x, int y, int z, BlockState state);
 }
