@@ -361,19 +361,19 @@ public class PlayerSession extends LivingEntity {
                     break;
                 case ACTION_START_SPRINT:
                     sprinting = true;
-                    // TODO: Update entity attributes
+                    sendAttributes();
                     break;
                 case ACTION_STOP_SPRINT:
                     sprinting = false;
-                    // TODO: Update entity attributes
+                    sendAttributes();
                     break;
                 case ACTION_START_SNEAK:
                     sneaking = true;
-                    // TODO: Update entity attributes
+                    sendAttributes();
                     break;
                 case ACTION_STOP_SNEAK:
                     sneaking = false;
-                    // TODO: Update entity attributes
+                    sendAttributes();
                     break;
                 case ACTION_SPAWN_OVERWORLD:
                     // Clean up attributes?

@@ -17,7 +17,6 @@ public class McpeAddEntity implements RakNetPackage {
     private Vector3f velocity;
     private float yaw;
     private float pitch;
-    // TODO: Attributes and metadata.
     private final MetadataDictionary metadata = new MetadataDictionary();
     private final Collection<Attribute> attributes = new ArrayList<>();
 

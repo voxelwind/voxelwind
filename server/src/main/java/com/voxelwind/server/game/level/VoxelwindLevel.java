@@ -30,7 +30,7 @@ public class VoxelwindLevel implements Level {
     public VoxelwindLevel(LevelCreator creator) {
         chunkProvider = creator.getChunkProvider();
         name = creator.getName();
-        uuid = UUID.randomUUID(); // TODO: Fix?
+        uuid = UUID.randomUUID();
         entityManager = new LevelEntityManager(this);
         packetManager = new LevelPacketManager(this);
         dataProvider = creator.getDataProvider();
