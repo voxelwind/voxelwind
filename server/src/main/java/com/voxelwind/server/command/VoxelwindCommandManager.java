@@ -5,11 +5,11 @@ import com.voxelwind.api.server.command.*;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VoxelwindCommandManager implements CommandManager {
-    private final Map<String, CommandExecutor> commandMap = new HashMap<>();
+    private final Map<String, CommandExecutor> commandMap = new ConcurrentHashMap<>();
 
     @Override
     public void register(@Nonnull String command, @Nonnull CommandExecutor executor) {
