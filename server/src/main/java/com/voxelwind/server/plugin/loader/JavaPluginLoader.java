@@ -75,7 +75,7 @@ public class JavaPluginLoader implements PluginLoader {
         }
 
         return new VoxelwindPluginContainer(description.getId(), description.getAuthor(), description.getVersion(),
-                description.getDependencies(), description.getSoftDependencies(),
+                description.getDependencies(), description.getSoftDependencies(), path.get(),
                 createPlugin(path.get(), (JavaVoxelwindPluginDescription) description));
     }
 
