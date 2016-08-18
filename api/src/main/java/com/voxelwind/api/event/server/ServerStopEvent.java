@@ -8,4 +8,7 @@ import com.voxelwind.api.event.Event;
  * up before the process exits.
  */
 public interface ServerStopEvent extends Event {
+    static ServerStopEvent create() {
+        return new ServerStopEvent() {};
+    }
 }
