@@ -5,6 +5,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.server.Player;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -15,12 +16,13 @@ import com.voxelwind.api.util.Rotation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class PlayerSession extends LivingEntity {
+public class PlayerSession extends LivingEntity implements Player {
     private static final int REQUIRED_TO_SPAWN = 56;
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
@@ -72,7 +74,7 @@ public class PlayerSession extends LivingEntity {
     }
 
     @Override
-    public void setRotation(Rotation rotation) {
+    public void setRotation(@Nonnull Rotation rotation) {
         setRotation(rotation, false);
     }
 
@@ -264,6 +266,30 @@ public class PlayerSession extends LivingEntity {
                 session.addToSendQueue(entity.createAddEntityPacket());
             }
         }
+    }
+
+    @Nonnull
+    @Override
+    public UUID getUniqueId() {
+        return session.getAuthenticationProfile().getIdentity();
+    }
+
+    @Override
+    public boolean isXboxAuthenticated() {
+        return session.getAuthenticationProfile().getXuid() != null;
+    }
+
+    @Nonnull
+    @Override
+    public OptionalLong getXuid() {
+        return session.getAuthenticationProfile().getXuid() == null ? OptionalLong.empty() :
+                OptionalLong.of(session.getAuthenticationProfile().getXuid());
+    }
+
+    @Nonnull
+    @Override
+    public String getName() {
+        return session.getAuthenticationProfile().getDisplayName();
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {

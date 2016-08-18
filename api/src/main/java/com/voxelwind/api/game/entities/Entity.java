@@ -7,17 +7,24 @@ import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.util.Rotation;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Optional;
 
+@ParametersAreNonnullByDefault
 public interface Entity {
     long getEntityId();
 
+    @Nonnull
     Level getLevel();
 
+    @Nonnull
     Vector3f getPosition();
 
+    @Nonnull
     Vector3f getGamePosition();
 
+    @Nonnull
     Rotation getRotation();
 
     void setRotation(Rotation rotation);
@@ -53,7 +60,7 @@ public interface Entity {
         int chunkInZ = blockPosition.getZ() % 16;
 
         Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(chunkX, chunkZ);
-        return chunkOptional.isPresent() && chunkOptional.get().getBlock(chunkInX, blockPosition.getY(), chunkInZ).getBlockType() != BlockTypes.AIR;
+        return chunkOptional.isPresent() && chunkOptional.get().getBlock(chunkInX, blockPosition.getY(), chunkInZ).getBlockState().getBlockType() != BlockTypes.AIR;
     }
 
     void teleport(Vector3f position);

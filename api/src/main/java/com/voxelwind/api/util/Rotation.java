@@ -6,7 +6,7 @@ import com.google.common.base.Preconditions;
 /**
  * This class represents a rotation. Pocket Edition uses degrees to measure angles. This class is immutable.
  */
-public class Rotation {
+public final class Rotation {
     public static final Rotation ZERO = new Rotation(0f, 0f, 0f);
 
     private final float pitch;

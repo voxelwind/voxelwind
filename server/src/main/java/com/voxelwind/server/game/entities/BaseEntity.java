@@ -10,6 +10,7 @@ import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import com.voxelwind.api.util.Rotation;
 
+import javax.annotation.Nonnull;
 import java.util.BitSet;
 
 public class BaseEntity implements Entity {
@@ -41,16 +42,19 @@ public class BaseEntity implements Entity {
         return entityId;
     }
 
+    @Nonnull
     @Override
     public VoxelwindLevel getLevel() {
         return level;
     }
 
+    @Nonnull
     @Override
     public Vector3f getPosition() {
         return position;
     }
 
+    @Nonnull
     @Override
     public Vector3f getGamePosition() {
         return getPosition().add(0, data.getHeight(), 0);
@@ -65,13 +69,14 @@ public class BaseEntity implements Entity {
         }
     }
 
+    @Nonnull
     @Override
     public Rotation getRotation() {
         return rotation;
     }
 
     @Override
-    public void setRotation(Rotation rotation) {
+    public void setRotation(@Nonnull Rotation rotation) {
         checkIfAlive();
 
         if (!this.rotation.equals(rotation)) {
@@ -86,7 +91,7 @@ public class BaseEntity implements Entity {
     }
 
     @Override
-    public void setMotion(Vector3f motion) {
+    public void setMotion(@Nonnull Vector3f motion) {
         checkIfAlive();
 
         if (!this.motion.equals(motion)) {
@@ -212,17 +217,17 @@ public class BaseEntity implements Entity {
     }
 
     @Override
-    public void teleport(Vector3f position) {
+    public void teleport(@Nonnull Vector3f position) {
         teleport(level, position, rotation);
     }
 
     @Override
-    public void teleport(Level level, Vector3f position) {
+    public void teleport(@Nonnull Level level, @Nonnull Vector3f position) {
         teleport(level, position, rotation);
     }
 
     @Override
-    public void teleport(Level level, Vector3f position, Rotation rotation) {
+    public void teleport(@Nonnull Level level, @Nonnull Vector3f position, @Nonnull Rotation rotation) {
         Preconditions.checkArgument(level instanceof VoxelwindLevel, "Not a valid level.");
 
         checkIfAlive();
