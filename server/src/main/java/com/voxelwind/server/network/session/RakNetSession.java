@@ -95,7 +95,7 @@ public class RakNetSession {
             for (int i = range.getStart(); i <= range.getEnd(); i++) {
                 SentDatagram datagram = datagramAcks.get(i);
                 if (datagram != null) {
-                    LOGGER.error("Must resend datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
+                    LOGGER.warn("Must resend datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
                     datagram.refreshForResend();
                     channel.write(datagram, channel.voidPromise());
                 }
@@ -112,7 +112,7 @@ public class RakNetSession {
             RakNetDatagram datagram = new RakNetDatagram();
             datagram.setDatagramSequenceNumber(datagramSequenceGenerator.getAndIncrement());
             if (!datagram.tryAddPacket(packet, mtu)) {
-                throw new RuntimeException("Packet too large to fit in MTU (size: " + packet.totalLength() + ", MTU: " + mtu + ")");
+                throw new IllegalArgumentException("Packet too large to fit in MTU (size: " + packet.totalLength() + ", MTU: " + mtu + ")");
             }
             datagrams.add(datagram.retain()); // retain in case we need to resend it
         }

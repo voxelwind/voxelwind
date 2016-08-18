@@ -53,10 +53,6 @@ public class PlayerSession extends LivingEntity implements Player {
             return false;
         }
 
-        if (getLevel().getCurrentTick() % 20 == 0) {
-            System.out.println("Position: " + getPosition());
-        }
-
         return true;
     }
 

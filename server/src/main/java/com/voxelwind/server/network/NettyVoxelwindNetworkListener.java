@@ -2,6 +2,7 @@ package com.voxelwind.server.network;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.server.VoxelwindServer;
+import com.voxelwind.server.network.handler.TailHandler;
 import com.voxelwind.server.network.handler.VoxelwindDatagramHandler;
 import com.voxelwind.server.network.handler.VoxelwindDirectPacketHandler;
 import com.voxelwind.server.network.raknet.DatagramRakNetPacketCodec;
@@ -54,7 +55,8 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
                 .addLast("simpleRaknetHandler", new SimpleRakNetPacketCodec())
                 .addLast("voxelwindPacketHandler", new VoxelwindDirectPacketHandler(server))
                 .addLast("raknetDatagramHandler", new DatagramRakNetPacketCodec(server))
-                .addLast("voxelwindDatagramHandler", new VoxelwindDatagramHandler(server));
+                .addLast("voxelwindDatagramHandler", new VoxelwindDatagramHandler(server))
+                .addLast("tailHandler", new TailHandler());
     }
 
     public void bind() {
@@ -64,7 +66,7 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
                 try {
                     ChannelFuture future = bootstrap.bind(address).await();
                     if (future.isSuccess()) {
-                        LOGGER.info("Binded listener #" + i + " for " + address);
+                        LOGGER.debug("Binded listener #" + i + " for " + address);
                     } else {
                         LOGGER.error("Unable to bind listener #" + i + " for " + address, future.cause());
                         break;
@@ -77,7 +79,7 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
             try {
                 ChannelFuture future = bootstrap.bind(address).await();
                 if (future.isSuccess()) {
-                    LOGGER.info("Binded listener for " + address);
+                    LOGGER.debug("Binded listener for " + address);
                 } else {
                     LOGGER.error("Unable to bind listener for " + address, future.cause());
                 }
@@ -85,5 +87,9 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
                 LOGGER.info("Interrupted while waiting for bind");
             }
         }
+    }
+
+    public InetSocketAddress getAddress() {
+        return address;
     }
 }
