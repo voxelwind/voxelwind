@@ -218,7 +218,7 @@ public class PlayerSession extends LivingEntity implements Player {
         }, 500, TimeUnit.MILLISECONDS);
     }
 
-    public void sendMessage(String message) {
+    public void sendMessage(@Nonnull String message) {
         McpeText text = new McpeText();
         text.setType(McpeText.TextType.RAW);
         text.setMessage(message);

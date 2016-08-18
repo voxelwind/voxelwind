@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import java.util.OptionalLong;
 import java.util.UUID;
 
-public interface Player extends Entity, CommandExecutorSource {
+public interface Player extends Entity, CommandExecutorSource, MessageRecipient {
     @Nonnull
     UUID getUniqueId();
 

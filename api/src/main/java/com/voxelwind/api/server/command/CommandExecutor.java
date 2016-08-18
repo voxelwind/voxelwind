@@ -1,7 +1,7 @@
 package com.voxelwind.api.server.command;
 
 /**
- * This class is implemented by command executors.
+ * A class that implements a command. The command may be executed asynchronously and concurrently.
  */
 public interface CommandExecutor {
     /**
