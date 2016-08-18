@@ -8,5 +8,8 @@ import java.nio.file.Path;
  */
 public interface PluginLoader {
     @Nonnull
-    PluginContainer loadPlugin(Path path) throws Exception;
+    PluginDescription loadPlugin(Path path) throws Exception;
+
+    @Nonnull
+    PluginContainer createPlugin(PluginDescription description) throws Exception;
 }

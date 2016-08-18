@@ -46,4 +46,8 @@ public class PluginInformation {
     public List<String> getSoftDependencies() {
         return softDependencies;
     }
+
+    public String getClassName() {
+        return className;
+    }
 }
