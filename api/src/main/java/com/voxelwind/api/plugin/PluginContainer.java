@@ -1,13 +1,35 @@
 package com.voxelwind.api.plugin;
 
-import com.voxelwind.api.server.Server;
-import org.slf4j.Logger;
+import java.util.Collection;
 
-/**
- * This class encapsulates several services that Voxelwind makes available to all plugins.
- */
 public interface PluginContainer {
-    Logger getLogger();
+    /**
+     * The ID for this plugin. This should be an alphanumeric name. Slashes are also allowed.
+     * @return the ID for this plugin
+     */
+    String getId();
 
-    Server getServer();
+    /**
+     * The author of this plugin.
+     * @return the plugin's author
+     */
+    String getAuthor();
+
+    /**
+     * The version of this plugin.
+     * @return the version of this plugin
+     */
+    String getVersion();
+
+    /**
+     * The array of plugin IDs that this plugin requires in order to load.
+     * @return the dependencies
+     */
+    Collection<String> getDependencies();
+
+    /**
+     * The array of plugin IDs that this plugin optionally depends on.
+     * @return the soft dependencies
+     */
+    Collection<String> getSoftDependencies();
 }
