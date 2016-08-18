@@ -6,9 +6,10 @@ package com.voxelwind.api.event;
 public interface EventManager {
     /**
      * Registers an object with event listeners.
+     * @param plugin the plugin associated
      * @param listener the object
      */
-    void register(Object listener);
+    void register(Object plugin, Object listener);
 
     /**
      * Fires an event.
@@ -20,5 +21,11 @@ public interface EventManager {
      * Unregisters an object's event listeners.
      * @param listener the object to deregister
      */
-    void unregister(Object listener);
+    void unregisterListener(Object listener);
+
+    /**
+     * Unregisters a plugin's event listeners.
+     * @param plugin the plugin to deregister
+     */
+    void unregisterAllListeners(Object plugin);
 }

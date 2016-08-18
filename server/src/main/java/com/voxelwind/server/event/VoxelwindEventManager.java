@@ -11,9 +11,11 @@ import java.util.*;
 public class VoxelwindEventManager implements EventManager {
     private final Map<Class<? extends Event>, EventFireHandler> eventHandlers = new HashMap<>();
     private final List<Object> listeners = new ArrayList<>();
+    private final Map<Object, List<Object>> listenersByPlugin = new HashMap<>();
 
     @Override
-    public void register(Object listener) {
+    public void register(Object plugin, Object listener) {
+        listenersByPlugin.computeIfAbsent(plugin, k -> new ArrayList<>()).add(listener);
         listeners.add(listener);
         bakeHandlers();
     }
@@ -27,9 +29,21 @@ public class VoxelwindEventManager implements EventManager {
     }
 
     @Override
-    public void unregister(Object listener) {
+    public void unregisterListener(Object listener) {
+        for (List<Object> objects : listenersByPlugin.values()) {
+            objects.remove(listener);
+        }
         listeners.remove(listener);
         bakeHandlers();
+    }
+
+    @Override
+    public void unregisterAllListeners(Object plugin) {
+        List<Object> objects = listenersByPlugin.remove(plugin);
+        if (objects != null) {
+            listeners.removeAll(objects);
+            bakeHandlers();
+        }
     }
 
     private void bakeHandlers() {

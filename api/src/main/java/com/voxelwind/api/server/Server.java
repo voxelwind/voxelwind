@@ -1,6 +1,8 @@
 package com.voxelwind.api.server;
 
+import com.voxelwind.api.event.EventManager;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.api.plugin.PluginManager;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -33,4 +35,8 @@ public interface Server {
      * @return all available worlds
      */
     Collection<Level> getAllLevels();
+
+    PluginManager getPluginManager();
+
+    EventManager getEventManager();
 }
