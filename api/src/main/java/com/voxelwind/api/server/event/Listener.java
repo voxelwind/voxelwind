@@ -1,4 +1,4 @@
-package com.voxelwind.api.event;
+package com.voxelwind.api.server.event;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,8 +1,9 @@
 package com.voxelwind.server.event;
 
-import com.voxelwind.api.event.Event;
-import com.voxelwind.api.event.EventManager;
-import com.voxelwind.api.event.Listener;
+import com.google.common.base.Preconditions;
+import com.voxelwind.api.server.event.Event;
+import com.voxelwind.api.server.event.EventManager;
+import com.voxelwind.api.server.event.Listener;
 import com.voxelwind.server.event.firehandlers.ReflectionEventFireHandler;
 
 import java.lang.reflect.Method;
@@ -15,6 +16,8 @@ public class VoxelwindEventManager implements EventManager {
 
     @Override
     public void register(Object plugin, Object listener) {
+        Preconditions.checkNotNull(plugin, "plugin");
+        Preconditions.checkNotNull(listener, "listener");
         listenersByPlugin.computeIfAbsent(plugin, k -> new ArrayList<>()).add(listener);
         listeners.add(listener);
         bakeHandlers();
@@ -22,6 +25,7 @@ public class VoxelwindEventManager implements EventManager {
 
     @Override
     public void fire(Event event) {
+        Preconditions.checkNotNull(event, "event");
         EventFireHandler handler = eventHandlers.get(event.getClass());
         if (handler != null) {
             handler.fire(event);
@@ -30,6 +34,7 @@ public class VoxelwindEventManager implements EventManager {
 
     @Override
     public void unregisterListener(Object listener) {
+        Preconditions.checkNotNull(listener, "listener");
         for (List<Object> objects : listenersByPlugin.values()) {
             objects.remove(listener);
         }
@@ -39,6 +44,7 @@ public class VoxelwindEventManager implements EventManager {
 
     @Override
     public void unregisterAllListeners(Object plugin) {
+        Preconditions.checkNotNull(plugin, "plugin");
         List<Object> objects = listenersByPlugin.remove(plugin);
         if (objects != null) {
             listeners.removeAll(objects);

@@ -1,6 +1,6 @@
 package com.voxelwind.api.server;
 
-import com.voxelwind.api.event.EventManager;
+import com.voxelwind.api.server.event.EventManager;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.plugin.PluginManager;
 

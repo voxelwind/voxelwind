@@ -1,4 +1,4 @@
-package com.voxelwind.api.event;
+package com.voxelwind.api.server.event;
 
 /**
  * This class manages event listeners and fires events.

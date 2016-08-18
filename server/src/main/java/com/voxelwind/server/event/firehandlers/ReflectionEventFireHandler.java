@@ -1,8 +1,8 @@
 package com.voxelwind.server.event.firehandlers;
 
 import com.google.common.collect.ImmutableList;
-import com.voxelwind.api.event.Event;
-import com.voxelwind.api.event.Listener;
+import com.voxelwind.api.server.event.Event;
+import com.voxelwind.api.server.event.Listener;
 import com.voxelwind.server.event.EventFireHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,6 +1,6 @@
-package com.voxelwind.api.event.server;
+package com.voxelwind.api.server.event.server;
 
-import com.voxelwind.api.event.Event;
+import com.voxelwind.api.server.event.Event;
 
 /**
  * This event will be fired when the server has disconnected clients, stopped accepting new connections and after levels

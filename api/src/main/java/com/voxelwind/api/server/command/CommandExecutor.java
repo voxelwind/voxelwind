@@ -9,5 +9,5 @@ public interface CommandExecutor {
      * @param source the source of the command
      * @param args the arguments for the command
      */
-    void execute(CommandExecutorSource source, String[] args);
+    void execute(CommandExecutorSource source, String[] args) throws Exception;
 }

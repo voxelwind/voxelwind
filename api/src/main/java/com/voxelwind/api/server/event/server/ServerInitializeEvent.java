@@ -1,6 +1,6 @@
-package com.voxelwind.api.event.server;
+package com.voxelwind.api.server.event.server;
 
-import com.voxelwind.api.event.Event;
+import com.voxelwind.api.server.event.Event;
 
 /**
  * This event will be fired after plugins are initialized but before the server initializes levels and binds to a port.

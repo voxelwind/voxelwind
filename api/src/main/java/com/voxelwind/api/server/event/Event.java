@@ -1,4 +1,4 @@
-package com.voxelwind.api.event;
+package com.voxelwind.api.server.event;
 
 /**
  * This interface specifies that this class is a event.
