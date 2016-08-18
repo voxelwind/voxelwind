@@ -2,6 +2,9 @@ package com.voxelwind.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.voxelwind.api.game.level.Level;
+import com.voxelwind.api.server.Player;
+import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.level.LevelCreator;
 import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
@@ -15,11 +18,12 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class VoxelwindServer {
+public class VoxelwindServer implements Server {
     public static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
     private final SessionManager sessionManager = new SessionManager();
@@ -71,5 +75,25 @@ public class VoxelwindServer {
 
     public VoxelwindLevel getDefaultLevel() {
         return defaultLevel;
+    }
+
+    @Override
+    public String getName() {
+        return "Voxelwind";
+    }
+
+    @Override
+    public String getVersion() {
+        return "0.1 (Layer of Fog)";
+    }
+
+    @Override
+    public Collection<Player> getPlayers() {
+        return sessionManager.allPlayers();
+    }
+
+    @Override
+    public Collection<Level> getAllLevels() {
+        return levelManager.all();
     }
 }

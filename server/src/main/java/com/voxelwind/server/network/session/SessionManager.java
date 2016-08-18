@@ -2,6 +2,7 @@ package com.voxelwind.server.network.session;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.voxelwind.api.server.Player;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -47,9 +48,10 @@ public class SessionManager {
                 .count();
     }
 
-    public List<UserSession> allConnected() {
+    public List<Player> allPlayers() {
         return sessions.values().stream()
-                .filter(p -> p.getState() == SessionState.CONNECTED)
+                .filter(p -> p.getPlayerSession() != null)
+                .map(UserSession::getPlayerSession)
                 .collect(Collectors.toList());
     }
 

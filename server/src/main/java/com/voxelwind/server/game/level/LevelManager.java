@@ -1,6 +1,7 @@
 package com.voxelwind.server.game.level;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.game.level.Level;
 
 import java.util.*;
@@ -27,6 +28,10 @@ public class LevelManager {
         LevelTicker ticker = levelTasks.remove(level);
         Preconditions.checkState(ticker != null, "level is not being ticked");
         ticker.stop();
+    }
+
+    public synchronized List<Level> all() {
+        return ImmutableList.copyOf(levels);
     }
 
     private class LevelTicker extends TimerTask {
