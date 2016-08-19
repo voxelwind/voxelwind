@@ -28,9 +28,11 @@ public class VoxelwindEventManager implements EventManager {
                     throw new IllegalArgumentException("Method " + method.getName() + " in " + listener + " has more than one parameter.");
                 }
 
-                if (!method.getParameterTypes()[0].isAssignableFrom(Event.class)) {
+                if (!Event.class.isAssignableFrom(method.getParameterTypes()[0])) {
                     throw new IllegalArgumentException("Method " + method.getName() + " in " + listener + " does not accept a subclass of Event.");
                 }
+
+                method.setAccessible(true);
             }
         }
 

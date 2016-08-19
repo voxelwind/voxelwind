@@ -8,6 +8,8 @@ import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.server.command.ConsoleCommandExecutorSource;
 import com.voxelwind.api.server.event.EventManager;
+import com.voxelwind.api.server.event.server.ServerInitializeEvent;
+import com.voxelwind.api.server.event.server.ServerStartEvent;
 import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
 import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.level.LevelCreator;
@@ -24,6 +26,9 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -72,17 +77,34 @@ public class VoxelwindServer implements Server {
         LOGGER.info("{} {} is coming online...", getName(), getVersion());
 
         // Load plugins.
+        try {
+            Path pluginPath = Paths.get("plugins");
+            if (Files.notExists(pluginPath)) {
+                Files.createDirectory(pluginPath);
+            }
+            pluginManager.loadPlugins(pluginPath);
+        } catch (Exception e) {
+            LOGGER.error("Can't load plugins", e);
+        }
 
+        // Fire the initialize event
+        eventManager.fire(ServerInitializeEvent.create());
+
+        // Bind to a port.
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
 
+        // Start the example level.
         defaultLevel = new VoxelwindLevel(new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
         levelManager.register(defaultLevel);
         levelManager.start(defaultLevel);
 
-        LOGGER.info("Now alive on {}", listener.getAddress());
+        LOGGER.info("Now alive on {}.", listener.getAddress());
 
         timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
+
+        // Send another event.
+        eventManager.fire(ServerStartEvent.create());
 
         Thread.sleep(10000000);
     }

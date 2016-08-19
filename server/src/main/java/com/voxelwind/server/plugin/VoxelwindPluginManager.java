@@ -1,6 +1,7 @@
 package com.voxelwind.server.plugin;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.plugin.Plugin;
 import com.voxelwind.api.plugin.PluginDescription;
@@ -35,13 +36,17 @@ public class VoxelwindPluginManager implements PluginManager {
 
     @Override
     public Optional<Object> getPlugin(String id) {
+        Preconditions.checkNotNull(id, "id");
         return Optional.ofNullable(plugins.get(id));
     }
 
-    public void loadPlugins() throws IOException {
+    public void loadPlugins(Path directory) throws IOException {
+        Preconditions.checkNotNull(directory, "directory");
+        Preconditions.checkArgument(Files.isDirectory(directory), "provided path isn't a directory");
+
         List<PluginDescription> found = new ArrayList<>();
         JavaPluginLoader loader = new JavaPluginLoader(server);
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("plugins"), p -> p.toString().endsWith(".jar"))) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, p -> p.toString().endsWith(".jar"))) {
             for (Path path : stream) {
                 try {
                     found.add(loader.loadPlugin(path));
