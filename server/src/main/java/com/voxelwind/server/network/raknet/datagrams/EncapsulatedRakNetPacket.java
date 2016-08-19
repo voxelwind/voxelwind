@@ -3,14 +3,14 @@ package com.voxelwind.server.network.raknet.datagrams;
 import com.voxelwind.server.network.session.RakNetSession;
 import com.voxelwind.server.network.session.UserSession;
 import io.netty.buffer.ByteBuf;
-import io.netty.util.AbstractReferenceCounted;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.ReferenceCounted;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EncapsulatedRakNetPacket extends AbstractReferenceCounted {
+public class EncapsulatedRakNetPacket implements ReferenceCounted {
     private RakNetReliability reliability;
     private int reliabilityNumber;
     private int sequenceIndex;
@@ -21,20 +21,6 @@ public class EncapsulatedRakNetPacket extends AbstractReferenceCounted {
     private short partId;
     private int partIndex;
     private ByteBuf buffer;
-
-    @Override
-    public EncapsulatedRakNetPacket retain() {
-        super.retain();
-        buffer.retain();
-        return this;
-    }
-
-    @Override
-    public EncapsulatedRakNetPacket retain(int increment) {
-        super.retain(increment);
-        buffer.retain(increment);
-        return this;
-    }
 
     public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, RakNetSession session) {
         // Potentially split the package..
@@ -198,7 +184,7 @@ public class EncapsulatedRakNetPacket extends AbstractReferenceCounted {
             partIndex = buf.readInt();
         }
 
-        buffer = buf.readSlice(size);
+        buffer = buf.readBytes(size);
     }
 
     public ByteBuf getBuffer() {
@@ -232,7 +218,27 @@ public class EncapsulatedRakNetPacket extends AbstractReferenceCounted {
     }
 
     @Override
-    protected void deallocate() {
-        ReferenceCountUtil.release(buffer);
+    public int refCnt() {
+        return buffer.refCnt();
+    }
+
+    @Override
+    public ReferenceCounted retain() {
+        return buffer.retain();
+    }
+
+    @Override
+    public ReferenceCounted retain(int i) {
+        return buffer.retain(i);
+    }
+
+    @Override
+    public boolean release() {
+        return buffer.release();
+    }
+
+    @Override
+    public boolean release(int i) {
+        return buffer.release(i);
     }
 }

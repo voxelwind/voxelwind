@@ -41,7 +41,6 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
         if (flags.isValid() && !flags.isAck() && !flags.isNak()) {
             RakNetDatagram datagram = new RakNetDatagram();
             datagram.decode(packet.content());
-            // TODO: Not sure why we need to call retain() here
             list.add(new AddressedRakNetDatagram(datagram, packet.recipient(), packet.sender()).retain());
         }
     }

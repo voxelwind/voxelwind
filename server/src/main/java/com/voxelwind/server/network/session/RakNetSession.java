@@ -69,6 +69,8 @@ public class RakNetSession {
 
     public Optional<ByteBuf> addSplitPacket(EncapsulatedRakNetPacket packet) {
         checkForClosed();
+        // Retain the packet so it can be reassembled later.
+        packet.retain();
         SplitPacketHelper helper = splitPackets.computeIfAbsent(packet.getPartId(), (k) -> new SplitPacketHelper());
         Optional<ByteBuf> result = helper.add(packet);
         if (result.isPresent()) {

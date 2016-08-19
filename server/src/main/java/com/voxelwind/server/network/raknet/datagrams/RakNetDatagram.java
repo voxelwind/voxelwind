@@ -3,6 +3,7 @@ package com.voxelwind.server.network.raknet.datagrams;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.AbstractReferenceCounted;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.ReferenceCounted;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -17,18 +18,12 @@ public class RakNetDatagram extends AbstractReferenceCounted {
     @Override
     public RakNetDatagram retain() {
         super.retain();
-        for (EncapsulatedRakNetPacket packet : packets) {
-            packet.retain();
-        }
         return this;
     }
 
     @Override
     public RakNetDatagram retain(int increment) {
         super.retain(increment);
-        for (EncapsulatedRakNetPacket packet : packets) {
-            packet.retain(increment);
-        }
         return this;
     }
 
