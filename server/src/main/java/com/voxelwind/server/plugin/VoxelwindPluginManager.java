@@ -77,7 +77,7 @@ public class VoxelwindPluginManager implements PluginManager {
     }
 
     @VisibleForTesting
-    public List<PluginDescription> sortDescriptions(List<PluginDescription> descriptions) {
+    List<PluginDescription> sortDescriptions(List<PluginDescription> descriptions) {
         // Create our graph, we're going to be using this for Kahn's algorithm.
         DirectedAcyclicGraph<PluginDescription> graph = new DirectedAcyclicGraph<>();
 
@@ -112,7 +112,9 @@ public class VoxelwindPluginManager implements PluginManager {
             for (DirectedAcyclicGraph.Node<PluginDescription> node : graph.withEdge(description)) {
                 node.removeEdge(descriptionNode);
                 if (node.getAdjacent().isEmpty()) {
-                    noEdges.add(node);
+                    if (!noEdges.contains(node)) {
+                        noEdges.add(node);
+                    }
                 }
             }
         }
