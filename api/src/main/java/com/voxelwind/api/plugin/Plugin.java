@@ -33,11 +33,11 @@ public @interface Plugin {
      * The array of plugin IDs that this plugin requires in order to load.
      * @return the dependencies
      */
-    String[] dependencies();
+    String[] dependencies() default {};
 
     /**
      * The array of plugin IDs that this plugin optionally depends on.
      * @return the soft dependencies
      */
-    String[] softDependencies();
+    String[] softDependencies() default {};
 }
