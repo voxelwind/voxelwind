@@ -3,8 +3,10 @@ package com.voxelwind.server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.api.plugin.PluginManager;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
+import com.voxelwind.api.server.event.EventManager;
 import com.voxelwind.server.game.level.LevelCreator;
 import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
@@ -95,5 +97,15 @@ public class VoxelwindServer implements Server {
     @Override
     public Collection<Level> getAllLevels() {
         return levelManager.all();
+    }
+
+    @Override
+    public PluginManager getPluginManager() {
+        return null;
+    }
+
+    @Override
+    public EventManager getEventManager() {
+        return null;
     }
 }

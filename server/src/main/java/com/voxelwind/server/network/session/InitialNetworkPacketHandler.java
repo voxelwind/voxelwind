@@ -3,15 +3,16 @@ package com.voxelwind.server.network.session;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.base.Preconditions;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.util.EncryptionUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,10 +23,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.text.ParseException;
 import java.util.Base64;
 
 public class InitialNetworkPacketHandler implements NetworkPacketHandler {
-    private static final boolean USE_ENCRYPTION = false;
+    private static final boolean USE_ENCRYPTION = true;
     private static final String MOJANG_PUBLIC_KEY_BASE64 =
             "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
     private static final PublicKey MOJANG_PUBLIC_KEY;
@@ -84,7 +86,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                 // Will not use encryption - initialize the player's session
                 initializePlayerSession();
             }
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) {
+        } catch (Exception e) {
             LOGGER.error("Unable to enable encryption", e);
         }
     }
@@ -129,31 +131,31 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         playerSession.doInitialSpawn();
     }
 
-    private JwtPayload validateChainData(JsonNode data) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    private JwtPayload validateChainData(JsonNode data) throws Exception {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
-        if (data.size() == 1 || !USE_ENCRYPTION) {
-            // The data is self-signed. We'll have to take the client at face value.
-            JsonNode payload = getPayload(data.get(data.size() - 1).asText());
-            JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
-            System.out.println("[Payload] " + payload);
-            // Don't provide an XUID
-            jwtPayload.getExtraData().setXuid(null);
-            return jwtPayload;
-        } else {
-            // The data has been signed by Mojang. Validate the chain.
-            Jwt<Header, Claims> last;
-            for (JsonNode node : data) {
-                PublicKey currentKey = getKey(getHeader(node.asText()).get("x5u").asText());
-                last = Jwts.parser()
-                        .setSigningKey(currentKey)
-                        .parseClaimsJwt(node.asText());
+        PublicKey lastKey = null;
+        boolean trustedChain = false;
+        for (JsonNode node : data) {
+            JWSObject object = JWSObject.parse(node.asText());
+            if (!trustedChain) {
+                trustedChain = verify(MOJANG_PUBLIC_KEY, object);
             }
-
-            JsonNode payload = getPayload(data.get(data.size() - 1).asText());
-            System.out.println("[Payload] " + payload);
-            return VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
+            if (lastKey != null) {
+                if (!verify(lastKey, object)) {
+                    throw new JOSEException("Unable to verify key in chain.");
+                }
+            }
+            lastKey = getKey((String) object.getPayload().toJSONObject().get("identityPublicKey"));
         }
+
+        if (!trustedChain) {
+            throw new IllegalArgumentException("No Mojang public key was found in the chain.");
+        }
+
+        JsonNode payload = getPayload(data.get(data.size() - 1).asText());
+        System.out.println("[Payload] " + payload);
+        return VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
     }
 
     // ¯\_(ツ)_/¯
@@ -165,5 +167,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     private JsonNode getPayload(String token) throws IOException {
         String payload = token.split("\\.")[1];
         return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload));
+    }
+
+    private boolean verify(PublicKey key, JWSObject object) throws JOSEException {
+        JWSVerifier verifier = new DefaultJWSVerifierFactory().createJWSVerifier(object.getHeader(), key);
+        return object.verify(verifier);
     }
 }

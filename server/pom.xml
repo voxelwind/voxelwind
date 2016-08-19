@@ -64,9 +64,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.6.0</version>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>4.24</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
