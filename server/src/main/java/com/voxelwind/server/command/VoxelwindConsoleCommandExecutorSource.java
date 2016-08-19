@@ -1,5 +1,6 @@
 package com.voxelwind.server.command;
 
+import com.google.common.base.Preconditions;
 import com.voxelwind.api.server.command.ConsoleCommandExecutorSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +18,7 @@ public class VoxelwindConsoleCommandExecutorSource implements ConsoleCommandExec
 
     @Override
     public void sendMessage(@Nonnull String text) {
+        Preconditions.checkNotNull(text, "text");
         LOGGER.info(text);
     }
 }
