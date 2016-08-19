@@ -28,7 +28,6 @@ public class ReflectionEventFireHandler implements EventFireHandler {
     public void fire(Event event) {
         for (int i = 0; i < methods.size(); i++) {
             try {
-                LOGGER.info("Calling {}", methods.get(i));
                 methods.get(i).run(event);
             } catch (InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error("Exception occurred while executing method " + methods.get(i) + " for " + event, e);
