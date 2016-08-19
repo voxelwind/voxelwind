@@ -83,12 +83,13 @@ public class VoxelwindServer implements Server {
                 Files.createDirectory(pluginPath);
             }
             pluginManager.loadPlugins(pluginPath);
+            pluginManager.getAllPlugins().forEach(p -> eventManager.register(p.getPlugin(), p.getPlugin()));
         } catch (Exception e) {
             LOGGER.error("Can't load plugins", e);
         }
 
         // Fire the initialize event
-        eventManager.fire(ServerInitializeEvent.create());
+        eventManager.fire(ServerInitializeEvent.INSTANCE);
 
         // Bind to a port.
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
@@ -104,7 +105,7 @@ public class VoxelwindServer implements Server {
         timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
 
         // Send another event.
-        eventManager.fire(ServerStartEvent.create());
+        eventManager.fire(ServerStartEvent.INSTANCE);
 
         Thread.sleep(10000000);
     }

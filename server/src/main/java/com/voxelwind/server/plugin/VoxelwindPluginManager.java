@@ -3,7 +3,7 @@ package com.voxelwind.server.plugin;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.voxelwind.api.plugin.Plugin;
+import com.voxelwind.api.plugin.PluginContainer;
 import com.voxelwind.api.plugin.PluginDescription;
 import com.voxelwind.api.plugin.PluginManager;
 import com.voxelwind.api.server.Server;
@@ -16,13 +16,12 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class VoxelwindPluginManager implements PluginManager {
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindPluginManager.class);
 
-    private final Map<String, Object> plugins = new HashMap<>();
+    private final Map<String, PluginContainer> plugins = new HashMap<>();
     private final Server server;
 
     public VoxelwindPluginManager(Server server) {
@@ -30,12 +29,12 @@ public class VoxelwindPluginManager implements PluginManager {
     }
 
     @Override
-    public Collection<Object> getAllPlugins() {
+    public Collection<PluginContainer> getAllPlugins() {
         return ImmutableList.copyOf(plugins.values());
     }
 
     @Override
-    public Optional<Object> getPlugin(String id) {
+    public Optional<PluginContainer> getPlugin(String id) {
         Preconditions.checkNotNull(id, "id");
         return Optional.ofNullable(plugins.get(id));
     }
@@ -61,7 +60,7 @@ public class VoxelwindPluginManager implements PluginManager {
         pluginLoad: for (PluginDescription plugin : sortedPlugins) {
             // Verify dependencies first.
             for (String s : plugin.getDependencies()) {
-                Optional<Object> loadedPlugin = getPlugin(s);
+                Optional<PluginContainer> loadedPlugin = getPlugin(s);
                 if (!loadedPlugin.isPresent()) {
                     LOGGER.error("Can't load plugin {} due to missing dependency {}", plugin.getId(), s);
                     continue pluginLoad;
@@ -69,7 +68,7 @@ public class VoxelwindPluginManager implements PluginManager {
             }
 
             // Now actually create the plugin.
-            Object pluginObject;
+            PluginContainer pluginObject;
             try {
                 pluginObject = loader.createPlugin(plugin);
             } catch (Exception e) {

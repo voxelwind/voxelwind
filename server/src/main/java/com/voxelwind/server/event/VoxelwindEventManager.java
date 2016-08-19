@@ -25,7 +25,7 @@ public class VoxelwindEventManager implements EventManager {
         for (Method method : listener.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(Listener.class)) {
                 if (method.getParameterCount() != 1) {
-                    throw new IllegalArgumentException("Method " + method.getName() + " in " + listener + " has more than one parameter.");
+                    throw new IllegalArgumentException("Method " + method.getName() + " in " + listener + " does not accept only one parameter.");
                 }
 
                 if (!Event.class.isAssignableFrom(method.getParameterTypes()[0])) {

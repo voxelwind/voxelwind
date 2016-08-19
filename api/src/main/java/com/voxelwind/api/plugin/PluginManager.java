@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface PluginManager {
-    Collection<Object> getAllPlugins();
+    Collection<PluginContainer> getAllPlugins();
 
-    Optional<Object> getPlugin(String id);
+    Optional<PluginContainer> getPlugin(String id);
 }
