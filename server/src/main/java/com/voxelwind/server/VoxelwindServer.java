@@ -38,7 +38,7 @@ public class VoxelwindServer implements Server {
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private NettyVoxelwindNetworkListener listener;
     private VoxelwindLevel defaultLevel;
-    private final VoxelwindPluginManager pluginManager = new VoxelwindPluginManager();
+    private final VoxelwindPluginManager pluginManager = new VoxelwindPluginManager(this);
     private final VoxelwindEventManager eventManager = new VoxelwindEventManager();
     private final ConsoleCommandExecutorSource consoleCommandExecutorSource = new VoxelwindConsoleCommandExecutorSource();
 
@@ -68,6 +68,11 @@ public class VoxelwindServer implements Server {
     }
 
     public void boot() throws Exception {
+        // Say hello.
+        LOGGER.info("{} {} is coming online...", getName(), getVersion());
+
+        // Load plugins.
+
         listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
         listener.bind();
 
@@ -75,7 +80,7 @@ public class VoxelwindServer implements Server {
         levelManager.register(defaultLevel);
         levelManager.start(defaultLevel);
 
-        LOGGER.info("{} {} is now alive on {}", getName(), getVersion(), listener.getAddress());
+        LOGGER.info("Now alive on {}", listener.getAddress());
 
         timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
 

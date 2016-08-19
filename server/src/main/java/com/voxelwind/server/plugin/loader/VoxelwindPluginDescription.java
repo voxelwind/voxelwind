@@ -52,4 +52,16 @@ public class VoxelwindPluginDescription implements PluginDescription {
     public Optional<Path> getPath() {
         return Optional.ofNullable(path);
     }
+
+    @Override
+    public String toString() {
+        return "VoxelwindPluginDescription{" +
+                "id='" + id + '\'' +
+                ", author='" + author + '\'' +
+                ", version='" + version + '\'' +
+                ", dependencies=" + dependencies +
+                ", softDependencies=" + softDependencies +
+                ", path=" + path +
+                '}';
+    }
 }
