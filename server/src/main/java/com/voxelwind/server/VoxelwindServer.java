@@ -6,7 +6,10 @@ import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.plugin.PluginManager;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
+import com.voxelwind.api.server.command.ConsoleCommandExecutorSource;
 import com.voxelwind.api.server.event.EventManager;
+import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
+import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.level.LevelCreator;
 import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
@@ -15,6 +18,7 @@ import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
 import com.voxelwind.server.network.session.SessionManager;
+import com.voxelwind.server.plugin.VoxelwindPluginManager;
 import io.netty.channel.epoll.Epoll;
 import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
@@ -34,6 +38,9 @@ public class VoxelwindServer implements Server {
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private NettyVoxelwindNetworkListener listener;
     private VoxelwindLevel defaultLevel;
+    private final VoxelwindPluginManager pluginManager = new VoxelwindPluginManager();
+    private final VoxelwindEventManager eventManager = new VoxelwindEventManager();
+    private final ConsoleCommandExecutorSource consoleCommandExecutorSource = new VoxelwindConsoleCommandExecutorSource();
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6
@@ -101,11 +108,16 @@ public class VoxelwindServer implements Server {
 
     @Override
     public PluginManager getPluginManager() {
-        return null;
+        return pluginManager;
     }
 
     @Override
     public EventManager getEventManager() {
-        return null;
+        return eventManager;
+    }
+
+    @Override
+    public ConsoleCommandExecutorSource getConsoleCommandExecutorSource() {
+        return consoleCommandExecutorSource;
     }
 }

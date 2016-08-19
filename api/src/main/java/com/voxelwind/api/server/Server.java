@@ -1,5 +1,6 @@
 package com.voxelwind.api.server;
 
+import com.voxelwind.api.server.command.ConsoleCommandExecutorSource;
 import com.voxelwind.api.server.event.EventManager;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.plugin.PluginManager;
@@ -39,4 +40,6 @@ public interface Server {
     PluginManager getPluginManager();
 
     EventManager getEventManager();
+
+    ConsoleCommandExecutorSource getConsoleCommandExecutorSource();
 }
