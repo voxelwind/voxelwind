@@ -6,6 +6,7 @@ import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.plugin.PluginManager;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
+import com.voxelwind.api.server.command.CommandManager;
 import com.voxelwind.api.server.command.sources.ConsoleCommandExecutorSource;
 import com.voxelwind.api.server.event.EventManager;
 import com.voxelwind.api.server.event.server.ServerInitializeEvent;
@@ -144,6 +145,11 @@ public class VoxelwindServer implements Server {
     @Override
     public EventManager getEventManager() {
         return eventManager;
+    }
+
+    @Override
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     @Override
