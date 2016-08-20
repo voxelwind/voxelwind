@@ -11,6 +11,7 @@ import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -42,6 +43,7 @@ public class UserSession extends RakNetSession {
     private final AtomicLong encryptedSentPacketGenerator = new AtomicLong();
     private final Queue<RakNetPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
     private UserAuthenticationProfile authenticationProfile;
+    private ClientData clientData;
     private NetworkPacketHandler handler;
     private volatile SessionState state = SessionState.INITIAL_CONNECTION;
     private BungeeCipher encryptionCipher;
@@ -262,5 +264,13 @@ public class UserSession extends RakNetSession {
         state = SessionState.CONNECTED;
         playerSession = new PlayerSession(this, level);
         return playerSession;
+    }
+
+    public ClientData getClientData() {
+        return clientData;
+    }
+
+    public void setClientData(ClientData clientData) {
+        this.clientData = clientData;
     }
 }

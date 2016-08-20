@@ -12,6 +12,7 @@ import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.jni.CryptoUtil;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
+import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import org.apache.logging.log4j.LogManager;
@@ -72,10 +73,14 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             JwtPayload payload = validateChainData(certChainData);
             session.setAuthenticationProfile(payload.getExtraData());
 
-            if (CAN_USE_ENCRYPTION) {
-                // Get the key to use for encrypting the connection
-                PublicKey key = getKey(payload.getIdentityPublicKey());
+            // Get the key to use for encrypting the connection and skin data
+            PublicKey key = getKey(payload.getIdentityPublicKey());
 
+            // Set the client data.
+            ClientData clientData = getClientData(key, packet.getSkinData());
+            session.setClientData(clientData);
+
+            if (CAN_USE_ENCRYPTION) {
                 // ...and begin encrypting the connection.
                 byte[] token = EncryptionUtil.generateRandomToken();
                 byte[] serverKey = EncryptionUtil.getServerKey(key, token);
@@ -163,6 +168,17 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             jwtPayload.getExtraData().setXuid(null);
         }
         return jwtPayload;
+    }
+
+    private ClientData getClientData(PublicKey key, String clientData) throws Exception {
+        if (CAN_USE_ENCRYPTION) {
+            JWSObject object = JWSObject.parse(clientData);
+            if (!verify(key, object)) {
+                throw new IllegalArgumentException("Unable to verify client data.");
+            }
+        }
+        JsonNode payload = getPayload(clientData);
+        return VoxelwindServer.MAPPER.convertValue(payload, ClientData.class);
     }
 
     // ¯\_(ツ)_/¯
