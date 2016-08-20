@@ -6,10 +6,11 @@ import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.plugin.PluginManager;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
-import com.voxelwind.api.server.command.ConsoleCommandExecutorSource;
+import com.voxelwind.api.server.command.sources.ConsoleCommandExecutorSource;
 import com.voxelwind.api.server.event.EventManager;
 import com.voxelwind.api.server.event.server.ServerInitializeEvent;
 import com.voxelwind.api.server.event.server.ServerStartEvent;
+import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
 import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.level.LevelCreator;
@@ -46,6 +47,7 @@ public class VoxelwindServer implements Server {
     private final VoxelwindPluginManager pluginManager = new VoxelwindPluginManager(this);
     private final VoxelwindEventManager eventManager = new VoxelwindEventManager();
     private final ConsoleCommandExecutorSource consoleCommandExecutorSource = new VoxelwindConsoleCommandExecutorSource();
+    private final VoxelwindCommandManager commandManager = new VoxelwindCommandManager();
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6

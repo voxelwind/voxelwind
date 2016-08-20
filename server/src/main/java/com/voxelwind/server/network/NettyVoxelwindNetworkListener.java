@@ -36,14 +36,14 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
         if (Epoll.isAvailable()) {
             bootstrap = new Bootstrap()
                     .channel(EpollDatagramChannel.class)
-                    .group(new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind Listener - #%d").build()))
+                    .group(new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind MCPE Listener - #%d").build()))
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .option(EpollChannelOption.SO_REUSEPORT, true)
                     .handler(this);
         } else {
             bootstrap = new Bootstrap()
                     .channel(NioDatagramChannel.class)
-                    .group(new NioEventLoopGroup(0, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind Listener - #%d").build()))
+                    .group(new NioEventLoopGroup(0, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind MCPE Listener - #%d").build()))
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .handler(this);
         }
@@ -66,7 +66,7 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
                 try {
                     ChannelFuture future = bootstrap.bind(address).await();
                     if (future.isSuccess()) {
-                        LOGGER.debug("Binded listener #" + i + " for " + address);
+                        LOGGER.debug("Bound listener #" + i + " for " + address);
                     } else {
                         LOGGER.error("Unable to bind listener #" + i + " for " + address, future.cause());
                         break;
@@ -79,7 +79,7 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
             try {
                 ChannelFuture future = bootstrap.bind(address).await();
                 if (future.isSuccess()) {
-                    LOGGER.debug("Binded listener for " + address);
+                    LOGGER.debug("Bound listener for " + address);
                 } else {
                     LOGGER.error("Unable to bind listener for " + address, future.cause());
                 }

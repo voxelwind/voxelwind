@@ -1,7 +1,7 @@
 package com.voxelwind.server.command;
 
 import com.google.common.base.Preconditions;
-import com.voxelwind.api.server.command.ConsoleCommandExecutorSource;
+import com.voxelwind.api.server.command.sources.ConsoleCommandExecutorSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
