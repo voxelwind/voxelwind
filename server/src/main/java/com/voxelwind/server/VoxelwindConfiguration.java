@@ -8,11 +8,30 @@ public class VoxelwindConfiguration {
      */
     private boolean performXboxAuthentication;
     /**
-     * The host name or IP address Voxelwind will bind to. By default, Voxelwind will bind to 0.0.0.0;
+     * The host name or IP address Voxelwind will bind to. By default, Voxelwind will bind to 0.0.0.0.
      */
     private String bindHost;
     /**
      * The port number Voxelwind will bind to. By default, Voxelwind will bind to port 19132.
      */
     private int port;
+    /**
+     * Configuration for the RCON service.
+     */
+    private RconConfiguration rcon;
+
+    public static class RconConfiguration {
+        /**
+         * The host name or IP address Voxelwind will bind to. By default, Voxelwind will bind to 0.0.0.0.
+         */
+        private String bindHost;
+        /**
+         * The port number Voxelwind will bind to. By default, Voxelwind will bind to port 19132.
+         */
+        private int port;
+        /**
+         * The password for the RCON server.
+         */
+        private String password;
+    }
 }
