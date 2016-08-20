@@ -9,6 +9,7 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.voxelwind.server.VoxelwindServer;
+import com.voxelwind.server.jni.CryptoUtil;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.JwtPayload;
@@ -27,7 +28,7 @@ import java.text.ParseException;
 import java.util.Base64;
 
 public class InitialNetworkPacketHandler implements NetworkPacketHandler {
-    private static final boolean USE_ENCRYPTION = true;
+    private static final boolean CAN_USE_ENCRYPTION = CryptoUtil.isEncryptionAvailable();
     private static final String MOJANG_PUBLIC_KEY_BASE64 =
             "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
     private static final PublicKey MOJANG_PUBLIC_KEY;
@@ -71,15 +72,13 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             JwtPayload payload = validateChainData(certChainData);
             session.setAuthenticationProfile(payload.getExtraData());
 
-            if (USE_ENCRYPTION) {
+            if (CAN_USE_ENCRYPTION) {
                 // Get the key to use for encrypting the connection
                 PublicKey key = getKey(payload.getIdentityPublicKey());
 
                 // ...and begin encrypting the connection.
                 byte[] token = EncryptionUtil.generateRandomToken();
                 byte[] serverKey = EncryptionUtil.getServerKey(key, token);
-
-                // TODO: Fix encryption later
                 session.enableEncryption(serverKey);
                 session.sendUrgentPackage(EncryptionUtil.createHandshakePacket(token));
             } else {
@@ -134,28 +133,36 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     private JwtPayload validateChainData(JsonNode data) throws Exception {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
-        PublicKey lastKey = null;
-        boolean trustedChain = false;
-        for (JsonNode node : data) {
-            JWSObject object = JWSObject.parse(node.asText());
-            if (!trustedChain) {
-                trustedChain = verify(MOJANG_PUBLIC_KEY, object);
-            }
-            if (lastKey != null) {
-                if (!verify(lastKey, object)) {
-                    throw new JOSEException("Unable to verify key in chain.");
+        if (CAN_USE_ENCRYPTION) {
+            // If encryption support is available, enable authentication.
+            PublicKey lastKey = null;
+            boolean trustedChain = false;
+            for (JsonNode node : data) {
+                JWSObject object = JWSObject.parse(node.asText());
+                if (!trustedChain) {
+                    trustedChain = verify(MOJANG_PUBLIC_KEY, object);
                 }
+                if (lastKey != null) {
+                    if (!verify(lastKey, object)) {
+                        throw new JOSEException("Unable to verify key in chain.");
+                    }
+                }
+                lastKey = getKey((String) object.getPayload().toJSONObject().get("identityPublicKey"));
             }
-            lastKey = getKey((String) object.getPayload().toJSONObject().get("identityPublicKey"));
-        }
 
-        if (!trustedChain) {
-            throw new IllegalArgumentException("No Mojang public key was found in the chain.");
+            if (!trustedChain) {
+                throw new IllegalArgumentException("No Mojang public key was found in the chain.");
+            }
         }
 
         JsonNode payload = getPayload(data.get(data.size() - 1).asText());
         System.out.println("[Payload] " + payload);
-        return VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
+        JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
+        if (!CAN_USE_ENCRYPTION) {
+            // Not authenticated, don't allow faking the XUID.
+            jwtPayload.getExtraData().setXuid(null);
+        }
+        return jwtPayload;
     }
 
     // ¯\_(ツ)_/¯

@@ -20,8 +20,9 @@ Voxelwind upstream so that the larger community can benefit from them.
 
 ## Requirements
 
-To run Voxelwind, Java 8 (with [unlimited strength cryptography policy files](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html))
-is required. Additionally, it is strongly recommended you run Voxelwind on a recent 64-bit x86 Debian-based Linux distribution (Debian 8 or Ubuntu 16.04) for two reasons:
+To run Voxelwind, Java 8 (optionally with [unlimited strength cryptography policy files](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html)
+for Xbox authentication support) is required. Additionally, it is strongly recommended you run Voxelwind on a recent 64-bit x86 Debian-based Linux distribution
+(Debian 8 or Ubuntu 16.04) for two reasons:
 
 * Voxelwind can use multiple threads to listen to the same port on Linux (`SO_REUSEPORT`). **JDK 9 includes native support
 for this flag, so it is likely this will appear in a future Netty version.**
