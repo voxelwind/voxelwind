@@ -10,6 +10,7 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.jni.CryptoUtil;
+import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.ClientData;
@@ -29,7 +30,7 @@ import java.text.ParseException;
 import java.util.Base64;
 
 public class InitialNetworkPacketHandler implements NetworkPacketHandler {
-    private static final boolean CAN_USE_ENCRYPTION = CryptoUtil.isEncryptionAvailable();
+    private static final boolean CAN_USE_ENCRYPTION = CryptoUtil.isJCEUnlimitedStrength() || Native.cipher.isLoaded();
     private static final String MOJANG_PUBLIC_KEY_BASE64 =
             "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
     private static final PublicKey MOJANG_PUBLIC_KEY;
