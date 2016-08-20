@@ -21,6 +21,7 @@ import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
+import com.voxelwind.server.network.rcon.NettyVoxelwindRconListener;
 import com.voxelwind.server.network.session.SessionManager;
 import com.voxelwind.server.plugin.VoxelwindPluginManager;
 import io.netty.channel.epoll.Epoll;
@@ -28,7 +29,9 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -49,6 +52,7 @@ public class VoxelwindServer implements Server {
     private final VoxelwindEventManager eventManager = new VoxelwindEventManager();
     private final ConsoleCommandExecutorSource consoleCommandExecutorSource = new VoxelwindConsoleCommandExecutorSource();
     private final VoxelwindCommandManager commandManager = new VoxelwindCommandManager();
+    private VoxelwindConfiguration configuration;
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6
@@ -79,6 +83,14 @@ public class VoxelwindServer implements Server {
         // Say hello.
         LOGGER.info("{} {} is coming online...", getName(), getVersion());
 
+        // Load configuration.
+        try {
+            configuration = VoxelwindConfiguration.load(Paths.get("config.json"));
+        } catch (NoSuchFileException e) {
+            configuration = VoxelwindConfiguration.defaultConfiguration();
+            VoxelwindConfiguration.save(Paths.get("config.json"), configuration);
+        }
+
         // Load plugins.
         try {
             Path pluginPath = Paths.get("plugins");
@@ -95,8 +107,14 @@ public class VoxelwindServer implements Server {
         eventManager.fire(ServerInitializeEvent.INSTANCE);
 
         // Bind to a port.
-        listener = new NettyVoxelwindNetworkListener(this, "0.0.0.0", 19132);
+        listener = new NettyVoxelwindNetworkListener(this, configuration.getBindHost(), configuration.getPort());
         listener.bind();
+
+        if (configuration.getRcon().isEnabled()) {
+            NettyVoxelwindRconListener rconListener = new NettyVoxelwindRconListener(this, configuration.getRcon().getPassword().getBytes(StandardCharsets.UTF_8));
+            rconListener.bind(configuration.getRcon().getBindHost(), configuration.getRcon().getPort());
+        }
+        configuration.getRcon().clearPassword();
 
         // Start the example level.
         defaultLevel = new VoxelwindLevel(new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));

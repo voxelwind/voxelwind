@@ -27,4 +27,13 @@ public class RconMessage {
     public String getBody() {
         return body;
     }
+
+    @Override
+    public String toString() {
+        return "RconMessage{" +
+                "id=" + id +
+                ", type=" + type +
+                ", body='" + body + '\'' +
+                '}';
+    }
 }

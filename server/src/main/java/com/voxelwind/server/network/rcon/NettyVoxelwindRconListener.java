@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.api.server.Server;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -29,18 +28,20 @@ public class NettyVoxelwindRconListener extends ChannelInitializer<SocketChannel
             .setNameFormat("Voxelwind RCON Listener").build());
     private final ExecutorService commandExecutionService = Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind RCON Command Executor").build());
+    private final byte[] password;
 
-    public NettyVoxelwindRconListener(Server server) {
+    public NettyVoxelwindRconListener(Server server, byte[] password) {
         this.server = server;
+        this.password = password;
     }
 
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
         // Maximum 4KB input size. You're administrating a server, not running a proxy!
-        channel.pipeline().addLast("lengthDecoder", new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 0, 2, 0, 2, true));
-        channel.pipeline().addLast("rconCodec", new RconCodec());
-        channel.pipeline().addLast("rconHandler", new RconHandler("test".getBytes(StandardCharsets.UTF_8), server, this));
-        channel.pipeline().addLast("lengthPrepender", new LengthFieldPrepender(ByteOrder.LITTLE_ENDIAN, 4, 0, false));
+        channel.pipeline().addLast("lengthDecoder", new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 0, 4, 0, 4, true));
+        channel.pipeline().addLast("rconDecoder", new RconDecoder());
+        channel.pipeline().addLast("rconHandler", new RconHandler(password, server, this));
+        channel.pipeline().addLast("rconEncoder", new RconEncoder());
     }
 
     public ExecutorService getCommandExecutionService() {
