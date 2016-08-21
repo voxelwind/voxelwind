@@ -60,7 +60,7 @@ public class EncryptionUtil {
     public static McpeServerHandshake createHandshakePacket(byte[] token) {
         McpeServerHandshake handshake = new McpeServerHandshake();
         handshake.setKey(serverKey.getPublic());
-        handshake.setToken(Unpooled.wrappedBuffer(token));
+        handshake.setToken(token);
         return handshake;
     }
 

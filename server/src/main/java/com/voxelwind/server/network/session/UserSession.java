@@ -22,6 +22,7 @@ import net.md_5.bungee.jni.cipher.BungeeCipher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.InetSocketAddress;
@@ -263,12 +264,15 @@ public class UserSession extends RakNetSession {
         this.clientData = clientData;
     }
 
-    public void disconnect(String reason) {
+    public void disconnect(@Nonnull String reason) {
+        Preconditions.checkNotNull(reason, "reason");
+        checkForClosed();
+
         McpeDisconnect packet = new McpeDisconnect();
         packet.setMessage(reason);
         sendUrgentPackage(packet);
 
-        // Wait a little bit and close their session
+        // Wait a little bit for the packet to be sent and close their session
         getChannel().eventLoop().schedule(() -> {
             if (!isClosed()) {
                 close();

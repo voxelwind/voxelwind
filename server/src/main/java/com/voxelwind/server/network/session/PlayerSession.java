@@ -209,7 +209,7 @@ public class PlayerSession extends LivingEntity implements Player {
         return CompletableFutures.allAsList(completableFutures);
     }
 
-    public void disconnect(String reason) {
+    public void disconnect(@Nonnull String reason) {
         session.disconnect(reason);
     }
 

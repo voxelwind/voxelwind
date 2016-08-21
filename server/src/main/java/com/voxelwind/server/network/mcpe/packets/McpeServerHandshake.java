@@ -18,7 +18,7 @@ import java.util.Base64;
 @BatchDisallowed
 public class McpeServerHandshake implements RakNetPackage {
     private PublicKey key;
-    private ByteBuf token;
+    private byte[] token;
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -30,14 +30,15 @@ public class McpeServerHandshake implements RakNetPackage {
             throw new AssertionError(e);
         }
         short tokenSz = buffer.readShort();
-        token = buffer.readBytes(tokenSz);
+        token = new byte[tokenSz];
+        buffer.readBytes(token);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         byte[] encoded = key.getEncoded();
         RakNetUtil.writeString(buffer, Base64.getEncoder().encodeToString(encoded));
-        buffer.writeShort(token.readableBytes());
+        buffer.writeShort(token.length);
         buffer.writeBytes(token);
     }
 
@@ -49,11 +50,11 @@ public class McpeServerHandshake implements RakNetPackage {
         this.key = key;
     }
 
-    public ByteBuf getToken() {
+    public byte[] getToken() {
         return token;
     }
 
-    public void setToken(ByteBuf token) {
+    public void setToken(byte[] token) {
         this.token = token;
     }
 }
