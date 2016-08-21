@@ -3,6 +3,7 @@ package com.voxelwind.server.network.session;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.jni.hash.VoxelwindHash;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
@@ -24,11 +25,8 @@ import org.apache.logging.log4j.Logger;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -36,12 +34,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class UserSession extends RakNetSession {
     private static final Logger LOGGER = LogManager.getLogger(UserSession.class);
-    private static final ThreadLocal<byte[]> CHECKSUM_BUFFER_LOCAL = new ThreadLocal<byte[]>() {
-        @Override
-        protected byte[] initialValue() {
-            return new byte[512];
-        }
-    };
     private final AtomicLong encryptedSentPacketGenerator = new AtomicLong();
     private final Queue<RakNetPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
     private UserAuthenticationProfile authenticationProfile;
@@ -232,26 +224,21 @@ public class UserSession extends RakNetSession {
     }
 
     private byte[] generateTrailer(ByteBuf buf) {
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError(e);
-        }
+        VoxelwindHash hash = Native.hash.newInstance();
 
-        digest.update(ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(encryptedSentPacketGenerator.getAndIncrement()).array());
-        // TODO: This is bad -  maybe we can make this native code?
-        byte[] tempBuf = CHECKSUM_BUFFER_LOCAL.get();
-        int readable = buf.readableBytes();
-        if (tempBuf.length < readable) {
-            tempBuf = new byte[readable];
-            CHECKSUM_BUFFER_LOCAL.set(tempBuf);
-        }
-        buf.getBytes(0, tempBuf, 0, readable);
-        digest.update(tempBuf, 0, readable);
-        digest.update(serverKey);
+        ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer();
+        ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer();
+        counterBuf.order(ByteOrder.LITTLE_ENDIAN).writeLong(encryptedSentPacketGenerator.getAndIncrement());
+        keyBuf.writeBytes(serverKey);
 
-        byte[] digested = digest.digest();
+        hash.update(counterBuf);
+        hash.update(buf);
+        hash.update(keyBuf);
+        byte[] digested = hash.digest();
+
+        counterBuf.release();
+        keyBuf.release();
+
         return Arrays.copyOf(digested, 8);
     }
 

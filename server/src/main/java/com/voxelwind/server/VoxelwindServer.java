@@ -60,16 +60,19 @@ public class VoxelwindServer implements Server {
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED);
         System.setProperty("java.net.preferIPv4Stack", "true");
 
-        if (!Epoll.isAvailable()) {
-            LOGGER.warn("Your platform does not support epoll. Server throughput and performance may suffer. To resolve this issue, run your server on Linux.");
-        }
+        // Load native libraries early.
+        boolean partiallySupportedLinux = Epoll.isAvailable();
+        boolean fullySupportedLinux = Native.cipher.load();
 
-        if (!Native.zlib.load()) {
-            LOGGER.warn("Your platform does not support native compression. Server throughput and performance may suffer. To resolve this issue, make sure you're using 64-bit Linux.");
-        }
-
-        if (!Native.cipher.load()) {
-            LOGGER.warn("Your platform does not support native encryption. Server throughput and performance may suffer. To resolve this issue, make sure you're using 64-bit Debian/Ubuntu.");
+        if (partiallySupportedLinux) {
+            Native.zlib.load();
+            if (fullySupportedLinux) {
+                Native.hash.load();
+            } else {
+                LOGGER.warn("You are running on Linux, but you are not using a fully-supported distribution. Server throughput and performance will be affected. Visit https://wiki.voxelwind.com/why_linux for more information.");
+            }
+        } else {
+            LOGGER.warn("You are not running Linux. Server throughput and performance will be affected. Visit https://wiki.voxelwind.com/why_linux for more information.");
         }
 
         VoxelwindServer server = new VoxelwindServer();
