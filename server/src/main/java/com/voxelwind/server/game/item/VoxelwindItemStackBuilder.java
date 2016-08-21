@@ -29,7 +29,7 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder materialData(@Nonnull MaterialData data) {
+    public ItemStackBuilder materialData(MaterialData data) {
         if (data != null) {
             Preconditions.checkState(material != null, "Material has not been set");
             Preconditions.checkArgument(data.getClass().isAssignableFrom(material.getMaterialDataClass()), "Material data is not valid (wanted %s)",
@@ -41,6 +41,7 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
 
     @Override
     public ItemStack build() {
-        return null;
+        Preconditions.checkArgument(material != null, "Material has not been set");
+        return new VoxelwindItemStack(material, amount, data);
     }
 }

@@ -26,10 +26,10 @@ public interface ItemStackBuilder {
 
     /**
      * Specifies the data to use for this item. This requires a material already be set.
-     * @param data
+     * @param data the material data to use
      * @return the builder, for chaining
      */
-    ItemStackBuilder materialData(@Nonnull MaterialData data);
+    ItemStackBuilder materialData(MaterialData data);
 
     // TODO: Add more methods as more functionality is implemented
 
