@@ -1,5 +1,7 @@
 package com.voxelwind.api.game.util;
 
+import com.google.common.base.Preconditions;
+
 import java.util.regex.Pattern;
 
 /**
@@ -119,6 +121,7 @@ public enum TextFormat {
     }
 
     public static String removeFormatting(String string) {
+        Preconditions.checkNotNull(string, "string");
         return CHAT_COLOR_MATCHER.matcher(string).replaceAll("");
     }
 }
