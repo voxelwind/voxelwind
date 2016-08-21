@@ -2,6 +2,7 @@ package com.voxelwind.server.network.rcon;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
@@ -51,7 +52,7 @@ public class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
                     server.getCommandManager().executeCommand(source, message.getBody());
                     source.stopOutput();
 
-                    body = Joiner.on('\n').join(source.getOutput());
+                    body = TextFormat.removeFormatting(Joiner.on('\n').join(source.getOutput()));
                 } catch (CommandNotFoundException e) {
                     body = "No such command found.";
                 } catch (CommandException e) {

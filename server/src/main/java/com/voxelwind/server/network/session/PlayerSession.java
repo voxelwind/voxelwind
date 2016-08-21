@@ -5,7 +5,10 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
+import com.voxelwind.api.server.command.CommandException;
+import com.voxelwind.api.server.command.CommandNotFoundException;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -436,21 +439,16 @@ public class PlayerSession extends LivingEntity implements Player {
 
             // Debugging commands.
             if (packet.getMessage().startsWith("/")) {
-                switch (packet.getMessage()) {
-                    case "/pos":
-                        sendMessage("Level: " + getLevel().getName());
-                        sendMessage("Position: " + getPosition());
-                        return;
-                    case "/testspawn":
-                        ZombieEntity entity = new ZombieEntity(getLevel(), getPosition());
-                        getLevel().getEntityManager().register(entity);
-                        updateViewableEntities();
-                        return;
-                    case "/die":
-                        sendMessage("You have committed suicide.");
-                        setHealth(0f);
-                        return;
+                String command = packet.getMessage().substring(1);
+                try {
+                    session.getServer().getCommandManager().executeCommand(PlayerSession.this, command);
+                } catch (CommandNotFoundException e) {
+                    sendMessage(TextFormat.RED + "No such command found.");
+                } catch (CommandException e) {
+                    LOGGER.error("Error while running command '{}' for {}", command, getName(), e);
+                    sendMessage(TextFormat.RED + "An error has occurred while running the command.");
                 }
+                return;
             }
 
             // By default, queue this packet for all players in the world.

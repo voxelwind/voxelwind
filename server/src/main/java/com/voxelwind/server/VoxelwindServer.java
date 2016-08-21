@@ -13,6 +13,7 @@ import com.voxelwind.api.server.event.server.ServerInitializeEvent;
 import com.voxelwind.api.server.event.server.ServerStartEvent;
 import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
+import com.voxelwind.server.command.builtin.VersionCommand;
 import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.level.LevelCreator;
 import com.voxelwind.server.game.level.LevelManager;
@@ -82,6 +83,9 @@ public class VoxelwindServer implements Server {
     public void boot() throws Exception {
         // Say hello.
         LOGGER.info("{} {} is coming online...", getName(), getVersion());
+
+        // Basic initialization.
+        commandManager.register("version", new VersionCommand(this));
 
         // Load configuration.
         try {
