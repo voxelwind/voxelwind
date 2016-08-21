@@ -226,8 +226,8 @@ public class UserSession extends RakNetSession {
     private byte[] generateTrailer(ByteBuf buf) {
         VoxelwindHash hash = Native.hash.newInstance();
 
-        ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer();
-        ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer();
+        ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer(8);
+        ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer(serverKey.length);
         counterBuf.order(ByteOrder.LITTLE_ENDIAN).writeLong(encryptedSentPacketGenerator.getAndIncrement());
         keyBuf.writeBytes(serverKey);
 
