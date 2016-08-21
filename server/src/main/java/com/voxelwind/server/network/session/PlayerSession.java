@@ -210,16 +210,7 @@ public class PlayerSession extends LivingEntity implements Player {
     }
 
     public void disconnect(String reason) {
-        McpeDisconnect packet = new McpeDisconnect();
-        packet.setMessage(reason);
-        session.sendUrgentPackage(packet);
-
-        // Wait a little bit and close their session
-        session.getChannel().eventLoop().schedule(() -> {
-            if (!session.isClosed()) {
-                session.close();
-            }
-        }, 500, TimeUnit.MILLISECONDS);
+        session.disconnect(reason);
     }
 
     public void sendMessage(@Nonnull String message) {
@@ -435,8 +426,6 @@ public class PlayerSession extends LivingEntity implements Player {
 
         @Override
         public void handle(McpeText packet) {
-            System.out.println("[Chat] " + packet);
-
             // Debugging commands.
             if (packet.getMessage().startsWith("/")) {
                 String command = packet.getMessage().substring(1);

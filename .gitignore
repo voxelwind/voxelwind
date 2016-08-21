@@ -84,3 +84,4 @@ hs_err_pid*
 
 ### Voxelwind ###
 plugins/
+voxelwind.json

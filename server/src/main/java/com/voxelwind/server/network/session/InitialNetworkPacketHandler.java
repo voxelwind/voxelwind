@@ -13,8 +13,10 @@ import com.voxelwind.server.jni.CryptoUtil;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
+import com.voxelwind.server.network.session.auth.ChainTrustInvalidException;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.JwtPayload;
+import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,7 +83,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             ClientData clientData = getClientData(key, packet.getSkinData());
             session.setClientData(clientData);
 
-            if (CAN_USE_ENCRYPTION) {
+            if (CAN_USE_ENCRYPTION && session.getServer().getConfiguration().getXboxAuthentication().isEnabled()) {
                 // ...and begin encrypting the connection.
                 byte[] token = EncryptionUtil.generateRandomToken();
                 byte[] serverKey = EncryptionUtil.getServerKey(key, token);
@@ -91,8 +93,30 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                 // Will not use encryption - initialize the player's session
                 initializePlayerSession();
             }
+        } catch (ChainTrustInvalidException e) {
+            // If configuration permits us to continue logging the player in, then initialize the player session without
+            // encrypting the connection.
+            if (!session.getServer().getConfiguration().getXboxAuthentication().isForceAuthentication()) {
+                // Fill in all data and try again.
+                try {
+                    JsonNode authProfilePayload = getPayload(certChainData.get(certChainData.size() - 1).asText());
+                    JwtPayload payload = VoxelwindServer.MAPPER.convertValue(authProfilePayload, JwtPayload.class);
+                    payload.getExtraData().setXuid(null);
+                    session.setAuthenticationProfile(payload.getExtraData());
+                    session.setClientData(VoxelwindServer.MAPPER.convertValue(getPayload(packet.getSkinData()), ClientData.class));
+                } catch (IOException e1) {
+                    // Disconnect the player.
+                    LOGGER.error("Unable to initialize player session", e);
+                    session.disconnect("Internal server error");
+                }
+                // Since all data is fake, don't bother encrypting the connection.
+                initializePlayerSession();
+            } else {
+                session.disconnect("This server requires that you sign in with Xbox Live.");
+            }
         } catch (Exception e) {
-            LOGGER.error("Unable to enable encryption", e);
+            LOGGER.error("Unable to initialize player session", e);
+            session.disconnect("Internal server error");
         }
     }
 
@@ -157,14 +181,13 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             }
 
             if (!trustedChain) {
-                throw new IllegalArgumentException("No Mojang public key was found in the chain.");
+                throw new ChainTrustInvalidException();
             }
         }
 
         JsonNode payload = getPayload(data.get(data.size() - 1).asText());
-        System.out.println("[Payload] " + payload);
         JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
-        if (!CAN_USE_ENCRYPTION) {
+        if (!CAN_USE_ENCRYPTION || !session.getServer().getConfiguration().getXboxAuthentication().isEnabled()) {
             // Not authenticated, don't allow faking the XUID.
             jwtPayload.getExtraData().setXuid(null);
         }

@@ -1,9 +1,11 @@
 package com.voxelwind.server.network.session.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 import java.util.UUID;
 
+@Data
 public class UserAuthenticationProfile {
     @JsonProperty
     private String displayName;
@@ -11,28 +13,4 @@ public class UserAuthenticationProfile {
     private UUID identity;
     @JsonProperty(value = "XUID")
     private Long xuid;
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public UUID getIdentity() {
-        return identity;
-    }
-
-    public void setIdentity(UUID identity) {
-        this.identity = identity;
-    }
-
-    public Long getXuid() {
-        return xuid;
-    }
-
-    public void setXuid(Long xuid) {
-        this.xuid = xuid;
-    }
 }

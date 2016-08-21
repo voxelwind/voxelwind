@@ -113,4 +113,11 @@ public class McpeBatch implements RakNetPackage {
         }
         precompressed = null;
     }
+
+    @Override
+    public String toString() {
+        return "McpeBatch{" +
+                "packages=" + packages +
+                '}';
+    }
 }

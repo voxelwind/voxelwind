@@ -88,11 +88,12 @@ public class VoxelwindServer implements Server {
         commandManager.register("version", new VersionCommand(this));
 
         // Load configuration.
+        Path configFile = Paths.get("voxelwind.json");
         try {
-            configuration = VoxelwindConfiguration.load(Paths.get("config.json"));
+            configuration = VoxelwindConfiguration.load(configFile);
         } catch (NoSuchFileException e) {
             configuration = VoxelwindConfiguration.defaultConfiguration();
-            VoxelwindConfiguration.save(Paths.get("config.json"), configuration);
+            VoxelwindConfiguration.save(configFile, configuration);
         }
 
         // Load plugins.
@@ -177,5 +178,9 @@ public class VoxelwindServer implements Server {
     @Override
     public ConsoleCommandExecutorSource getConsoleCommandExecutorSource() {
         return consoleCommandExecutorSource;
+    }
+
+    public VoxelwindConfiguration getConfiguration() {
+        return configuration;
     }
 }

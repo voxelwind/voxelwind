@@ -10,6 +10,7 @@ import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
+import com.voxelwind.server.network.mcpe.packets.McpeDisconnect;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
@@ -30,6 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UserSession extends RakNetSession {
@@ -106,7 +108,9 @@ public class UserSession extends RakNetSession {
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
 
-        System.out.println("[Network Send] " + netPackage);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Sending packet {} to {}", netPackage, getRemoteAddress());
+        }
 
         ByteBuf toEncapsulate;
         if (encryptionCipher == null || netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
@@ -153,8 +157,6 @@ public class UserSession extends RakNetSession {
         RakNetPackage netPackage;
         McpeBatch batch = new McpeBatch();
         while ((netPackage = currentlyQueued.poll()) != null) {
-            System.out.println("[Sending] " + netPackage);
-
             if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class) ||
                     netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
                 // We hit a un-batchable packet. Send the current batch and then send the un-batchable packet.
@@ -272,5 +274,18 @@ public class UserSession extends RakNetSession {
 
     public void setClientData(ClientData clientData) {
         this.clientData = clientData;
+    }
+
+    public void disconnect(String reason) {
+        McpeDisconnect packet = new McpeDisconnect();
+        packet.setMessage(reason);
+        sendUrgentPackage(packet);
+
+        // Wait a little bit and close their session
+        getChannel().eventLoop().schedule(() -> {
+            if (!isClosed()) {
+                close();
+            }
+        }, 500, TimeUnit.MILLISECONDS);
     }
 }
