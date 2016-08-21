@@ -2,6 +2,7 @@ package com.voxelwind.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.plugin.PluginManager;
 import com.voxelwind.api.server.Player;
@@ -15,6 +16,7 @@ import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
 import com.voxelwind.server.command.builtin.VersionCommand;
 import com.voxelwind.server.event.VoxelwindEventManager;
+import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
 import com.voxelwind.server.game.level.LevelCreator;
 import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
@@ -181,6 +183,11 @@ public class VoxelwindServer implements Server {
     @Override
     public ConsoleCommandExecutorSource getConsoleCommandExecutorSource() {
         return consoleCommandExecutorSource;
+    }
+
+    @Override
+    public ItemStackBuilder createItemStackBuilder() {
+        return new VoxelwindItemStackBuilder();
     }
 
     public VoxelwindConfiguration getConfiguration() {
