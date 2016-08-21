@@ -66,6 +66,7 @@ public class PlayerSession extends LivingEntity implements Player {
 
         if (!internal) {
             sendMovePlayerPacket();
+            sendNewChunks();
         }
     }
 
@@ -288,6 +289,20 @@ public class PlayerSession extends LivingEntity implements Player {
         return session.getAuthenticationProfile().getDisplayName();
     }
 
+    private void sendNewChunks() {
+        getChunksForRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
+            if (throwable != null) {
+                LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
+                disconnect("Internal server error");
+                return;
+            }
+
+            for (Chunk chunk : chunks) {
+                session.sendUrgentPackage(((VoxelwindChunk) chunk).getChunkDataPacket());
+            }
+        });
+    }
+
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
         @Override
         public void handle(McpeLogin packet) {
@@ -457,17 +472,7 @@ public class PlayerSession extends LivingEntity implements Player {
                 updateViewableEntities();
             }
 
-            getChunksForRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
-                if (throwable != null) {
-                    LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
-                    disconnect("Internal server error");
-                    return;
-                }
-
-                for (Chunk chunk : chunks) {
-                    session.sendUrgentPackage(((VoxelwindChunk) chunk).getChunkDataPacket());
-                }
-            });
+            sendNewChunks();
         }
     }
 }
