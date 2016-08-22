@@ -3,20 +3,20 @@ package com.voxelwind.server.game.item;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
-import com.voxelwind.api.game.item.Material;
-import com.voxelwind.api.game.item.data.MaterialData;
+import com.voxelwind.api.game.item.ItemType;
+import com.voxelwind.api.game.item.data.ItemData;
 
 import javax.annotation.Nonnull;
 
 public class VoxelwindItemStackBuilder implements ItemStackBuilder {
-    private Material material;
+    private ItemType itemType;
     private int amount = 1;
-    private MaterialData data;
+    private ItemData data;
 
     @Override
-    public ItemStackBuilder material(@Nonnull Material material) {
-        Preconditions.checkNotNull(material, "material");
-        this.material = material;
+    public ItemStackBuilder material(@Nonnull ItemType itemType) {
+        Preconditions.checkNotNull(itemType, "itemType");
+        this.itemType = itemType;
         this.data = null; // No data
         return this;
     }
@@ -29,11 +29,12 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder materialData(MaterialData data) {
+    public ItemStackBuilder itemData(ItemData data) {
         if (data != null) {
-            Preconditions.checkState(material != null, "Material has not been set");
-            Preconditions.checkArgument(data.getClass().isAssignableFrom(material.getMaterialDataClass()), "Material data is not valid (wanted %s)",
-                    material.getMaterialDataClass().getName());
+            Preconditions.checkState(itemType != null, "ItemType has not been set");
+            Preconditions.checkArgument(itemType.getMaterialDataClass() != null, "Item does not have any data associated with it.");
+            Preconditions.checkArgument(data.getClass().isAssignableFrom(itemType.getMaterialDataClass()), "ItemType data is not valid (wanted %s)",
+                    itemType.getMaterialDataClass().getName());
         }
         this.data = data;
         return this;
@@ -41,7 +42,7 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
 
     @Override
     public ItemStack build() {
-        Preconditions.checkArgument(material != null, "Material has not been set");
-        return new VoxelwindItemStack(material, amount, data);
+        Preconditions.checkArgument(itemType != null, "ItemType has not been set");
+        return new VoxelwindItemStack(itemType, amount, data);
     }
 }

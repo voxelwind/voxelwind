@@ -6,7 +6,7 @@ import com.voxelwind.api.game.level.block.BlockData;
 /**
  * Represents all the states of a flower pot.
  */
-public class FlowerPot implements MaterialData, BlockData {
+public class FlowerPot implements ItemData, BlockData {
     public static FlowerPot of(Type type) {
         Preconditions.checkNotNull(type, "type");
         return new FlowerPot(type);

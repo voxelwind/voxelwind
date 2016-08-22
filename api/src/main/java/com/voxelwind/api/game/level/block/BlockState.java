@@ -9,4 +9,10 @@ public interface BlockState {
      * @return the type for this block
      */
     BlockType getBlockType();
+
+    /**
+     * Returns the block data.
+     * @return block data
+     */
+    BlockData getBlockData();
 }

@@ -1,6 +1,6 @@
 package com.voxelwind.api.game.item;
 
-import com.voxelwind.api.game.item.data.MaterialData;
+import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.server.Server;
 
 import javax.annotation.Nonnull;
@@ -11,11 +11,11 @@ import javax.annotation.Nonnull;
  */
 public interface ItemStackBuilder {
     /**
-     * Specifies the material to use.
-     * @param material the material to use
+     * Specifies the itemType to use.
+     * @param itemType the itemType to use
      * @return the builder, for chaining
      */
-    ItemStackBuilder material(@Nonnull Material material);
+    ItemStackBuilder material(@Nonnull ItemType itemType);
 
     /**
      * Specifies the amount of items to give in this item stack.
@@ -29,7 +29,7 @@ public interface ItemStackBuilder {
      * @param data the material data to use
      * @return the builder, for chaining
      */
-    ItemStackBuilder materialData(MaterialData data);
+    ItemStackBuilder itemData(ItemData data);
 
     // TODO: Add more methods as more functionality is implemented
 

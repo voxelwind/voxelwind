@@ -1,10 +1,10 @@
 package com.voxelwind.api.game.item.data;
 
 /**
- * This {@link MaterialData} represents coal. In Minecraft, coal can either be regular or be charcoal. They are the same,
+ * This {@link ItemData} represents coal. In Minecraft, coal can either be regular or be charcoal. They are the same,
  * regardless.
  */
-public class Coal implements MaterialData {
+public class Coal implements ItemData {
     /**
      * Represents a regular coal item.
      */

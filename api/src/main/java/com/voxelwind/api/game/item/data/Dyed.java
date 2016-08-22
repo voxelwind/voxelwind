@@ -7,7 +7,7 @@ import com.voxelwind.api.game.level.block.BlockData;
 /**
  * Represents any dyed item, such as stained glass, wool, or dyes.
  */
-public class Dyed implements MaterialData, BlockData {
+public class Dyed implements ItemData, BlockData {
     public static Dyed of(DyeColor color) {
         Preconditions.checkNotNull(color, "color");
         return new Dyed(color);

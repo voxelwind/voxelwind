@@ -1,6 +1,6 @@
 package com.voxelwind.api.game.item;
 
-import com.voxelwind.api.game.item.data.MaterialData;
+import com.voxelwind.api.game.item.data.ItemData;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -14,7 +14,7 @@ public interface ItemStack {
      * Returns the material this item stack represents.
      * @return the material the item stack represented
      */
-    Material getMaterial();
+    ItemType getItemType();
 
     /**
      * Returns the amount that this item stack represents.
@@ -23,10 +23,10 @@ public interface ItemStack {
     int getAmount();
 
     /**
-     * Returns the material data that this item has.
-     * @return the material data
+     * Returns the item data that this item has.
+     * @return the item data
      */
-    Optional<MaterialData> getMaterialData();
+    Optional<ItemData> getItemData();
 
     /**
      * Creates a builder from this item stack.

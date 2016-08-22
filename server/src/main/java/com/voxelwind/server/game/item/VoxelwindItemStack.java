@@ -2,25 +2,24 @@ package com.voxelwind.server.game.item;
 
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
-import com.voxelwind.api.game.item.Material;
-import com.voxelwind.api.game.item.data.MaterialData;
+import com.voxelwind.api.game.item.ItemType;
+import com.voxelwind.api.game.item.data.ItemData;
 
 import java.util.Optional;
 
 public class VoxelwindItemStack implements ItemStack {
-    private final Material material;
+    private final ItemType itemType;
     private final int amount;
-    private final MaterialData data;
+    private final ItemData data;
 
-    public VoxelwindItemStack(Material material, int amount, MaterialData data) {
-        this.material = material;
+    public VoxelwindItemStack(ItemType itemType, int amount, ItemData data) {
+        this.itemType = itemType;
         this.amount = amount;
         this.data = data;
     }
 
-    @Override
-    public Material getMaterial() {
-        return material;
+    public ItemType getItemType() {
+        return itemType;
     }
 
     @Override
@@ -29,12 +28,12 @@ public class VoxelwindItemStack implements ItemStack {
     }
 
     @Override
-    public Optional<MaterialData> getMaterialData() {
+    public Optional<ItemData> getItemData() {
         return Optional.ofNullable(data);
     }
 
     @Override
     public ItemStackBuilder toBuilder() {
-        return new VoxelwindItemStackBuilder().material(material).amount(amount).materialData(data);
+        return new VoxelwindItemStackBuilder().material(itemType).amount(amount).itemData(data);
     }
 }
