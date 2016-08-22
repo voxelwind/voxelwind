@@ -1,18 +1,25 @@
 package com.voxelwind.api.game.level.block;
 
 import com.google.common.collect.ImmutableList;
+import com.sun.tools.javac.jvm.Items;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
+import com.voxelwind.api.game.item.ItemTypes;
+import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
+import com.voxelwind.api.game.item.util.DyeColor;
 import com.voxelwind.api.server.Server;
 
 import java.util.Collection;
+import java.util.Random;
 
 /**
  * This class contains all block types recognized by Voxelwind and Pocket Edition.
  */
 public class BlockTypes {
-    public static final BlockType AIR = new IntBlock(0, "air", 0, false, true, 0, 0, SelfDrop.INSTANCE, null);
+    private static final Random RANDOM = new Random();
+
+    public static final BlockType AIR = new IntBlock(0, "air", 0, false, true, 0, 0, (i1, i2, i3) -> ImmutableList.of(), null);
     public static final BlockType STONE = new IntBlock(1, "stone", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType GRASS_BLOCK = new IntBlock(2, "grass_block", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType DIRT = new IntBlock(3, "dirt", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
@@ -20,10 +27,10 @@ public class BlockTypes {
     public static final BlockType WOOD_PLANKS = new IntBlock(5, "wood_planks", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType SAPLING = new IntBlock(6, "sapling", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType BEDROCK = new IntBlock(7, "bedrock", 64, false, false, 0, 15, SelfDrop.INSTANCE, null);
-    public static final BlockType WATER = new IntBlock(8, "water", 0, false, true, 0, 2, SelfDrop.INSTANCE, null);
-    public static final BlockType WATER_STATIONARY = new IntBlock(9, "water", 0, false, true, 0, 2, SelfDrop.INSTANCE, null);
-    public static final BlockType LAVA = new IntBlock(10, "lava", 0, false, true, 15, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType LAVA_STATIONAR = new IntBlock(11, "lava", 0, false, true, 15, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType WATER = new IntBlock(8, "water", 0, false, true, 0, 2, (i1, i2, i3) -> ImmutableList.of(), null);
+    public static final BlockType WATER_STATIONARY = new IntBlock(9, "water", 0, false, true, 0, 2, (i1, i2, i3) -> ImmutableList.of(), null);
+    public static final BlockType LAVA = new IntBlock(10, "lava", 0, false, true, 15, 0, (i1, i2, i3) -> ImmutableList.of(), null);
+    public static final BlockType LAVA_STATIONAR = new IntBlock(11, "lava", 0, false, true, 15, 0, (i1, i2, i3) -> ImmutableList.of(), null);
     public static final BlockType SAND = new IntBlock(12, "sand", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType GRAVEL = new IntBlock(13, "gravel", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType GOLD_ORE = new IntBlock(14, "gold_ore", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
@@ -33,18 +40,29 @@ public class BlockTypes {
     public static final BlockType LEAVES = new IntBlock(18, "leaves", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType SPONGE = new IntBlock(19, "sponge", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType GLASS = new IntBlock(20, "glass", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType LAPIS_LAZULI_ORE = new IntBlock(21, "lapis_lazuli_ore", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
+    public static final BlockType LAPIS_LAZULI_ORE = new IntBlock(21, "lapis_lazuli_ore", 64, true, false, 0, 15, (server, i2, i3) -> {
+        return ImmutableList.of(server.createItemStackBuilder()
+                .material(ItemTypes.DYE)
+                .itemData(Dyed.of(DyeColor.BLUE))
+                .amount((4) + RANDOM.nextInt(5))
+                .build());
+    }, null);
     public static final BlockType LAPIS_LAZULI_BLOCK = new IntBlock(22, "lapis_lazuli_block", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType DISPENSER = new IntBlock(23, "dispenser", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType SANDSTONE = new IntBlock(24, "sandstone", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType NOTE_BLOCK = new IntBlock(25, "note_block", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
-    public static final BlockType BED = new IntBlock(26, "bed", 1, true, true, 0, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType BED = new IntBlock(26, "bed", 1, true, true, 0, 0, (server, i2, i3) -> {
+        return ImmutableList.of(server.createItemStackBuilder()
+                .material(ItemTypes.BED)
+                .amount(1)
+                .build());
+    }, null);
     public static final BlockType POWERED_RAIL = new IntBlock(27, "powered_rail", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType DETECTOR_RAIL = new IntBlock(28, "detector_rail", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType COBWEB = new IntBlock(30, "cobweb", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType TALL_GRASS = new IntBlock(31, "tall_grass", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType DEAD_BUSH = new IntBlock(32, "dead_bush", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType WOOL = new IntBlock(35, "wool", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
+    public static final BlockType WOOL = new IntBlock(35, "wool", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class);
     public static final BlockType DANDELION = new IntBlock(37, "dandelion", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType FLOWER = new IntBlock(38, "flower", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType BROWN_MUSHROOM = new IntBlock(39, "brown_mushroom", 64, true, false, 1, 15, SelfDrop.INSTANCE, null);
@@ -54,7 +72,7 @@ public class BlockTypes {
     public static final BlockType DOUBLE_STONE_SLAB = new IntBlock(43, "double_stone_slab", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType STONE_SLAB = new IntBlock(44, "stone_slab", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType BRICKS = new IntBlock(45, "bricks", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
-    public static final BlockType TNT = new IntBlock(46, "tnt", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType TNT = new IntBlock(46, "tnt", 64, true, true, 0, 0, (server, i2, i3) -> ImmutableList.of(), null);
     public static final BlockType BOOKSHELF = new IntBlock(47, "bookshelf", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType MOSS_STONE = new IntBlock(48, "moss_stone", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType OBSIDIAN = new IntBlock(49, "obsidian", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
@@ -157,14 +175,14 @@ public class BlockTypes {
     public static final BlockType QUARTZ_STAIRS = new IntBlock(156, "quartz_stairs", 64, true, true, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType WOODEN_DOUBLE_SLAB = new IntBlock(157, "wooden_double_slab", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType WOODEN_SLAB = new IntBlock(158, "wooden_slab", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType STAINED_CLAY = new IntBlock(159, "stained_clay", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
+    public static final BlockType STAINED_CLAY = new IntBlock(159, "stained_clay", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class);
     public static final BlockType ACACIA_LEAVES = new IntBlock(161, "acacia_leaves", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType ACACIA_WOOD = new IntBlock(162, "acacia_wood", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType ACACIA_WOOD_STAIRS = new IntBlock(163, "acacia_wood_stairs", 64, true, true, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType DARK_OAK_WOOD_STAIRS = new IntBlock(164, "dark_oak_wood_stairs", 64, true, true, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType IRON_TRAPDOOR = new IntBlock(167, "iron_trapdoor", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType HAY_BALE = new IntBlock(170, "hay_bale", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
-    public static final BlockType CARPET = new IntBlock(171, "carpet", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType CARPET = new IntBlock(171, "carpet", 64, true, true, 0, 0, SelfDrop.INSTANCE, Dyed.class);
     public static final BlockType HARDENED_CLAY = new IntBlock(172, "hardened_clay", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType BLOCK_OF_COAL = new IntBlock(173, "block_of_coal", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType PACKED_ICE = new IntBlock(174, "packed_ice", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
@@ -208,10 +226,10 @@ public class BlockTypes {
         private final boolean transparent;
         private final int emitLight;
         private final int filterLight;
-        private final SelfDrop dropHandler;
+        private final DroppedHandler dropHandler;
         private final Class<? extends BlockData> aClass;
 
-        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, SelfDrop dropHandler, Class<? extends BlockData> aClass) {
+        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, DroppedHandler dropHandler, Class<? extends BlockData> aClass) {
             this.id = id;
             this.name = name;
             this.maxStackSize = maxStackSize;
