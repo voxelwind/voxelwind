@@ -99,10 +99,25 @@ public class BlockTypes {
     public static final BlockType STONE_PRESSURE_PLATE = new IntBlock(70, "stone_pressure_plate", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType IRON_DOOR = new IntBlock(71, "iron_door", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType WOODEN_PRESSURE_PLATE = new IntBlock(72, "wooden_pressure_plate", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType REDSTONE_ORE = new IntBlock(73, "redstone_ore", 64, true, true, 9, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType REDSTONE_ORE_ACTIVE = new IntBlock(74, "redstone_ore", 64, true, true, 9, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType REDSTONE_ORE = new IntBlock(73, "redstone_ore", 64, true, true, 9, 0, (server, i2, i3) -> {
+        return ImmutableList.of(server.createItemStackBuilder()
+                .material(ItemTypes.REDSTONE)
+                .amount(4 + RANDOM.nextInt(2))
+                .build());
+    }, null);
+    public static final BlockType REDSTONE_ORE_ACTIVE = new IntBlock(74, "redstone_ore", 64, true, true, 9, 0, (server, i2, i3) -> {
+        return ImmutableList.of(server.createItemStackBuilder()
+                .material(ItemTypes.REDSTONE)
+                .amount(4 + RANDOM.nextInt(2))
+                .build());
+    }, null);
     public static final BlockType REDSTONE_TORCH = new IntBlock(75, "redstone_torch", 64, true, true, 7, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType REDSTONE_TORCH_ACTIVE = new IntBlock(76, "redstone_torch", 64, true, true, 7, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType REDSTONE_TORCH_ACTIVE = new IntBlock(76, "redstone_torch", 64, true, true, 7, 0, (server, i2, i3) -> {
+        return ImmutableList.of(server.createItemStackBuilder()
+                .material(REDSTONE_TORCH)
+                .amount(1)
+                .build());
+    }, null);
     public static final BlockType STONE_BUTTON = new IntBlock(77, "stone_button", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType TOP_SNOW = new IntBlock(78, "top_snow", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType ICE = new IntBlock(79, "ice", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
@@ -115,9 +130,9 @@ public class BlockTypes {
     public static final BlockType NETHERRACK = new IntBlock(87, "netherrack", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType SOUL_SAND = new IntBlock(88, "soul_sand", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType GLOWSTONE = new IntBlock(89, "glowstone", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType PORTAL = new IntBlock(90, "portal", 0, false, false, 0, 15, SelfDrop.INSTANCE, null);
+    public static final BlockType PORTAL = new IntBlock(90, "portal", 0, false, false, 0, 15, (server, i2, i3) -> ImmutableList.of(), null);
     public static final BlockType JACK_OLANTERN = new IntBlock(91, "jack_o'lantern", 64, true, true, 15, 15, SelfDrop.INSTANCE, null);
-    public static final BlockType CAKE = new IntBlock(92, "cake", 1, true, true, 0, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType CAKE = new IntBlock(92, "cake", 1, true, true, 0, 0, (server, i2, i3) -> ImmutableList.of(), null);
     public static final BlockType REDSTONE_REPEATER = new IntBlock(93, "redstone_repeater", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType REDSTONE_REPEATER_ACTIVE = new IntBlock(94, "redstone_repeater", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType INVISIBLE_BEDROCK = new IntBlock(95, "invisible_bedrock", 64, false, true, 0, 0, SelfDrop.INSTANCE, null);
