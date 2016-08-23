@@ -1,13 +1,14 @@
 package com.voxelwind.api.game.level.block;
 
 import com.google.common.collect.ImmutableList;
-import com.sun.tools.javac.jvm.Items;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.item.util.DyeColor;
+import com.voxelwind.api.game.item.util.ItemTypeUtil;
+import com.voxelwind.api.game.level.block.data.CocoaGrowth;
 import com.voxelwind.api.server.Server;
 
 import java.util.Collection;
@@ -119,7 +120,15 @@ public class BlockTypes {
                 .build());
     }, null);
     public static final BlockType STONE_BUTTON = new IntBlock(77, "stone_button", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType TOP_SNOW = new IntBlock(78, "top_snow", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType TOP_SNOW = new IntBlock(78, "top_snow", 64, true, true, 0, 0, (server, block, itemStack) -> {
+        if (ItemTypeUtil.isShovel(itemStack.getItemType()) && RANDOM.nextBoolean()) {
+            return ImmutableList.of(server.createItemStackBuilder()
+                    .material(ItemTypes.SNOWBALL)
+                    .amount(1)
+                    .build());
+        }
+        return ImmutableList.of();
+    }, null);
     public static final BlockType ICE = new IntBlock(79, "ice", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType SNOW = new IntBlock(80, "snow", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType CACTUS = new IntBlock(81, "cactus", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
@@ -164,7 +173,18 @@ public class BlockTypes {
     public static final BlockType REDSTONE_LAMP = new IntBlock(122, "redstone_lamp", 64, true, true, 15, 0, SelfDrop.INSTANCE, null);
     public static final BlockType REDSTONE_LAMP_ACTIVE = new IntBlock(123, "redstone_lamp", 64, true, true, 15, 0, SelfDrop.INSTANCE, null);
     public static final BlockType ACTIVATOR_RAIL = new IntBlock(126, "activator_rail", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType COCOA = new IntBlock(127, "cocoa", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType COCOA = new IntBlock(127, "cocoa", 64, true, true, 0, 0, (server, block, with) -> {
+        BlockData data = block.getBlockState().getBlockData();
+        if (data instanceof CocoaGrowth) {
+            int amt = ((CocoaGrowth) data).isFullyGrown() ? (RANDOM.nextInt(3) + 1) : 1;
+            return ImmutableList.of(server.createItemStackBuilder()
+                    .material(ItemTypes.DYE)
+                    .itemData(Dyed.of(DyeColor.BROWN))
+                    .amount(amt)
+                    .build());
+        }
+        return ImmutableList.of();
+    }, CocoaGrowth.class);
     public static final BlockType SANDSTONE_STAIRS = new IntBlock(128, "sandstone_stairs", 64, true, true, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType EMERALD_ORE = new IntBlock(129, "emerald_ore", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType TRIPWIRE_HOOK = new IntBlock(131, "tripwire_hook", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
