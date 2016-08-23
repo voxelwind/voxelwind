@@ -14,7 +14,7 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     private ItemData data;
 
     @Override
-    public ItemStackBuilder material(@Nonnull ItemType itemType) {
+    public ItemStackBuilder item(@Nonnull ItemType itemType) {
         Preconditions.checkNotNull(itemType, "itemType");
         this.itemType = itemType;
         this.data = null; // No data

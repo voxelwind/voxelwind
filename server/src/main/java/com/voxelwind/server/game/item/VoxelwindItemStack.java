@@ -34,6 +34,6 @@ public class VoxelwindItemStack implements ItemStack {
 
     @Override
     public ItemStackBuilder toBuilder() {
-        return new VoxelwindItemStackBuilder().material(itemType).amount(amount).itemData(data);
+        return new VoxelwindItemStackBuilder().item(itemType).amount(amount).itemData(data);
     }
 }

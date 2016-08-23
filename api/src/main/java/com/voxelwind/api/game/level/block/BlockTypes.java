@@ -43,7 +43,7 @@ public class BlockTypes {
     public static final BlockType GLASS = new IntBlock(20, "glass", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType LAPIS_LAZULI_ORE = new IntBlock(21, "lapis_lazuli_ore", 64, true, false, 0, 15, (server, i2, i3) -> {
         return ImmutableList.of(server.createItemStackBuilder()
-                .material(ItemTypes.DYE)
+                .item(ItemTypes.DYE)
                 .itemData(Dyed.of(DyeColor.BLUE))
                 .amount((4) + RANDOM.nextInt(5))
                 .build());
@@ -54,15 +54,44 @@ public class BlockTypes {
     public static final BlockType NOTE_BLOCK = new IntBlock(25, "note_block", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType BED = new IntBlock(26, "bed", 1, true, true, 0, 0, (server, i2, i3) -> {
         return ImmutableList.of(server.createItemStackBuilder()
-                .material(ItemTypes.BED)
+                .item(ItemTypes.BED)
                 .amount(1)
                 .build());
     }, null);
     public static final BlockType POWERED_RAIL = new IntBlock(27, "powered_rail", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType DETECTOR_RAIL = new IntBlock(28, "detector_rail", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType COBWEB = new IntBlock(30, "cobweb", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType TALL_GRASS = new IntBlock(31, "tall_grass", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
-    public static final BlockType DEAD_BUSH = new IntBlock(32, "dead_bush", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
+    public static final BlockType COBWEB = new IntBlock(30, "cobweb", 64, true, true, 0, 0, (server, block, with) -> {
+        return ImmutableList.of(server.createItemStackBuilder()
+                .item(with.getItemType() == ItemTypes.SHEARS ? block.getBlockState().getBlockType() : ItemTypes.STRING)
+                .amount(1)
+                .build());
+    }, null);
+    public static final BlockType TALL_GRASS = new IntBlock(31, "tall_grass", 64, true, true, 0, 0, (server, block, with) -> {
+        if (with.getItemType() == ItemTypes.SHEARS) {
+            return ImmutableList.of(server.createItemStackBuilder()
+                    .item(with.getItemType() == ItemTypes.SHEARS ? block.getBlockState().getBlockType() : ItemTypes.STRING)
+                    .amount(1)
+                    .build());
+        } else {
+            if (RANDOM.nextInt(15) == 0) {
+                return ImmutableList.of(server.createItemStackBuilder()
+                        .item(ItemTypes.SEEDS)
+                        .amount(1)
+                        .build());
+            } else {
+                return ImmutableList.of();
+            }
+        }
+    }, null);
+    public static final BlockType DEAD_BUSH = new IntBlock(32, "dead_bush", 64, true, true, 0, 0, (server, block, with) -> {
+        if (with.getItemType() == ItemTypes.SHEARS) {
+            return ImmutableList.of(server.createItemStackBuilder()
+                    .item(block.getBlockState().getBlockType())
+                    .amount(1)
+                    .build());
+        }
+        return ImmutableList.of();
+    }, null);
     public static final BlockType WOOL = new IntBlock(35, "wool", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class);
     public static final BlockType DANDELION = new IntBlock(37, "dandelion", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType FLOWER = new IntBlock(38, "flower", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
@@ -73,7 +102,7 @@ public class BlockTypes {
     public static final BlockType DOUBLE_STONE_SLAB = new IntBlock(43, "double_stone_slab", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType STONE_SLAB = new IntBlock(44, "stone_slab", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType BRICKS = new IntBlock(45, "bricks", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
-    public static final BlockType TNT = new IntBlock(46, "tnt", 64, true, true, 0, 0, (server, i2, i3) -> ImmutableList.of(), null);
+    public static final BlockType TNT = new IntBlock(46, "tnt", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType BOOKSHELF = new IntBlock(47, "bookshelf", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType MOSS_STONE = new IntBlock(48, "moss_stone", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
     public static final BlockType OBSIDIAN = new IntBlock(49, "obsidian", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
@@ -102,20 +131,20 @@ public class BlockTypes {
     public static final BlockType WOODEN_PRESSURE_PLATE = new IntBlock(72, "wooden_pressure_plate", 64, true, true, 0, 0, SelfDrop.INSTANCE, null);
     public static final BlockType REDSTONE_ORE = new IntBlock(73, "redstone_ore", 64, true, true, 9, 0, (server, i2, i3) -> {
         return ImmutableList.of(server.createItemStackBuilder()
-                .material(ItemTypes.REDSTONE)
+                .item(ItemTypes.REDSTONE)
                 .amount(4 + RANDOM.nextInt(2))
                 .build());
     }, null);
     public static final BlockType REDSTONE_ORE_ACTIVE = new IntBlock(74, "redstone_ore", 64, true, true, 9, 0, (server, i2, i3) -> {
         return ImmutableList.of(server.createItemStackBuilder()
-                .material(ItemTypes.REDSTONE)
+                .item(ItemTypes.REDSTONE)
                 .amount(4 + RANDOM.nextInt(2))
                 .build());
     }, null);
     public static final BlockType REDSTONE_TORCH = new IntBlock(75, "redstone_torch", 64, true, true, 7, 0, SelfDrop.INSTANCE, null);
     public static final BlockType REDSTONE_TORCH_ACTIVE = new IntBlock(76, "redstone_torch", 64, true, true, 7, 0, (server, i2, i3) -> {
         return ImmutableList.of(server.createItemStackBuilder()
-                .material(REDSTONE_TORCH)
+                .item(REDSTONE_TORCH)
                 .amount(1)
                 .build());
     }, null);
@@ -123,7 +152,7 @@ public class BlockTypes {
     public static final BlockType TOP_SNOW = new IntBlock(78, "top_snow", 64, true, true, 0, 0, (server, block, itemStack) -> {
         if (ItemTypeUtil.isShovel(itemStack.getItemType()) && RANDOM.nextBoolean()) {
             return ImmutableList.of(server.createItemStackBuilder()
-                    .material(ItemTypes.SNOWBALL)
+                    .item(ItemTypes.SNOWBALL)
                     .amount(1)
                     .build());
         }
@@ -178,7 +207,7 @@ public class BlockTypes {
         if (data instanceof CocoaGrowth) {
             int amt = ((CocoaGrowth) data).isFullyGrown() ? (RANDOM.nextInt(3) + 1) : 1;
             return ImmutableList.of(server.createItemStackBuilder()
-                    .material(ItemTypes.DYE)
+                    .item(ItemTypes.DYE)
                     .itemData(Dyed.of(DyeColor.BROWN))
                     .amount(amt)
                     .build());
@@ -240,12 +269,22 @@ public class BlockTypes {
         Collection<ItemStack> drop(Server server, Block block, ItemStack with);
     }
 
+    private ItemStack tryExact(Server server, Block block) {
+        ItemStackBuilder builder = server.createItemStackBuilder()
+                .item(block.getBlockState().getBlockType())
+                .amount(1);
+        if (block.getBlockState().getBlockData() instanceof ItemData) {
+            builder.itemData((ItemData) block.getBlockState().getBlockData());
+        }
+        return builder.build();
+    }
+
     private static class SelfDrop implements DroppedHandler {
         private static SelfDrop INSTANCE = new SelfDrop();
 
         @Override
         public Collection<ItemStack> drop(Server server, Block block, ItemStack with) {
-            ItemStackBuilder builder = server.createItemStackBuilder().material(block.getBlockState().getBlockType()).amount(1);
+            ItemStackBuilder builder = server.createItemStackBuilder().item(block.getBlockState().getBlockType()).amount(1);
             if (block.getBlockState().getBlockData() != null && block.getBlockState().getBlockData() instanceof BlockData) {
                 builder.itemData((ItemData) block.getBlockState().getBlockData());
             }
