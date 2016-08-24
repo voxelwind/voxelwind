@@ -2,6 +2,8 @@ package com.voxelwind.server;
 
 import com.voxelwind.server.jni.CryptoUtil;
 import com.voxelwind.server.network.Native;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,6 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Random;
 
+@Getter
+@ToString
 public class VoxelwindConfiguration {
     /**
      * Configuration for Xbox authentication.
@@ -30,6 +34,8 @@ public class VoxelwindConfiguration {
      */
     private RconConfiguration rcon;
 
+    @Getter
+    @ToString
     public static class XboxAuthenticationConfiguration {
         /**
          * Whether or not to use Xbox authentication. This setting will be overridden on a system that does not have the
@@ -52,6 +58,8 @@ public class VoxelwindConfiguration {
         }
     }
 
+    @Getter
+    @ToString
     public static class RconConfiguration {
         /**
          * Whether or not RCON is enabled.
@@ -70,22 +78,6 @@ public class VoxelwindConfiguration {
          */
         private String password;
 
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public String getBindHost() {
-            return bindHost;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
         public void clearPassword() {
             password = null;
         }
@@ -93,18 +85,6 @@ public class VoxelwindConfiguration {
 
     public XboxAuthenticationConfiguration getXboxAuthentication() {
         return xboxAuthentication;
-    }
-
-    public String getBindHost() {
-        return bindHost;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public RconConfiguration getRcon() {
-        return rcon;
     }
 
     public static VoxelwindConfiguration load(Path path) throws IOException {
