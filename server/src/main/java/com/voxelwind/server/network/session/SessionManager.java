@@ -14,11 +14,11 @@ public class SessionManager {
     // Voxelwind ticks each session in a thread pool. This thread pool is automatically adjusted depending on player count.
     private static final int SESSIONS_PER_THREAD = 50;
 
-    private final ConcurrentMap<InetSocketAddress, UserSession> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<InetSocketAddress, McpeSession> sessions = new ConcurrentHashMap<>();
     private final ThreadPoolExecutor sessionTicker = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
             new ThreadFactoryBuilder().setNameFormat("Voxelwind Session Ticker - #%d").setDaemon(true).build());
 
-    public boolean add(InetSocketAddress address, UserSession session) {
+    public boolean add(InetSocketAddress address, McpeSession session) {
         boolean added = sessions.putIfAbsent(address, session) == null;
         if (added) {
             adjustPoolSize();
@@ -34,11 +34,11 @@ public class SessionManager {
         return removed;
     }
 
-    public UserSession get(InetSocketAddress address) {
+    public McpeSession get(InetSocketAddress address) {
         return sessions.get(address);
     }
 
-    public Collection<UserSession> all() {
+    public Collection<McpeSession> all() {
         return ImmutableList.copyOf(sessions.values());
     }
 
@@ -51,7 +51,7 @@ public class SessionManager {
     public List<Player> allPlayers() {
         return sessions.values().stream()
                 .filter(p -> p.getPlayerSession() != null)
-                .map(UserSession::getPlayerSession)
+                .map(McpeSession::getPlayerSession)
                 .collect(Collectors.toList());
     }
 
@@ -63,7 +63,7 @@ public class SessionManager {
     }
 
     public void onTick() {
-        for (UserSession session : sessions.values()) {
+        for (McpeSession session : sessions.values()) {
             sessionTicker.execute(session::onTick);
         }
     }

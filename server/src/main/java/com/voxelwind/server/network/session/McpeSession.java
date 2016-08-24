@@ -33,8 +33,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class UserSession extends RakNetSession {
-    private static final Logger LOGGER = LogManager.getLogger(UserSession.class);
+public class McpeSession extends RakNetSession {
+    private static final Logger LOGGER = LogManager.getLogger(McpeSession.class);
     private final AtomicLong encryptedSentPacketGenerator = new AtomicLong();
     private final Queue<RakNetPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
     private UserAuthenticationProfile authenticationProfile;
@@ -46,7 +46,7 @@ public class UserSession extends RakNetSession {
     private PlayerSession playerSession;
     private byte[] serverKey;
 
-    public UserSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
+    public McpeSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
         super(remoteAddress, mtu, channel, server);
         this.handler = handler;
     }

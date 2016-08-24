@@ -11,7 +11,7 @@ import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.*;
-import com.voxelwind.server.network.session.UserSession;
+import com.voxelwind.server.network.session.McpeSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -35,17 +35,15 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, AddressedRakNetDatagram datagram) throws Exception {
-        UserSession session = server.getSessionManager().get(datagram.sender());
+        McpeSession session = server.getSessionManager().get(datagram.sender());
 
         if (session == null)
             return;
 
         // Acknowledge receipt of the datagram.
-        //session.enqueueAck(datagram.content().getDatagramSequenceNumber());
-        // Temporary hack:
         AckPacket ackPacket = new AckPacket();
         ackPacket.getIds().add(new IntRange(datagram.content().getDatagramSequenceNumber()));
-        ctx.writeAndFlush(new DirectAddressedRakNetPacket(ackPacket, datagram.sender()));
+        ctx.writeAndFlush(new DirectAddressedRakNetPacket(ackPacket, datagram.sender()), ctx.voidPromise());
 
         // Update session touch time.
         session.touch();
@@ -78,7 +76,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         }
     }
 
-    private void handlePackage(RakNetPackage netPackage, UserSession session) throws Exception {
+    private void handlePackage(RakNetPackage netPackage, McpeSession session) throws Exception {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("[Package] " + netPackage);
         }

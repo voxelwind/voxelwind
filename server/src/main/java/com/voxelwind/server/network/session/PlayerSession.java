@@ -23,19 +23,18 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 public class PlayerSession extends LivingEntity implements Player {
     private static final int REQUIRED_TO_SPAWN = 56;
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
-    private final UserSession session;
+    private final McpeSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<Long> isViewing = new HashSet<>();
     private boolean spawned = false;
     private int viewDistance = 5;
 
-    public PlayerSession(UserSession session, VoxelwindLevel level) {
+    public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation());
         this.session = session;
     }
@@ -167,7 +166,7 @@ public class PlayerSession extends LivingEntity implements Player {
         session.addToSendQueue(spawnPosition);
     }
 
-    public UserSession getUserSession() {
+    public McpeSession getUserSession() {
         return session;
     }
 
@@ -453,13 +452,12 @@ public class PlayerSession extends LivingEntity implements Player {
             setPosition(newPosition, true);
             setRotation(packet.getRotation(), true);
 
-            // If we haven't moved in the X or Z axis, don't update viewable entities - they haven't changed.
+            // If we haven't moved in the X or Z axis, don't update viewable entities or try updating chunks - they haven't changed.
             if (Float.compare(originalPosition.getX(), newPosition.getX()) != 0 ||
                     Float.compare(originalPosition.getZ(), newPosition.getZ()) != 0) {
                 updateViewableEntities();
+                sendNewChunks();
             }
-
-            sendNewChunks();
         }
     }
 }

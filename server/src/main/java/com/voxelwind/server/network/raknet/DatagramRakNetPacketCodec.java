@@ -4,7 +4,7 @@ import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagramFlags;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
-import com.voxelwind.server.network.session.UserSession;
+import com.voxelwind.server.network.session.McpeSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
@@ -29,7 +29,7 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
     @Override
     protected void decode(ChannelHandlerContext ctx, DatagramPacket packet, List<Object> list) throws Exception {
         // Requires a session
-        UserSession session = server.getSessionManager().get(packet.sender());
+        McpeSession session = server.getSessionManager().get(packet.sender());
 
         if (session == null)
             return;

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.base.Preconditions;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
@@ -16,19 +15,16 @@ import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.ChainTrustInvalidException;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.JwtPayload;
-import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.text.ParseException;
 import java.util.Base64;
 
 public class InitialNetworkPacketHandler implements NetworkPacketHandler {
@@ -46,9 +42,9 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         }
     }
 
-    private final UserSession session;
+    private final McpeSession session;
 
-    public InitialNetworkPacketHandler(UserSession session) {
+    public InitialNetworkPacketHandler(McpeSession session) {
         this.session = session;
     }
 

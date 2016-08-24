@@ -4,7 +4,7 @@ import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.network.session.InitialNetworkPacketHandler;
-import com.voxelwind.server.network.session.UserSession;
+import com.voxelwind.server.network.session.McpeSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -18,7 +18,7 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DirectAddressedRakNetPacket packet) throws Exception {
-        UserSession session = server.getSessionManager().get(packet.sender());
+        McpeSession session = server.getSessionManager().get(packet.sender());
 
         // ** Everything we can handle without a session **
         if (packet.content() instanceof UnconnectedPingPacket) {
@@ -27,7 +27,7 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
             response.setPingId(request.getPingId());
             response.setServerId(SERVER_ID);
             response.setAdvertise("MCPE;Voxelwind server;82;0.15.4;" + server.getSessionManager().countConnected() + ";10000");
-            ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()));
+            ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()), ctx.voidPromise());
             return;
         }
         if (packet.content() instanceof OpenConnectionRequest1Packet) {
@@ -36,7 +36,7 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
             response.setMtuSize(request.getMtu());
             response.setServerSecurity((byte) 0);
             response.setServerGuid(SERVER_ID);
-            ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()));
+            ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()), ctx.voidPromise());
             return;
         }
         if (packet.content() instanceof OpenConnectionRequest2Packet) {
@@ -46,10 +46,10 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
             response.setServerSecurity((byte) 0);
             response.setClientAddress(packet.sender());
             response.setServerId(SERVER_ID);
-            session = new UserSession(packet.sender(), request.getMtuSize(), null, ctx.channel(), server);
+            session = new McpeSession(packet.sender(), request.getMtuSize(), null, ctx.channel(), server);
             session.setHandler(new InitialNetworkPacketHandler(session));
             server.getSessionManager().add(packet.sender(), session);
-            ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()));
+            ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()), ctx.voidPromise());
             return;
         }
 

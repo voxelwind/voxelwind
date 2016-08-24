@@ -1,9 +1,8 @@
 package com.voxelwind.server.network.raknet.datagrams;
 
 import com.voxelwind.server.network.session.RakNetSession;
-import com.voxelwind.server.network.session.UserSession;
+import com.voxelwind.server.network.session.McpeSession;
 import io.netty.buffer.ByteBuf;
-import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ReferenceCounted;
 
 import java.nio.ByteOrder;
@@ -39,7 +38,7 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
         }
 
         // Now create the packets.
-        boolean encrypted = session instanceof UserSession && ((UserSession) session).isEncrypted();
+        boolean encrypted = session instanceof McpeSession && ((McpeSession) session).isEncrypted();
 
         List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
         short splitId = (short) (System.nanoTime() % Short.MAX_VALUE);

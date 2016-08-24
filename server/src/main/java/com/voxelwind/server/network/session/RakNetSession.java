@@ -8,7 +8,6 @@ import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
-import com.voxelwind.server.network.raknet.packets.AckPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
@@ -127,7 +126,7 @@ public class RakNetSession {
 
     public void sendDirectPackage(RakNetPackage netPackage) {
         checkForClosed();
-        channel.writeAndFlush(new DirectAddressedRakNetPacket(netPackage, remoteAddress));
+        channel.writeAndFlush(new DirectAddressedRakNetPacket(netPackage, remoteAddress), channel.voidPromise());
     }
 
     public void onTick() {
@@ -135,7 +134,6 @@ public class RakNetSession {
             return;
         }
 
-        sendAckQueue();
         resendStalePackets();
         cleanSplitPackets();
     }
@@ -155,7 +153,7 @@ public class RakNetSession {
             if (datagram.isStale()) {
                 LOGGER.warn("Datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " for " + remoteAddress + " is stale, resending!");
                 datagram.refreshForResend();
-                channel.write(new AddressedRakNetDatagram(datagram.getDatagram(), remoteAddress));
+                channel.write(new AddressedRakNetDatagram(datagram.getDatagram(), remoteAddress), channel.voidPromise());
             }
         }
         channel.flush();
@@ -163,29 +161,6 @@ public class RakNetSession {
 
     public void touch() {
         lastKnownUpdate.set(System.currentTimeMillis());
-    }
-
-    public void enqueueAck(int ack) {
-        checkForClosed();
-
-        synchronized (ackQueue) {
-            ackQueue.add(ack);
-        }
-    }
-
-    private void sendAckQueue() {
-        List<IntRange> ranges;
-        synchronized (ackQueue) {
-            if (ackQueue.isEmpty())
-                return;
-
-            ranges = AckPacket.intoRanges(ackQueue);
-            ackQueue.clear();
-        }
-
-        AckPacket packet = new AckPacket();
-        packet.getIds().addAll(ranges);
-        sendDirectPackage(packet);
     }
 
     protected void close() {
