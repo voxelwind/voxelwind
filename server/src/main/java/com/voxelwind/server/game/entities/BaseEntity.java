@@ -61,6 +61,7 @@ public class BaseEntity implements Entity {
     }
 
     protected void setPosition(Vector3f position) {
+        Preconditions.checkNotNull(position, "position");
         checkIfAlive();
 
         if (!this.position.equals(position)) {
@@ -77,6 +78,7 @@ public class BaseEntity implements Entity {
 
     @Override
     public void setRotation(@Nonnull Rotation rotation) {
+        Preconditions.checkNotNull(rotation, "rotation");
         checkIfAlive();
 
         if (!this.rotation.equals(rotation)) {
@@ -92,6 +94,7 @@ public class BaseEntity implements Entity {
 
     @Override
     public void setMotion(@Nonnull Vector3f motion) {
+        Preconditions.checkNotNull(motion, "motion");
         checkIfAlive();
 
         if (!this.motion.equals(motion)) {
@@ -228,6 +231,9 @@ public class BaseEntity implements Entity {
 
     @Override
     public void teleport(@Nonnull Level level, @Nonnull Vector3f position, @Nonnull Rotation rotation) {
+        Preconditions.checkNotNull(level, "level");
+        Preconditions.checkNotNull(position, "position");
+        Preconditions.checkNotNull(rotation, "rotation");
         Preconditions.checkArgument(level instanceof VoxelwindLevel, "Not a valid level.");
 
         checkIfAlive();

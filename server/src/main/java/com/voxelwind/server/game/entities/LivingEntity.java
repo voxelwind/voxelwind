@@ -49,7 +49,7 @@ public class LivingEntity extends BaseEntity {
         Preconditions.checkArgument(Float.compare(health, maximumHealth) <= 0, "New health %s exceeds maximum health %s", health, maximumHealth);
         this.health = health;
 
-        if (Double.compare(health, maximumHealth) <= 0f) {
+        if (Double.compare(health, maximumHealth) <= 0) {
             doDeath();
         }
     }
@@ -59,6 +59,7 @@ public class LivingEntity extends BaseEntity {
     }
 
     public void setMaximumHealth(float maximumHealth) {
+        Preconditions.checkArgument(Float.compare(maximumHealth, 0) <= 0, "New health %s is less than minimum allowed 0", maximumHealth);
         this.maximumHealth = maximumHealth;
         this.health = Math.min(maximumHealth, health);
     }
