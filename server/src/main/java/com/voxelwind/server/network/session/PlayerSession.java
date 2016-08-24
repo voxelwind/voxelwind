@@ -70,11 +70,15 @@ public class PlayerSession extends LivingEntity implements Player {
     }
 
     private void setPosition(Vector3f position, boolean internal) {
+        Vector3f oldPosition = getPosition();
         super.setPosition(position);
 
         if (!internal) {
             sendMovePlayerPacket();
-            sendNewChunks();
+            if (hasSubstantiallyMoved(oldPosition, position)) {
+                sendNewChunks();
+                updateViewableEntities();
+            }
         }
     }
 
@@ -497,11 +501,14 @@ public class PlayerSession extends LivingEntity implements Player {
             setRotation(packet.getRotation(), true);
 
             // If we haven't moved in the X or Z axis, don't update viewable entities or try updating chunks - they haven't changed.
-            if (Float.compare(originalPosition.getX(), newPosition.getX()) != 0 ||
-                    Float.compare(originalPosition.getZ(), newPosition.getZ()) != 0) {
+            if (hasSubstantiallyMoved(originalPosition, newPosition)) {
                 updateViewableEntities();
                 sendNewChunks();
             }
         }
+    }
+
+    private static boolean hasSubstantiallyMoved(Vector3f oldPos, Vector3f newPos) {
+        return (Float.compare(oldPos.getX(), newPos.getX()) != 0 || Float.compare(oldPos.getZ(), newPos.getZ()) != 0);
     }
 }
