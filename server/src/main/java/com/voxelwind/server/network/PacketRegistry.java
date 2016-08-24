@@ -57,6 +57,7 @@ public class PacketRegistry {
                             .put(0x28, McpeRespawn.class)
                             .put(0x31, McpeAdventureSettings.class)
                             .put(0x34, McpeFullChunkData.class)
+                            .put(0x37, McpeSetPlayerGameMode.class)
                             .put(0x3d, McpeRequestChunkRadius.class)
                             .put(0x3e, McpeChunkRadiusUpdated.class)
                             .build())

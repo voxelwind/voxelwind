@@ -3,6 +3,7 @@ package com.voxelwind.server.network.session;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Preconditions;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.util.TextFormat;
@@ -11,6 +12,7 @@ import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
+import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -34,6 +36,7 @@ public class PlayerSession extends LivingEntity implements Player {
     private final McpeSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<Long> isViewing = new HashSet<>();
+    private GameMode gameMode = GameMode.SURVIVAL;
     private boolean spawned = false;
     private int viewDistance = 5;
 
@@ -163,7 +166,7 @@ public class PlayerSession extends LivingEntity implements Player {
         startGame.setSeed(-1);
         startGame.setDimension((byte) 0);
         startGame.setGenerator(1);
-        startGame.setGamemode(0);
+        startGame.setGamemode(gameMode.ordinal());
         startGame.setEntityId(getEntityId());
         startGame.setSpawnLocation(getPosition().toInt());
         startGame.setPosition(getGamePosition());
@@ -317,6 +320,24 @@ public class PlayerSession extends LivingEntity implements Player {
     @Override
     public Skin getSkin() {
         return new Skin(session.getClientData().getSkinId(), session.getClientData().getSkinData());
+    }
+
+    @Nonnull
+    @Override
+    public GameMode getGameMode() {
+        return gameMode;
+    }
+
+    @Override
+    public void setGameMode(@Nonnull GameMode mode) {
+        GameMode oldGameMode = gameMode;
+        gameMode = Preconditions.checkNotNull(mode, "mode");
+
+        if (oldGameMode != gameMode && spawned) {
+            McpeSetPlayerGameMode packet = new McpeSetPlayerGameMode();
+            packet.setGamemode(mode.ordinal());
+            session.addToSendQueue(packet);
+        }
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
