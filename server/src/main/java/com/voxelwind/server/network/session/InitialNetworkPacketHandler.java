@@ -7,6 +7,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
+import com.voxelwind.api.server.event.session.SessionLoginEvent;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.jni.CryptoUtil;
 import com.voxelwind.server.network.Native;
@@ -15,6 +16,7 @@ import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.session.auth.ChainTrustInvalidException;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.JwtPayload;
+import com.voxelwind.server.network.session.auth.TemporarySession;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,6 +106,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                     // Disconnect the player.
                     LOGGER.error("Unable to initialize player session", e);
                     session.disconnect("Internal server error");
+                    return;
                 }
                 // Since all data is fake, don't bother encrypting the connection.
                 initializePlayerSession();
@@ -147,6 +150,15 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     }
 
     private void initializePlayerSession() {
+        TemporarySession apiSession = new TemporarySession(session);
+        SessionLoginEvent event = new SessionLoginEvent(apiSession);
+        session.getServer().getEventManager().fire(event);
+
+        if (event.willDisconnect()) {
+            session.disconnect(event.getDisconnectReason());
+            return;
+        }
+
         McpePlayStatus status = new McpePlayStatus();
         status.setStatus(McpePlayStatus.Status.LOGIN_SUCCESS);
         session.addToSendQueue(status);

@@ -7,12 +7,5 @@ import javax.annotation.Nonnull;
 import java.util.OptionalLong;
 import java.util.UUID;
 
-public interface Player extends Entity, CommandExecutorSource, MessageRecipient {
-    @Nonnull
-    UUID getUniqueId();
-
-    boolean isXboxAuthenticated();
-
-    @Nonnull
-    OptionalLong getXuid();
+public interface Player extends Entity, CommandExecutorSource, MessageRecipient, Session {
 }
