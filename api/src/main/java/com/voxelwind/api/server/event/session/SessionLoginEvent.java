@@ -3,6 +3,8 @@ package com.voxelwind.api.server.event.session;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.server.Session;
 
+import javax.annotation.Nonnull;
+
 /**
  * This event is called after the session has been authenticated but before a player session has been set up.
  */
@@ -14,6 +16,7 @@ public class SessionLoginEvent implements SessionEvent {
         this.session = Preconditions.checkNotNull(session, "session");
     }
 
+    @Nonnull
     @Override
     public Session getSession() {
         return session;

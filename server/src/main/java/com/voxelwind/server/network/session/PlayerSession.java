@@ -10,6 +10,7 @@ import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
+import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -149,6 +150,15 @@ public class PlayerSession extends LivingEntity implements Player {
     }
 
     public void doInitialSpawn() {
+        // Fire PlayerSpawnEvent.
+        // TODO: Fill this in from known player data.
+        PlayerSpawnEvent event = new PlayerSpawnEvent(this, getLevel().getSpawnLocation(), getLevel(), Rotation.ZERO);
+        session.getServer().getEventManager().fire(event);
+
+        teleport(event.getSpawnLevel(), event.getSpawnLocation(), event.getRotation());
+        resetStale(); // We haven't sent packets for other players yet, so staleness is superfluous
+
+        // Send packets to spawn the player.
         McpeStartGame startGame = new McpeStartGame();
         startGame.setSeed(-1);
         startGame.setDimension((byte) 0);
