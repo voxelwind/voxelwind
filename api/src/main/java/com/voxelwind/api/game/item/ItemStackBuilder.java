@@ -15,7 +15,7 @@ public interface ItemStackBuilder {
      * @param itemType the itemType to use
      * @return the builder, for chaining
      */
-    ItemStackBuilder item(@Nonnull ItemType itemType);
+    ItemStackBuilder itemType(@Nonnull ItemType itemType);
 
     /**
      * Specifies the amount of items to give in this item stack.
