@@ -1,6 +1,7 @@
 package com.voxelwind.server.game.level.block;
 
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.level.block.BlockData;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockType;
 
@@ -17,5 +18,11 @@ public class BasicBlockState implements BlockState {
     @Override
     public BlockType getBlockType() {
         return type;
+    }
+
+    @Override
+    public BlockData getBlockData() {
+        // There isn't any
+        return null;
     }
 }

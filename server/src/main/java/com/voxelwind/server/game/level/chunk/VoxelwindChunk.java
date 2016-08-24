@@ -5,6 +5,7 @@ import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
@@ -57,8 +58,8 @@ public class VoxelwindChunk implements Chunk {
         byte data = blockData[xyzIdx(x, y, z)];
 
         Vector3i full = new Vector3i(x + (this.x * 16), y, z + (this.z * 16));
-        // TODO: Add level
-        return new VoxelwindBlock(null, this, full, BlockTypes.forId(data));
+        // TODO: Add level and associated block data
+        return new VoxelwindBlock(null, this, full, new BasicBlockState(BlockTypes.forId(data)));
     }
 
     @Override

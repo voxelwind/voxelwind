@@ -10,7 +10,7 @@ public class ClientData {
     @JsonProperty("ServerAddress")
     private final String serverAddress;
     @JsonProperty("SkinData")
-    private final String skinData;
+    private final byte[] skinData; // Jackson conveniently deserializes from Base64
     @JsonProperty("SkinId")
     private final String skinId;
 }

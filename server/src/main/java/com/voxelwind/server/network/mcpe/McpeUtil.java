@@ -3,6 +3,7 @@ package com.voxelwind.server.network.mcpe;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.server.Skin;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import com.voxelwind.api.util.Rotation;
@@ -127,5 +128,25 @@ public class McpeUtil {
             buf.writeFloat(attribute.getValue());
             RakNetUtil.writeString(buf, attribute.getName());
         }
+    }
+
+    public static Skin readSkin(ByteBuf buf) {
+        String type = RakNetUtil.readString(buf);
+        short length = buf.readShort();
+        if (length == 64*32*4 || length == 64*64*4) {
+            byte[] in = new byte[length];
+            buf.readBytes(in);
+
+            return new Skin(type, in);
+        }
+
+        return new Skin("Standard_Custom", new byte[0]);
+    }
+
+    public static void writeSkin(ByteBuf buf, Skin skin) {
+        byte[] texture = skin.getTexture();
+        RakNetUtil.writeString(buf, skin.getType());
+        buf.writeShort(texture.length);
+        buf.writeBytes(texture);
     }
 }

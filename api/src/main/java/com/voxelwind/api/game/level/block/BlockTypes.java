@@ -12,6 +12,8 @@ import com.voxelwind.api.game.level.block.data.CocoaGrowth;
 import com.voxelwind.api.server.Server;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -265,11 +267,19 @@ public class BlockTypes {
     public static final BlockType GLOWING_OBSIDIAN = new IntBlock(246, "glowing_obsidian", 64, true, false, 12, 15, SelfDrop.INSTANCE, null);
     public static final BlockType NETHER_REACTOR_CORE = new IntBlock(247, "nether_reactor_core", 64, true, false, 0, 15, SelfDrop.INSTANCE, null);
 
+    public static BlockType forId(byte data) {
+        BlockType type = BY_ID.get((int) data);
+        if (type == null) {
+            throw new IllegalArgumentException("ID is not valid.");
+        }
+        return type;
+    }
+
     private interface DroppedHandler {
         Collection<ItemStack> drop(Server server, Block block, ItemStack with);
     }
 
-    private ItemStack tryExact(Server server, Block block) {
+    private static ItemStack tryExact(Server server, Block block) {
         ItemStackBuilder builder = server.createItemStackBuilder()
                 .itemType(block.getBlockState().getBlockType())
                 .amount(1);
@@ -292,6 +302,8 @@ public class BlockTypes {
         }
     }
 
+    private static Map<Integer, BlockType> BY_ID = new HashMap<>();
+
     private static class IntBlock implements BlockType {
         private final int id;
         private final String name;
@@ -313,6 +325,8 @@ public class BlockTypes {
             this.filterLight = filterLight;
             this.dropHandler = dropHandler;
             this.aClass = aClass;
+
+            BY_ID.put(id, this);
         }
 
         @Override

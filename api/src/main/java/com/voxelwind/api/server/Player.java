@@ -8,4 +8,5 @@ import java.util.OptionalLong;
 import java.util.UUID;
 
 public interface Player extends Entity, CommandExecutorSource, MessageRecipient, Session {
+    Skin getSkin();
 }

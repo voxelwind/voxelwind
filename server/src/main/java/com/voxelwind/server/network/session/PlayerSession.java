@@ -7,6 +7,7 @@ import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
+import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
 import com.voxelwind.server.game.level.VoxelwindLevel;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -282,6 +284,12 @@ public class PlayerSession extends LivingEntity implements Player {
         return session.getAuthenticationProfile().getDisplayName();
     }
 
+    @Nonnull
+    @Override
+    public InetSocketAddress getRemoteAddress() {
+        return session.getRemoteAddress();
+    }
+
     private void sendNewChunks() {
         getChunksForRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
             if (throwable != null) {
@@ -294,6 +302,11 @@ public class PlayerSession extends LivingEntity implements Player {
                 session.sendUrgentPackage(((VoxelwindChunk) chunk).getChunkDataPacket());
             }
         });
+    }
+
+    @Override
+    public Skin getSkin() {
+        return new Skin(session.getClientData().getSkinId(), session.getClientData().getSkinData());
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
