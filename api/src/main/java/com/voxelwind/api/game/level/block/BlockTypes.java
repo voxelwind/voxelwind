@@ -9,6 +9,7 @@ import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.item.util.DyeColor;
 import com.voxelwind.api.game.item.util.ItemTypeUtil;
+import com.voxelwind.api.game.level.block.data.Cake;
 import com.voxelwind.api.game.level.block.data.Crops;
 import com.voxelwind.api.server.Server;
 
@@ -191,7 +192,7 @@ public class BlockTypes {
     public static final BlockType GLOWSTONE = new IntBlock(89, "glowstone", 64, true, true, 0, 0);
     public static final BlockType PORTAL = new IntBlock(90, "portal", 0, false, false, 0, 15, NothingDrop.INSTANCE);
     public static final BlockType JACK_OLANTERN = new IntBlock(91, "jack_o'lantern", 64, true, true, 15, 15);
-    public static final BlockType CAKE = new IntBlock(92, "cake", 1, true, true, 0, 0, NothingDrop.INSTANCE);
+    public static final BlockType CAKE = new IntBlock(92, "cake", 1, true, true, 0, 0, NothingDrop.INSTANCE, Cake.class);
     public static final BlockType REDSTONE_REPEATER = new IntBlock(93, "redstone_repeater", 64, true, true, 0, 0);
     public static final BlockType REDSTONE_REPEATER_ACTIVE = new IntBlock(94, "redstone_repeater", 64, true, true, 0, 0);
     public static final BlockType INVISIBLE_BEDROCK = new IntBlock(95, "invisible_bedrock", 64, false, true, 0, 0);
