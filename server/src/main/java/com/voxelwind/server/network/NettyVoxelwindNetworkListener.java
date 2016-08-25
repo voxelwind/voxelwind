@@ -29,17 +29,21 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
     private final Bootstrap bootstrap;
     private final InetSocketAddress address;
     private final VoxelwindServer server;
+    private final boolean useSoReuseport;
 
-    public NettyVoxelwindNetworkListener(VoxelwindServer voxelwindServer, String host, int port) {
+    public NettyVoxelwindNetworkListener(VoxelwindServer voxelwindServer, String host, int port, boolean useSoReuseport) {
         this.server = voxelwindServer;
         this.address = new InetSocketAddress(host, port);
+        this.useSoReuseport = useSoReuseport;
         if (Epoll.isAvailable()) {
             bootstrap = new Bootstrap()
                     .channel(EpollDatagramChannel.class)
                     .group(new EpollEventLoopGroup(0, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind MCPE Listener - #%d").build()))
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .option(EpollChannelOption.SO_REUSEPORT, true)
                     .handler(this);
+            if (useSoReuseport) {
+                bootstrap.option(EpollChannelOption.SO_REUSEPORT, true);
+            }
         } else {
             bootstrap = new Bootstrap()
                     .channel(NioDatagramChannel.class)
@@ -60,8 +64,8 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
     }
 
     public void bind() {
-        if (Epoll.isAvailable()) {
-            // Can use multiple threads to bind to a port for Linux. The kernel will round-robin for us.
+        if (Epoll.isAvailable() && useSoReuseport) {
+            // Can use SO_REUSEPORT so that multiple threads can bind to a port.
             for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
                 try {
                     ChannelFuture future = bootstrap.bind(address).await();

@@ -30,6 +30,11 @@ public class VoxelwindConfiguration {
      */
     private int port;
     /**
+     * Whether or not Voxelwind should try to use SO_REUSEPORT. This is only supported under Linux 3.9+. This increases
+     * the potential throughput of the server.
+     */
+    private boolean useSoReuseport;
+    /**
      * Configuration for the RCON service.
      */
     private RconConfiguration rcon;
@@ -102,6 +107,7 @@ public class VoxelwindConfiguration {
     public static VoxelwindConfiguration defaultConfiguration() {
         VoxelwindConfiguration configuration = new VoxelwindConfiguration();
         configuration.bindHost = "0.0.0.0";
+        configuration.useSoReuseport = false;
         configuration.xboxAuthentication = new XboxAuthenticationConfiguration();
         configuration.xboxAuthentication.enabled = CryptoUtil.isJCEUnlimitedStrength() || Native.cipher.isLoaded();
         configuration.xboxAuthentication.forceAuthentication = false;

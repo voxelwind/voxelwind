@@ -117,7 +117,8 @@ public class VoxelwindServer implements Server {
         eventManager.fire(ServerInitializeEvent.INSTANCE);
 
         // Bind to a port.
-        listener = new NettyVoxelwindNetworkListener(this, configuration.getBindHost(), configuration.getPort());
+        listener = new NettyVoxelwindNetworkListener(this, configuration.getBindHost(), configuration.getPort(),
+                configuration.isUseSoReuseport());
         listener.bind();
 
         if (configuration.getRcon().isEnabled()) {
