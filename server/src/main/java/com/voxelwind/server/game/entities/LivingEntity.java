@@ -8,8 +8,8 @@ import com.voxelwind.server.network.mcpe.packets.McpeEntityEvent;
 public class LivingEntity extends BaseEntity {
     protected float drag = 0.02f;
     protected float gravity = 0.08f;
-    private float health = 20;
-    private float maximumHealth = 20;
+    private float health;
+    private float maximumHealth;
 
     public LivingEntity(EntityTypeData data, VoxelwindLevel level, Vector3f position, float maximumHealth) {
         super(data, position, level);
