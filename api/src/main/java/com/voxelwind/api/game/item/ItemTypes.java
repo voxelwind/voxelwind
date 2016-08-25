@@ -2,6 +2,7 @@ package com.voxelwind.api.game.item;
 
 import com.voxelwind.api.game.item.data.Coal;
 import com.voxelwind.api.game.item.data.Dyed;
+import com.voxelwind.api.game.item.data.GenericDamageValue;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
@@ -196,7 +197,7 @@ public class ItemTypes {
             this.name = name;
             this.maxStackSize = maxStackSize;
             this.data = data;
-            this.fromMetadata = fromMetadata;
+            this.fromMetadata = fromMetadata == null ? GenericDamageValue::new : fromMetadata;
 
             BY_ID.put(id, this);
         }

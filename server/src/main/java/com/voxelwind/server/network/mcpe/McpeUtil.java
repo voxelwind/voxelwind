@@ -3,8 +3,15 @@ package com.voxelwind.server.network.mcpe;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.api.game.item.ItemType;
+import com.voxelwind.api.game.item.ItemTypes;
+import com.voxelwind.api.game.item.data.ItemData;
+import com.voxelwind.api.game.level.block.BlockType;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import com.voxelwind.api.util.Rotation;
@@ -16,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class McpeUtil {
     private McpeUtil() {
@@ -167,5 +175,40 @@ public class McpeUtil {
         for (String s : message.getReplacements()) {
             RakNetUtil.writeString(buf, s);
         }
+    }
+
+    public static ItemStack readItemStack(ByteBuf buf) {
+        short id = buf.readShort();
+        if (id == 0) {
+            return new VoxelwindItemStack(BlockTypes.AIR, 1, null);
+        }
+
+        int count = buf.readByte();
+        short damage = buf.readShort();
+        // TODO: Deserialize NBT data.
+        short nbtSize = buf.readShort();
+        byte[] nbtData = new byte[nbtSize];
+        buf.readBytes(nbtData);
+
+        ItemType type = ItemTypes.forId(id);
+        return new VoxelwindItemStack(type, count, type.createDataFor(damage).orElse(null));
+    }
+
+    public static void writeItemStack(ByteBuf buf, ItemStack stack) {
+        buf.writeShort(stack.getItemType().getId());
+        if (stack.getItemType() == BlockTypes.AIR) {
+            return;
+        }
+
+        buf.writeByte(stack.getAmount());
+        Optional<ItemData> dataOptional = stack.getItemData();
+        if (dataOptional.isPresent()) {
+            buf.writeShort(dataOptional.get().toMetadata());
+        } else {
+            buf.writeShort(0);
+        }
+
+        // TODO: Serialize NBT data.
+        buf.writeShort(0);
     }
 }
