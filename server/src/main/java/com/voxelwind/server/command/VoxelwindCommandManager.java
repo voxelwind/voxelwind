@@ -23,7 +23,7 @@ public class VoxelwindCommandManager implements CommandManager {
         Preconditions.checkNotNull(source, "source");
         Preconditions.checkNotNull(command, "command");
 
-        String[] args = command.split(" ", -1);
+        String[] args = command.trim().split(" ");
         CommandExecutor executor = commandMap.get(args[0]);
         if (executor == null) {
             throw new CommandNotFoundException(args[0]);

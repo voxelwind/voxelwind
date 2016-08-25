@@ -1,5 +1,7 @@
 package com.voxelwind.api.game.item.data;
 
+import javax.annotation.Nonnull;
+
 /**
  * This {@link ItemData} represents coal. In Minecraft, coal can either be regular or be charcoal. They are the same,
  * regardless.
@@ -14,6 +16,7 @@ public class Coal implements ItemData {
      */
     public static final Coal CHARCOAL = new Coal(true);
 
+    @Nonnull
     public static Coal of(short metadata) {
         if (metadata == 0 || metadata == 1) {
             return metadata == 0 ? REGULAR : CHARCOAL;

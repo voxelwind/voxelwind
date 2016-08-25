@@ -4,15 +4,19 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.item.util.DyeColor;
 import com.voxelwind.api.game.level.block.BlockData;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents any dyed item, such as stained glass, wool, or dyes.
  */
 public class Dyed implements ItemData, BlockData {
-    public static Dyed of(DyeColor color) {
+    @Nonnull
+    public static Dyed of(@Nonnull DyeColor color) {
         Preconditions.checkNotNull(color, "color");
         return new Dyed(color);
     }
 
+    @Nonnull
     public static Dyed of(short color) {
         DyeColor[] colors = DyeColor.values();
         Preconditions.checkArgument(color >= 0 && color < colors.length, "color is not valid");
@@ -25,6 +29,7 @@ public class Dyed implements ItemData, BlockData {
         this.color = color;
     }
 
+    @Nonnull
     public DyeColor getColor() {
         return color;
     }
