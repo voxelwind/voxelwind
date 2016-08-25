@@ -7,25 +7,27 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class NettyVoxelwindRconListener extends ChannelInitializer<SocketChannel> {
     private static final Logger LOGGER = LogManager.getLogger(NettyVoxelwindRconListener.class);
 
     private final Server server;
-    private final NioEventLoopGroup group = new NioEventLoopGroup(1, new ThreadFactoryBuilder().setDaemon(true)
-            .setNameFormat("Voxelwind RCON Listener").build());
+    private final EventLoopGroup group;
     private final ExecutorService commandExecutionService = Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind RCON Command Executor").build());
     private final byte[] password;
@@ -33,6 +35,8 @@ public class NettyVoxelwindRconListener extends ChannelInitializer<SocketChannel
     public NettyVoxelwindRconListener(Server server, byte[] password) {
         this.server = server;
         this.password = password;
+        ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind RCON Listener").build();
+        this.group = Epoll.isAvailable() ? new EpollEventLoopGroup(1, factory) : new NioEventLoopGroup(1, factory);
     }
 
     @Override
@@ -50,7 +54,7 @@ public class NettyVoxelwindRconListener extends ChannelInitializer<SocketChannel
 
     public void bind(String host, int port) {
         new ServerBootstrap()
-                .channel(NioServerSocketChannel.class)
+                .channel(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .group(group)
                 .childHandler(this)
