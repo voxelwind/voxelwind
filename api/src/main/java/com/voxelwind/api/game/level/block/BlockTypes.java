@@ -3,6 +3,7 @@ package com.voxelwind.api.game.level.block;
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
+import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
@@ -60,10 +61,14 @@ public class BlockTypes {
     public static final BlockType POWERED_RAIL = new IntBlock(27, "powered_rail", 64, true, true, 0, 0);
     public static final BlockType DETECTOR_RAIL = new IntBlock(28, "detector_rail", 64, true, true, 0, 0);
     public static final BlockType COBWEB = new IntBlock(30, "cobweb", 64, true, true, 0, 0, (server, block, with) -> {
-        return ImmutableList.of(server.createItemStackBuilder()
-                .itemType(with.getItemType() == ItemTypes.SHEARS ? block.getBlockState().getBlockType() : ItemTypes.STRING)
-                .amount(1)
-                .build());
+        if (with.getItemType() == ItemTypes.SHEARS || with.getItemType() == ItemTypes.IRON_SWORD || with.getItemType() == ItemTypes.GOLD_SWORD ||
+                with.getItemType() == ItemTypes.DIAMOND_SWORD) {
+            return ImmutableList.of(server.createItemStackBuilder()
+                    .itemType(with.getItemType() == ItemTypes.SHEARS ? block.getBlockState().getBlockType() : ItemTypes.STRING)
+                    .amount(1)
+                    .build());
+        }
+        return ImmutableList.of();
     });
     public static final BlockType TALL_GRASS = new IntBlock(31, "tall_grass", 64, true, true, 0, 0, (server, block, with) -> {
         if (with.getItemType() == ItemTypes.SHEARS) {
@@ -82,22 +87,14 @@ public class BlockTypes {
             }
         }
     });
-    public static final BlockType DEAD_BUSH = new IntBlock(32, "dead_bush", 64, true, true, 0, 0, (server, block, with) -> {
-        if (with.getItemType() == ItemTypes.SHEARS) {
-            return ImmutableList.of(server.createItemStackBuilder()
-                    .itemType(block.getBlockState().getBlockType())
-                    .amount(1)
-                    .build());
-        }
-        return ImmutableList.of();
-    });
+    public static final BlockType DEAD_BUSH = new IntBlock(32, "dead_bush", 64, true, true, 0, 0, SelfForInDrop.SHEARS_ONLY);
     public static final BlockType WOOL = new IntBlock(35, "wool", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class);
     public static final BlockType DANDELION = new IntBlock(37, "dandelion", 64, true, true, 0, 0);
     public static final BlockType FLOWER = new IntBlock(38, "flower", 64, true, true, 0, 0);
     public static final BlockType BROWN_MUSHROOM = new IntBlock(39, "brown_mushroom", 64, true, false, 1, 15);
     public static final BlockType RED_MUSHROOM = new IntBlock(40, "red_mushroom", 64, true, false, 1, 15);
-    public static final BlockType BLOCK_OF_GOLD = new IntBlock(41, "block_of_gold", 64, true, false, 0, 15);
-    public static final BlockType BLOCK_OF_IRON = new IntBlock(42, "block_of_iron", 64, true, false, 0, 15);
+    public static final BlockType BLOCK_OF_GOLD = new IntBlock(41, "block_of_gold", 64, true, false, 0, 15, SelfForInDrop.ALL_PICKAXES);
+    public static final BlockType BLOCK_OF_IRON = new IntBlock(42, "block_of_iron", 64, true, false, 0, 15, SelfForInDrop.ALL_PICKAXES);
     public static final BlockType DOUBLE_STONE_SLAB = new IntBlock(43, "double_stone_slab", 64, true, true, 0, 0);
     public static final BlockType STONE_SLAB = new IntBlock(44, "stone_slab", 64, true, true, 0, 0);
     public static final BlockType BRICKS = new IntBlock(45, "bricks", 64, true, false, 0, 15);
@@ -141,8 +138,8 @@ public class BlockTypes {
         return ImmutableList.of();
     });
     public static final BlockType FARMLAND = new IntBlock(60, "farmland", 64, true, true, 0, 15);
-    public static final BlockType FURNACE = new IntBlock(61, "furnace", 64, true, true, 13, 0);
-    public static final BlockType FURNACE_ACTIVE = new IntBlock(62, "furnace", 64, true, true, 13, 0);
+    public static final BlockType FURNACE = new IntBlock(61, "furnace", 64, true, true, 13, 0, SelfForInDrop.ALL_PICKAXES);
+    public static final BlockType FURNACE_ACTIVE = new IntBlock(62, "furnace", 64, true, true, 13, 0, SelfForInDrop.ALL_PICKAXES);
     public static final BlockType SIGN = new IntBlock(63, "sign", 16, true, true, 0, 0);
     public static final BlockType WOODEN_DOOR = new IntBlock(64, "wooden_door", 64, true, true, 0, 0);
     public static final BlockType LADDER = new IntBlock(65, "ladder", 64, true, true, 0, 0);
@@ -256,7 +253,7 @@ public class BlockTypes {
     public static final BlockType WEIGHTED_PRESSURE_PLATE_HEAVY = new IntBlock(148, "weighted_pressure_plate", 64, true, true, 0, 0);
     public static final BlockType DAYLIGHT_SENSOR = new IntBlock(151, "daylight_sensor", 64, true, true, 0, 0);
     public static final BlockType BLOCK_OF_REDSTONE = new IntBlock(152, "block_of_redstone", 64, true, true, 0, 0);
-    public static final BlockType NETHER_QUARTZ_ORE = new IntBlock(153, "nether_quartz_ore", 64, true, false, 0, 15);
+    public static final BlockType NETHER_QUARTZ_ORE = new IntBlock(153, "nether_quartz_ore", 64, true, false, 0, 15, SelfForInDrop.ALL_PICKAXES);
     public static final BlockType BLOCK_OF_QUARTZ = new IntBlock(155, "block_of_quartz", 64, true, false, 0, 15);
     public static final BlockType QUARTZ_STAIRS = new IntBlock(156, "quartz_stairs", 64, true, true, 0, 15);
     public static final BlockType WOODEN_DOUBLE_SLAB = new IntBlock(157, "wooden_double_slab", 64, true, true, 0, 0);
@@ -286,6 +283,7 @@ public class BlockTypes {
     public static final BlockType STONECUTTER = new IntBlock(245, "stonecutter", 64, true, false, 0, 15);
     public static final BlockType GLOWING_OBSIDIAN = new IntBlock(246, "glowing_obsidian", 64, true, false, 12, 15);
     public static final BlockType NETHER_REACTOR_CORE = new IntBlock(247, "nether_reactor_core", 64, true, false, 0, 15);
+    public static final BlockType OBSERVER = new IntBlock(251, "observer", 64, true, false, 0, 15, SelfForInDrop.ALL_PICKAXES);
 
     public static BlockType forId(int data) {
         BlockType type = BY_ID.get(data);
@@ -327,6 +325,27 @@ public class BlockTypes {
 
         @Override
         public Collection<ItemStack> drop(Server server, Block block, ItemStack with) {
+            return ImmutableList.of();
+        }
+    }
+
+    private static class SelfForInDrop implements DroppedHandler {
+        private final Collection<ItemType> forItems;
+
+        public static final SelfForInDrop ALL_PICKAXES = new SelfForInDrop(ImmutableList.of(
+                ItemTypes.WOODEN_PICKAXE, ItemTypes.STONE_PICKAXE, ItemTypes.IRON_PICKAXE, ItemTypes.GOLD_PICKAXE, ItemTypes.DIAMOND_PICKAXE
+        ));
+        public static final SelfForInDrop SHEARS_ONLY = new SelfForInDrop(ImmutableList.of(ItemTypes.SHEARS));
+
+        private SelfForInDrop(Collection<ItemType> forItems) {
+            this.forItems = forItems;
+        }
+
+        @Override
+        public Collection<ItemStack> drop(Server server, Block block, ItemStack with) {
+            if (forItems.contains(with.getItemType())) {
+                return ImmutableList.of(tryExact(server, block));
+            }
             return ImmutableList.of();
         }
     }
