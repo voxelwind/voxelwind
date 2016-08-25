@@ -10,8 +10,8 @@ import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.util.NibbleArray;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
