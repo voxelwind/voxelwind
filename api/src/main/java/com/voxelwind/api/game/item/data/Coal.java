@@ -14,6 +14,13 @@ public class Coal implements ItemData {
      */
     public static final Coal CHARCOAL = new Coal(true);
 
+    public static Coal of(short metadata) {
+        if (metadata == 0 || metadata == 1) {
+            return metadata == 0 ? REGULAR : CHARCOAL;
+        }
+        throw new IllegalArgumentException("Metadata value " + metadata + " is not valid");
+    }
+
     private final boolean isCharcoal;
 
     private Coal(boolean isCharcoal) {
@@ -26,5 +33,10 @@ public class Coal implements ItemData {
      */
     public boolean isCharcoal() {
         return isCharcoal;
+    }
+
+    @Override
+    public short toMetadata() {
+        return (short) (isCharcoal ? 1 : 0);
     }
 }

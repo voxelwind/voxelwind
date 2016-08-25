@@ -13,6 +13,12 @@ public class Dyed implements ItemData, BlockData {
         return new Dyed(color);
     }
 
+    public static Dyed of(short color) {
+        DyeColor[] colors = DyeColor.values();
+        Preconditions.checkArgument(color >= 0 && color < colors.length, "color is not valid");
+        return new Dyed(colors[color]);
+    }
+
     private final DyeColor color;
 
     private Dyed(DyeColor color) {
@@ -21,5 +27,10 @@ public class Dyed implements ItemData, BlockData {
 
     public DyeColor getColor() {
         return color;
+    }
+
+    @Override
+    public short toMetadata() {
+        return (short) color.ordinal();
     }
 }

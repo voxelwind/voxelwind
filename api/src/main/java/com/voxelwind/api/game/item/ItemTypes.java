@@ -1,6 +1,14 @@
 package com.voxelwind.api.game.item;
 
+import com.voxelwind.api.game.item.data.Coal;
+import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
+import com.voxelwind.api.game.level.block.BlockType;
+import com.voxelwind.api.game.level.block.BlockTypes;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Represents all items available on the server.
@@ -13,7 +21,7 @@ public class ItemTypes {
     public static final ItemType APPLE = new IntItem(260, "apple", 64, null);
     public static final ItemType BOW = new IntItem(261, "bow", 1, null);
     public static final ItemType ARROW = new IntItem(262, "arrow", 64, null);
-    public static final ItemType COAL = new IntItem(263, "coal", 64, null);
+    public static final ItemType COAL = new IntItem(263, "coal", 64, null, Coal::of);
     public static final ItemType DIAMOND = new IntItem(264, "diamond", 64, null);
     public static final ItemType IRON_INGOT = new IntItem(265, "iron_ingot", 64, null);
     public static final ItemType GOLD_INGOT = new IntItem(266, "gold_ingot", 64, null);
@@ -96,7 +104,7 @@ public class ItemTypes {
     public static final ItemType GLOWSTONE_DUST = new IntItem(348, "glowstone_dust", 64, null);
     public static final ItemType RAW_FISH = new IntItem(349, "raw_fish", 64, null);
     public static final ItemType COOKED_FISH = new IntItem(350, "cooked_fish", 64, null);
-    public static final ItemType DYE = new IntItem(351, "dye", 64, null);
+    public static final ItemType DYE = new IntItem(351, "dye", 64, Dyed.class, Dyed::of);
     public static final ItemType BONE = new IntItem(352, "bone", 64, null);
     public static final ItemType SUGAR = new IntItem(353, "sugar", 64, null);
     public static final ItemType CAKE = new IntItem(354, "cake", 1, null);
@@ -149,18 +157,48 @@ public class ItemTypes {
     public static final ItemType BEETROOT_SEEDS = new IntItem(458, "beetroot_seeds", 64, null);
     public static final ItemType BEETROOT_SOUP = new IntItem(459, "beetroot_soup", 1, null);
     public static final ItemType CAMERA = new IntItem(498, "camera", 64, null);
-    
+
+    public interface FromMetadata {
+        ItemData of(short s);
+    }
+
+    public static ItemType forId(int data) {
+        return forId(data, false);
+    }
+
+    public static ItemType forId(int data, boolean itemsOnly) {
+        ItemType type = BY_ID.get(data);
+        if (type == null) {
+            if (itemsOnly) {
+                throw new IllegalArgumentException("ID is not valid.");
+            } else {
+                return BlockTypes.forId(data);
+            }
+        }
+        return type;
+    }
+
+    private static Map<Integer, IntItem> BY_ID = new HashMap<>();
+
     private static class IntItem implements ItemType {
         private final int id;
         private final String name;
         private final int maxStackSize;
         private final Class<? extends ItemData> data;
+        private final FromMetadata fromMetadata;
 
         public IntItem(int id, String name, int maxStackSize, Class<? extends ItemData> data) {
+            this(id, name, maxStackSize, data, null);
+        }
+
+        public IntItem(int id, String name, int maxStackSize, Class<? extends ItemData> data, FromMetadata fromMetadata) {
             this.id = id;
             this.name = name;
             this.maxStackSize = maxStackSize;
             this.data = data;
+            this.fromMetadata = fromMetadata;
+
+            BY_ID.put(id, this);
         }
 
         @Override
@@ -186,6 +224,14 @@ public class ItemTypes {
         @Override
         public int getMaximumStackSize() {
             return maxStackSize;
+        }
+
+        @Override
+        public Optional<ItemData> createDataFor(short metadata) {
+            if (fromMetadata != null) {
+                return Optional.of(fromMetadata.of(metadata));
+            }
+            return Optional.empty();
         }
     }
 }

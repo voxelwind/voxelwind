@@ -2,6 +2,11 @@ package com.voxelwind.server.network.mcpe.util.metadata;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.api.game.item.ItemType;
+import com.voxelwind.api.game.item.ItemTypes;
+import com.voxelwind.api.game.item.data.ItemData;
+import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
@@ -67,6 +72,15 @@ public final class MetadataDictionary {
                 case EntityMetadataConstants.DATA_TYPE_POS:
                     dictionary.put(idx, McpeUtil.readVector3i(buf, false));
                     break;
+                case EntityMetadataConstants.DATA_TYPE_SLOT:
+                    short id = buf.readShort();
+                    byte amount = buf.readByte();
+                    short data = buf.readShort();
+
+                    ItemType type1 = ItemTypes.forId(id);
+                    Optional<ItemData> data1 = type1.createDataFor(data);
+                    dictionary.put(idx, new VoxelwindItemStack(type1, amount, data1.orElse(null)));
+                    break;
                 default:
                     throw new IllegalArgumentException("Type " + type + " is not recognized.");
             }
@@ -98,8 +112,18 @@ public final class MetadataDictionary {
             String s = (String) o;
             buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_STRING, idx));
             RakNetUtil.writeString(buf, s);
-        } // TODO: Implement slots. (Requires item type)
-        else if (o instanceof Vector3i) {
+        } else if (o instanceof ItemStack) {
+            ItemStack stack = (ItemStack) o;
+            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_SLOT, idx));
+            buf.writeShort(stack.getItemType().getId());
+            buf.writeByte(stack.getAmount());
+            Optional<ItemData> data = stack.getItemData();
+            if (data.isPresent()) {
+                buf.writeShort(data.get().toMetadata());
+            } else {
+                buf.writeShort(0);
+            }
+        } else if (o instanceof Vector3i) {
             Vector3i vector3i = (Vector3i) o;
             buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_POS, idx));
             McpeUtil.writeVector3i(buf, vector3i, false);
