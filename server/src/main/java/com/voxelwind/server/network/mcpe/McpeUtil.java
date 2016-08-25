@@ -2,6 +2,10 @@ package com.voxelwind.server.network.mcpe;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.EndTag;
+import com.flowpowered.nbt.stream.NBTInputStream;
+import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
@@ -16,8 +20,11 @@ import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import com.voxelwind.api.util.Rotation;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.ByteBufUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -185,13 +192,19 @@ public class McpeUtil {
 
         int count = buf.readByte();
         short damage = buf.readShort();
-        // TODO: Deserialize NBT data.
+
         short nbtSize = buf.readShort();
         byte[] nbtData = new byte[nbtSize];
         buf.readBytes(nbtData);
 
         ItemType type = ItemTypes.forId(id);
-        return new VoxelwindItemStack(type, count, type.createDataFor(damage).orElse(null));
+        VoxelwindItemStack stack = new VoxelwindItemStack(type, count, type.createDataFor(damage).orElse(null));
+        try (NBTInputStream stream = new NBTInputStream(new ByteArrayInputStream(nbtData), false, ByteOrder.LITTLE_ENDIAN)) {
+            stack.readNbt(stream);
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to load NBT data", e);
+        }
+        return stack;
     }
 
     public static void writeItemStack(ByteBuf buf, ItemStack stack) {
@@ -208,7 +221,21 @@ public class McpeUtil {
             buf.writeShort(0);
         }
 
-        // TODO: Serialize NBT data.
+        // Remember this position, since we'll be writing the true NBT size here later:
+        int sizeIndex = buf.writerIndex();
         buf.writeShort(0);
+
+        if (stack instanceof VoxelwindItemStack) {
+            try (NBTOutputStream stream = new NBTOutputStream(new ByteBufOutputStream(buf), false, ByteOrder.LITTLE_ENDIAN)) {
+                ((VoxelwindItemStack) stack).writeNbt(stream);
+                stream.writeTag(new EndTag());
+            } catch (IOException e) {
+                // This shouldn't happen (as this is backed by a Netty ByteBuf), but okay...
+                throw new IllegalStateException("Unable to save NBT data", e);
+            }
+
+            // Set to the written NBT size
+            buf.setShort(sizeIndex, buf.writerIndex() - sizeIndex);
+        }
     }
 }

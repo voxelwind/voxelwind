@@ -1,10 +1,13 @@
 package com.voxelwind.server.game.item;
 
+import com.flowpowered.nbt.stream.NBTInputStream;
+import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.data.ItemData;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public class VoxelwindItemStack implements ItemStack {
@@ -35,5 +38,13 @@ public class VoxelwindItemStack implements ItemStack {
     @Override
     public ItemStackBuilder toBuilder() {
         return new VoxelwindItemStackBuilder().itemType(itemType).amount(amount).itemData(data);
+    }
+
+    public void writeNbt(NBTOutputStream stream) throws IOException {
+        // TODO: Implement
+    }
+
+    public void readNbt(NBTInputStream stream) throws IOException {
+        // TODO: Implement
     }
 }
