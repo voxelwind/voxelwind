@@ -8,8 +8,8 @@ import java.util.Collection;
 public class JavaVoxelwindPluginDescription extends VoxelwindPluginDescription {
     private final String className;
 
-    public JavaVoxelwindPluginDescription(String id, String author, String version, Collection<String> dependencies, Collection<String> softDependencies, Path path, String className) {
-        super(id, author, version, dependencies, softDependencies, path);
+    public JavaVoxelwindPluginDescription(String id, String author, String version, String website, Collection<String> dependencies, Collection<String> softDependencies, Path path, String className) {
+        super(id, author, version, website, dependencies, softDependencies, path);
         this.className = className;
     }
 

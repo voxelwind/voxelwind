@@ -7,6 +7,7 @@ public class PluginInformation {
     private String id;
     private String author;
     private String version;
+    private String website;
     private final String className;
     private final List<String> dependencies = new ArrayList<>();
     private final List<String> softDependencies = new ArrayList<>();
@@ -37,6 +38,14 @@ public class PluginInformation {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 
     public List<String> getDependencies() {

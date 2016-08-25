@@ -53,7 +53,7 @@ public class JavaPluginLoader implements PluginLoader {
                 Optional<PluginInformation> information = scan(in);
                 if (information.isPresent()) {
                     return new JavaVoxelwindPluginDescription(information.get().getId(),
-                            information.get().getAuthor(), information.get().getVersion(), ImmutableList.copyOf(information.get().getDependencies()),
+                            information.get().getAuthor(), information.get().getVersion(), information.get().getWebsite(), ImmutableList.copyOf(information.get().getDependencies()),
                             ImmutableList.copyOf(information.get().getSoftDependencies()), path, information.get().getClassName());
                 }
             }
@@ -75,7 +75,7 @@ public class JavaPluginLoader implements PluginLoader {
         }
 
         return new VoxelwindPluginContainer(description.getId(), description.getAuthor(), description.getVersion(),
-                description.getDependencies(), description.getSoftDependencies(), path.get(),
+                description.getWebsite(), description.getDependencies(), description.getSoftDependencies(), path.get(),
                 createPlugin(path.get(), (JavaVoxelwindPluginDescription) description));
     }
 

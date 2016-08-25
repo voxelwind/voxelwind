@@ -8,8 +8,8 @@ import java.util.Collection;
 public class VoxelwindPluginContainer extends VoxelwindPluginDescription implements PluginContainer {
     private final Object plugin;
 
-    public VoxelwindPluginContainer(String id, String author, String version, Collection<String> dependencies, Collection<String> softDependencies, Path path, Object plugin) {
-        super(id, author, version, dependencies, softDependencies, path);
+    public VoxelwindPluginContainer(String id, String author, String version, String website, Collection<String> dependencies, Collection<String> softDependencies, Path path, Object plugin) {
+        super(id, author, version, website, dependencies, softDependencies, path);
         this.plugin = plugin;
     }
 
