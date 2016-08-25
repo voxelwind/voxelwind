@@ -27,10 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class McpeUtil {
     private McpeUtil() {
@@ -237,5 +234,14 @@ public class McpeUtil {
             // Set to the written NBT size
             buf.setShort(sizeIndex, buf.writerIndex() - sizeIndex);
         }
+    }
+
+    public static UUID readUuid(ByteBuf buf) {
+        return new UUID(buf.readLong(), buf.readLong());
+    }
+
+    public static void writeUuid(ByteBuf buf, UUID uuid) {
+        buf.writeLong(uuid.getMostSignificantBits());
+        buf.writeLong(uuid.getLeastSignificantBits());
     }
 }
