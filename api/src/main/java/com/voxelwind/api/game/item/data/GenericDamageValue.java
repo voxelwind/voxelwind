@@ -10,6 +10,10 @@ public class GenericDamageValue implements ItemData {
         this.damage = damage;
     }
 
+    public short getDamage() {
+        return damage;
+    }
+
     @Override
     public short toMetadata() {
         return damage;
