@@ -1,19 +1,20 @@
 package com.voxelwind.api.game.item.util;
 
 public enum DyeColor {
-    BLACK,
-    RED,
-    GREEN,
-    BROWN,
-    BLUE,
-    PURPLE,
-    CYAN,
-    LIGHT_GRAY,
-    PINK,
-    LIME,
-    YELLOW,
-    LIGHT_BLUE,
-    MAGNETA,
+    WHITE,
     ORANGE,
-    WHITE
+    MAGENTA,
+    LIGHT_BLUE,
+    YELLOW,
+    LIME,
+    PINK,
+    GRAY,
+    SILVER,
+    CYAN,
+    PURPLE,
+    BLUE,
+    BROWN,
+    GREEN,
+    RED,
+    BLACK
 }
