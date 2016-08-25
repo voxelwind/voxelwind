@@ -13,6 +13,7 @@ import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
+import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -342,6 +343,15 @@ public class PlayerSession extends LivingEntity implements Player {
             packet.setGamemode(mode.ordinal());
             session.addToSendQueue(packet);
         }
+    }
+
+    @Override
+    public void sendTranslatedMessage(@Nonnull TranslatedMessage message) {
+        Preconditions.checkNotNull(message, "message");
+        McpeText text = new McpeText();
+        text.setType(McpeText.TextType.TRANSLATE);
+        text.setTranslatedMessage(message);
+        session.addToSendQueue(text);
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {

@@ -3,6 +3,7 @@ package com.voxelwind.api.server;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.server.command.CommandExecutorSource;
 import com.voxelwind.api.server.player.GameMode;
+import com.voxelwind.api.server.util.TranslatedMessage;
 
 import javax.annotation.Nonnull;
 import java.util.OptionalLong;
@@ -15,4 +16,6 @@ public interface Player extends Entity, CommandExecutorSource, MessageRecipient,
     GameMode getGameMode();
 
     void setGameMode(@Nonnull GameMode mode);
+
+    void sendTranslatedMessage(@Nonnull TranslatedMessage message);
 }

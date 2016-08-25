@@ -1,5 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
@@ -8,6 +10,7 @@ public class McpeText implements RakNetPackage {
     private TextType type;
     private String source = "";
     private String message = "";
+    private TranslatedMessage translatedMessage;
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -21,7 +24,8 @@ public class McpeText implements RakNetPackage {
                 message = RakNetUtil.readString(buffer);
                 break;
             case TRANSLATE:
-                throw new UnsupportedOperationException("Translate packets currently unsupported");
+                translatedMessage = McpeUtil.readTranslatedMessage(buffer);
+                break;
             case POPUP:
                 source = RakNetUtil.readString(buffer);
                 message = RakNetUtil.readString(buffer);
@@ -47,7 +51,8 @@ public class McpeText implements RakNetPackage {
                 RakNetUtil.writeString(buffer, message);
                 break;
             case TRANSLATE:
-                throw new UnsupportedOperationException("Translate packets currently unsupported");
+                McpeUtil.writeTranslatedMessage(buffer, translatedMessage);
+                break;
             case POPUP:
                 RakNetUtil.writeString(buffer, source);
                 RakNetUtil.writeString(buffer, message);
@@ -67,6 +72,7 @@ public class McpeText implements RakNetPackage {
                 "type=" + type +
                 ", source='" + source + '\'' +
                 ", message='" + message + '\'' +
+                ", translatedMessage=" + translatedMessage +
                 '}';
     }
 
@@ -92,6 +98,14 @@ public class McpeText implements RakNetPackage {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public TranslatedMessage getTranslatedMessage() {
+        return translatedMessage;
+    }
+
+    public void setTranslatedMessage(TranslatedMessage translatedMessage) {
+        this.translatedMessage = translatedMessage;
     }
 
     public enum TextType {

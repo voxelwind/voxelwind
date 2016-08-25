@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.server.Skin;
+import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import com.voxelwind.api.util.Rotation;
@@ -148,5 +149,23 @@ public class McpeUtil {
         RakNetUtil.writeString(buf, skin.getType());
         buf.writeShort(texture.length);
         buf.writeBytes(texture);
+    }
+
+    public static TranslatedMessage readTranslatedMessage(ByteBuf buf) {
+        String message = RakNetUtil.readString(buf);
+        int ln = buf.readByte();
+        List<String> replacements = new ArrayList<>();
+        for (int i = 0; i < ln; i++) {
+            replacements.add(RakNetUtil.readString(buf));
+        }
+        return new TranslatedMessage(message, replacements);
+    }
+
+    public static void writeTranslatedMessage(ByteBuf buf, TranslatedMessage message) {
+        RakNetUtil.writeString(buf, message.getName());
+        buf.writeByte(message.getReplacements().size());
+        for (String s : message.getReplacements()) {
+            RakNetUtil.writeString(buf, s);
+        }
     }
 }
