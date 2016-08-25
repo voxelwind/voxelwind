@@ -5,6 +5,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 
 public class ZombieEntity extends LivingEntity {
     public ZombieEntity(VoxelwindLevel level, Vector3f position) {
-        super(EntityTypeData.ZOMBIE, level, position);
+        super(EntityTypeData.ZOMBIE, level, position, 20f);
     }
 }

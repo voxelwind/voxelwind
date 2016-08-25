@@ -41,7 +41,7 @@ public class PlayerSession extends LivingEntity implements Player {
     private int viewDistance = 5;
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
-        super(EntityTypeData.PLAYER, level, level.getSpawnLocation());
+        super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), 20f);
         this.session = session;
     }
 
