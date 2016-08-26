@@ -4,7 +4,9 @@ import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpePlayerAction implements RakNetPackage {
     private long entityId;
     private Action action;
@@ -25,38 +27,6 @@ public class McpePlayerAction implements RakNetPackage {
         buffer.writeInt(action.ordinal());
         McpeUtil.writeVector3i(buffer, position);
         buffer.writeInt(face);
-    }
-
-    public long getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(long entityId) {
-        this.entityId = entityId;
-    }
-
-    public Action getAction() {
-        return action;
-    }
-
-    public void setAction(Action action) {
-        this.action = action;
-    }
-
-    public Vector3i getPosition() {
-        return position;
-    }
-
-    public void setPosition(Vector3i position) {
-        this.position = position;
-    }
-
-    public int getFace() {
-        return face;
-    }
-
-    public void setFace(int face) {
-        this.face = face;
     }
 
     public enum Action {

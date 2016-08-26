@@ -2,7 +2,9 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpePlayStatus implements RakNetPackage {
     private Status status;
 
@@ -14,14 +16,6 @@ public class McpePlayStatus implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeInt(status.ordinal());
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public enum Status {

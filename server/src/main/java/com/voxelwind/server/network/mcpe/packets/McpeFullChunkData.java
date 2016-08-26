@@ -2,7 +2,13 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
+@Data
+@ToString(exclude = {"data"})
+@EqualsAndHashCode(exclude = {"data"})
 public class McpeFullChunkData implements RakNetPackage {
     private int chunkX;
     private int chunkZ;
@@ -26,37 +32,5 @@ public class McpeFullChunkData implements RakNetPackage {
         buffer.writeByte(order);
         buffer.writeInt(data.length);
         buffer.writeBytes(data);
-    }
-
-    public int getChunkX() {
-        return chunkX;
-    }
-
-    public void setChunkX(int chunkX) {
-        this.chunkX = chunkX;
-    }
-
-    public int getChunkZ() {
-        return chunkZ;
-    }
-
-    public void setChunkZ(int chunkZ) {
-        this.chunkZ = chunkZ;
-    }
-
-    public byte getOrder() {
-        return order;
-    }
-
-    public void setOrder(byte order) {
-        this.order = order;
-    }
-
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
     }
 }

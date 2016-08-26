@@ -2,7 +2,9 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpeSetPlayerGameMode implements RakNetPackage {
     private int gamemode;
 
@@ -14,13 +16,5 @@ public class McpeSetPlayerGameMode implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeInt(gamemode);
-    }
-
-    public int getGamemode() {
-        return gamemode;
-    }
-
-    public void setGamemode(int gamemode) {
-        this.gamemode = gamemode;
     }
 }

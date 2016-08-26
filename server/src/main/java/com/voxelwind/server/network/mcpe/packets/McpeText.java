@@ -5,7 +5,9 @@ import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpeText implements RakNetPackage {
     private TextType type;
     private String source = "";
@@ -74,38 +76,6 @@ public class McpeText implements RakNetPackage {
                 ", message='" + message + '\'' +
                 ", translatedMessage=" + translatedMessage +
                 '}';
-    }
-
-    public TextType getType() {
-        return type;
-    }
-
-    public void setType(TextType type) {
-        this.type = type;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public TranslatedMessage getTranslatedMessage() {
-        return translatedMessage;
-    }
-
-    public void setTranslatedMessage(TranslatedMessage translatedMessage) {
-        this.translatedMessage = translatedMessage;
     }
 
     public enum TextType {

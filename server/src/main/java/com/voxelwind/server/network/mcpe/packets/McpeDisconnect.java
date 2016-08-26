@@ -3,7 +3,9 @@ package com.voxelwind.server.network.mcpe.packets;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpeDisconnect implements RakNetPackage {
     private String message;
 
@@ -15,13 +17,5 @@ public class McpeDisconnect implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         RakNetUtil.writeString(buffer, message);
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }

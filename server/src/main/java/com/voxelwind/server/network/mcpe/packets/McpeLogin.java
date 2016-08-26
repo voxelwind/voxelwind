@@ -5,37 +5,15 @@ import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
+import lombok.Data;
 
 import java.util.zip.DataFormatException;
 
+@Data
 public class McpeLogin implements RakNetPackage {
-    private int protocolVersion; // = 81
+    private int protocolVersion; // = 82
     private String chainData;
     private String skinData;
-
-    public int getProtocolVersion() {
-        return protocolVersion;
-    }
-
-    public void setProtocolVersion(int protocolVersion) {
-        this.protocolVersion = protocolVersion;
-    }
-
-    public String getChainData() {
-        return chainData;
-    }
-
-    public void setChainData(String chainData) {
-        this.chainData = chainData;
-    }
-
-    public String getSkinData() {
-        return skinData;
-    }
-
-    public void setSkinData(String skinData) {
-        this.skinData = skinData;
-    }
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -76,14 +54,5 @@ public class McpeLogin implements RakNetPackage {
         } finally {
             body.release();
         }
-    }
-
-    @Override
-    public String toString() {
-        return "McpeLogin{" +
-                "protocolVersion=" + protocolVersion +
-                ", chainData='" + chainData + '\'' +
-                ", skinData='" + skinData + '\'' +
-                '}';
     }
 }

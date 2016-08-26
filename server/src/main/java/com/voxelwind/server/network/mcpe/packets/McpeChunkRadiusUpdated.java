@@ -2,7 +2,9 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpeChunkRadiusUpdated implements RakNetPackage {
     private int radius;
 
@@ -14,13 +16,5 @@ public class McpeChunkRadiusUpdated implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeInt(radius);
-    }
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public void setRadius(int radius) {
-        this.radius = radius;
     }
 }

@@ -2,7 +2,9 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpeSetTime implements RakNetPackage {
     private long time;
     private boolean running;
@@ -17,21 +19,5 @@ public class McpeSetTime implements RakNetPackage {
     public void encode(ByteBuf buffer) {
         buffer.writeLong(time);
         buffer.writeBoolean(running);
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
     }
 }

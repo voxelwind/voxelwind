@@ -5,6 +5,7 @@ import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +17,7 @@ import java.util.Base64;
 
 @ForceClearText
 @BatchDisallowed
+@Data
 public class McpeServerHandshake implements RakNetPackage {
     private PublicKey key;
     private byte[] token;
@@ -40,21 +42,5 @@ public class McpeServerHandshake implements RakNetPackage {
         RakNetUtil.writeString(buffer, Base64.getEncoder().encodeToString(encoded));
         buffer.writeShort(token.length);
         buffer.writeBytes(token);
-    }
-
-    public PublicKey getKey() {
-        return key;
-    }
-
-    public void setKey(PublicKey key) {
-        this.key = key;
-    }
-
-    public byte[] getToken() {
-        return token;
-    }
-
-    public void setToken(byte[] token) {
-        this.token = token;
     }
 }

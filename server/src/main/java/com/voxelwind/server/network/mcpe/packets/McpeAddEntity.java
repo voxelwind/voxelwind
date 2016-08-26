@@ -6,10 +6,12 @@ import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Data
 public class McpeAddEntity implements RakNetPackage {
     private long entityId;
     private int entityType;
@@ -42,61 +44,5 @@ public class McpeAddEntity implements RakNetPackage {
         buffer.writeFloat(pitch);
         McpeUtil.writeAttributes(buffer, attributes);
         metadata.writeTo(buffer);
-    }
-
-    public long getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(long entityId) {
-        this.entityId = entityId;
-    }
-
-    public int getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(int entityType) {
-        this.entityType = entityType;
-    }
-
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public void setPosition(Vector3f position) {
-        this.position = position;
-    }
-
-    public Vector3f getVelocity() {
-        return velocity;
-    }
-
-    public void setVelocity(Vector3f velocity) {
-        this.velocity = velocity;
-    }
-
-    public float getYaw() {
-        return yaw;
-    }
-
-    public void setYaw(float yaw) {
-        this.yaw = yaw;
-    }
-
-    public float getPitch() {
-        return pitch;
-    }
-
-    public void setPitch(float pitch) {
-        this.pitch = pitch;
-    }
-
-    public MetadataDictionary getMetadata() {
-        return metadata;
-    }
-
-    public Collection<Attribute> getAttributes() {
-        return attributes;
     }
 }

@@ -4,10 +4,12 @@ import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class McpeSetEntityMotion implements RakNetPackage {
     private final List<EntityMotion> motionList = new ArrayList<>();
 
@@ -26,10 +28,6 @@ public class McpeSetEntityMotion implements RakNetPackage {
             buffer.writeLong(motion.entityId);
             McpeUtil.writeVector3f(buffer, motion.motion);
         }
-    }
-
-    public List<EntityMotion> getMotionList() {
-        return motionList;
     }
 
     public static class EntityMotion {

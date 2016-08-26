@@ -2,7 +2,9 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class McpeAnimate implements RakNetPackage {
     private byte action;
     private long entityId;
@@ -17,21 +19,5 @@ public class McpeAnimate implements RakNetPackage {
     public void encode(ByteBuf buffer) {
         buffer.writeByte(action);
         buffer.writeLong(entityId);
-    }
-
-    public byte getAction() {
-        return action;
-    }
-
-    public void setAction(byte action) {
-        this.action = action;
-    }
-
-    public long getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(long entityId) {
-        this.entityId = entityId;
     }
 }
