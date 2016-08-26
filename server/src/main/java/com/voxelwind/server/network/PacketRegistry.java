@@ -56,6 +56,7 @@ public class PacketRegistry {
                             .put(0x26, McpeSetSpawnPosition.class)
                             .put(0x27, McpeAnimate.class)
                             .put(0x28, McpeRespawn.class)
+                            .put(0x2a, McpeContainerOpen.class)
                             .put(0x31, McpeAdventureSettings.class)
                             .put(0x34, McpeFullChunkData.class)
                             .put(0x37, McpeSetPlayerGameMode.class)
