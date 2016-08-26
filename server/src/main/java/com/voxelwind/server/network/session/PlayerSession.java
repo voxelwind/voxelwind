@@ -5,6 +5,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.spotify.futures.CompletableFutures;
+import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
@@ -29,6 +30,7 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PlayerSession extends LivingEntity implements Player {
     private static final int REQUIRED_TO_SPAWN = 56;
@@ -40,6 +42,8 @@ public class PlayerSession extends LivingEntity implements Player {
     private GameMode gameMode = GameMode.SURVIVAL;
     private boolean spawned = false;
     private int viewDistance = 5;
+    private final AtomicInteger windowIdGenerator = new AtomicInteger();
+    private final Map<Integer, Inventory> openInventories = new HashMap<>();
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), 20f);
@@ -352,6 +356,10 @@ public class PlayerSession extends LivingEntity implements Player {
         text.setType(McpeText.TextType.TRANSLATE);
         text.setTranslatedMessage(message);
         session.addToSendQueue(text);
+    }
+
+    public int getNextWindowId() {
+        return windowIdGenerator.incrementAndGet() % 2;
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
