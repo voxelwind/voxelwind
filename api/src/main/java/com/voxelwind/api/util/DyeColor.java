@@ -1,5 +1,8 @@
-package com.voxelwind.api.game.item.util;
+package com.voxelwind.api.util;
 
+/**
+ * Represents all wool colors.
+ */
 public enum DyeColor {
     WHITE,
     ORANGE,

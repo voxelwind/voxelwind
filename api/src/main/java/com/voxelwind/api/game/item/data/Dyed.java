@@ -1,7 +1,7 @@
 package com.voxelwind.api.game.item.data;
 
 import com.google.common.base.Preconditions;
-import com.voxelwind.api.game.item.util.DyeColor;
+import com.voxelwind.api.util.DyeColor;
 import com.voxelwind.api.game.level.block.BlockData;
 
 import javax.annotation.Nonnull;

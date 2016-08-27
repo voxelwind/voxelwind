@@ -7,7 +7,7 @@ import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
-import com.voxelwind.api.game.item.util.DyeColor;
+import com.voxelwind.api.util.DyeColor;
 import com.voxelwind.api.game.item.util.ItemTypeUtil;
 import com.voxelwind.api.game.level.block.data.Cake;
 import com.voxelwind.api.game.level.block.data.Crops;

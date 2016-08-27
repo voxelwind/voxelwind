@@ -1,7 +1,6 @@
 package com.voxelwind.api.game.item.data;
 
-import com.voxelwind.api.game.item.util.DyeColor;
-import org.junit.Assert;
+import com.voxelwind.api.util.DyeColor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
