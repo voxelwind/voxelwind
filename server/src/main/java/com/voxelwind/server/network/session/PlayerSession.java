@@ -51,7 +51,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private boolean spawned = false;
     private int viewDistance = 5;
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
-    private final BiMap<Integer, Inventory> openWindows = HashBiMap.create();
+    private final BiMap<Integer, VoxelwindBaseInventory> openWindows = HashBiMap.create();
     private int openInventoryId = -1;
     private final PlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
 
@@ -378,17 +378,19 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     @Override
-    public void onInventoryChange(int slot, @Nullable ItemStack oldItem, @Nullable ItemStack newItem, VoxelwindBaseInventory inventory) {
+    public void onInventoryChange(int slot, @Nullable ItemStack oldItem, @Nullable ItemStack newItem, VoxelwindBaseInventory inventory, @Nullable PlayerSession session) {
         Integer windowId = openWindows.inverse().get(inventory);
         if (windowId == null) {
             return;
         }
 
-        McpeContainerSetSlot packet = new McpeContainerSetSlot();
-        packet.setSlot((short) slot);
-        packet.setStack(newItem);
-        packet.setWindowId(windowId.byteValue());
-        session.addToSendQueue(packet);
+        if (session != null) {
+            McpeContainerSetSlot packet = new McpeContainerSetSlot();
+            packet.setSlot((short) slot);
+            packet.setStack(newItem);
+            packet.setWindowId(windowId.byteValue());
+            this.session.addToSendQueue(packet);
+        }
     }
 
     @Override
@@ -574,11 +576,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeContainerSetSlot packet) {
-            Inventory window = null;
+            VoxelwindBaseInventory window = null;
             if (openInventoryId < 0 || openInventoryId != packet.getWindowId()) {
                 // There's no inventory open, so it's probably the player inventory. Lightly verify this.
                 if (packet.getWindowId() == 0) {
-                    window = playerInventory;
+                    window = (VoxelwindBaseInventory) playerInventory;
                 } else if (packet.getWindowId() == 0x78) {
                     // It's the armor inventory. TODO: Needs to be handled
                     return;
@@ -591,7 +593,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 return;
             }
 
-            window.setItem(packet.getSlot(), packet.getStack());
+            window.setItem(packet.getSlot(), packet.getStack(), PlayerSession.this);
         }
     }
 

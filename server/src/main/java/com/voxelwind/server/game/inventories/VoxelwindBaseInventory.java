@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.server.Player;
+import com.voxelwind.server.network.session.PlayerSession;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -27,12 +29,16 @@ public class VoxelwindBaseInventory implements Inventory {
 
     @Override
     public void setItem(int slot, @Nonnull ItemStack stack) {
+        setItem(slot, stack, null);
+    }
+
+    public void setItem(int slot, @Nonnull ItemStack stack, PlayerSession session) {
         Preconditions.checkNotNull(stack, "stack");
         Preconditions.checkArgument(slot >= 0 && slot < fullSize, "Wanted slot %s is not between 0 and %s", slot, fullSize);
         if (!isNothing(stack)) {
             ItemStack oldItem = inventory.put(slot, stack);
             for (InventoryObserver observer : observerList) {
-                observer.onInventoryChange(slot, oldItem, stack, this);
+                observer.onInventoryChange(slot, oldItem, stack, this, session);
             }
         } else {
             clearItem(slot);
@@ -41,12 +47,16 @@ public class VoxelwindBaseInventory implements Inventory {
 
     @Override
     public boolean addItem(@Nonnull ItemStack stack) {
+        return addItem(stack, null);
+    }
+
+    public boolean addItem(@Nonnull ItemStack stack, PlayerSession session) {
         Preconditions.checkNotNull(stack, "stack");
         for (int i = 0; i < fullSize; i++) {
             if (!inventory.containsKey(i)) {
                 inventory.put(i, stack);
                 for (InventoryObserver observer : observerList) {
-                    observer.onInventoryChange(i, null, stack, this);
+                    observer.onInventoryChange(i, null, stack, this, session);
                 }
                 return true;
             }
@@ -56,11 +66,15 @@ public class VoxelwindBaseInventory implements Inventory {
 
     @Override
     public void clearItem(int slot) {
+        clearItem(slot, null);
+    }
+
+    public void clearItem(int slot, PlayerSession session) {
         Preconditions.checkArgument(slot >= 0 && slot < fullSize, "Wanted slot %s is not between 0 and %s", slot, fullSize);
         ItemStack stack = inventory.remove(slot);
         if (stack != null) {
             for (InventoryObserver observer : observerList) {
-                observer.onInventoryChange(slot, stack, null, this);
+                observer.onInventoryChange(slot, stack, null, this, session);
             }
         }
     }
