@@ -30,9 +30,7 @@ class SentDatagram {
         Preconditions.checkState(!released, "Already released");
         stopwatch.reset();
         stopwatch.start();
-        for (EncapsulatedRakNetPacket packet : datagram.getPackets()) {
-            packet.retain();
-        }
+        datagram.retain();
     }
 
     void tryRelease() {
@@ -40,10 +38,7 @@ class SentDatagram {
             return;
         }
 
-        for (EncapsulatedRakNetPacket packet : datagram.getPackets()) {
-            ReferenceCountUtil.release(packet);
-        }
-
+        datagram.release();
         stopwatch.stop();
         released = true;
     }

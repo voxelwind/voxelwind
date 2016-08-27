@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class RakNetSession {
     private static final Logger LOGGER = LogManager.getLogger(RakNetSession.class);
+    private static final int TIMEOUT_MS = 30000;
     private final InetSocketAddress remoteAddress;
     private final short mtu;
     private final AtomicLong lastKnownUpdate = new AtomicLong(System.currentTimeMillis());
@@ -98,7 +99,7 @@ public class RakNetSession {
                 if (datagram != null) {
                     LOGGER.warn("Must resend datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
                     datagram.refreshForResend();
-                    channel.write(datagram, channel.voidPromise());
+                    channel.write(new AddressedRakNetDatagram(datagram.getDatagram(), remoteAddress), channel.voidPromise());
                 }
             }
         }
@@ -136,6 +137,11 @@ public class RakNetSession {
 
         resendStalePackets();
         cleanSplitPackets();
+
+        if (isTimedOut()) {
+            LOGGER.error("Client {} has timed out, closing connection.", getRemoteAddress());
+            close();
+        }
     }
 
     private void cleanSplitPackets() {
@@ -189,5 +195,9 @@ public class RakNetSession {
 
     public Channel getChannel() {
         return channel;
+    }
+
+    public boolean isTimedOut() {
+        return System.currentTimeMillis() - lastKnownUpdate.get() >= TIMEOUT_MS;
     }
 }
