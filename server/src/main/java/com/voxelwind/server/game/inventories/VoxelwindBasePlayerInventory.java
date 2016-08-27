@@ -23,12 +23,6 @@ public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory impleme
     }
 
     @Override
-    public int getUsableInventorySize() {
-        // Four slots are reserved for armor, however Voxelwind stores them separately.
-        return InventoryType.PLAYER.getInventorySize() - 4;
-    }
-
-    @Override
     public int[] getHotbarLinks() {
         return Arrays.copyOf(hotbarLinks, hotbarLinks.length);
     }
