@@ -3,9 +3,9 @@ package com.voxelwind.server.game.inventories;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.inventories.Inventory;
+import com.voxelwind.api.game.inventories.InventoryType;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.BlockTypes;
-import com.voxelwind.api.server.Player;
 import com.voxelwind.server.network.session.PlayerSession;
 
 import javax.annotation.Nonnull;
@@ -15,15 +15,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class VoxelwindBaseInventory implements Inventory {
     private final Map<Integer, ItemStack> inventory = new HashMap<>();
     private final List<InventoryObserver> observerList = new CopyOnWriteArrayList<>();
-    private final int fullSize;
+    private final InventoryType type;
 
-    protected VoxelwindBaseInventory(int fullSize) {
-        this.fullSize = fullSize;
+    protected VoxelwindBaseInventory(InventoryType type) {
+        this.type = type;
     }
 
     @Override
     public Optional<ItemStack> getItem(int slot) {
-        Preconditions.checkArgument(slot >= 0 && slot < fullSize, "Wanted slot %s is not between 0 and %s", slot, fullSize);
+        Preconditions.checkArgument(slot >= 0 && slot < type.getInventorySize(), "Wanted slot %s is not between 0 and %s", slot, type.getInventorySize());
         return Optional.ofNullable(inventory.get(slot));
     }
 
@@ -34,7 +34,7 @@ public class VoxelwindBaseInventory implements Inventory {
 
     public void setItem(int slot, @Nonnull ItemStack stack, PlayerSession session) {
         Preconditions.checkNotNull(stack, "stack");
-        Preconditions.checkArgument(slot >= 0 && slot < fullSize, "Wanted slot %s is not between 0 and %s", slot, fullSize);
+        Preconditions.checkArgument(slot >= 0 && slot < type.getInventorySize(), "Wanted slot %s is not between 0 and %s", slot, type.getInventorySize());
         if (!isNothing(stack)) {
             ItemStack oldItem = inventory.put(slot, stack);
             for (InventoryObserver observer : observerList) {
@@ -52,7 +52,7 @@ public class VoxelwindBaseInventory implements Inventory {
 
     public boolean addItem(@Nonnull ItemStack stack, PlayerSession session) {
         Preconditions.checkNotNull(stack, "stack");
-        for (int i = 0; i < fullSize; i++) {
+        for (int i = 0; i < type.getInventorySize(); i++) {
             if (!inventory.containsKey(i)) {
                 inventory.put(i, stack);
                 for (InventoryObserver observer : observerList) {
@@ -70,7 +70,7 @@ public class VoxelwindBaseInventory implements Inventory {
     }
 
     public void clearItem(int slot, PlayerSession session) {
-        Preconditions.checkArgument(slot >= 0 && slot < fullSize, "Wanted slot %s is not between 0 and %s", slot, fullSize);
+        Preconditions.checkArgument(slot >= 0 && slot < type.getInventorySize(), "Wanted slot %s is not between 0 and %s", slot, type.getInventorySize());
         ItemStack stack = inventory.remove(slot);
         if (stack != null) {
             for (InventoryObserver observer : observerList) {
@@ -80,13 +80,8 @@ public class VoxelwindBaseInventory implements Inventory {
     }
 
     @Override
-    public int getInventorySize() {
-        return fullSize;
-    }
-
-    @Override
     public int getUsableInventorySize() {
-        return fullSize;
+        return type.getInventorySize();
     }
 
     @Override
@@ -112,13 +107,18 @@ public class VoxelwindBaseInventory implements Inventory {
         }
 
         Integer maxSlot = Collections.max(contentsCopy.keySet());
-        Preconditions.checkArgument(maxSlot < fullSize, "Maximum passed contents slot (%s) is greater than this inventory's size (%s)",
-                maxSlot, fullSize);
+        Preconditions.checkArgument(maxSlot < type.getInventorySize(), "Maximum passed contents slot (%s) is greater than this inventory's size (%s)",
+                maxSlot, type.getInventorySize());
         inventory.clear();
         inventory.putAll(contentsCopy);
         for (InventoryObserver observer : observerList) {
             observer.onInventoryContentsReplacement(contentsCopy, this);
         }
+    }
+
+    @Override
+    public InventoryType getInventoryType() {
+        return type;
     }
 
     private static boolean isNothing(ItemStack stack) {

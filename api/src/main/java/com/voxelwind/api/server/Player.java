@@ -9,6 +9,7 @@ import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 
@@ -24,4 +25,10 @@ public interface Player extends Entity, CommandExecutorSource, MessageRecipient,
 
     @Override
     PlayerInventory getInventory();
+
+    Optional<Inventory> getOpenedInventory();
+
+    void openInventory(Inventory inventory);
+
+    void closeInventory();
 }

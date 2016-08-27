@@ -15,6 +15,8 @@ import java.util.Optional;
  * Represents all items available on the server.
  */
 public class ItemTypes {
+    private static Map<Integer, IntItem> BY_ID = new HashMap<>();
+
     public static final ItemType IRON_SHOVEL = new IntItem(256, "iron_shovel", 1, null);
     public static final ItemType IRON_PICKAXE = new IntItem(257, "iron_pickaxe", 1, null);
     public static final ItemType IRON_AXE = new IntItem(258, "iron_axe", 1, null);
@@ -178,8 +180,6 @@ public class ItemTypes {
         }
         return type;
     }
-
-    private static Map<Integer, IntItem> BY_ID = new HashMap<>();
 
     private static class IntItem implements ItemType {
         private final int id;

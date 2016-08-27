@@ -14,6 +14,7 @@ import com.voxelwind.api.server.event.server.ServerInitializeEvent;
 import com.voxelwind.api.server.event.server.ServerStartEvent;
 import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
+import com.voxelwind.server.command.builtin.GiveItemTestCommand;
 import com.voxelwind.server.command.builtin.VersionCommand;
 import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
@@ -91,6 +92,7 @@ public class VoxelwindServer implements Server {
 
         // Basic initialization.
         commandManager.register("version", new VersionCommand(this));
+        commandManager.register("giveitem", new GiveItemTestCommand());
 
         // Load configuration.
         Path configFile = Paths.get("voxelwind.json");

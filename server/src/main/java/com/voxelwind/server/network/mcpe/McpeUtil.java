@@ -2,8 +2,6 @@ package com.voxelwind.server.network.mcpe;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.EndTag;
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
@@ -11,7 +9,6 @@ import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.ItemData;
-import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.util.TranslatedMessage;
@@ -225,7 +222,6 @@ public class McpeUtil {
         if (stack instanceof VoxelwindItemStack) {
             try (NBTOutputStream stream = new NBTOutputStream(new ByteBufOutputStream(buf), false, ByteOrder.LITTLE_ENDIAN)) {
                 ((VoxelwindItemStack) stack).writeNbt(stream);
-                stream.writeTag(new EndTag());
             } catch (IOException e) {
                 // This shouldn't happen (as this is backed by a Netty ByteBuf), but okay...
                 throw new IllegalStateException("Unable to save NBT data", e);

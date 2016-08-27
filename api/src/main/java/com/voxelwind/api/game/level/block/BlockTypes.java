@@ -19,6 +19,7 @@ import java.util.*;
  * This class contains all block types recognized by Voxelwind and Pocket Edition.
  */
 public class BlockTypes {
+    private static Map<Integer, BlockType> BY_ID = new HashMap<>();
     private static final Random RANDOM = new Random();
 
     public static final BlockType AIR = new IntBlock(0, "air", 0, false, true, 0, 0, NothingDrop.INSTANCE);
@@ -350,8 +351,6 @@ public class BlockTypes {
             return ImmutableList.of();
         }
     }
-
-    private static Map<Integer, BlockType> BY_ID = new HashMap<>();
 
     private static class IntBlock implements BlockType {
         private final int id;

@@ -39,12 +39,6 @@ public interface Inventory {
     void clearItem(int slot);
 
     /**
-     * Returns the full size of this inventory.
-     * @return the full size of this inventory
-     */
-    int getInventorySize();
-
-    /**
      * Returns the usable size of this inventory. For instance, armor item slots would not be considered "usable".
      * @return the usable size of this inventory
      */
@@ -66,4 +60,10 @@ public interface Inventory {
      * @param contents the inventory contents
      */
     void setAllContents(Map<Integer, ItemStack> contents);
+
+    /**
+     * Returns what type that inventory is.
+     * @return the inventory type
+     */
+    InventoryType getInventoryType();
 }

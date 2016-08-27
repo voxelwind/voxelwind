@@ -4,9 +4,9 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.spotify.futures.CompletableFutures;
+import com.voxelwind.api.game.inventories.Inventory;
+import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
@@ -18,9 +18,7 @@ import com.voxelwind.api.server.command.CommandNotFoundException;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
-import com.voxelwind.server.game.inventories.InventoryObserver;
-import com.voxelwind.server.game.inventories.VoxelwindBaseInventory;
-import com.voxelwind.server.game.inventories.VoxelwindBasePlayerInventory;
+import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -50,8 +48,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private boolean spawned = false;
     private int viewDistance = 5;
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
-    private final BiMap<Integer, VoxelwindBaseInventory> openWindows = HashBiMap.create();
-    private int openInventoryId = -1;
+    private Inventory openedInventory;
+    private byte openInventoryId = -1;
     private final PlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
@@ -372,37 +370,110 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         return playerInventory;
     }
 
-    public int getNextWindowId() {
-        return windowIdGenerator.incrementAndGet() % 2;
+    @Override
+    public Optional<Inventory> getOpenedInventory() {
+        return Optional.ofNullable(openedInventory);
+    }
+
+    @Override
+    public void openInventory(Inventory inventory) {
+        Preconditions.checkNotNull(inventory, "inventory");
+        Preconditions.checkArgument(inventory instanceof VoxelwindBaseOpenableInventory, "inventory is not a valid type that can be opened");
+        Preconditions.checkState(openedInventory == null, "inventory already opened");
+
+        VoxelwindInventoryType internalType = VoxelwindInventoryType.fromApi(inventory.getInventoryType());
+        byte windowId = internalType.getWindowId(this);
+        openedInventory = inventory;
+        openInventoryId = windowId;
+
+        McpeContainerOpen openPacket = new McpeContainerOpen();
+        openPacket.setWindowId(windowId);
+        openPacket.setSlotCount((short) inventory.getInventoryType().getInventorySize());
+        openPacket.setPosition(((OpenableInventory) inventory).getPosition());
+        openPacket.setType(internalType.getType());
+        session.addToSendQueue(openPacket);
+
+        McpeContainerSetContents contents = new McpeContainerSetContents();
+        contents.setWindowId(windowId);
+        contents.getStacks().putAll(inventory.getAllContents());
+        // Since this can be a large packet (even when compressed), send it as a separate batch packet.
+        McpeBatch contentBatch = new McpeBatch();
+        contentBatch.getPackages().add(contents);
+        session.addToSendQueue(contentBatch);
+
+        ((VoxelwindBaseInventory) openedInventory).getObserverList().add(this);
+    }
+
+    @Override
+    public void closeInventory() {
+        Preconditions.checkState(openedInventory != null, "inventory not opened");
+        McpeContainerClose close = new McpeContainerClose();
+        close.setWindowId(openInventoryId);
+        session.addToSendQueue(close);
+
+        ((VoxelwindBaseInventory) openedInventory).getObserverList().remove(this);
+        openedInventory = null;
+        openInventoryId = -1;
+    }
+
+    public byte getNextWindowId() {
+        return (byte) (1 + (windowIdGenerator.incrementAndGet() % 2));
     }
 
     @Override
     public void onInventoryChange(int slot, @Nullable ItemStack oldItem, @Nullable ItemStack newItem, VoxelwindBaseInventory inventory, @Nullable PlayerSession session) {
-        Integer windowId = openWindows.inverse().get(inventory);
-        if (windowId == null) {
+        byte windowId;
+        if (inventory == openedInventory) {
+            windowId = openInventoryId;
+        } else if (inventory instanceof PlayerInventory) {
+            windowId = 0x00;
+        } else {
             return;
         }
 
-        if (session != null) {
+        if (session != this) {
             McpeContainerSetSlot packet = new McpeContainerSetSlot();
             packet.setSlot((short) slot);
             packet.setStack(newItem);
-            packet.setWindowId(windowId.byteValue());
+            packet.setWindowId(windowId);
             this.session.addToSendQueue(packet);
         }
     }
 
     @Override
     public void onInventoryContentsReplacement(Map<Integer, ItemStack> newItems, VoxelwindBaseInventory inventory) {
-        Integer windowId = openWindows.inverse().get(inventory);
-        if (windowId == null) {
+        byte windowId;
+        if (inventory == openedInventory) {
+            windowId = openInventoryId;
+        } else if (inventory instanceof PlayerInventory) {
+            windowId = 0x00;
+        } else {
             return;
         }
 
         McpeContainerSetContents packet = new McpeContainerSetContents();
-        packet.setWindowId(windowId.byteValue());
+        packet.setWindowId(windowId);
         packet.getStacks().putAll(newItems);
         session.addToSendQueue(packet);
+    }
+
+    public void sendPlayerInventory() {
+        McpeContainerSetContents contents = new McpeContainerSetContents();
+        contents.setWindowId((byte) 0x00);
+        contents.getStacks().putAll(playerInventory.getAllContents());
+        // TODO: Actually populate these
+        for (int i = 0; i < 9; i++) {
+            contents.getHotbarData().put(i, -1);
+        }
+
+        // Batch separately
+        McpeBatch contentBatch = new McpeBatch();
+        contentBatch.getPackages().add(contents);
+        if (!spawned) {
+            session.sendImmediatePackage(contentBatch);
+        } else {
+            session.addToSendQueue(contentBatch);
+        }
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
@@ -461,14 +532,15 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         setTime.setRunning(true);
                         session.sendImmediatePackage(setTime);
 
-                        spawned = true;
-
                         McpeRespawn respawn = new McpeRespawn();
                         respawn.setPosition(getPosition());
                         session.sendImmediatePackage(respawn);
 
                         updateViewableEntities();
                         sendAttributes();
+                        sendPlayerInventory();
+
+                        spawned = true;
                     }
                 }
             });
@@ -570,7 +642,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeContainerClose packet) {
-
+            ((VoxelwindBaseInventory) openedInventory).getObserverList().remove(PlayerSession.this);
+            openedInventory = null;
+            openInventoryId = -1;
         }
 
         @Override
@@ -581,7 +655,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 if (packet.getWindowId() == 0) {
                     window = (VoxelwindBaseInventory) playerInventory;
                 } else if (packet.getWindowId() == 0x78) {
-                    // It's the armor inventory.
+                    // It's the armor inventory. Handle it here.
                     switch (packet.getSlot()) {
                         case 0:
                             getEquipment().setHelmet(packet.getStack());
@@ -599,7 +673,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     return;
                 }
             } else {
-                window = openWindows.get((int) packet.getWindowId());
+                window = (VoxelwindBaseInventory) openedInventory;
             }
 
             if (window == null) {
