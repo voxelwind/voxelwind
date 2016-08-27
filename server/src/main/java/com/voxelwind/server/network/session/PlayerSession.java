@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.spotify.futures.CompletableFutures;
-import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
@@ -331,7 +330,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             }
 
             for (Chunk chunk : chunks) {
-                session.sendUrgentPackage(((VoxelwindChunk) chunk).getChunkDataPacket());
+                session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
             }
         });
     }
@@ -449,24 +448,24 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 int sent = 0;
 
                 for (Chunk chunk : chunks) {
-                    session.sendUrgentPackage(((VoxelwindChunk) chunk).getChunkDataPacket());
+                    session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
                     sent++;
 
                     if (!spawned && sent >= REQUIRED_TO_SPAWN) {
                         McpePlayStatus status = new McpePlayStatus();
                         status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
-                        session.sendUrgentPackage(status);
+                        session.sendImmediatePackage(status);
 
                         McpeSetTime setTime = new McpeSetTime();
                         setTime.setTime(getLevel().getTime());
                         setTime.setRunning(true);
-                        session.sendUrgentPackage(setTime);
+                        session.sendImmediatePackage(setTime);
 
                         spawned = true;
 
                         McpeRespawn respawn = new McpeRespawn();
                         respawn.setPosition(getPosition());
-                        session.sendUrgentPackage(respawn);
+                        session.sendImmediatePackage(respawn);
 
                         updateViewableEntities();
                         sendAttributes();

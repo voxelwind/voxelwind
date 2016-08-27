@@ -88,7 +88,7 @@ public class McpeSession extends RakNetSession {
         currentlyQueued.add(netPackage);
     }
 
-    public void sendUrgentPackage(RakNetPackage netPackage) {
+    public void sendImmediatePackage(RakNetPackage netPackage) {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
         internalSendPackage(netPackage);
@@ -270,7 +270,7 @@ public class McpeSession extends RakNetSession {
 
         McpeDisconnect packet = new McpeDisconnect();
         packet.setMessage(reason);
-        sendUrgentPackage(packet);
+        sendImmediatePackage(packet);
 
         // Wait a little bit for the packet to be sent and close their session
         getChannel().eventLoop().schedule(() -> {

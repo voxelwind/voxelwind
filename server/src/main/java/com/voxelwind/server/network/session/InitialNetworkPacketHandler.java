@@ -86,7 +86,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                 byte[] token = EncryptionUtil.generateRandomToken();
                 byte[] serverKey = EncryptionUtil.getServerKey(key, token);
                 session.enableEncryption(serverKey);
-                session.sendUrgentPackage(EncryptionUtil.createHandshakePacket(token));
+                session.sendImmediatePackage(EncryptionUtil.createHandshakePacket(token));
             } else {
                 // Will not use encryption - initialize the player's session
                 initializePlayerSession();

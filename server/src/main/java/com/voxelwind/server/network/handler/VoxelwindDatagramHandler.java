@@ -119,7 +119,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             ConnectedPongPacket response = new ConnectedPongPacket();
             response.setPingTime(request.getPingTime());
             response.setPongTime(System.currentTimeMillis());
-            session.sendUrgentPackage(response);
+            session.sendImmediatePackage(response);
             return;
         }
         // Connection Request
@@ -134,7 +134,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
             addresses[0] = new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132);
             response.setSystemAddresses(addresses);
             response.setSystemIndex((short) 0);
-            session.sendUrgentPackage(response);
+            session.sendImmediatePackage(response);
             return;
         }
         // Disconnection
