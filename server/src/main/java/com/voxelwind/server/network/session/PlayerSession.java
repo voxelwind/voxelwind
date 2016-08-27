@@ -197,7 +197,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         session.addToSendQueue(spawnPosition);
     }
 
-    public McpeSession getUserSession() {
+    public McpeSession getMcpeSession() {
         return session;
     }
 
@@ -322,7 +322,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private void sendNewChunks() {
         getChunksForRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
             if (throwable != null) {
-                LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
+                LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
                 disconnect("Internal server error");
                 return;
             }
@@ -492,7 +492,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             getChunksForRadius(radius, true).whenComplete((chunks, throwable) -> {
                 if (throwable != null) {
-                    LOGGER.error("Unable to load chunks for " + getUserSession().getAuthenticationProfile().getDisplayName(), throwable);
+                    LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
                     disconnect("Internal server error");
                     return;
                 }

@@ -108,7 +108,7 @@ public class LevelEntityManager {
         for (BaseEntity entity : currentEntityList) {
             if (entity instanceof PlayerSession) {
                 PlayerSession session = (PlayerSession) entity;
-                if (!session.getUserSession().isClosed()) {
+                if (!session.getMcpeSession().isClosed()) {
                     sessions.add((PlayerSession) entity);
                 }
             }

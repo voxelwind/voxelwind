@@ -20,7 +20,7 @@ public class LevelPacketManager {
     public synchronized void onTick() {
         for (RakNetPackage aPackage : broadcastQueue) {
             for (PlayerSession session : level.getEntityManager().getPlayers()) {
-                session.getUserSession().addToSendQueue(aPackage);
+                session.getMcpeSession().addToSendQueue(aPackage);
             }
         }
 
@@ -34,7 +34,7 @@ public class LevelPacketManager {
 
                     if (session.getPosition().distance(entity.getPosition()) <= 64F) {
                         for (RakNetPackage aPackage : entry.getValue()) {
-                            session.getUserSession().addToSendQueue(aPackage);
+                            session.getMcpeSession().addToSendQueue(aPackage);
                         }
                     }
                 }
