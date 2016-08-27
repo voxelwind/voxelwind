@@ -10,6 +10,7 @@ import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Skin;
@@ -19,6 +20,7 @@ import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.game.inventories.*;
+import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -391,15 +393,19 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         openPacket.setSlotCount((short) inventory.getInventoryType().getInventorySize());
         openPacket.setPosition(((OpenableInventory) inventory).getPosition());
         openPacket.setType(internalType.getType());
-        session.addToSendQueue(openPacket);
+        session.sendImmediatePackage(openPacket);
 
         McpeContainerSetContents contents = new McpeContainerSetContents();
         contents.setWindowId(windowId);
         contents.getStacks().putAll(inventory.getAllContents());
-        // Since this can be a large packet (even when compressed), send it as a separate batch packet.
-        McpeBatch contentBatch = new McpeBatch();
-        contentBatch.getPackages().add(contents);
-        session.addToSendQueue(contentBatch);
+        // Fill in with air.
+        for (int i = 0; i < inventory.getInventoryType().getInventorySize(); i++) {
+            if (!contents.getStacks().containsKey(i)) {
+                contents.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
+            }
+        }
+        // Can't batch this :(
+        session.sendImmediatePackage(contents);
 
         ((VoxelwindBaseInventory) openedInventory).getObserverList().add(this);
     }
@@ -454,26 +460,30 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeContainerSetContents packet = new McpeContainerSetContents();
         packet.setWindowId(windowId);
         packet.getStacks().putAll(newItems);
-        session.addToSendQueue(packet);
+        // Fill in with air
+        for (int i = 0; i < inventory.getInventoryType().getInventorySize(); i++) {
+            if (!packet.getStacks().containsKey(i)) {
+                packet.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
+            }
+        }
+        session.sendImmediatePackage(packet);
     }
 
     public void sendPlayerInventory() {
         McpeContainerSetContents contents = new McpeContainerSetContents();
         contents.setWindowId((byte) 0x00);
         contents.getStacks().putAll(playerInventory.getAllContents());
+        // Because MCPE is stupid, we have to add 9 more slots. Use this opportunity to fill the rest in with air.
+        for (int i = 0; i < playerInventory.getInventoryType().getInventorySize() + 9; i++) {
+            if (!contents.getStacks().containsKey(i)) {
+                contents.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
+            }
+        }
         // TODO: Actually populate these
         for (int i = 0; i < 9; i++) {
             contents.getHotbarData().put(i, -1);
         }
-
-        // Batch separately
-        McpeBatch contentBatch = new McpeBatch();
-        contentBatch.getPackages().add(contents);
-        if (!spawned) {
-            session.sendImmediatePackage(contentBatch);
-        } else {
-            session.addToSendQueue(contentBatch);
-        }
+        session.sendImmediatePackage(contents);
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
