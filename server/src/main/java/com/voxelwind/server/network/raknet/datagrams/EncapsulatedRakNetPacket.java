@@ -30,7 +30,6 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
             // Split the buffer up
             int split = (int) Math.ceil(buffer.readableBytes() / by);
             for (int i = 0; i < split; i++) {
-                // Need to retain, in the event that we need to send due to NAK.
                 bufs.add(from.readSlice(Math.min(by, from.readableBytes())));
             }
         } else {
@@ -44,7 +43,7 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
         short splitId = (short) (System.nanoTime() % Short.MAX_VALUE);
         int orderNumber = encrypted ? session.getOrderSequenceGenerator().getAndIncrement() : 0;
         for (int i = 0; i < bufs.size(); i++) {
-            // NB: When we add encryption support, you must use RELIABLE_ORDERED
+            // Encryption requires RELIABLE_ORDERED
             EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
             packet.setBuffer(bufs.get(i));
             packet.setReliability(encrypted ? RakNetReliability.RELIABLE_ORDERED : RakNetReliability.RELIABLE);
