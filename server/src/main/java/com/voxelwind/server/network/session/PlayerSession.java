@@ -578,11 +578,25 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         public void handle(McpeContainerSetSlot packet) {
             VoxelwindBaseInventory window = null;
             if (openInventoryId < 0 || openInventoryId != packet.getWindowId()) {
-                // There's no inventory open, so it's probably the player inventory. Lightly verify this.
+                // There's no inventory open, so it's probably the player inventory.
                 if (packet.getWindowId() == 0) {
                     window = (VoxelwindBaseInventory) playerInventory;
                 } else if (packet.getWindowId() == 0x78) {
-                    // It's the armor inventory. TODO: Needs to be handled
+                    // It's the armor inventory.
+                    switch (packet.getSlot()) {
+                        case 0:
+                            getEquipment().setHelmet(packet.getStack());
+                            break;
+                        case 1:
+                            getEquipment().setChestplate(packet.getStack());
+                            break;
+                        case 2:
+                            getEquipment().setLeggings(packet.getStack());
+                            break;
+                        case 3:
+                            getEquipment().setBoots(packet.getStack());
+                            break;
+                    }
                     return;
                 }
             } else {
