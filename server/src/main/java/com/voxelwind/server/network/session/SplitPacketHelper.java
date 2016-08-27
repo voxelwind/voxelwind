@@ -33,7 +33,6 @@ public class SplitPacketHelper {
 
         contained.clear();
         List<EncapsulatedRakNetPacket> sortedPackets = new ArrayList<>(packets);
-        packets.clear();
         sortedPackets.sort((o1, o2) -> Integer.compare(o1.getPartIndex(), o2.getPartIndex()));
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
@@ -42,6 +41,7 @@ public class SplitPacketHelper {
         }
 
         release();
+        packets.clear();
 
         return Optional.of(buf);
     }
