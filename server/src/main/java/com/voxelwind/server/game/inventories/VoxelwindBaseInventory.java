@@ -90,29 +90,20 @@ public abstract class VoxelwindBaseInventory implements Inventory {
         Preconditions.checkNotNull(contents, "contents");
         Map<Integer, ItemStack> contentsCopy = ImmutableMap.copyOf(contents);
         if (contentsCopy.isEmpty()) {
-            clearAll();
+            inventory.clear();
+            for (InventoryObserver observer : observerList) {
+                observer.onInventoryContentsReplacement(ImmutableMap.of());
+            }
             return;
         }
 
         Integer maxSlot = Collections.max(contentsCopy.keySet());
         Preconditions.checkArgument(maxSlot < fullSize, "Maximum passed contents slot (%s) is greater than this inventory's size (%s)",
                 maxSlot, fullSize);
-
-        Set<Integer> slotsRemoved = new HashSet<>(inventory.keySet());
-        slotsRemoved.removeAll(contentsCopy.keySet());
-
-        for (Integer integer : slotsRemoved) {
-            for (InventoryObserver observer : observerList) {
-                observer.onInventoryChange(integer, inventory.get(integer), null, null);
-            }
-        }
-        inventory.keySet().removeAll(slotsRemoved);
-
-        for (Map.Entry<Integer, ItemStack> entry : contentsCopy.entrySet()) {
-            ItemStack previous = inventory.put(entry.getKey(), entry.getValue());
-            for (InventoryObserver observer : observerList) {
-                observer.onInventoryChange(entry.getKey(), previous, entry.getValue(), null);
-            }
+        inventory.clear();
+        inventory.putAll(contentsCopy);
+        for (InventoryObserver observer : observerList) {
+            observer.onInventoryContentsReplacement(contentsCopy);
         }
     }
 }
