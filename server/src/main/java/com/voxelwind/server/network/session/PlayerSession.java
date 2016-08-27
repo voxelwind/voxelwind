@@ -53,6 +53,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private Inventory openedInventory;
     private byte openInventoryId = -1;
     private final PlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
+    private final int[] hotbarLinks = new int[9];
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), 20f);
@@ -482,10 +483,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 contents.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
             }
         }
-        // TODO: Actually populate these
-        for (int i = 0; i < 9; i++) {
-            contents.getHotbarData().put(i, -1);
-        }
+        // Populate hotbar links.
+        contents.setHotbarData(Arrays.copyOf(hotbarLinks, hotbarLinks.length));
         McpeBatch contentsBatch = new McpeBatch();
         contentsBatch.getPackages().add(contents);
         session.sendImmediatePackage(contentsBatch);
