@@ -1,7 +1,11 @@
 package com.voxelwind.api.game.level;
 
 import com.flowpowered.math.vector.Vector3f;
+import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.level.block.Block;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -55,4 +59,47 @@ public interface Level {
      * @return an {@link CompletableFuture} with the chunk
      */
     CompletableFuture<Chunk> getChunk(int x, int z);
+
+    /**
+     * Returns the block at the specified vector.
+     * @param vector the vector
+     * @return an {@link CompletableFuture} with the block
+     */
+    default CompletableFuture<Block> getBlock(@Nonnull Vector3i vector) {
+        Preconditions.checkNotNull(vector, "vector");
+        return getBlock(vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    /**
+     * Returns the block at the specified location, possibly loading or generating a chunk asynchronously if required.
+     * @param x the X coordinate
+     * @param y the Y coordinate
+     * @param z the Z coordinate
+     * @return an {@link CompletableFuture} with the block
+     */
+    default CompletableFuture<Block> getBlock(int x, int y, int z) {
+        return getChunk(x / 16, z / 16).thenApply(chunk -> chunk.getBlock(x % 16, y, z % 16));
+    }
+
+    /**
+     * Returns the block at the specified vector if the location it is in is already loaded.
+     * @param vector the vector
+     * @return an {@link Optional} with the block
+     */
+    default Optional<Block> getBlockIfChunkLoaded(@Nonnull Vector3i vector) {
+        Preconditions.checkNotNull(vector, "vector");
+        return getBlockIfChunkLoaded(vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    /**
+     * Returns the block at the specified vector.
+     * @param x the X coordinate
+     * @param y the Y coordinate
+     * @param z the Z coordinate
+     * @return an {@link Optional} with the block
+     */
+    default Optional<Block> getBlockIfChunkLoaded(int x, int y, int z) {
+        Optional<Chunk> chunkOptional = getChunkIfLoaded(x / 16, z / 16);
+        return chunkOptional.map(c -> c.getBlock(x % 16, y, z % 16));
+    }
 }
