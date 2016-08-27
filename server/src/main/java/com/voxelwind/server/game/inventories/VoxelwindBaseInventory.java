@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class VoxelwindBaseInventory implements Inventory {
+public class VoxelwindBaseInventory implements Inventory {
     private final Map<Integer, ItemStack> inventory = new HashMap<>();
     private final List<InventoryObserver> observerList = new CopyOnWriteArrayList<>();
     private final int fullSize;

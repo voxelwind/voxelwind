@@ -9,59 +9,52 @@ import java.util.Optional;
 
 public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory implements PlayerInventory {
     private final PlayerSession session;
-    private ItemStack helmet;
-    private ItemStack chestplate;
-    private ItemStack leggings;
-    private ItemStack boots;
+    private final VoxelwindArmorEquipment armorEquipment;
 
     public VoxelwindBasePlayerInventory(PlayerSession session) {
         // TODO: Verify
         super(45);
         this.session = session;
+        this.armorEquipment = new VoxelwindArmorEquipment(session);
     }
 
-    // TODO: These require parameter validation.
     @Override
     public Optional<ItemStack> getHelmet() {
-        return Optional.ofNullable(helmet);
+        return armorEquipment.getHelmet();
     }
 
     @Override
     public void setHelmet(@Nullable ItemStack stack) {
-        helmet = stack;
-        session.sendUpdateArmorPacket();
+        armorEquipment.setHelmet(stack);
     }
 
     @Override
     public Optional<ItemStack> getChestplate() {
-        return Optional.ofNullable(chestplate);
+        return armorEquipment.getChestplate();
     }
 
     @Override
     public void setChestplate(@Nullable ItemStack stack) {
-        chestplate = stack;
-        session.sendUpdateArmorPacket();
+        armorEquipment.setChestplate(stack);
     }
 
     @Override
     public Optional<ItemStack> getLeggings() {
-        return Optional.ofNullable(leggings);
+        return armorEquipment.getLeggings();
     }
 
     @Override
     public void setLeggings(@Nullable ItemStack stack) {
-        leggings = stack;
-        session.sendUpdateArmorPacket();
+        armorEquipment.setLeggings(stack);
     }
 
     @Override
     public Optional<ItemStack> getBoots() {
-        return Optional.ofNullable(boots);
+        return armorEquipment.getBoots();
     }
 
     @Override
     public void setBoots(@Nullable ItemStack stack) {
-        this.boots = stack;
-        session.sendUpdateArmorPacket();
+        armorEquipment.setBoots(stack);
     }
 }
