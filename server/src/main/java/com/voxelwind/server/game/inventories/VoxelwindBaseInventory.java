@@ -110,4 +110,8 @@ public abstract class VoxelwindBaseInventory implements Inventory {
     private static boolean isNothing(ItemStack stack) {
         return stack == null || stack.getItemType() == BlockTypes.AIR;
     }
+
+    public List<InventoryObserver> getObserverList() {
+        return observerList;
+    }
 }

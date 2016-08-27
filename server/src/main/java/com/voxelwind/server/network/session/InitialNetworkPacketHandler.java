@@ -150,11 +150,6 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     }
 
     @Override
-    public void handle(McpeContainerOpen packet) {
-        throw new IllegalStateException("Got unexpected McpeContainerOpen");
-    }
-
-    @Override
     public void handle(McpeContainerClose packet) {
         throw new IllegalStateException("Got unexpected McpeContainerClose");
     }

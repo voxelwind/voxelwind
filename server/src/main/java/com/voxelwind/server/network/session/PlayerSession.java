@@ -20,6 +20,7 @@ import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.game.inventories.InventoryObserver;
+import com.voxelwind.server.game.inventories.VoxelwindBaseInventory;
 import com.voxelwind.server.game.inventories.VoxelwindBasePlayerInventory;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
@@ -377,7 +378,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     @Override
-    public void onInventoryChange(int slot, @Nullable ItemStack oldItem, @Nullable ItemStack newItem, Inventory inventory) {
+    public void onInventoryChange(int slot, @Nullable ItemStack oldItem, @Nullable ItemStack newItem, VoxelwindBaseInventory inventory) {
         Integer windowId = openWindows.inverse().get(inventory);
         if (windowId == null) {
             return;
@@ -391,7 +392,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     @Override
-    public void onInventoryContentsReplacement(Map<Integer, ItemStack> newItems, Inventory inventory) {
+    public void onInventoryContentsReplacement(Map<Integer, ItemStack> newItems, VoxelwindBaseInventory inventory) {
         Integer windowId = openWindows.inverse().get(inventory);
         if (windowId == null) {
             return;
@@ -567,18 +568,30 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         }
 
         @Override
-        public void handle(McpeContainerOpen packet) {
-
-        }
-
-        @Override
         public void handle(McpeContainerClose packet) {
 
         }
 
         @Override
         public void handle(McpeContainerSetSlot packet) {
+            Inventory window = null;
+            if (openInventoryId < 0 || openInventoryId != packet.getWindowId()) {
+                // There's no inventory open, so it's probably the player inventory. Lightly verify this.
+                if (packet.getWindowId() == 0) {
+                    window = playerInventory;
+                } else if (packet.getWindowId() == 0x78) {
+                    // It's the armor inventory. TODO: Needs to be handled
+                    return;
+                }
+            } else {
+                window = openWindows.get((int) packet.getWindowId());
+            }
 
+            if (window == null) {
+                return;
+            }
+
+            window.setItem(packet.getSlot(), packet.getStack());
         }
     }
 
