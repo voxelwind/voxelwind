@@ -6,7 +6,9 @@ public enum VoxelwindInventoryType {
     CHEST(10),
     FURNACE(11),
     ENCHANTING(12),
-    ANVIL;
+    ANVIL,
+    PLAYER(0),
+    PLAYER_ARMOR(0x78);
 
     private int id = -1;
 

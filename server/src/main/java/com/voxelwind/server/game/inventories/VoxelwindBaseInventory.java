@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.api.game.level.block.BlockTypes;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -28,9 +29,13 @@ public abstract class VoxelwindBaseInventory implements Inventory {
     public void setItem(int slot, @Nonnull ItemStack stack) {
         Preconditions.checkNotNull(stack, "stack");
         Preconditions.checkArgument(slot >= 0 && slot < fullSize, "Wanted slot %s is not between 0 and %s", slot, fullSize);
-        ItemStack oldItem = inventory.put(slot, stack);
-        for (InventoryObserver observer : observerList) {
-            observer.onInventoryChange(slot, oldItem, stack, null);
+        if (!isNothing(stack)) {
+            ItemStack oldItem = inventory.put(slot, stack);
+            for (InventoryObserver observer : observerList) {
+                observer.onInventoryChange(slot, oldItem, stack, this);
+            }
+        } else {
+            clearItem(slot);
         }
     }
 
@@ -41,7 +46,7 @@ public abstract class VoxelwindBaseInventory implements Inventory {
             if (!inventory.containsKey(i)) {
                 inventory.put(i, stack);
                 for (InventoryObserver observer : observerList) {
-                    observer.onInventoryChange(i, null, stack, null);
+                    observer.onInventoryChange(i, null, stack, this);
                 }
                 return true;
             }
@@ -55,7 +60,7 @@ public abstract class VoxelwindBaseInventory implements Inventory {
         ItemStack stack = inventory.remove(slot);
         if (stack != null) {
             for (InventoryObserver observer : observerList) {
-                observer.onInventoryChange(slot, stack, null, null);
+                observer.onInventoryChange(slot, stack, null, this);
             }
         }
     }
@@ -72,10 +77,8 @@ public abstract class VoxelwindBaseInventory implements Inventory {
 
     @Override
     public void clearAll() {
-        for (Map.Entry<Integer, ItemStack> entry : inventory.entrySet()) {
-            for (InventoryObserver observer : observerList) {
-                observer.onInventoryChange(entry.getKey(), entry.getValue(), null, null);
-            }
+        for (InventoryObserver observer : observerList) {
+            observer.onInventoryContentsReplacement(ImmutableMap.of(), this);
         }
         inventory.clear();
     }
@@ -90,10 +93,7 @@ public abstract class VoxelwindBaseInventory implements Inventory {
         Preconditions.checkNotNull(contents, "contents");
         Map<Integer, ItemStack> contentsCopy = ImmutableMap.copyOf(contents);
         if (contentsCopy.isEmpty()) {
-            inventory.clear();
-            for (InventoryObserver observer : observerList) {
-                observer.onInventoryContentsReplacement(ImmutableMap.of());
-            }
+            clearAll();
             return;
         }
 
@@ -103,7 +103,11 @@ public abstract class VoxelwindBaseInventory implements Inventory {
         inventory.clear();
         inventory.putAll(contentsCopy);
         for (InventoryObserver observer : observerList) {
-            observer.onInventoryContentsReplacement(contentsCopy);
+            observer.onInventoryContentsReplacement(contentsCopy, this);
         }
+    }
+
+    private static boolean isNothing(ItemStack stack) {
+        return stack == null || stack.getItemType() == BlockTypes.AIR;
     }
 }

@@ -4,8 +4,12 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.inventories.Inventory;
+import com.voxelwind.api.game.inventories.PlayerInventory;
+import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
@@ -15,6 +19,8 @@ import com.voxelwind.api.server.command.CommandNotFoundException;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.server.game.inventories.InventoryObserver;
+import com.voxelwind.server.game.inventories.VoxelwindBasePlayerInventory;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -26,13 +32,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PlayerSession extends LivingEntity implements Player {
+public class PlayerSession extends LivingEntity implements Player, InventoryObserver {
     private static final int REQUIRED_TO_SPAWN = 56;
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
@@ -43,7 +50,8 @@ public class PlayerSession extends LivingEntity implements Player {
     private boolean spawned = false;
     private int viewDistance = 5;
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
-    private final Map<Integer, Inventory> openInventories = new HashMap<>();
+    private final BiMap<Integer, Inventory> openWindows = HashBiMap.create();
+    private final PlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), 20f);
@@ -358,8 +366,40 @@ public class PlayerSession extends LivingEntity implements Player {
         session.addToSendQueue(text);
     }
 
+    @Override
+    public PlayerInventory getInventory() {
+        return playerInventory;
+    }
+
     public int getNextWindowId() {
         return windowIdGenerator.incrementAndGet() % 2;
+    }
+
+    @Override
+    public void onInventoryChange(int slot, @Nullable ItemStack oldItem, @Nullable ItemStack newItem, Inventory inventory) {
+        Integer windowId = openWindows.inverse().get(inventory);
+        if (windowId == null) {
+            return;
+        }
+
+        McpeContainerSetSlot packet = new McpeContainerSetSlot();
+        packet.setSlot((short) slot);
+        packet.setStack(newItem);
+        packet.setWindowId(windowId.byteValue());
+        session.addToSendQueue(packet);
+    }
+
+    @Override
+    public void onInventoryContentsReplacement(Map<Integer, ItemStack> newItems, Inventory inventory) {
+        Integer windowId = openWindows.inverse().get(inventory);
+        if (windowId == null) {
+            return;
+        }
+
+        McpeContainerSetContents packet = new McpeContainerSetContents();
+        packet.setWindowId(windowId.byteValue());
+        packet.getStacks().putAll(newItems);
+        session.addToSendQueue(packet);
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {

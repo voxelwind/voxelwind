@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Defines an inventory.
+ * Defines an inventory. Inventories are always backed by a holder, typically a block entity or player.
  */
 @ParametersAreNonnullByDefault
 public interface Inventory {
