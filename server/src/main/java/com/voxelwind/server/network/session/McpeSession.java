@@ -229,18 +229,19 @@ public class McpeSession extends RakNetSession {
 
         ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer(8);
         ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer(serverKey.length);
-        counterBuf.order(ByteOrder.LITTLE_ENDIAN).writeLong(encryptedSentPacketGenerator.getAndIncrement());
-        keyBuf.writeBytes(serverKey);
+        try {
+            counterBuf.order(ByteOrder.LITTLE_ENDIAN).writeLong(encryptedSentPacketGenerator.getAndIncrement());
+            keyBuf.writeBytes(serverKey);
 
-        hash.update(counterBuf);
-        hash.update(buf);
-        hash.update(keyBuf);
-        byte[] digested = hash.digest();
-
-        counterBuf.release();
-        keyBuf.release();
-
-        return Arrays.copyOf(digested, 8);
+            hash.update(counterBuf);
+            hash.update(buf);
+            hash.update(keyBuf);
+            byte[] digested = hash.digest();
+            return Arrays.copyOf(digested, 8);
+        } finally {
+            counterBuf.release();
+            keyBuf.release();
+        }
     }
 
     public PlayerSession getPlayerSession() {
