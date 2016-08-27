@@ -10,7 +10,6 @@ import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
-import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Skin;
@@ -20,7 +19,6 @@ import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.game.inventories.*;
-import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
@@ -52,13 +50,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
     private Inventory openedInventory;
     private byte openInventoryId = -1;
-    private final PlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
-    private final int[] hotbarLinks = new int[9];
+    private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), 20f);
         this.session = session;
-        Arrays.fill(hotbarLinks, -1);
     }
 
     @Override
@@ -469,7 +465,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         ItemStack[] stacks = Arrays.copyOf(playerInventory.getAllContents(), playerInventory.getInventoryType().getInventorySize() + 9);
         contents.setStacks(stacks);
         // Populate hotbar links.
-        contents.setHotbarData(Arrays.copyOf(hotbarLinks, hotbarLinks.length));
+        contents.setHotbarData(playerInventory.getHotbarLinks());
         McpeBatch contentsBatch = new McpeBatch();
         contentsBatch.getPackages().add(contents);
         session.sendImmediatePackage(contentsBatch);
@@ -680,6 +676,21 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             }
 
             window.setItem(packet.getSlot(), packet.getStack(), PlayerSession.this);
+        }
+
+        @Override
+        public void handle(McpeMobEquipment packet) {
+            // Basic sanity check:
+            if (packet.getHotbarSlot() < 0 || packet.getHotbarSlot() >= 9) {
+                throw new IllegalArgumentException("Specified hotbar slot " + packet.getHotbarSlot() + " isn't valid.");
+            }
+
+            int correctedInventorySlot = packet.getInventorySlot() - 9;
+            int finalSlot = correctedInventorySlot < 0 || correctedInventorySlot >= playerInventory.getInventoryType().getInventorySize() ?
+                    -1 : correctedInventorySlot;
+
+            playerInventory.setLink(packet.getHotbarSlot(), finalSlot);
+            playerInventory.setHeldSlot(packet.getHotbarSlot(), false);
         }
     }
 

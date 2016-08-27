@@ -20,4 +20,6 @@ public interface NetworkPacketHandler {
     void handle(McpeContainerClose packet);
 
     void handle(McpeContainerSetSlot packet);
+
+    void handle(McpeMobEquipment packet);
 }

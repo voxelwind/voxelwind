@@ -50,6 +50,7 @@ public class PacketRegistry {
                             .put(0x13, McpeUpdateBlock.class)
                             .put(0x18, McpeEntityEvent.class)
                             .put(0x1a, McpeUpdateAttributes.class)
+                            .put(0x1b, McpeMobEquipment.class)
                             .put(0x20, McpePlayerAction.class)
                             .put(0x22, McpeSetEntityData.class)
                             .put(0x23, McpeSetEntityMotion.class)

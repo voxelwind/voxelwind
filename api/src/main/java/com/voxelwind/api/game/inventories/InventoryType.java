@@ -3,7 +3,7 @@ package com.voxelwind.api.game.inventories;
 public enum InventoryType {
     CHEST(27),
     DOUBLE_CHEST(27 + 27),
-    PLAYER(40),
+    PLAYER(36),
     FURNACE(3),
     CRAFTING(5),
     WORKBENCH(10),
