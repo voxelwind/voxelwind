@@ -393,7 +393,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         openPacket.setSlotCount((short) inventory.getInventoryType().getInventorySize());
         openPacket.setPosition(((OpenableInventory) inventory).getPosition());
         openPacket.setType(internalType.getType());
-        session.sendImmediatePackage(openPacket);
+        session.addToSendQueue(openPacket);
 
         McpeContainerSetContents contents = new McpeContainerSetContents();
         contents.setWindowId(windowId);
@@ -404,8 +404,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 contents.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
             }
         }
-        // Can't batch this :(
-        session.sendImmediatePackage(contents);
+        McpeBatch contentsBatch = new McpeBatch();
+        contentsBatch.getPackages().add(contents);
+        session.addToSendQueue(contentsBatch);
 
         ((VoxelwindBaseInventory) openedInventory).getObserverList().add(this);
     }
@@ -466,7 +467,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 packet.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
             }
         }
-        session.sendImmediatePackage(packet);
+        McpeBatch contentsBatch = new McpeBatch();
+        contentsBatch.getPackages().add(packet);
+        session.addToSendQueue(contentsBatch);
     }
 
     public void sendPlayerInventory() {
@@ -483,7 +486,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         for (int i = 0; i < 9; i++) {
             contents.getHotbarData().put(i, -1);
         }
-        session.sendImmediatePackage(contents);
+        McpeBatch contentsBatch = new McpeBatch();
+        contentsBatch.getPackages().add(contents);
+        session.sendImmediatePackage(contentsBatch);
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
