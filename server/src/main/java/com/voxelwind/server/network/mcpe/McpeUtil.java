@@ -17,10 +17,10 @@ import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import com.voxelwind.api.util.Rotation;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.ByteBufUtil;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -188,15 +188,16 @@ public class McpeUtil {
         short damage = buf.readShort();
 
         short nbtSize = buf.readShort();
-        byte[] nbtData = new byte[nbtSize];
-        buf.readBytes(nbtData);
 
         ItemType type = ItemTypes.forId(id);
         VoxelwindItemStack stack = new VoxelwindItemStack(type, count, type.createDataFor(damage).orElse(null));
-        try (NBTInputStream stream = new NBTInputStream(new ByteArrayInputStream(nbtData), false, ByteOrder.LITTLE_ENDIAN)) {
-            stack.readNbt(stream);
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to load NBT data", e);
+
+        if (nbtSize > 0) {
+            try (NBTInputStream stream = new NBTInputStream(new ByteBufInputStream(buf.readSlice(nbtSize)), false, ByteOrder.LITTLE_ENDIAN)) {
+                stack.readNbt(stream);
+            } catch (IOException e) {
+                throw new IllegalStateException("Unable to load NBT data", e);
+            }
         }
         return stack;
     }
