@@ -20,5 +20,6 @@ public class PluginModule extends AbstractModule {
     protected void configure() {
         bind(Logger.class).toInstance(LoggerFactory.getLogger(description.getId()));
         bind(Server.class).toInstance(server);
+        bind(PluginDescription.class).toInstance(description);
     }
 }
