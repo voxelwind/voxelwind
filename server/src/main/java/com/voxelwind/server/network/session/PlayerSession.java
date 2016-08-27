@@ -404,6 +404,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         session.addToSendQueue(packet);
     }
 
+    public void sendUpdateArmorPacket() {
+
+    }
+
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
         @Override
         public void handle(McpeLogin packet) {
