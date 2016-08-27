@@ -10,8 +10,6 @@ import java.util.Optional;
 public interface ItemType {
     int getId();
 
-    String getName();
-
     boolean isBlock();
 
     Class<? extends ItemData> getMaterialDataClass();

@@ -9,7 +9,7 @@ import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.ItemData;
-import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.level.block.types.BlockTypes;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.game.item.VoxelwindItemStack;

@@ -1,11 +1,10 @@
 package com.voxelwind.server.game.inventories;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.InventoryType;
 import com.voxelwind.api.game.item.ItemStack;
-import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.level.block.types.BlockTypes;
 import com.voxelwind.server.network.session.PlayerSession;
 
 import javax.annotation.Nonnull;

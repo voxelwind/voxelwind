@@ -2,7 +2,7 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.api.game.item.ItemStack;
-import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.level.block.types.BlockTypes;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;

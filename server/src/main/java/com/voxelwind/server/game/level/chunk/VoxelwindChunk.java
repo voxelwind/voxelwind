@@ -3,6 +3,7 @@ package com.voxelwind.server.game.level.chunk;
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.block.*;
+import com.voxelwind.api.game.level.block.types.BlockTypes;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;

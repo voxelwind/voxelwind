@@ -2,7 +2,7 @@ package com.voxelwind.server.game.level.provider;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.voxelwind.api.game.level.Chunk;
-import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.level.block.types.BlockTypes;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 
