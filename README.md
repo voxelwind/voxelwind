@@ -12,6 +12,11 @@ Voxelwind aims to be a comprehensive implementation of MCPE.
 Voxelwind is licensed under the permissive **MIT** license. However, we would love if you submit improvements you make to
 Voxelwind upstream so that the larger community can benefit from them.
 
+## Quick Links
+
+* [Gitter chat room](https://gitter.im/minecrafter/voxelwind)
+* [Wiki](https://wiki.voxelwind.com)
+
 ## Special Thanks
 
 * [MiNET](https://github.com/NiclasOlofsson/MiNET) was invaluable in helping me figure out some of the more difficult stuff.
