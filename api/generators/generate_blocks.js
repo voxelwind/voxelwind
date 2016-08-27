@@ -12,7 +12,7 @@ Object.keys(blocks).forEach(function(blockId) {
     }
 
     var line = "public static final BlockType " + name + " = IntBlock.builder()" +
-        ".id(" + blockId + ").maxStackSize(" + block.stackSize + ").diggable(" + block.diggable + ").transparent(" + block.transparent +
+        ".name(\"" + name + "\").id(" + blockId + ").maxStackSize(" + block.stackSize + ").diggable(" + block.diggable + ").transparent(" + block.transparent +
         ").emitLight(" + block.emitLight + ").filterLight(" + block.filterLight + ").dropHandler(";
 
     if (block.drops.length == 0) {
