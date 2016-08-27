@@ -107,7 +107,10 @@ public class LevelEntityManager {
 
         for (BaseEntity entity : currentEntityList) {
             if (entity instanceof PlayerSession) {
-                sessions.add((PlayerSession) entity);
+                PlayerSession session = (PlayerSession) entity;
+                if (!session.getUserSession().isClosed()) {
+                    sessions.add((PlayerSession) entity);
+                }
             }
         }
 
