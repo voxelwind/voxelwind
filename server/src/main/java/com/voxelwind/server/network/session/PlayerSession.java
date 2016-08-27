@@ -51,6 +51,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private int viewDistance = 5;
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
     private final BiMap<Integer, Inventory> openWindows = HashBiMap.create();
+    private int openInventoryId = -1;
     private final PlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
@@ -563,6 +564,21 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 updateViewableEntities();
                 sendNewChunks();
             }
+        }
+
+        @Override
+        public void handle(McpeContainerOpen packet) {
+
+        }
+
+        @Override
+        public void handle(McpeContainerClose packet) {
+
+        }
+
+        @Override
+        public void handle(McpeContainerSetSlot packet) {
+
         }
     }
 

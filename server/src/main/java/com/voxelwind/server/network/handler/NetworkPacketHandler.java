@@ -16,4 +16,10 @@ public interface NetworkPacketHandler {
     void handle(McpeText packet);
 
     void handle(McpeMovePlayer packet);
+
+    void handle(McpeContainerOpen packet);
+
+    void handle(McpeContainerClose packet);
+
+    void handle(McpeContainerSetSlot packet);
 }
