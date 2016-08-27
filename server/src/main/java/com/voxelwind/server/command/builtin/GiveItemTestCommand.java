@@ -1,6 +1,6 @@
 package com.voxelwind.server.command.builtin;
 
-import com.voxelwind.api.game.level.block.types.BlockTypes;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.command.CommandExecutor;
 import com.voxelwind.api.server.command.CommandExecutorSource;
