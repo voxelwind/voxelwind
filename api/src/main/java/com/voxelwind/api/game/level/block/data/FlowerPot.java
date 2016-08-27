@@ -1,7 +1,9 @@
 package com.voxelwind.api.game.level.block.data;
 
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.level.block.BlockData;
+import com.voxelwind.api.util.DyeColor;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -13,6 +15,13 @@ public class FlowerPot implements BlockData {
     public static FlowerPot of(Type type) {
         Preconditions.checkNotNull(type, "type");
         return new FlowerPot(type);
+    }
+
+    @Nonnull
+    public static FlowerPot of(short type) {
+        Type[] colors = Type.values();
+        Preconditions.checkArgument(type >= 0 && type < colors.length, "type is not valid");
+        return new FlowerPot(colors[type]);
     }
 
     private final Type type;
@@ -44,6 +53,11 @@ public class FlowerPot implements BlockData {
         return "FlowerPot{" +
                 "type=" + type +
                 '}';
+    }
+
+    @Override
+    public short toBlockMetadata() {
+        return (short) type.ordinal();
     }
 
     public enum Type {

@@ -2,9 +2,8 @@ package com.voxelwind.server.game.level.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.level.Chunk;
-import com.voxelwind.api.game.level.block.Block;
-import com.voxelwind.api.game.level.block.BlockState;
-import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.level.block.*;
+import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.util.NibbleArray;
@@ -16,6 +15,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class VoxelwindChunk implements Chunk {
     private static final int FULL_CHUNK_SIZE = 16 * 16 * 128; // 32768
@@ -24,6 +26,7 @@ public class VoxelwindChunk implements Chunk {
     private final NibbleArray blockMetadata = new NibbleArray(FULL_CHUNK_SIZE);
     private final NibbleArray skyLightData = new NibbleArray(FULL_CHUNK_SIZE);
     private final NibbleArray blockLightData = new NibbleArray(FULL_CHUNK_SIZE);
+    private final Map<Vector3i, BlockEntity> blockEntities = new HashMap<>();
 
     private final int x;
     private final int z;
@@ -55,26 +58,32 @@ public class VoxelwindChunk implements Chunk {
 
     public synchronized Block getBlock(int x, int y, int z) {
         checkPosition(x, y, z);
-        byte data = blockData[xyzIdx(x, y, z)];
+        int index = xyzIdx(x, y, z);
+        byte data = blockData[index];
 
         Vector3i full = new Vector3i(x + (this.x * 16), y, z + (this.z * 16));
+
+        BlockType type = BlockTypes.forId(data);
+        Optional<BlockData> createdData = type.createBlockDataFor(blockMetadata.get(index));
+
         // TODO: Add level and associated block data
-        return new VoxelwindBlock(null, this, full, new BasicBlockState(BlockTypes.forId(data)));
+        return new VoxelwindBlock(null, this, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null)), blockEntities.get(
+                new Vector3i(x, y, z)));
     }
 
     @Override
-    public Block setType(int x, int y, int z, BlockState state) {
-        setBlock(x, y, z, (byte) state.getBlockType().getId());
-        return getBlock(x, y, z);
-    }
-
-    public synchronized void setBlock(int x, int y, int z, byte id) {
+    public Block setBlock(int x, int y, int z, BlockState state) {
         checkPosition(x, y, z);
-        byte old = blockData[xyzIdx(x, y, z)];
-        if (old != id) {
-            blockData[xyzIdx(x, y, z)] = id;
-            stale = true;
+        int index = xyzIdx(x, y, z);
+        byte data = blockData[index];
+        if (data != state.getBlockType().getId()) {
+            blockData[index] = (byte) state.getBlockType().getId();
+            BlockData blockData = state.getBlockData();
+            if (blockData != null) {
+                blockMetadata.set(index, (byte) blockData.toBlockMetadata());
+            }
         }
+        return getBlock(x, y, z);
     }
 
     public synchronized McpeBatch getChunkDataPacket() {

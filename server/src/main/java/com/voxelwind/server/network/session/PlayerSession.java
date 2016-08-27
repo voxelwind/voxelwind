@@ -170,7 +170,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     public void doInitialSpawn() {
         // Fire PlayerSpawnEvent.
-        // TODO: Fill this in from known player data.
+        // TODO: Fill this in of known player data.
         PlayerSpawnEvent event = new PlayerSpawnEvent(this, getLevel().getSpawnLocation(), getLevel(), Rotation.ZERO);
         session.getServer().getEventManager().fire(event);
 

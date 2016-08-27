@@ -5,18 +5,23 @@ import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
+import com.voxelwind.api.game.level.blockentities.BlockEntity;
+
+import java.util.Optional;
 
 public class VoxelwindBlock implements Block {
     private final Level level;
     private final Chunk chunk;
     private final Vector3i location;
     private final BlockState state;
+    private final BlockEntity blockEntity;
 
-    public VoxelwindBlock(Level level, Chunk chunk, Vector3i location, BlockState state) {
+    public VoxelwindBlock(Level level, Chunk chunk, Vector3i location, BlockState state, BlockEntity blockEntity) {
         this.level = level;
         this.chunk = chunk;
         this.location = location;
         this.state = state;
+        this.blockEntity = blockEntity;
     }
 
     @Override
@@ -37,5 +42,10 @@ public class VoxelwindBlock implements Block {
     @Override
     public Vector3i getLevelLocation() {
         return location;
+    }
+
+    @Override
+    public Optional<BlockEntity> getBlockEntity() {
+        return Optional.ofNullable(blockEntity);
     }
 }

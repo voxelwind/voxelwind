@@ -10,5 +10,5 @@ public interface Chunk {
 
     Block getBlock(int x, int y, int z);
 
-    Block setType(int x, int y, int z, BlockState state);
+    Block setBlock(int x, int y, int z, BlockState state);
 }

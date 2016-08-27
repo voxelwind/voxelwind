@@ -36,4 +36,9 @@ public class Cake implements BlockData {
     public int getSlicesLeft() {
         return 7 - level;
     }
+
+    @Override
+    public short toBlockMetadata() {
+        return (short) level;
+    }
 }

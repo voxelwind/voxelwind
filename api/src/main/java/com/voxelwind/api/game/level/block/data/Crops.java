@@ -59,4 +59,9 @@ public class Crops implements BlockData {
                 ", fullyGrown=" + isFullyGrown() +
                 '}';
     }
+
+    @Override
+    public short toBlockMetadata() {
+        return (short) level;
+    }
 }

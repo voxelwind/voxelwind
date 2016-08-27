@@ -7,6 +7,7 @@ import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
+import com.voxelwind.api.game.level.block.data.FlowerPot;
 import com.voxelwind.api.util.DyeColor;
 import com.voxelwind.api.game.item.util.ItemTypeUtil;
 import com.voxelwind.api.game.level.block.data.Cake;
@@ -90,7 +91,7 @@ public class BlockTypes {
         }
     });
     public static final BlockType DEAD_BUSH = new IntBlock(32, "dead_bush", 64, true, true, 0, 0, SelfForInDrop.SHEARS_ONLY);
-    public static final BlockType WOOL = new IntBlock(35, "wool", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class);
+    public static final BlockType WOOL = new IntBlock(35, "wool", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class, Dyed::of, Dyed::of);
     public static final BlockType DANDELION = new IntBlock(37, "dandelion", 64, true, true, 0, 0);
     public static final BlockType FLOWER = new IntBlock(38, "flower", 64, true, true, 0, 0);
     public static final BlockType BROWN_MUSHROOM = new IntBlock(39, "brown_mushroom", 64, true, false, 1, 15);
@@ -138,7 +139,7 @@ public class BlockTypes {
             }
         }
         return ImmutableList.of();
-    });
+    }, null, Crops::ofStage);
     public static final BlockType FARMLAND = new IntBlock(60, "farmland", 64, true, true, 0, 15);
     public static final BlockType FURNACE = new IntBlock(61, "furnace", 64, true, true, 13, 0, SelfForInDrop.ALL_PICKAXES);
     public static final BlockType FURNACE_ACTIVE = new IntBlock(62, "furnace", 64, true, true, 13, 0, SelfForInDrop.ALL_PICKAXES);
@@ -157,20 +158,20 @@ public class BlockTypes {
                 .itemType(ItemTypes.REDSTONE)
                 .amount(4 + RANDOM.nextInt(2))
                 .build());
-    }, null);
+    }, null, null);
     public static final BlockType REDSTONE_ORE_ACTIVE = new IntBlock(74, "redstone_ore", 64, true, true, 9, 0, (server, i2, i3) -> {
         return ImmutableList.of(server.createItemStackBuilder()
                 .itemType(ItemTypes.REDSTONE)
                 .amount(4 + RANDOM.nextInt(2))
                 .build());
-    }, null);
+    }, null, null);
     public static final BlockType REDSTONE_TORCH = new IntBlock(75, "redstone_torch", 64, true, true, 7, 0);
     public static final BlockType REDSTONE_TORCH_ACTIVE = new IntBlock(76, "redstone_torch", 64, true, true, 7, 0, (server, i2, i3) -> {
         return ImmutableList.of(server.createItemStackBuilder()
                 .itemType(REDSTONE_TORCH)
                 .amount(1)
                 .build());
-    }, null);
+    }, null, null);
     public static final BlockType STONE_BUTTON = new IntBlock(77, "stone_button", 64, true, true, 0, 0);
     public static final BlockType TOP_SNOW = new IntBlock(78, "top_snow", 64, true, true, 0, 0, (server, block, itemStack) -> {
         if (ItemTypeUtil.isShovel(itemStack.getItemType()) && RANDOM.nextBoolean()) {
@@ -180,7 +181,7 @@ public class BlockTypes {
                     .build());
         }
         return ImmutableList.of();
-    }, null);
+    }, null, null);
     public static final BlockType ICE = new IntBlock(79, "ice", 64, true, true, 0, 0);
     public static final BlockType SNOW = new IntBlock(80, "snow", 64, true, false, 0, 15);
     public static final BlockType CACTUS = new IntBlock(81, "cactus", 64, true, true, 0, 0);
@@ -193,7 +194,7 @@ public class BlockTypes {
     public static final BlockType GLOWSTONE = new IntBlock(89, "glowstone", 64, true, true, 0, 0);
     public static final BlockType PORTAL = new IntBlock(90, "portal", 0, false, false, 0, 15, NothingDrop.INSTANCE);
     public static final BlockType JACK_OLANTERN = new IntBlock(91, "jack_o'lantern", 64, true, true, 15, 15);
-    public static final BlockType CAKE = new IntBlock(92, "cake", 1, true, true, 0, 0, NothingDrop.INSTANCE, Cake.class);
+    public static final BlockType CAKE = new IntBlock(92, "cake", 1, true, true, 0, 0, NothingDrop.INSTANCE, Cake.class, null, Cake::ofStage);
     public static final BlockType REDSTONE_REPEATER = new IntBlock(93, "redstone_repeater", 64, true, true, 0, 0);
     public static final BlockType REDSTONE_REPEATER_ACTIVE = new IntBlock(94, "redstone_repeater", 64, true, true, 0, 0);
     public static final BlockType INVISIBLE_BEDROCK = new IntBlock(95, "invisible_bedrock", 64, false, true, 0, 0);
@@ -244,7 +245,7 @@ public class BlockTypes {
     public static final BlockType BIRCH_WOOD_STAIRS = new IntBlock(135, "birch_wood_stairs", 64, true, true, 0, 15);
     public static final BlockType JUNGLE_WOOD_STAIRS = new IntBlock(136, "jungle_wood_stairs", 64, true, true, 0, 15);
     public static final BlockType COBBLESTONE_WALL = new IntBlock(139, "cobblestone_wall", 64, true, true, 0, 0);
-    public static final BlockType FLOWER_POT = new IntBlock(140, "flower_pot", 64, true, true, 0, 0);
+    public static final BlockType FLOWER_POT = new IntBlock(140, "flower_pot", 64, true, true, 0, 0, SelfDrop.INSTANCE, FlowerPot.class, null, FlowerPot::of);
     public static final BlockType CARROTS = new IntBlock(141, "carrots", 64, true, false, 0, 15);
     public static final BlockType POTATO = new IntBlock(142, "potato", 64, true, false, 0, 15);
     public static final BlockType WOODEN_BUTTON = new IntBlock(143, "wooden_button", 64, true, true, 0, 0);
@@ -260,14 +261,14 @@ public class BlockTypes {
     public static final BlockType QUARTZ_STAIRS = new IntBlock(156, "quartz_stairs", 64, true, true, 0, 15);
     public static final BlockType WOODEN_DOUBLE_SLAB = new IntBlock(157, "wooden_double_slab", 64, true, true, 0, 0);
     public static final BlockType WOODEN_SLAB = new IntBlock(158, "wooden_slab", 64, true, true, 0, 0);
-    public static final BlockType STAINED_CLAY = new IntBlock(159, "stained_clay", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class, Dyed::of);
+    public static final BlockType STAINED_CLAY = new IntBlock(159, "stained_clay", 64, true, false, 0, 15, SelfDrop.INSTANCE, Dyed.class, Dyed::of, Dyed::of);
     public static final BlockType ACACIA_LEAVES = new IntBlock(161, "acacia_leaves", 64, true, true, 0, 0);
     public static final BlockType ACACIA_WOOD = new IntBlock(162, "acacia_wood", 64, true, false, 0, 15);
     public static final BlockType ACACIA_WOOD_STAIRS = new IntBlock(163, "acacia_wood_stairs", 64, true, true, 0, 15);
     public static final BlockType DARK_OAK_WOOD_STAIRS = new IntBlock(164, "dark_oak_wood_stairs", 64, true, true, 0, 15);
     public static final BlockType IRON_TRAPDOOR = new IntBlock(167, "iron_trapdoor", 64, true, true, 0, 0);
     public static final BlockType HAY_BALE = new IntBlock(170, "hay_bale", 64, true, false, 0, 15);
-    public static final BlockType CARPET = new IntBlock(171, "carpet", 64, true, true, 0, 0, SelfDrop.INSTANCE, Dyed.class, Dyed::of);
+    public static final BlockType CARPET = new IntBlock(171, "carpet", 64, true, true, 0, 0, SelfDrop.INSTANCE, Dyed.class, Dyed::of, Dyed::of);
     public static final BlockType HARDENED_CLAY = new IntBlock(172, "hardened_clay", 64, true, false, 0, 15);
     public static final BlockType BLOCK_OF_COAL = new IntBlock(173, "block_of_coal", 64, true, false, 0, 15);
     public static final BlockType PACKED_ICE = new IntBlock(174, "packed_ice", 64, true, false, 0, 15);
@@ -352,6 +353,10 @@ public class BlockTypes {
         }
     }
 
+    private interface FromBlockMetadata {
+        BlockData of(short data);
+    }
+
     private static class IntBlock implements BlockType {
         private final int id;
         private final String name;
@@ -363,20 +368,21 @@ public class BlockTypes {
         private final DroppedHandler dropHandler;
         private final Class<? extends BlockData> aClass;
         private final ItemTypes.FromMetadata fromMetadata;
+        private final FromBlockMetadata fromBlockMetadata;
 
         public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight) {
             this(id, name, maxStackSize, diggable, transparent, emitLight, filterLight, SelfDrop.INSTANCE);
         }
 
         public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, DroppedHandler handler) {
-            this(id, name, maxStackSize, diggable, transparent, emitLight, filterLight, handler, null);
+            this(id, name, maxStackSize, diggable, transparent, emitLight, filterLight, handler, null, null);
         }
 
-        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, DroppedHandler dropHandler, Class<? extends BlockData> aClass) {
-            this(id, name, maxStackSize, diggable, transparent, emitLight, filterLight, SelfDrop.INSTANCE, aClass, null);
+        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, DroppedHandler dropHandler, Class<? extends BlockData> aClass, FromBlockMetadata fromBlockMetadata) {
+            this(id, name, maxStackSize, diggable, transparent, emitLight, filterLight, SelfDrop.INSTANCE, aClass, null, fromBlockMetadata);
         }
 
-        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, DroppedHandler dropHandler, Class<? extends BlockData> aClass, ItemTypes.FromMetadata fromMetadata) {
+        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, DroppedHandler dropHandler, Class<? extends BlockData> aClass, ItemTypes.FromMetadata fromMetadata, FromBlockMetadata fromBlockMetadata) {
             this.id = id;
             this.name = name;
             this.maxStackSize = maxStackSize;
@@ -387,6 +393,7 @@ public class BlockTypes {
             this.dropHandler = dropHandler;
             this.aClass = aClass;
             this.fromMetadata = fromMetadata;
+            this.fromBlockMetadata = fromBlockMetadata;
 
             BY_ID.put(id, this);
         }
@@ -418,6 +425,14 @@ public class BlockTypes {
         public Optional<ItemData> createDataFor(short metadata) {
             if (fromMetadata != null) {
                 return Optional.of(fromMetadata.of(metadata));
+            }
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<BlockData> createBlockDataFor(short metadata) {
+            if (fromMetadata != null) {
+                return Optional.of(fromBlockMetadata.of(metadata));
             }
             return Optional.empty();
         }

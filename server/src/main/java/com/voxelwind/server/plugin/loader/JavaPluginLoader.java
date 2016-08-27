@@ -66,7 +66,7 @@ public class JavaPluginLoader implements PluginLoader {
     @Override
     public PluginContainer createPlugin(PluginDescription description) throws Exception {
         if (!(description instanceof JavaVoxelwindPluginDescription)) {
-            throw new IllegalArgumentException("Description provided isn't from the Java plugin loader.");
+            throw new IllegalArgumentException("Description provided isn't of the Java plugin loader.");
         }
 
         Optional<Path> path = description.getPath();

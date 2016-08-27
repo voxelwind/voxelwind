@@ -38,4 +38,9 @@ public class Dyed implements ItemData, BlockData {
     public short toMetadata() {
         return (short) color.ordinal();
     }
+
+    @Override
+    public short toBlockMetadata() {
+        return toMetadata();
+    }
 }

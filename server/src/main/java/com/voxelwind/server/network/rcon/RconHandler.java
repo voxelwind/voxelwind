@@ -67,7 +67,7 @@ public class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error("An error occurred whilst handling a RCON request from {}", ctx.channel().remoteAddress(), cause);
+        LOGGER.error("An error occurred whilst handling a RCON request of {}", ctx.channel().remoteAddress(), cause);
         // Better to close the channel instead.
         ctx.close();
     }

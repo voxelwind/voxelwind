@@ -10,9 +10,11 @@ import com.voxelwind.api.game.level.block.BlockType;
  */
 public class BasicBlockState implements BlockState {
     private final BlockType type;
+    private final BlockData data;
 
-    public BasicBlockState(BlockType type) {
+    public BasicBlockState(BlockType type, BlockData data) {
         this.type = Preconditions.checkNotNull(type, "type");
+        this.data = data;
     }
 
     @Override

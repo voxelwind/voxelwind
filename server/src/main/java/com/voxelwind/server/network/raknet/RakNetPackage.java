@@ -4,10 +4,10 @@ import io.netty.buffer.ByteBuf;
 
 public interface RakNetPackage {
     /**
-     * Decodes a packet from the specified buffer. The buffer is always assumed to have the proper position and length
+     * Decodes a packet of the specified buffer. The buffer is always assumed to have the proper position and length
      * to complete the read.
      *
-     * @param buffer the buffer to read from
+     * @param buffer the buffer to read of
      */
     void decode(ByteBuf buffer);
 
