@@ -153,7 +153,7 @@ public class VoxelwindServer implements Server {
 
     @Override
     public String getVersion() {
-        return "0.1 (Layer of Fog)";
+        return "0.0.1 (Layer of Fog)";
     }
 
     @Override
