@@ -56,6 +56,7 @@ public class SplitPacketHelper {
     void release() {
         Preconditions.checkState(!released, "packet has been released");
 
+        released = true;
         for (EncapsulatedRakNetPacket packet : packets) {
             packet.release();
         }
