@@ -58,6 +58,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), 20f);
         this.session = session;
+        Arrays.fill(hotbarLinks, -1);
     }
 
     @Override
