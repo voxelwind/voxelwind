@@ -53,13 +53,13 @@ public interface Inventory {
      * Returns all the items in this inventory. The returned map will be immutable.
      * @return all the items in this inventory
      */
-    Map<Integer, ItemStack> getAllContents();
+    ItemStack[] getAllContents();
 
     /**
      * Sets the contents of the entire inventory.
      * @param contents the inventory contents
      */
-    void setAllContents(Map<Integer, ItemStack> contents);
+    void setAllContents(ItemStack[] contents);
 
     /**
      * Returns what type that inventory is.

@@ -398,13 +398,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         McpeContainerSetContents contents = new McpeContainerSetContents();
         contents.setWindowId(windowId);
-        contents.getStacks().putAll(inventory.getAllContents());
-        // Fill in with air.
-        for (int i = 0; i < inventory.getInventoryType().getInventorySize(); i++) {
-            if (!contents.getStacks().containsKey(i)) {
-                contents.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
-            }
-        }
+        contents.setStacks(inventory.getAllContents());
         McpeBatch contentsBatch = new McpeBatch();
         contentsBatch.getPackages().add(contents);
         session.addToSendQueue(contentsBatch);
@@ -449,7 +443,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     @Override
-    public void onInventoryContentsReplacement(Map<Integer, ItemStack> newItems, VoxelwindBaseInventory inventory) {
+    public void onInventoryContentsReplacement(ItemStack[] newItems, VoxelwindBaseInventory inventory) {
         byte windowId;
         if (inventory == openedInventory) {
             windowId = openInventoryId;
@@ -461,13 +455,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         McpeContainerSetContents packet = new McpeContainerSetContents();
         packet.setWindowId(windowId);
-        packet.getStacks().putAll(newItems);
-        // Fill in with air
-        for (int i = 0; i < inventory.getInventoryType().getInventorySize(); i++) {
-            if (!packet.getStacks().containsKey(i)) {
-                packet.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
-            }
-        }
+        packet.setStacks(newItems);
         McpeBatch contentsBatch = new McpeBatch();
         contentsBatch.getPackages().add(packet);
         session.addToSendQueue(contentsBatch);
@@ -476,13 +464,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     public void sendPlayerInventory() {
         McpeContainerSetContents contents = new McpeContainerSetContents();
         contents.setWindowId((byte) 0x00);
-        contents.getStacks().putAll(playerInventory.getAllContents());
-        // Because MCPE is stupid, we have to add 9 more slots. Use this opportunity to fill the rest in with air.
-        for (int i = 0; i < playerInventory.getInventoryType().getInventorySize() + 9; i++) {
-            if (!contents.getStacks().containsKey(i)) {
-                contents.getStacks().put(i, new VoxelwindItemStack(BlockTypes.AIR, 0, null));
-            }
-        }
+        // Because MCPE is stupid, we have to add 9 more slots. The rest will be filled in as air.
+        ItemStack[] stacks = Arrays.copyOf(playerInventory.getAllContents(), playerInventory.getInventoryType().getInventorySize() + 9);
+        contents.setStacks(stacks);
         // Populate hotbar links.
         contents.setHotbarData(Arrays.copyOf(hotbarLinks, hotbarLinks.length));
         McpeBatch contentsBatch = new McpeBatch();

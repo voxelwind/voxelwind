@@ -13,18 +13,19 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class VoxelwindBaseInventory implements Inventory {
-    private final Map<Integer, ItemStack> inventory = new HashMap<>();
+    private final ItemStack[] inventory;
     private final List<InventoryObserver> observerList = new CopyOnWriteArrayList<>();
     private final InventoryType type;
 
     protected VoxelwindBaseInventory(InventoryType type) {
         this.type = type;
+        this.inventory = new ItemStack[type.getInventorySize()];
     }
 
     @Override
     public Optional<ItemStack> getItem(int slot) {
         Preconditions.checkArgument(slot >= 0 && slot < type.getInventorySize(), "Wanted slot %s is not between 0 and %s", slot, type.getInventorySize());
-        return Optional.ofNullable(inventory.get(slot));
+        return Optional.ofNullable(inventory[slot]);
     }
 
     @Override
@@ -36,7 +37,8 @@ public class VoxelwindBaseInventory implements Inventory {
         Preconditions.checkNotNull(stack, "stack");
         Preconditions.checkArgument(slot >= 0 && slot < type.getInventorySize(), "Wanted slot %s is not between 0 and %s", slot, type.getInventorySize());
         if (!isNothing(stack)) {
-            ItemStack oldItem = inventory.put(slot, stack);
+            ItemStack oldItem = inventory[slot];
+            inventory[slot] = stack;
             for (InventoryObserver observer : observerList) {
                 observer.onInventoryChange(slot, oldItem, stack, this, session);
             }
@@ -53,8 +55,9 @@ public class VoxelwindBaseInventory implements Inventory {
     public boolean addItem(@Nonnull ItemStack stack, PlayerSession session) {
         Preconditions.checkNotNull(stack, "stack");
         for (int i = 0; i < type.getInventorySize(); i++) {
-            if (!inventory.containsKey(i)) {
-                inventory.put(i, stack);
+            // TODO: Add smart stacking!
+            if (inventory[i] == null) {
+                inventory[i] = stack;
                 for (InventoryObserver observer : observerList) {
                     observer.onInventoryChange(i, null, stack, this, session);
                 }
@@ -71,8 +74,9 @@ public class VoxelwindBaseInventory implements Inventory {
 
     public void clearItem(int slot, PlayerSession session) {
         Preconditions.checkArgument(slot >= 0 && slot < type.getInventorySize(), "Wanted slot %s is not between 0 and %s", slot, type.getInventorySize());
-        ItemStack stack = inventory.remove(slot);
+        ItemStack stack = inventory[slot];
         if (stack != null) {
+            inventory[slot] = null;
             for (InventoryObserver observer : observerList) {
                 observer.onInventoryChange(slot, stack, null, this, session);
             }
@@ -86,33 +90,25 @@ public class VoxelwindBaseInventory implements Inventory {
 
     @Override
     public void clearAll() {
+        Arrays.fill(inventory, null);
         for (InventoryObserver observer : observerList) {
-            observer.onInventoryContentsReplacement(ImmutableMap.of(), this);
+            observer.onInventoryContentsReplacement(inventory, this);
         }
-        inventory.clear();
     }
 
     @Override
-    public Map<Integer, ItemStack> getAllContents() {
-        return ImmutableMap.copyOf(inventory);
+    public ItemStack[] getAllContents() {
+        return Arrays.copyOf(inventory, inventory.length);
     }
 
     @Override
-    public void setAllContents(@Nonnull Map<Integer, ItemStack> contents) {
+    public void setAllContents(@Nonnull ItemStack[] contents) {
         Preconditions.checkNotNull(contents, "contents");
-        Map<Integer, ItemStack> contentsCopy = ImmutableMap.copyOf(contents);
-        if (contentsCopy.isEmpty()) {
-            clearAll();
-            return;
-        }
-
-        Integer maxSlot = Collections.max(contentsCopy.keySet());
-        Preconditions.checkArgument(maxSlot < type.getInventorySize(), "Maximum passed contents slot (%s) is greater than this inventory's size (%s)",
-                maxSlot, type.getInventorySize());
-        inventory.clear();
-        inventory.putAll(contentsCopy);
+        Preconditions.checkArgument(contents.length == type.getInventorySize(), "Passed contents size %s is not equal to this inventory's size (%s)",
+                contents.length, type.getInventorySize());
+        System.arraycopy(contents, 0, inventory, 0, inventory.length);
         for (InventoryObserver observer : observerList) {
-            observer.onInventoryContentsReplacement(contentsCopy, this);
+            observer.onInventoryContentsReplacement(contents, this);
         }
     }
 

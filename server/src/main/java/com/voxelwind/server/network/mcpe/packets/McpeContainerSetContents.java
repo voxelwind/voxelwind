@@ -12,15 +12,16 @@ import java.util.Map;
 @Data
 public class McpeContainerSetContents implements RakNetPackage {
     private byte windowId;
-    private final Map<Integer, ItemStack> stacks = new HashMap<>();
+    private ItemStack[] stacks;
     private int[] hotbarData = new int[0];
 
     @Override
     public void decode(ByteBuf buffer) {
         windowId = buffer.readByte();
         int stacksToRead = buffer.readShort();
+        stacks = new ItemStack[stacksToRead];
         for (int i = 0; i < stacksToRead; i++) {
-            stacks.put(i, McpeUtil.readItemStack(buffer));
+            stacks[i] = McpeUtil.readItemStack(buffer);
         }
         int hotbarEntriesToRead = buffer.readShort();
         hotbarData = new int[hotbarEntriesToRead];
@@ -32,8 +33,8 @@ public class McpeContainerSetContents implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeByte(windowId);
-        buffer.writeShort(stacks.size());
-        for (ItemStack stack : stacks.values()) {
+        buffer.writeShort(stacks.length);
+        for (ItemStack stack : stacks) {
             McpeUtil.writeItemStack(buffer, stack);
         }
         buffer.writeShort(hotbarData.length);
