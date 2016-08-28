@@ -327,6 +327,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 return;
             }
 
+            // Sort by whichever chunks are closest to the player for smoother loading
+            Vector3f spawnPosition = getPosition();
+            int spawnChunkX = spawnPosition.getFloorX() >> 4;
+            int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
+            Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
+            chunks.sort(new AroundPointComparator(originCoord));
+
             for (Chunk chunk : chunks) {
                 session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
             }
@@ -502,14 +509,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 int spawnChunkX = spawnPosition.getFloorX() >> 4;
                 int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
                 Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
-                Collections.sort(chunks, (o1, o2) -> {
-                    Vector2i o1Coord = new Vector2i(o1.getX(), o1.getZ());
-                    Vector2i o2Coord = new Vector2i(o2.getX(), o2.getZ());
-
-                    // Use whichever is closest to the origin.
-                    return Integer.compare(o1Coord.distanceSquared(originCoord),
-                            o2Coord.distanceSquared(originCoord));
-                });
+                chunks.sort(new AroundPointComparator(originCoord));
 
                 int sent = 0;
 
@@ -691,6 +691,24 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             playerInventory.setLink(packet.getHotbarSlot(), finalSlot);
             playerInventory.setHeldSlot(packet.getHotbarSlot(), false);
+        }
+    }
+
+    private static class AroundPointComparator implements Comparator<Chunk> {
+        private final Vector2i originCoord;
+
+        private AroundPointComparator(Vector2i originCoord) {
+            this.originCoord = Preconditions.checkNotNull(originCoord, "originCoord");
+        }
+
+        @Override
+        public int compare(Chunk o1, Chunk o2) {
+            Vector2i o1Coord = new Vector2i(o1.getX(), o1.getZ());
+            Vector2i o2Coord = new Vector2i(o2.getX(), o2.getZ());
+
+            // Use whichever is closest to the origin.
+            return Integer.compare(o1Coord.distanceSquared(originCoord),
+                    o2Coord.distanceSquared(originCoord));
         }
     }
 

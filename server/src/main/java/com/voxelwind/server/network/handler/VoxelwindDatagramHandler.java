@@ -78,7 +78,7 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
 
     private void handlePackage(RakNetPackage netPackage, McpeSession session) throws Exception {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("[Package] " + netPackage);
+            LOGGER.debug("Inbound package: {}", netPackage);
         }
 
         if (netPackage == null) {
@@ -146,8 +146,8 @@ public class VoxelwindDatagramHandler extends SimpleChannelInboundHandler<Addres
         // Unknown
         if (netPackage instanceof McpeUnknown) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("[Unknown Packet] ID: " + Integer.toHexString(((McpeUnknown) netPackage).getId()));
-                LOGGER.debug(ByteBufUtil.prettyHexDump(((McpeUnknown) netPackage).getBuf()));
+                LOGGER.debug("Unknown packet received with ID " + Integer.toHexString(((McpeUnknown) netPackage).getId()));
+                LOGGER.debug("Dump: {}", ByteBufUtil.hexDump(((McpeUnknown) netPackage).getBuf()));
             }
             ((McpeUnknown) netPackage).getBuf().release();
         }

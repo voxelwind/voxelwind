@@ -56,6 +56,7 @@ public class VoxelwindChunk implements Chunk {
         return z;
     }
 
+    @Override
     public synchronized Block getBlock(int x, int y, int z) {
         checkPosition(x, y, z);
         int index = xyzIdx(x, y, z);
@@ -72,17 +73,16 @@ public class VoxelwindChunk implements Chunk {
     }
 
     @Override
-    public Block setBlock(int x, int y, int z, BlockState state) {
+    public synchronized Block setBlock(int x, int y, int z, BlockState state) {
         checkPosition(x, y, z);
         int index = xyzIdx(x, y, z);
-        byte data = blockData[index];
-        if (data != state.getBlockType().getId()) {
-            blockData[index] = (byte) state.getBlockType().getId();
-            BlockData blockData = state.getBlockData();
-            if (blockData != null) {
-                blockMetadata.set(index, (byte) blockData.toBlockMetadata());
-            }
+
+        blockData[index] = (byte) state.getBlockType().getId();
+        BlockData blockData = state.getBlockData();
+        if (blockData != null) {
+            blockMetadata.set(index, (byte) blockData.toBlockMetadata());
         }
+
         return getBlock(x, y, z);
     }
 
