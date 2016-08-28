@@ -150,11 +150,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         // - generic.absorption
         Attribute health = new Attribute("generic.health", 0f, getMaximumHealth(), getHealth());
         Attribute hunger = new Attribute("player.hunger", 0f, 20f, 20f); // TODO: Implement hunger
+        Attribute speed = new Attribute("generic.movementSpeed", 0, Float.MAX_VALUE, 0.1f);
         // TODO: Implement levels, movement speed, and absorption.
 
         McpeUpdateAttributes packet = new McpeUpdateAttributes();
         packet.getAttributes().add(health);
         packet.getAttributes().add(hunger);
+        packet.getAttributes().add(speed);
         session.addToSendQueue(packet);
     }
 
@@ -516,27 +518,27 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 for (Chunk chunk : chunks) {
                     session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
                     sent++;
+                }
 
-                    if (!spawned && sent >= REQUIRED_TO_SPAWN) {
-                        McpePlayStatus status = new McpePlayStatus();
-                        status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
-                        session.sendImmediatePackage(status);
+                if (!spawned) {
+                    McpePlayStatus status = new McpePlayStatus();
+                    status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
+                    session.sendImmediatePackage(status);
 
-                        McpeSetTime setTime = new McpeSetTime();
-                        setTime.setTime(getLevel().getTime());
-                        setTime.setRunning(true);
-                        session.sendImmediatePackage(setTime);
+                    McpeSetTime setTime = new McpeSetTime();
+                    setTime.setTime(getLevel().getTime());
+                    setTime.setRunning(true);
+                    session.sendImmediatePackage(setTime);
 
-                        McpeRespawn respawn = new McpeRespawn();
-                        respawn.setPosition(getPosition());
-                        session.sendImmediatePackage(respawn);
+                    McpeRespawn respawn = new McpeRespawn();
+                    respawn.setPosition(getPosition());
+                    session.sendImmediatePackage(respawn);
 
-                        updateViewableEntities();
-                        sendAttributes();
-                        sendPlayerInventory();
+                    updateViewableEntities();
+                    sendAttributes();
+                    sendPlayerInventory();
 
-                        spawned = true;
-                    }
+                    spawned = true;
                 }
             });
         }
