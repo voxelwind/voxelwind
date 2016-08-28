@@ -10,14 +10,18 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link com.voxelwind.server.event.EventFireHandler} that uses reflection to call the method.
  */
 public class ReflectionEventFireHandler implements EventFireHandler {
     private static final Logger LOGGER = LogManager.getLogger(ReflectionEventFireHandler.class);
+    private static final long LONG_RUNNING_EVENT_TIME = TimeUnit.MILLISECONDS.toNanos(5);
     private final List<ListenerMethod> methods;
 
     public ReflectionEventFireHandler(Collection<ListenerMethod> methods) {
@@ -26,12 +30,18 @@ public class ReflectionEventFireHandler implements EventFireHandler {
 
     @Override
     public void fire(Event event) {
+        long start = System.nanoTime();
         for (int i = 0; i < methods.size(); i++) {
             try {
                 methods.get(i).run(event);
             } catch (InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error("Exception occurred while executing method " + methods.get(i) + " for " + event, e);
             }
+        }
+        long differenceTaken = System.nanoTime() - start;
+        if (differenceTaken >= LONG_RUNNING_EVENT_TIME) {
+            LOGGER.warn("Event {} took {}ms to fire!", event, BigDecimal.valueOf(differenceTaken)
+                    .divide(new BigDecimal("1000000"), RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
         }
     }
 
