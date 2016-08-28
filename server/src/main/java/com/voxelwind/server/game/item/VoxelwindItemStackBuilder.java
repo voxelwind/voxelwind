@@ -23,7 +23,8 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
 
     @Override
     public ItemStackBuilder amount(int amount) {
-        Preconditions.checkArgument(amount >= 0 && amount <= 64, "Amount %s is not between 0 and 64", amount);
+        Preconditions.checkState(itemType != null, "ItemType has not been set");
+        Preconditions.checkArgument(amount >= 0 && amount <= itemType.getMaximumStackSize(), "Amount %s is not between 0 and %s", amount, itemType.getMaximumStackSize());
         this.amount = amount;
         return this;
     }
@@ -44,5 +45,14 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     public ItemStack build() {
         Preconditions.checkArgument(itemType != null, "ItemType has not been set");
         return new VoxelwindItemStack(itemType, amount, data);
+    }
+
+    @Override
+    public String toString() {
+        return "VoxelwindItemStackBuilder{" +
+                "itemType=" + itemType +
+                ", amount=" + amount +
+                ", data=" + data +
+                '}';
     }
 }

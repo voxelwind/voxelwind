@@ -5,6 +5,7 @@ import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.InventoryType;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.network.session.PlayerSession;
 
 import javax.annotation.Nonnull;
@@ -53,8 +54,66 @@ public class VoxelwindBaseInventory implements Inventory {
 
     public boolean addItem(@Nonnull ItemStack stack, PlayerSession session) {
         Preconditions.checkNotNull(stack, "stack");
-        for (int i = 0; i < type.getInventorySize(); i++) {
-            // TODO: Add smart stacking!
+
+        if (isNothing(stack)) {
+            return false;
+        }
+
+        // Code paths:
+        // - If a similar item was found, try to merge this item stack.
+        // - Otherwise, add the item normally.
+        Map<Integer, ItemStack> similar = findBySimilarity(stack);
+        if (similar.isEmpty()) {
+            return addDirectly(stack, session);
+        } else {
+            // Be sure we have enough space.
+            int amountRequiringNewStack = stack.getAmount();
+            int maximumStack = stack.getItemType().getMaximumStackSize();
+            for (Map.Entry<Integer, ItemStack> entry : similar.entrySet()) {
+                int amountAddableToThisStack = maximumStack - entry.getValue().getAmount();
+                if (amountAddableToThisStack <= 0) {
+                    continue;
+                }
+
+                amountRequiringNewStack -= amountAddableToThisStack;
+            }
+
+            // Do a slot check if we need to occupy another slot.
+            if (amountRequiringNewStack > 0) {
+                int requiredSlots = (int) Math.ceil((float) amountRequiringNewStack / maximumStack);
+                if (requiredSlots > getFreeSlots()) {
+                    return false;
+                }
+            }
+
+            // It's safe to perform the change. Do it now.
+            int amountToAdd = stack.getAmount();
+            for (Map.Entry<Integer, ItemStack> entry : similar.entrySet()) {
+                if (amountToAdd <= 0) {
+                    // Already done.
+                    return true;
+                }
+
+                int amountAddableToThisStack = maximumStack - entry.getValue().getAmount();
+                if (amountAddableToThisStack <= 0) {
+                    continue;
+                }
+
+                int addToThisStack = Math.min(amountToAdd, amountAddableToThisStack);
+                setItem(entry.getKey(), entry.getValue().toBuilder().amount(entry.getValue().getAmount() +
+                        addToThisStack).build(), session);
+                amountToAdd -= addToThisStack;
+            }
+
+            if (amountRequiringNewStack > 0) {
+                addDirectly(stack.toBuilder().amount(amountRequiringNewStack).build(), session);
+            }
+            return true;
+        }
+    }
+
+    private boolean addDirectly(ItemStack stack, PlayerSession session) {
+        for (int i = 0; i < inventory.length; i++) {
             if (inventory[i] == null) {
                 inventory[i] = stack;
                 for (InventoryObserver observer : observerList) {
@@ -64,6 +123,28 @@ public class VoxelwindBaseInventory implements Inventory {
             }
         }
         return false;
+    }
+
+    private Map<Integer, ItemStack> findBySimilarity(ItemStack stack) {
+        Map<Integer, ItemStack> found = new HashMap<>();
+        for (int i = 0; i < inventory.length; i++) {
+            if (inventory[i] != null) {
+                if (inventory[i].isSimiliarTo(stack)) {
+                    found.put(i, inventory[i]);
+                }
+            }
+        }
+        return found;
+    }
+
+    private int getFreeSlots() {
+        int free = 0;
+        for (ItemStack inInventory : inventory) {
+            if (inInventory == null) {
+                free++;
+            }
+        }
+        return free;
     }
 
     @Override
@@ -105,7 +186,15 @@ public class VoxelwindBaseInventory implements Inventory {
         Preconditions.checkNotNull(contents, "contents");
         Preconditions.checkArgument(contents.length == type.getInventorySize(), "Passed contents size %s is not equal to this inventory's size (%s)",
                 contents.length, type.getInventorySize());
+        for (int i = 0; i < contents.length; i++) {
+            Preconditions.checkArgument(contents[i] instanceof VoxelwindItemStack, "Slot %s is not a valid item stack", i);
+        }
         System.arraycopy(contents, 0, inventory, 0, inventory.length);
+        for (int i = 0; i < contents.length; i++) {
+            if (isNothing(contents[i])) {
+                contents[i] = null;
+            }
+        }
         for (InventoryObserver observer : observerList) {
             observer.onInventoryContentsReplacement(contents, this);
         }
@@ -117,7 +206,7 @@ public class VoxelwindBaseInventory implements Inventory {
     }
 
     private static boolean isNothing(ItemStack stack) {
-        return stack == null || stack.getItemType() == BlockTypes.AIR;
+        return stack == null || stack.getItemType() == BlockTypes.AIR || stack.getAmount() == 0;
     }
 
     public List<InventoryObserver> getObserverList() {

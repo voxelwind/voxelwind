@@ -33,4 +33,11 @@ public interface ItemStack {
      * @return a {@link ItemStackBuilder}
      */
     ItemStackBuilder toBuilder();
+
+    /**
+     * Determines whether or not this item stack is similar to {@code other}.
+     * @param other the other item stack to check
+     * @return whether or not the stacks are similar
+     */
+    boolean isSimiliarTo(@Nonnull ItemStack other);
 }
