@@ -22,6 +22,7 @@ Voxelwind upstream so that the larger community can benefit from them.
 * [MiNET](https://github.com/NiclasOlofsson/MiNET) was invaluable in helping me figure out some of the more difficult stuff.
 * [yawkat's protocol documentation](https://confluence.yawk.at/display/PEPROTOCOL/pe-protocol-docs+Home) was also useful, especially for encryption.
 * [BungeeCord](https://github.com/SpigotMC/BungeeCord)'s native compression and cryptography support is used in Voxelwind for more performance. We [forked it](https://github.com/minecrafter/voxelwind-natives) for our use.
+* [minecraft-data](https://github.com/PrismarineJS/minecraft-data) was used to generate item and block type data.
 
 ## Requirements
 
