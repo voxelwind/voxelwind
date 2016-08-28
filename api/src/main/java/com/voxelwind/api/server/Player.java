@@ -14,6 +14,8 @@ import java.util.OptionalLong;
 import java.util.UUID;
 
 public interface Player extends Entity, CommandExecutorSource, MessageRecipient, Session, InventoryHolder {
+    void disconnect(@Nonnull String reason);
+
     Skin getSkin();
 
     @Nonnull

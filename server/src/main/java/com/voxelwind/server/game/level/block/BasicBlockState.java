@@ -24,7 +24,6 @@ public class BasicBlockState implements BlockState {
 
     @Override
     public BlockData getBlockData() {
-        // There isn't any
-        return null;
+        return data;
     }
 }

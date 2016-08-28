@@ -40,7 +40,6 @@ public class SimpleRakNetPacketCodec extends MessageToMessageCodec<DatagramPacke
             if (netPackage != null) {
                 list.add(new DirectAddressedRakNetPacket(netPackage, packet.recipient(), packet.sender()));
             }
-            return;
         } else {
             // We can decode some datagrams directly.
             buf.resetReaderIndex();

@@ -1,7 +1,6 @@
 package com.voxelwind.server.network.util;
 
 import com.voxelwind.server.network.mcpe.packets.McpeServerHandshake;
-import io.netty.buffer.Unpooled;
 
 import javax.crypto.KeyAgreement;
 import java.security.*;

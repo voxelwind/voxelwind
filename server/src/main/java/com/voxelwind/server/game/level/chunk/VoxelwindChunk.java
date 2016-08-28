@@ -83,6 +83,7 @@ public class VoxelwindChunk implements Chunk {
             blockMetadata.set(index, (byte) blockData.toBlockMetadata());
         }
 
+        stale = true;
         return getBlock(x, y, z);
     }
 
@@ -127,6 +128,7 @@ public class VoxelwindChunk implements Chunk {
             data.setData(memoryStream.toByteArray());
             chunkDataPacket.getPackages().add(data);
             chunkDataPacket.precompress();
+            stale = false;
         }
 
         return chunkDataPacket;

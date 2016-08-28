@@ -6,9 +6,6 @@ import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Data
 public class McpeContainerSetContents implements RakNetPackage {
     private byte windowId;

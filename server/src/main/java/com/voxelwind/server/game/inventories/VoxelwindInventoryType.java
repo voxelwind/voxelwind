@@ -18,8 +18,8 @@ public enum VoxelwindInventoryType {
     DROPPER((byte) 7),
     HOPPER((byte) 8);
 
-    private byte id = -1;
-    private byte type;
+    private final byte id;
+    private final byte type;
 
     VoxelwindInventoryType(byte type, byte id) {
         this.id = id;
@@ -27,7 +27,7 @@ public enum VoxelwindInventoryType {
     }
 
     VoxelwindInventoryType(byte type) {
-        this.type = type;
+        this(type, (byte) -1);
     }
 
     public byte getWindowId(PlayerSession session) {

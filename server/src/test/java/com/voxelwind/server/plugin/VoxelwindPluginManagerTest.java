@@ -9,8 +9,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 public class VoxelwindPluginManagerTest {
     private static final PluginDescription DEPENDENT = new VoxelwindPluginDescription(
             "example", "tuxed", "0.1", ImmutableList.of("example2"), ImmutableList.of(), null

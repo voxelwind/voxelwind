@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class RconCommandExecutorSource implements RemoteConsoleCommandExecutorSource {
+class RconCommandExecutorSource implements RemoteConsoleCommandExecutorSource {
     private final List<String> output = new ArrayList<>();
     private final AtomicBoolean acceptingOutput = new AtomicBoolean(true);
 

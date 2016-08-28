@@ -120,7 +120,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     @Override
     public void setHealth(float health) {
         super.setHealth(health);
+        sendAttributes();
+    }
 
+    @Override
+    public void setMaximumHealth(float maximumHealth) {
+        super.setMaximumHealth(maximumHealth);
         sendAttributes();
     }
 
@@ -241,10 +246,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         return CompletableFutures.allAsList(completableFutures);
     }
 
+    @Override
     public void disconnect(@Nonnull String reason) {
         session.disconnect(reason);
     }
 
+    @Override
     public void sendMessage(@Nonnull String message) {
         McpeText text = new McpeText();
         text.setType(McpeText.TextType.RAW);
@@ -467,7 +474,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         session.addToSendQueue(contentsBatch);
     }
 
-    public void sendPlayerInventory() {
+    private void sendPlayerInventory() {
         McpeContainerSetContents contents = new McpeContainerSetContents();
         contents.setWindowId((byte) 0x00);
         // Because MCPE is stupid, we have to add 9 more slots. The rest will be filled in as air.
@@ -513,11 +520,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
                 chunks.sort(new AroundPointComparator(originCoord));
 
-                int sent = 0;
-
                 for (Chunk chunk : chunks) {
                     session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
-                    sent++;
                 }
 
                 if (!spawned) {
@@ -652,7 +656,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             if (openInventoryId < 0 || openInventoryId != packet.getWindowId()) {
                 // There's no inventory open, so it's probably the player inventory.
                 if (packet.getWindowId() == 0) {
-                    window = (VoxelwindBaseInventory) playerInventory;
+                    window = playerInventory;
                 } else if (packet.getWindowId() == 0x78) {
                     // It's the armor inventory. Handle it here.
                     switch (packet.getSlot()) {

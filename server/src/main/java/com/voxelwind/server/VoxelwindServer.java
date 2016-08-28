@@ -86,7 +86,7 @@ public class VoxelwindServer implements Server {
         return sessionManager;
     }
 
-    public void boot() throws Exception {
+    private void boot() throws Exception {
         // Say hello.
         LOGGER.info("{} {} is coming online...", getName(), getVersion());
 

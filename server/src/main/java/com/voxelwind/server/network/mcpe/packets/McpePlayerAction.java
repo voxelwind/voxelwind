@@ -42,6 +42,6 @@ public class McpePlayerAction implements RakNetPackage {
         ACTION_START_SNEAK,
         ACTION_STOP_SNEAK,
         ACTION_SPAWN_OVERWORLD,
-        ACTION_SPAWN_NETHER;
+        ACTION_SPAWN_NETHER
     }
 }

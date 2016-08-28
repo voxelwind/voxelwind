@@ -180,7 +180,7 @@ public class McpeSession extends RakNetSession {
         getChannel().flush();
     }
 
-    protected void enableEncryption(byte[] secretKey) {
+    void enableEncryption(byte[] secretKey) {
         checkForClosed();
 
         serverKey = secretKey;

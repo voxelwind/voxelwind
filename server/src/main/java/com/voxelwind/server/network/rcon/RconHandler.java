@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
-public class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
+class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
     private static final Logger LOGGER = LogManager.getLogger(RconHandler.class);
     private final byte[] password;
     private final Server server;

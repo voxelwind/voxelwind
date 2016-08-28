@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class PluginClassLoader extends URLClassLoader {
-    private static Set<PluginClassLoader> loaders = new CopyOnWriteArraySet<>();
+    private static final Set<PluginClassLoader> loaders = new CopyOnWriteArraySet<>();
 
     static {
         ClassLoader.registerAsParallelCapable();
@@ -14,6 +14,7 @@ public class PluginClassLoader extends URLClassLoader {
 
     public PluginClassLoader(URL[] urls) {
         super(urls);
+        loaders.add(this);
     }
 
     @Override
@@ -24,14 +25,16 @@ public class PluginClassLoader extends URLClassLoader {
     private Class<?> loadClass0(String name, boolean resolve, boolean checkOther) throws ClassNotFoundException {
         try {
             return super.loadClass(name, resolve);
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ignored) {
+            // Ignored: we'll try others
         }
         if (checkOther) {
             for (PluginClassLoader loader : loaders) {
                 if (loader != this) {
                     try {
                         return loader.loadClass0(name, resolve, false);
-                    } catch (ClassNotFoundException ex) {
+                    } catch (ClassNotFoundException ignored) {
+                        // We're trying others, safe to ignore
                     }
                 }
             }

@@ -7,7 +7,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 
 import java.util.*;
 
-public class SplitPacketHelper {
+class SplitPacketHelper {
     private final Queue<EncapsulatedRakNetPacket> packets = new ArrayDeque<>();
     private final BitSet contained = new BitSet();
     private final long created = System.currentTimeMillis();

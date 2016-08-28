@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import javax.annotation.Nonnull;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
 
 public class VoxelwindCommandManagerTest {

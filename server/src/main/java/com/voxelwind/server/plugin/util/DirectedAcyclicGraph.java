@@ -1,7 +1,6 @@
 package com.voxelwind.server.plugin.util;
 
 import com.google.common.collect.ImmutableList;
-import com.voxelwind.api.plugin.PluginDescription;
 
 import java.util.*;
 
@@ -17,7 +16,7 @@ public class DirectedAcyclicGraph<T> {
     public Node<T> add(T t) {
         Optional<Node<T>> willAdd = get(t);
         if (!willAdd.isPresent()) {
-            Node<T> node = new Node<T>(t);
+            Node<T> node = new Node<>(t);
             nodes.add(node);
             return node;
         } else {

@@ -2,12 +2,10 @@ package com.voxelwind.server.game.inventories;
 
 import com.voxelwind.api.game.inventories.InventoryType;
 import com.voxelwind.api.game.item.ItemStack;
-import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.Assert.*;

@@ -30,7 +30,6 @@ public class RakNetSession {
     private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
     private final AtomicInteger reliabilitySequenceGenerator = new AtomicInteger();
     private final AtomicInteger orderSequenceGenerator = new AtomicInteger();
-    private final Set<Integer> ackQueue = new HashSet<>();
     private final ConcurrentMap<Integer, SentDatagram> datagramAcks = new ConcurrentHashMap<>();
     private final Channel channel;
     private final VoxelwindServer server;

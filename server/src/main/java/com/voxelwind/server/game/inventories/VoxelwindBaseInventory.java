@@ -17,7 +17,7 @@ public class VoxelwindBaseInventory implements Inventory {
     private final List<InventoryObserver> observerList = new CopyOnWriteArrayList<>();
     private final InventoryType type;
 
-    protected VoxelwindBaseInventory(InventoryType type) {
+    VoxelwindBaseInventory(InventoryType type) {
         this.type = type;
         this.inventory = new ItemStack[type.getInventorySize()];
     }
@@ -52,7 +52,7 @@ public class VoxelwindBaseInventory implements Inventory {
         return addItem(stack, null);
     }
 
-    public boolean addItem(@Nonnull ItemStack stack, PlayerSession session) {
+    private boolean addItem(@Nonnull ItemStack stack, PlayerSession session) {
         Preconditions.checkNotNull(stack, "stack");
 
         if (isNothing(stack)) {
@@ -152,7 +152,7 @@ public class VoxelwindBaseInventory implements Inventory {
         clearItem(slot, null);
     }
 
-    public void clearItem(int slot, PlayerSession session) {
+    private void clearItem(int slot, PlayerSession session) {
         Preconditions.checkArgument(slot >= 0 && slot < type.getInventorySize(), "Wanted slot %s is not between 0 and %s", slot, type.getInventorySize());
         ItemStack stack = inventory[slot];
         if (stack != null) {

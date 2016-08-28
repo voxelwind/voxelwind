@@ -27,7 +27,7 @@ public class BaseEntity implements Entity {
     private boolean invisible = false;
     private boolean removed = false;
 
-    public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level) {
+    BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level) {
         this.data = data;
         this.level = Preconditions.checkNotNull(level, "level");
         this.position = Preconditions.checkNotNull(position, "position");
@@ -148,7 +148,7 @@ public class BaseEntity implements Entity {
         }
     }
 
-    public byte getFlagValue() {
+    protected byte getFlagValue() {
         BitSet set = new BitSet(8);
         set.set(0, false); // On fire (not implemented)
         set.set(1, sneaking); // Sneaking
@@ -161,7 +161,7 @@ public class BaseEntity implements Entity {
         return array.length == 0 ? 0 : array[0];
     }
 
-    public MetadataDictionary getMetadata() {
+    private MetadataDictionary getMetadata() {
         checkIfAlive();
 
         // TODO: Implement more than this.
@@ -208,7 +208,7 @@ public class BaseEntity implements Entity {
         return true;
     }
 
-    public boolean isTeleported() {
+    protected boolean isTeleported() {
         return teleported;
     }
 
@@ -242,6 +242,7 @@ public class BaseEntity implements Entity {
         if (oldLevel != level) {
             oldLevel.getEntityManager().unregister(this);
             ((VoxelwindLevel) level).getEntityManager().register(this);
+            entityId = ((VoxelwindLevel) level).getEntityManager().allocateEntityId();
 
             // Mark as stale so that the destination level's entity manager will send the appropriate packets.
             this.stale = true;
@@ -263,7 +264,7 @@ public class BaseEntity implements Entity {
         return removed;
     }
 
-    protected final void checkIfAlive() {
+    final void checkIfAlive() {
         Preconditions.checkState(!removed, "Entity has been removed.");
     }
 }
