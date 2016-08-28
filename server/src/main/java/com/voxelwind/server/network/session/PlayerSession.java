@@ -603,6 +603,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeText packet) {
+            Preconditions.checkArgument(!packet.getMessage().contains("\0"), "Text packet contains a null byte");
+
             // Debugging commands.
             if (packet.getMessage().startsWith("/")) {
                 String command = packet.getMessage().substring(1);
