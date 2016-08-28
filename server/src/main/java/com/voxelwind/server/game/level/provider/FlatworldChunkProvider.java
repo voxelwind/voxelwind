@@ -1,19 +1,19 @@
 package com.voxelwind.server.game.level.provider;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FlatworldChunkProvider implements ChunkProvider {
     public static final FlatworldChunkProvider INSTANCE = new FlatworldChunkProvider();
-    private final AsyncLoadingCache<Vector2i, Chunk> chunks = Caffeine.newBuilder().buildAsync(this::generate);
+    private final Map<Vector2i, VoxelwindChunk> chunks = new ConcurrentHashMap<>();
 
     private FlatworldChunkProvider() {
 
@@ -21,17 +21,17 @@ public class FlatworldChunkProvider implements ChunkProvider {
 
     @Override
     public CompletableFuture<Chunk> get(int x, int z) {
-        return chunks.get(new Vector2i(x, z));
+        return CompletableFuture.completedFuture(chunks.computeIfAbsent(new Vector2i(x, z), this::generate));
     }
 
     @Override
     public Optional<Chunk> getIfLoaded(int x, int z) {
-        return Optional.ofNullable(chunks.synchronous().getIfPresent(new Vector2i(x, z)));
+        return Optional.ofNullable(chunks.get(new Vector2i(x, z)));
     }
 
     @Override
     public boolean unload(int x, int z) {
-        return false;
+        return chunks.remove(new Vector2i(x, z)) != null;
     }
 
     private VoxelwindChunk generate(Vector2i vector2i) {
