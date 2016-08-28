@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -96,6 +97,7 @@ public class JavaPluginLoader implements PluginLoader {
         injector.register(Server.class, server);
         injector.register(PluginDescription.class, description);
         injector.register(Logger.class, LoggerFactory.getLogger(description.getId()));
+        injector.register(Path.class, path.resolve("..").resolve(description.getId()));
         return injector.newInstance(clz);
     }
 
