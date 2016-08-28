@@ -112,5 +112,11 @@
             <version>2.6.2</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>ch.jalu</groupId>
+            <artifactId>injector</artifactId>
+            <version>0.3</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

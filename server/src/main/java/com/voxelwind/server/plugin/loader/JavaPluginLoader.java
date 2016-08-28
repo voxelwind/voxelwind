@@ -1,19 +1,20 @@
 package com.voxelwind.server.plugin.loader;
 
+import ch.jalu.injector.Injector;
+import ch.jalu.injector.InjectorBuilder;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.voxelwind.api.plugin.InvalidPluginException;
 import com.voxelwind.api.plugin.PluginContainer;
 import com.voxelwind.api.plugin.PluginDescription;
 import com.voxelwind.api.plugin.PluginLoader;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.plugin.PluginClassLoader;
-import com.voxelwind.server.plugin.inject.PluginModule;
 import com.voxelwind.server.plugin.loader.java.JavaVoxelwindPluginDescription;
 import com.voxelwind.server.plugin.loader.java.PluginClassVisitor;
 import com.voxelwind.server.plugin.loader.java.PluginInformation;
 import org.objectweb.asm.ClassReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedInputStream;
@@ -84,10 +85,18 @@ public class JavaPluginLoader implements PluginLoader {
                 new URL[] { path.toUri().toURL() }
         );
 
-        Class clz = loader.loadClass(description.getClassName().replace('/', '.'));
-        Injector injector = Guice.createInjector(new PluginModule(description, server));
+        String className = description.getClassName().replace('/', '.');
+        int lastDot = className.lastIndexOf('.');
+        String packageName = lastDot == -1 ? "" : className.substring(0, className.lastIndexOf('.'));
 
-        return injector.getInstance(clz);
+        Class clz = loader.loadClass(className);
+        Injector injector = new InjectorBuilder()
+                .addDefaultHandlers(packageName)
+                .create();
+        injector.register(Server.class, server);
+        injector.register(PluginDescription.class, description);
+        injector.register(Logger.class, LoggerFactory.getLogger(description.getId()));
+        return injector.newInstance(clz);
     }
 
     private Optional<PluginInformation> scan(InputStream in) throws IOException {
