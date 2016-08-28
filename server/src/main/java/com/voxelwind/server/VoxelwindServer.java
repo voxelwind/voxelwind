@@ -72,10 +72,10 @@ public class VoxelwindServer implements Server {
             if (fullySupportedLinux) {
                 Native.hash.load();
             } else {
-                LOGGER.warn("You are running on Linux, but you are not using a fully-supported distribution. Server throughput and performance will be affected. Visit https://wiki.voxelwind.com/why_linux for more information.");
+                LOGGER.warn("You are running x64 Linux, but you are not using a fully-supported distribution. Server throughput and performance will be affected. Visit https://wiki.voxelwind.com/why_linux for more information.");
             }
         } else {
-            LOGGER.warn("You are not running Linux. Server throughput and performance will be affected. Visit https://wiki.voxelwind.com/why_linux for more information.");
+            LOGGER.warn("You are not running x64 Linux. Server throughput and performance will be affected. Visit https://wiki.voxelwind.com/why_linux for more information.");
         }
 
         VoxelwindServer server = new VoxelwindServer();
