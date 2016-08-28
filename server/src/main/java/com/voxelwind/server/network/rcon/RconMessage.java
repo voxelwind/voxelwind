@@ -1,5 +1,8 @@
 package com.voxelwind.server.network.rcon;
 
+import lombok.Value;
+
+@Value
 class RconMessage {
     public static final int SERVERDATA_AUTH = 3;
     public static final int SERVERDATA_AUTH_RESPONSE = 2;
@@ -14,26 +17,5 @@ class RconMessage {
         this.id = id;
         this.type = type;
         this.body = body;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    @Override
-    public String toString() {
-        return "RconMessage{" +
-                "id=" + id +
-                ", type=" + type +
-                ", body='" + body + '\'' +
-                '}';
     }
 }
