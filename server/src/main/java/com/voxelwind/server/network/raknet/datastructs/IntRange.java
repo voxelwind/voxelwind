@@ -1,9 +1,11 @@
 package com.voxelwind.server.network.raknet.datastructs;
 
 import com.google.common.base.Preconditions;
+import lombok.Value;
 
 import java.util.function.IntConsumer;
 
+@Value
 public final class IntRange {
     private final int start;
     private final int end;
@@ -16,19 +18,5 @@ public final class IntRange {
         Preconditions.checkArgument(start <= end, "start is less than end");
         this.start = start;
         this.end = end;
-    }
-
-    public int getStart() {
-        return start;
-    }
-
-    public int getEnd() {
-        return end;
-    }
-
-    public void forEach(IntConsumer consumer) {
-        for (int i = start; i <= end; i++) {
-            consumer.accept(i);
-        }
     }
 }

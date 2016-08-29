@@ -4,11 +4,13 @@ import com.voxelwind.server.network.session.RakNetSession;
 import com.voxelwind.server.network.session.McpeSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCounted;
+import lombok.Data;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class EncapsulatedRakNetPacket implements ReferenceCounted {
     private RakNetReliability reliability;
     private int reliabilityNumber;
@@ -58,78 +60,6 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
             packets.add(packet);
         }
         return packets;
-    }
-
-    public RakNetReliability getReliability() {
-        return reliability;
-    }
-
-    public void setReliability(RakNetReliability reliability) {
-        this.reliability = reliability;
-    }
-
-    public int getReliabilityNumber() {
-        return reliabilityNumber;
-    }
-
-    public void setReliabilityNumber(int reliabilityNumber) {
-        this.reliabilityNumber = reliabilityNumber;
-    }
-
-    public int getSequenceIndex() {
-        return sequenceIndex;
-    }
-
-    public void setSequenceIndex(int sequenceIndex) {
-        this.sequenceIndex = sequenceIndex;
-    }
-
-    public int getOrderingIndex() {
-        return orderingIndex;
-    }
-
-    public void setOrderingIndex(int orderingIndex) {
-        this.orderingIndex = orderingIndex;
-    }
-
-    public byte getOrderingChannel() {
-        return orderingChannel;
-    }
-
-    public void setOrderingChannel(byte orderingChannel) {
-        this.orderingChannel = orderingChannel;
-    }
-
-    public boolean isHasSplit() {
-        return hasSplit;
-    }
-
-    public void setHasSplit(boolean hasSplit) {
-        this.hasSplit = hasSplit;
-    }
-
-    public int getPartCount() {
-        return partCount;
-    }
-
-    public void setPartCount(int partCount) {
-        this.partCount = partCount;
-    }
-
-    public short getPartId() {
-        return partId;
-    }
-
-    public void setPartId(short partId) {
-        this.partId = partId;
-    }
-
-    public int getPartIndex() {
-        return partIndex;
-    }
-
-    public void setPartIndex(int partIndex) {
-        this.partIndex = partIndex;
     }
 
     public void encode(ByteBuf buf) {
@@ -196,23 +126,6 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
     public int totalLength() {
         // Back of the envelope calculation, YMMV
         return buffer.writerIndex() + 24;
-    }
-
-    @Override
-    public String toString() {
-        return "EncapsulatedRakNetPacket{" +
-                "reliability=" + reliability +
-                ", reliabilityNumber=" + reliabilityNumber +
-                ", sequenceIndex=" + sequenceIndex +
-                ", orderingIndex=" + orderingIndex +
-                ", orderingChannel=" + orderingChannel +
-                ", hasSplit=" + hasSplit +
-                ", partCount=" + partCount +
-                ", partId=" + partId +
-                ", partIndex=" + partIndex +
-                ", buffer=" + buffer +
-                ", totalLength=" + totalLength() +
-                '}';
     }
 
     @Override

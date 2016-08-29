@@ -3,6 +3,7 @@ package com.voxelwind.server.network.raknet;
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import lombok.experimental.UtilityClass;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -13,11 +14,8 @@ import java.util.Arrays;
 
 import static com.voxelwind.server.network.raknet.RakNetConstants.RAKNET_UNCONNECTED_MAGIC;
 
+@UtilityClass
 public class RakNetUtil {
-    private RakNetUtil() {
-        throw new AssertionError("Can't create instance of RakNetUtil");
-    }
-
     public static void writeString(ByteBuf buffer, String string) {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");

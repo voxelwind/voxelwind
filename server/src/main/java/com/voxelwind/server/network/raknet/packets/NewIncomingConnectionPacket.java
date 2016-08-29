@@ -3,46 +3,16 @@ package com.voxelwind.server.network.raknet.packets;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import java.net.InetSocketAddress;
 
+@Data
 public class NewIncomingConnectionPacket implements RakNetPackage {
     private InetSocketAddress clientAddress;
     private InetSocketAddress[] systemAddresses;
     private long clientTimestamp;
     private long serverTimestamp;
-
-    public InetSocketAddress getClientAddress() {
-        return clientAddress;
-    }
-
-    public void setClientAddress(InetSocketAddress clientAddress) {
-        this.clientAddress = clientAddress;
-    }
-
-    public InetSocketAddress[] getSystemAddresses() {
-        return systemAddresses;
-    }
-
-    public void setSystemAddresses(InetSocketAddress[] systemAddresses) {
-        this.systemAddresses = systemAddresses;
-    }
-
-    public long getClientTimestamp() {
-        return clientTimestamp;
-    }
-
-    public void setClientTimestamp(long clientTimestamp) {
-        this.clientTimestamp = clientTimestamp;
-    }
-
-    public long getServerTimestamp() {
-        return serverTimestamp;
-    }
-
-    public void setServerTimestamp(long serverTimestamp) {
-        this.serverTimestamp = serverTimestamp;
-    }
 
     @Override
     public void decode(ByteBuf buffer) {

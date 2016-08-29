@@ -3,9 +3,11 @@ package com.voxelwind.server.network.raknet.packets;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import static com.voxelwind.server.network.raknet.RakNetConstants.RAKNET_UNCONNECTED_MAGIC;
 
+@Data
 public class UnconnectedPongPacket implements RakNetPackage {
     private long pingId;
     private long serverId;
@@ -25,29 +27,5 @@ public class UnconnectedPongPacket implements RakNetPackage {
         buffer.writeLong(serverId);
         buffer.writeBytes(RAKNET_UNCONNECTED_MAGIC);
         RakNetUtil.writeString(buffer, advertise);
-    }
-
-    public long getPingId() {
-        return pingId;
-    }
-
-    public void setPingId(long pingId) {
-        this.pingId = pingId;
-    }
-
-    public long getServerId() {
-        return serverId;
-    }
-
-    public void setServerId(long serverId) {
-        this.serverId = serverId;
-    }
-
-    public String getAdvertise() {
-        return advertise;
-    }
-
-    public void setAdvertise(String advertise) {
-        this.advertise = advertise;
     }
 }

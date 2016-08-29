@@ -5,10 +5,12 @@ import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 @BatchDisallowed
 @ForceClearText
 @DisallowWrapping
+@Data
 public class ConnectedPongPacket implements RakNetPackage {
     private long pingTime;
     private long pongTime;
@@ -23,21 +25,5 @@ public class ConnectedPongPacket implements RakNetPackage {
     public void encode(ByteBuf buffer) {
         buffer.writeLong(pingTime);
         buffer.writeLong(pongTime);
-    }
-
-    public long getPingTime() {
-        return pingTime;
-    }
-
-    public void setPingTime(long pingTime) {
-        this.pingTime = pingTime;
-    }
-
-    public long getPongTime() {
-        return pongTime;
-    }
-
-    public void setPongTime(long pongTime) {
-        this.pongTime = pongTime;
     }
 }

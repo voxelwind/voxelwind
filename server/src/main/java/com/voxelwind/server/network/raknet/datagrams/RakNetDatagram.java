@@ -3,12 +3,14 @@ package com.voxelwind.server.network.raknet.datagrams;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.AbstractReferenceCounted;
 import io.netty.util.ReferenceCountUtil;
+import lombok.Data;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Data
 public class RakNetDatagram extends AbstractReferenceCounted {
     private final List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
     private RakNetDatagramFlags flags = new RakNetDatagramFlags((byte) 0x84);
@@ -44,22 +46,6 @@ public class RakNetDatagram extends AbstractReferenceCounted {
         }
     }
 
-    public RakNetDatagramFlags getFlags() {
-        return flags;
-    }
-
-    public void setFlags(RakNetDatagramFlags flags) {
-        this.flags = flags;
-    }
-
-    public int getDatagramSequenceNumber() {
-        return datagramSequenceNumber;
-    }
-
-    public void setDatagramSequenceNumber(int datagramSequenceNumber) {
-        this.datagramSequenceNumber = datagramSequenceNumber;
-    }
-
     public List<EncapsulatedRakNetPacket> getPackets() {
         return Collections.unmodifiableList(packets);
     }
@@ -84,15 +70,6 @@ public class RakNetDatagram extends AbstractReferenceCounted {
             flags = new RakNetDatagramFlags((byte) 0x8c); // set continuous send
         }
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return "RakNetDatagram{" +
-                "flags=" + flags +
-                ", datagramSequenceNumber=" + datagramSequenceNumber +
-                ", packets=" + packets +
-                '}';
     }
 
     @Override

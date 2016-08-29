@@ -3,11 +3,13 @@ package com.voxelwind.server.network.raknet.packets;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import java.net.InetSocketAddress;
 
 import static com.voxelwind.server.network.raknet.RakNetConstants.RAKNET_UNCONNECTED_MAGIC;
 
+@Data
 public class OpenConnectionResponse2Packet implements RakNetPackage {
     private long serverId;
     private InetSocketAddress clientAddress;
@@ -30,37 +32,5 @@ public class OpenConnectionResponse2Packet implements RakNetPackage {
         RakNetUtil.writeSocketAddress(buffer, clientAddress);
         buffer.writeShort(mtuSize);
         buffer.writeByte(serverSecurity);
-    }
-
-    public long getServerId() {
-        return serverId;
-    }
-
-    public void setServerId(long serverId) {
-        this.serverId = serverId;
-    }
-
-    public InetSocketAddress getClientAddress() {
-        return clientAddress;
-    }
-
-    public void setClientAddress(InetSocketAddress clientAddress) {
-        this.clientAddress = clientAddress;
-    }
-
-    public short getMtuSize() {
-        return mtuSize;
-    }
-
-    public void setMtuSize(short mtuSize) {
-        this.mtuSize = mtuSize;
-    }
-
-    public byte getServerSecurity() {
-        return serverSecurity;
-    }
-
-    public void setServerSecurity(byte serverSecurity) {
-        this.serverSecurity = serverSecurity;
     }
 }

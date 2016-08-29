@@ -2,7 +2,9 @@ package com.voxelwind.server.network.raknet.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class ConnectionRequestPacket implements RakNetPackage {
     private long clientGuid;
     private long timestamp;
@@ -20,29 +22,5 @@ public class ConnectionRequestPacket implements RakNetPackage {
         buffer.writeLong(clientGuid);
         buffer.writeLong(timestamp);
         buffer.writeBoolean(serverSecurity);
-    }
-
-    public long getClientGuid() {
-        return clientGuid;
-    }
-
-    public void setClientGuid(long clientGuid) {
-        this.clientGuid = clientGuid;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public boolean isServerSecurity() {
-        return serverSecurity;
-    }
-
-    public void setServerSecurity(boolean serverSecurity) {
-        this.serverSecurity = serverSecurity;
     }
 }

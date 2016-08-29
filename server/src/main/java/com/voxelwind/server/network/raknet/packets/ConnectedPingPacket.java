@@ -2,7 +2,9 @@ package com.voxelwind.server.network.raknet.packets;
 
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class ConnectedPingPacket implements RakNetPackage {
     private long pingTime;
 
@@ -14,13 +16,5 @@ public class ConnectedPingPacket implements RakNetPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeLong(pingTime);
-    }
-
-    public long getPingTime() {
-        return pingTime;
-    }
-
-    public void setPingTime(long pingTime) {
-        this.pingTime = pingTime;
     }
 }

@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import java.nio.ByteOrder;
 import java.util.*;
 
+@Data
 public abstract class BaseAckPacket implements RakNetPackage {
     private final List<IntRange> ids = new ArrayList<>();
 
@@ -71,9 +73,5 @@ public abstract class BaseAckPacket implements RakNetPackage {
                 buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.getEnd());
             }
         }
-    }
-
-    public List<IntRange> getIds() {
-        return ids;
     }
 }

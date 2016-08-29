@@ -4,10 +4,12 @@ import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
 import java.net.InetSocketAddress;
 
 @DisallowWrapping
+@Data
 public class ConnectionResponsePacket implements RakNetPackage {
     private InetSocketAddress systemAddress;
     private short systemIndex;
@@ -36,45 +38,5 @@ public class ConnectionResponsePacket implements RakNetPackage {
         }
         buffer.writeLong(incomingTimestamp);
         buffer.writeLong(systemTimestamp);
-    }
-
-    public InetSocketAddress getSystemAddress() {
-        return systemAddress;
-    }
-
-    public void setSystemAddress(InetSocketAddress systemAddress) {
-        this.systemAddress = systemAddress;
-    }
-
-    public short getSystemIndex() {
-        return systemIndex;
-    }
-
-    public void setSystemIndex(short systemIndex) {
-        this.systemIndex = systemIndex;
-    }
-
-    public InetSocketAddress[] getSystemAddresses() {
-        return systemAddresses;
-    }
-
-    public void setSystemAddresses(InetSocketAddress[] systemAddresses) {
-        this.systemAddresses = systemAddresses;
-    }
-
-    public long getIncomingTimestamp() {
-        return incomingTimestamp;
-    }
-
-    public void setIncomingTimestamp(long incomingTimestamp) {
-        this.incomingTimestamp = incomingTimestamp;
-    }
-
-    public long getSystemTimestamp() {
-        return systemTimestamp;
-    }
-
-    public void setSystemTimestamp(long systemTimestamp) {
-        this.systemTimestamp = systemTimestamp;
     }
 }

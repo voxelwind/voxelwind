@@ -4,7 +4,9 @@ import com.voxelwind.server.network.raknet.RakNetConstants;
 import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
+import lombok.Data;
 
+@Data
 public class OpenConnectionResponse1Packet implements RakNetPackage {
     private byte serverSecurity;
     private long serverGuid;
@@ -24,29 +26,5 @@ public class OpenConnectionResponse1Packet implements RakNetPackage {
         buffer.writeLong(serverGuid);
         buffer.writeByte(serverSecurity);
         buffer.writeShort(mtuSize);
-    }
-
-    public byte getServerSecurity() {
-        return serverSecurity;
-    }
-
-    public void setServerSecurity(byte serverSecurity) {
-        this.serverSecurity = serverSecurity;
-    }
-
-    public short getMtuSize() {
-        return mtuSize;
-    }
-
-    public void setMtuSize(short mtuSize) {
-        this.mtuSize = mtuSize;
-    }
-
-    public long getServerGuid() {
-        return serverGuid;
-    }
-
-    public void setServerGuid(long serverGuid) {
-        this.serverGuid = serverGuid;
     }
 }
