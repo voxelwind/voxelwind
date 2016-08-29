@@ -82,8 +82,8 @@ public class McpeSession extends RakNetSession {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
 
-        Integer id = PacketRegistry.getId(netPackage);
-        Preconditions.checkArgument(id != null, "Package " + netPackage + " has no ID.");
+        // Verify that the packet ID exists.
+        PacketRegistry.getId(netPackage);
 
         currentlyQueued.add(netPackage);
     }
@@ -96,8 +96,7 @@ public class McpeSession extends RakNetSession {
     }
 
     private void internalSendPackage(RakNetPackage netPackage) {
-        Integer id = PacketRegistry.getId(netPackage);
-        Preconditions.checkArgument(id != null, "Package " + netPackage + " has no ID.");
+        int id = PacketRegistry.getId(netPackage);
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
 

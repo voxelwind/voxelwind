@@ -1,8 +1,5 @@
 package com.voxelwind.server.network;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.raknet.RakNetPackage;
@@ -10,66 +7,65 @@ import com.voxelwind.server.network.raknet.packets.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 
-import java.util.Map;
+import java.util.Arrays;
 
 public class PacketRegistry {
-    private static final Map<PacketType, BiMap<Integer, Class<? extends RakNetPackage>>> PACKAGE_BY_ID =
-            ImmutableMap.<PacketType, BiMap<Integer, Class<? extends RakNetPackage>>>builder()
-                    .put(PacketType.RAKNET, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
-                            .put(0x00, ConnectedPingPacket.class)
-                            .put(0x01, UnconnectedPingPacket.class)
-                            .put(0x03, ConnectedPongPacket.class)
-                            .put(0x05, OpenConnectionRequest1Packet.class)
-                            .put(0x06, OpenConnectionResponse1Packet.class)
-                            .put(0x07, OpenConnectionRequest2Packet.class)
-                            .put(0x08, OpenConnectionResponse2Packet.class)
-                            .put(0x09, ConnectionRequestPacket.class)
-                            .put(0x10, ConnectionResponsePacket.class)
-                            .put(0x13, NewIncomingConnectionPacket.class)
-                            .put(0x14, NoFreeIncomingConnectionsPacket.class)
-                            .put(0x15, DisconnectNotificationPacket.class)
-                            .put(0x1c, UnconnectedPongPacket.class)
-                            .put(0xa0, NakPacket.class)
-                            .put(0xc0, AckPacket.class)
-                            .put(0xfe, McpeWrapper.class) // Technically not an MCPE packet, but here for convenience
-                            .build())
-                    .put(PacketType.MCPE, ImmutableBiMap.<Integer, Class<? extends RakNetPackage>>builder()
-                            .put(0x01, McpeLogin.class)
-                            .put(0x02, McpePlayStatus.class)
-                            .put(0x03, McpeServerHandshake.class)
-                            .put(0x04, McpeClientMagic.class)
-                            .put(0x05, McpeDisconnect.class)
-                            .put(0x06, McpeBatch.class)
-                            .put(0x07, McpeText.class)
-                            .put(0x08, McpeSetTime.class)
-                            .put(0x09, McpeStartGame.class)
-                            .put(0x0a, McpeAddPlayer.class)
-                            .put(0x0b, McpeAddEntity.class)
-                            .put(0x0c, McpeRemoveEntity.class)
-                            .put(0x0f, McpeMoveEntity.class)
-                            .put(0x10, McpeMovePlayer.class)
-                            .put(0x13, McpeUpdateBlock.class)
-                            .put(0x18, McpeEntityEvent.class)
-                            .put(0x1a, McpeUpdateAttributes.class)
-                            .put(0x1b, McpeMobEquipment.class)
-                            .put(0x20, McpePlayerAction.class)
-                            .put(0x22, McpeSetEntityData.class)
-                            .put(0x23, McpeSetEntityMotion.class)
-                            .put(0x26, McpeSetSpawnPosition.class)
-                            .put(0x27, McpeAnimate.class)
-                            .put(0x28, McpeRespawn.class)
-                            .put(0x2a, McpeContainerOpen.class)
-                            .put(0x2b, McpeContainerClose.class)
-                            .put(0x2c, McpeContainerSetSlot.class)
-                            .put(0x2d, McpeContainerSetData.class)
-                            .put(0x2e, McpeContainerSetContents.class)
-                            .put(0x31, McpeAdventureSettings.class)
-                            .put(0x34, McpeFullChunkData.class)
-                            .put(0x37, McpeSetPlayerGameMode.class)
-                            .put(0x3d, McpeRequestChunkRadius.class)
-                            .put(0x3e, McpeChunkRadiusUpdated.class)
-                            .build())
-                    .build();
+    private static final Class<? extends RakNetPackage>[] RAKNET_PACKETS = new Class[256];
+    private static final Class<? extends RakNetPackage>[] MCPE_PACKETS = new Class[256];
+
+    static {
+        RAKNET_PACKETS[0x00] = ConnectedPingPacket.class;
+        RAKNET_PACKETS[0x01] = UnconnectedPingPacket.class;
+        RAKNET_PACKETS[0x03] = ConnectedPongPacket.class;
+        RAKNET_PACKETS[0x05] = OpenConnectionRequest1Packet.class;
+        RAKNET_PACKETS[0x06] = OpenConnectionResponse1Packet.class;
+        RAKNET_PACKETS[0x07] = OpenConnectionRequest2Packet.class;
+        RAKNET_PACKETS[0x08] = OpenConnectionResponse2Packet.class;
+        RAKNET_PACKETS[0x09] = ConnectionRequestPacket.class;
+        RAKNET_PACKETS[0x10] = ConnectionResponsePacket.class;
+        RAKNET_PACKETS[0x13] = NewIncomingConnectionPacket.class;
+        RAKNET_PACKETS[0x14] = NoFreeIncomingConnectionsPacket.class;
+        RAKNET_PACKETS[0x15] = DisconnectNotificationPacket.class;
+        RAKNET_PACKETS[0x1c] = UnconnectedPongPacket.class;
+        RAKNET_PACKETS[0xa0] = NakPacket.class;
+        RAKNET_PACKETS[0xc0] = AckPacket.class;
+        RAKNET_PACKETS[0xfe] = McpeWrapper.class; // Technically not an MCPE packet, but here for convenience
+
+        MCPE_PACKETS[0x01] = McpeLogin.class;
+        MCPE_PACKETS[0x02] = McpePlayStatus.class;
+        MCPE_PACKETS[0x03] = McpeServerHandshake.class;
+        MCPE_PACKETS[0x04] = McpeClientMagic.class;
+        MCPE_PACKETS[0x05] = McpeDisconnect.class;
+        MCPE_PACKETS[0x06] = McpeBatch.class;
+        MCPE_PACKETS[0x07] = McpeText.class;
+        MCPE_PACKETS[0x08] = McpeSetTime.class;
+        MCPE_PACKETS[0x09] = McpeStartGame.class;
+        MCPE_PACKETS[0x0a] = McpeAddPlayer.class;
+        MCPE_PACKETS[0x0b] = McpeAddEntity.class;
+        MCPE_PACKETS[0x0c] = McpeRemoveEntity.class;
+        MCPE_PACKETS[0x0f] = McpeMoveEntity.class;
+        MCPE_PACKETS[0x10] = McpeMovePlayer.class;
+        MCPE_PACKETS[0x13] = McpeUpdateBlock.class;
+        MCPE_PACKETS[0x18] = McpeEntityEvent.class;
+        MCPE_PACKETS[0x1a] = McpeUpdateAttributes.class;
+        MCPE_PACKETS[0x1b] = McpeMobEquipment.class;
+        MCPE_PACKETS[0x20] = McpePlayerAction.class;
+        MCPE_PACKETS[0x22] = McpeSetEntityData.class;
+        MCPE_PACKETS[0x23] = McpeSetEntityMotion.class;
+        MCPE_PACKETS[0x26] = McpeSetSpawnPosition.class;
+        MCPE_PACKETS[0x27] = McpeAnimate.class;
+        MCPE_PACKETS[0x28] = McpeRespawn.class;
+        MCPE_PACKETS[0x2a] = McpeContainerOpen.class;
+        MCPE_PACKETS[0x2b] = McpeContainerClose.class;
+        MCPE_PACKETS[0x2c] = McpeContainerSetSlot.class;
+        MCPE_PACKETS[0x2d] = McpeContainerSetData.class;
+        MCPE_PACKETS[0x2e] = McpeContainerSetContents.class;
+        MCPE_PACKETS[0x31] = McpeAdventureSettings.class;
+        MCPE_PACKETS[0x34] = McpeFullChunkData.class;
+        MCPE_PACKETS[0x37] = McpeSetPlayerGameMode.class;
+        MCPE_PACKETS[0x3d] = McpeRequestChunkRadius.class;
+        MCPE_PACKETS[0x3e] = McpeChunkRadiusUpdated.class;
+    }
 
     private PacketRegistry() {
 
@@ -81,9 +77,21 @@ public class PacketRegistry {
 
     public static RakNetPackage tryDecode(ByteBuf buf, PacketType type, boolean fromBatch) {
         int id = buf.readUnsignedByte();
-        Class<? extends RakNetPackage> pkgClass = PACKAGE_BY_ID.get(type).get(id);
-        if (pkgClass == null)
+        Class<? extends RakNetPackage> pkgClass;
+        switch (type) {
+            case RAKNET:
+                pkgClass = RAKNET_PACKETS[id];
+                break;
+            case MCPE:
+                pkgClass = MCPE_PACKETS[id];
+                break;
+            default:
+                throw new AssertionError();
+        }
+
+        if (pkgClass == null) {
             return null;
+        }
 
         if (fromBatch) {
             if (pkgClass.isAnnotationPresent(BatchDisallowed.class)) {
@@ -103,24 +111,20 @@ public class PacketRegistry {
     }
 
     public static Integer getId(RakNetPackage pkg) {
-        for (Map.Entry<PacketType, BiMap<Integer, Class<? extends RakNetPackage>>> entry : PACKAGE_BY_ID.entrySet()) {
-            Integer res = entry.getValue().inverse().get(pkg.getClass());
-            if (res != null) {
-                return res;
-            }
+        // TODO: Might be a regression going from two O(1) operations to two O(n) operations. Requires some profiling.
+        Class<? extends RakNetPackage> pkgClass = pkg.getClass();
+        int res = Arrays.asList(RAKNET_PACKETS).indexOf(pkg.getClass());
+        if (res == -1) {
+            res = Arrays.asList(MCPE_PACKETS).indexOf(pkg.getClass());
         }
-        return null;
-    }
-
-    public static Integer getId(RakNetPackage pkg, PacketType type) {
-        return PACKAGE_BY_ID.get(type).inverse().get(pkg.getClass());
+        if (res == -1) {
+            throw new IllegalArgumentException("Packet ID for " + pkgClass.getName() + " does not exist.");
+        }
+        return res;
     }
 
     public static ByteBuf tryEncode(RakNetPackage pkg) {
-        Integer id = getId(pkg);
-        if (id == null) {
-            throw new IllegalArgumentException("Package " + pkg.getClass() + " is not registered");
-        }
+        int id = getId(pkg);
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
         buf.writeByte((id & 0xFF));
