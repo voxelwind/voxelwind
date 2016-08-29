@@ -86,7 +86,7 @@ public class PacketRegistry {
                 pkgClass = MCPE_PACKETS[id];
                 break;
             default:
-                throw new AssertionError();
+                throw new IllegalArgumentException("Invalid PacketType");
         }
 
         if (pkgClass == null) {
@@ -126,7 +126,7 @@ public class PacketRegistry {
     public static ByteBuf tryEncode(RakNetPackage pkg) {
         int id = getId(pkg);
 
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer();
+        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
         buf.writeByte((id & 0xFF));
         pkg.encode(buf);
 
