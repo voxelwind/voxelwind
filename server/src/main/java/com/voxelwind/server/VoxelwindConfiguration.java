@@ -30,6 +30,11 @@ public class VoxelwindConfiguration {
      */
     private int port;
     /**
+     * The maximum number of players Voxelwind will accept before rejecting further connections. By default, this is set
+     * to -1 (unlimited).
+     */
+    private int maximumPlayerLimit;
+    /**
      * Whether or not Voxelwind should try to use SO_REUSEPORT. This is only supported under Linux 3.9+. This increases
      * the potential throughput of the server.
      */
@@ -53,14 +58,6 @@ public class VoxelwindConfiguration {
          * without using Xbox authentication, they will be disconnected when trying to log in.
          */
         private boolean forceAuthentication;
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public boolean isForceAuthentication() {
-            return forceAuthentication;
-        }
     }
 
     @Getter
@@ -117,6 +114,7 @@ public class VoxelwindConfiguration {
         configuration.rcon.bindHost = "127.0.0.1";
         configuration.rcon.port = 27015;
         configuration.rcon.password = generateRandomPassword();
+        configuration.maximumPlayerLimit = -1;
         return configuration;
     }
 
