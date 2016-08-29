@@ -1,11 +1,11 @@
 package com.voxelwind.server.network.raknet.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class ConnectedPingPacket implements RakNetPackage {
+public class ConnectedPingPacket implements NetworkPackage {
     private long pingTime;
 
     @Override

@@ -1,7 +1,7 @@
 package com.voxelwind.server.network.raknet.packets;
 
 import com.google.common.collect.ImmutableList;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.nio.ByteOrder;
 import java.util.*;
 
 @Data
-public abstract class BaseAckPacket implements RakNetPackage {
+public abstract class BaseAckPacket implements NetworkPackage {
     private final List<IntRange> ids = new ArrayList<>();
 
     public static List<IntRange> intoRanges(Collection<Integer> knownIds) {

@@ -2,12 +2,12 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeSetSpawnPosition implements RakNetPackage {
+public class McpeSetSpawnPosition implements NetworkPackage {
     private Vector3i position;
 
     @Override

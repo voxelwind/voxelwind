@@ -1,4 +1,4 @@
-package com.voxelwind.server.network.session;
+package com.voxelwind.server.network.raknet.util;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
@@ -7,7 +7,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 
 import java.util.*;
 
-class SplitPacketHelper {
+public class SplitPacketHelper {
     private final Queue<EncapsulatedRakNetPacket> packets = new ArrayDeque<>();
     private final BitSet contained = new BitSet();
     private final long created = System.currentTimeMillis();
@@ -46,14 +46,14 @@ class SplitPacketHelper {
         return Optional.of(buf);
     }
 
-    boolean expired() {
+    public boolean expired() {
         // If we're waiting on a split packet for more than 30 seconds, the client on the other end is either severely
         // lagging, or has died.
         Preconditions.checkState(!released, "packet has been released");
         return System.currentTimeMillis() - created >= 30000;
     }
 
-    void release() {
+    public void release() {
         Preconditions.checkState(!released, "packet has been released");
 
         released = true;

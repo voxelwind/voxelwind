@@ -2,9 +2,9 @@ package com.voxelwind.server.network;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.server.VoxelwindServer;
-import com.voxelwind.server.network.handler.TailHandler;
-import com.voxelwind.server.network.handler.VoxelwindDatagramHandler;
-import com.voxelwind.server.network.handler.VoxelwindDirectPacketHandler;
+import com.voxelwind.server.network.raknet.handler.TailHandler;
+import com.voxelwind.server.network.raknet.handler.RakNetDatagramHandler;
+import com.voxelwind.server.network.raknet.handler.RakNetDirectPacketHandler;
 import com.voxelwind.server.network.raknet.DatagramRakNetPacketCodec;
 import com.voxelwind.server.network.raknet.SimpleRakNetPacketCodec;
 import io.netty.bootstrap.Bootstrap;
@@ -57,9 +57,9 @@ public class NettyVoxelwindNetworkListener extends ChannelInitializer<DatagramCh
     protected void initChannel(DatagramChannel channel) throws Exception {
         channel.pipeline()
                 .addLast("simpleRaknetHandler", new SimpleRakNetPacketCodec())
-                .addLast("voxelwindPacketHandler", new VoxelwindDirectPacketHandler(server))
+                .addLast("voxelwindPacketHandler", new RakNetDirectPacketHandler(server))
                 .addLast("raknetDatagramHandler", new DatagramRakNetPacketCodec(server))
-                .addLast("voxelwindDatagramHandler", new VoxelwindDatagramHandler(server))
+                .addLast("voxelwindDatagramHandler", new RakNetDatagramHandler(server))
                 .addLast("tailHandler", new TailHandler());
     }
 

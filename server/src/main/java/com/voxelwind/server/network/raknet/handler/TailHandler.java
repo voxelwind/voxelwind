@@ -1,4 +1,4 @@
-package com.voxelwind.server.network.handler;
+package com.voxelwind.server.network.raknet.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

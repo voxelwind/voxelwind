@@ -2,6 +2,7 @@ package com.voxelwind.api.server;
 
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ public interface Session {
     String getName();
 
     @Nonnull
-    InetSocketAddress getRemoteAddress();
+    Optional<InetSocketAddress> getRemoteAddress();
 
     @Nonnull
     UUID getUniqueId();

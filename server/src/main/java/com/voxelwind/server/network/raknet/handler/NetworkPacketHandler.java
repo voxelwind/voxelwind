@@ -1,4 +1,4 @@
-package com.voxelwind.server.network.handler;
+package com.voxelwind.server.network.raknet.handler;
 
 import com.voxelwind.server.network.mcpe.packets.*;
 

@@ -2,7 +2,7 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -18,7 +18,7 @@ import java.util.Base64;
 @ForceClearText
 @BatchDisallowed
 @Data
-public class McpeServerHandshake implements RakNetPackage {
+public class McpeServerHandshake implements NetworkPackage {
     private PublicKey key;
     private byte[] token;
 

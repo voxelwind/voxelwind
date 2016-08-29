@@ -1,8 +1,8 @@
-package com.voxelwind.server.network.raknet;
+package com.voxelwind.server.network;
 
 import io.netty.buffer.ByteBuf;
 
-public interface RakNetPackage {
+public interface NetworkPackage {
     /**
      * Decodes a packet of the specified buffer. The buffer is always assumed to have the proper position and length
      * to complete the read.

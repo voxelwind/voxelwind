@@ -1,9 +1,9 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 
-public class McpeClientMagic implements RakNetPackage {
+public class McpeClientMagic implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         buffer.skipBytes(buffer.readableBytes());

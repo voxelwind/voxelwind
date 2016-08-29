@@ -1,10 +1,10 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 
-public class McpeUnknown implements RakNetPackage {
+public class McpeUnknown implements NetworkPackage {
     private short id;
     private ByteBuf buf;
 

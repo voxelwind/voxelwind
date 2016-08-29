@@ -2,12 +2,12 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeContainerOpen implements RakNetPackage {
+public class McpeContainerOpen implements NetworkPackage {
     private byte windowId;
     private byte type;
     private short slotCount;

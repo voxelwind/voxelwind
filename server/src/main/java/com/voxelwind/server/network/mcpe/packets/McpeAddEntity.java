@@ -4,7 +4,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Data
-public class McpeAddEntity implements RakNetPackage {
+public class McpeAddEntity implements NetworkPackage {
     private long entityId;
     private int entityType;
     private Vector3f position;

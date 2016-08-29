@@ -2,7 +2,6 @@ package com.voxelwind.server.network;
 
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.packets.*;
-import com.voxelwind.server.network.raknet.RakNetPackage;
 import com.voxelwind.server.network.raknet.packets.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -10,8 +9,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import java.util.Arrays;
 
 public class PacketRegistry {
-    private static final Class<? extends RakNetPackage>[] RAKNET_PACKETS = new Class[256];
-    private static final Class<? extends RakNetPackage>[] MCPE_PACKETS = new Class[256];
+    private static final Class<? extends NetworkPackage>[] RAKNET_PACKETS = new Class[256];
+    private static final Class<? extends NetworkPackage>[] MCPE_PACKETS = new Class[256];
 
     static {
         RAKNET_PACKETS[0x00] = ConnectedPingPacket.class;
@@ -71,13 +70,13 @@ public class PacketRegistry {
 
     }
 
-    public static RakNetPackage tryDecode(ByteBuf buf, PacketType type) {
+    public static NetworkPackage tryDecode(ByteBuf buf, PacketType type) {
         return tryDecode(buf, type, false);
     }
 
-    public static RakNetPackage tryDecode(ByteBuf buf, PacketType type, boolean fromBatch) {
+    public static NetworkPackage tryDecode(ByteBuf buf, PacketType type, boolean fromBatch) {
         int id = buf.readUnsignedByte();
-        Class<? extends RakNetPackage> pkgClass;
+        Class<? extends NetworkPackage> pkgClass;
         switch (type) {
             case RAKNET:
                 pkgClass = RAKNET_PACKETS[id];
@@ -99,7 +98,7 @@ public class PacketRegistry {
             }
         }
 
-        RakNetPackage netPackage;
+        NetworkPackage netPackage;
         try {
             netPackage = pkgClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
@@ -110,9 +109,9 @@ public class PacketRegistry {
         return netPackage;
     }
 
-    public static Integer getId(RakNetPackage pkg) {
+    public static Integer getId(NetworkPackage pkg) {
         // TODO: Might be a regression going from two O(1) operations to two O(n) operations. Requires some profiling.
-        Class<? extends RakNetPackage> pkgClass = pkg.getClass();
+        Class<? extends NetworkPackage> pkgClass = pkg.getClass();
         int res = Arrays.asList(RAKNET_PACKETS).indexOf(pkg.getClass());
         if (res == -1) {
             res = Arrays.asList(MCPE_PACKETS).indexOf(pkg.getClass());
@@ -123,7 +122,7 @@ public class PacketRegistry {
         return res;
     }
 
-    public static ByteBuf tryEncode(RakNetPackage pkg) {
+    public static ByteBuf tryEncode(NetworkPackage pkg) {
         int id = getId(pkg);
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();

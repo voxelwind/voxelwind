@@ -1,7 +1,7 @@
 package com.voxelwind.server.network.raknet.packets;
 
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
 
 @DisallowWrapping
 @Data
-public class ConnectionResponsePacket implements RakNetPackage {
+public class ConnectionResponsePacket implements NetworkPackage {
     private InetSocketAddress systemAddress;
     private short systemIndex;
     private InetSocketAddress[] systemAddresses;

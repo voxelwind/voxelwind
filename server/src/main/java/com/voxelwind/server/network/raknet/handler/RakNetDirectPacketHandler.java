@@ -1,6 +1,7 @@
-package com.voxelwind.server.network.handler;
+package com.voxelwind.server.network.raknet.handler;
 
 import com.voxelwind.server.VoxelwindServer;
+import com.voxelwind.server.network.raknet.RakNetSession;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.network.session.InitialNetworkPacketHandler;
@@ -8,11 +9,11 @@ import com.voxelwind.server.network.session.McpeSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<DirectAddressedRakNetPacket> {
+public class RakNetDirectPacketHandler extends SimpleChannelInboundHandler<DirectAddressedRakNetPacket> {
     private static final long SERVER_ID = 68382;
     private final VoxelwindServer server;
 
-    public VoxelwindDirectPacketHandler(VoxelwindServer server) {
+    public RakNetDirectPacketHandler(VoxelwindServer server) {
         this.server = server;
     }
 
@@ -55,18 +56,21 @@ public class VoxelwindDirectPacketHandler extends SimpleChannelInboundHandler<Di
                 response.setServerSecurity((byte) 0);
                 response.setClientAddress(packet.sender());
                 response.setServerId(SERVER_ID);
-                session = new McpeSession(packet.sender(), request.getMtuSize(), null, ctx.channel(), server);
+                session = new McpeSession(null, server, new RakNetSession(packet.sender(), request.getMtuSize(), ctx.channel(), server));
                 session.setHandler(new InitialNetworkPacketHandler(session));
                 server.getSessionManager().add(packet.sender(), session);
                 ctx.writeAndFlush(new DirectAddressedRakNetPacket(response, packet.sender(), packet.recipient()), ctx.voidPromise());
-                return;
             }
         } else {
             if (packet.content() instanceof AckPacket) {
-                session.onAck(((AckPacket) packet.content()).getIds());
+                if (session.getConnection() instanceof RakNetSession) {
+                    ((RakNetSession) session.getConnection()).onAck(((AckPacket) packet.content()).getIds());
+                }
             }
             if (packet.content() instanceof NakPacket) {
-                session.onNak(((NakPacket) packet.content()).getIds());
+                if (session.getConnection() instanceof RakNetSession) {
+                    ((RakNetSession) session.getConnection()).onNak(((NakPacket) packet.content()).getIds());
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -10,8 +10,8 @@ import lombok.Data;
 import java.util.zip.DataFormatException;
 
 @Data
-public class McpeLogin implements RakNetPackage {
-    private int protocolVersion; // = 82
+public class McpeLogin implements NetworkPackage {
+    private int protocolVersion; // = 90
     private String chainData;
     private String skinData;
 

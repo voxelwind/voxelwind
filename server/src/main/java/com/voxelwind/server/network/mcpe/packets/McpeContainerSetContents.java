@@ -2,12 +2,12 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeContainerSetContents implements RakNetPackage {
+public class McpeContainerSetContents implements NetworkPackage {
     private byte windowId;
     private ItemStack[] stacks;
     private int[] hotbarData = new int[0];

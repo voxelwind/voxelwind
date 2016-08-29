@@ -26,8 +26,8 @@ public class SessionManager {
         return added;
     }
 
-    public boolean remove(InetSocketAddress address) {
-        boolean removed = sessions.remove(address) != null;
+    public boolean remove(McpeSession address) {
+        boolean removed = sessions.values().remove(address);
         if (removed) {
             adjustPoolSize();
         }

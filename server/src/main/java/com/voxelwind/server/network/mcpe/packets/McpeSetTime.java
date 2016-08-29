@@ -1,11 +1,11 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeSetTime implements RakNetPackage {
+public class McpeSetTime implements NetworkPackage {
     private long time;
     private boolean running;
 

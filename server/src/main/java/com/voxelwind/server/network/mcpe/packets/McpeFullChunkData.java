@@ -1,6 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Data
 @ToString(exclude = {"data"})
 @EqualsAndHashCode(exclude = {"data"})
-public class McpeFullChunkData implements RakNetPackage {
+public class McpeFullChunkData implements NetworkPackage {
     private int chunkX;
     private int chunkZ;
     private byte order;

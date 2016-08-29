@@ -2,13 +2,13 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeText implements RakNetPackage {
+public class McpeText implements NetworkPackage {
     private TextType type;
     private String source = "";
     private String message = "";

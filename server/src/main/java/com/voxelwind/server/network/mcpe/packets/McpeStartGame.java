@@ -3,14 +3,14 @@ package com.voxelwind.server.network.mcpe.packets;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 import javax.xml.bind.DatatypeConverter;
 
 @Data
-public class McpeStartGame implements RakNetPackage {
+public class McpeStartGame implements NetworkPackage {
     private static final byte[] UNKNOWN = DatatypeConverter.parseHexBinary("01010000000000000000000000");
     private int seed;
     private byte dimension;

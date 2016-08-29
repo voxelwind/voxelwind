@@ -1,31 +1,32 @@
-package com.voxelwind.server.network.session;
+package com.voxelwind.server.network.raknet;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.VoxelwindServer;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 import com.voxelwind.server.network.raknet.datastructs.IntRange;
 import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
+import com.voxelwind.server.network.raknet.util.SentDatagram;
+import com.voxelwind.server.network.raknet.util.SplitPacketHelper;
+import com.voxelwind.server.network.session.SessionConnection;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
-public class RakNetSession {
+public class RakNetSession implements SessionConnection {
     private static final Logger LOGGER = LogManager.getLogger(RakNetSession.class);
-    private static final int TIMEOUT_MS = 30000;
     private final InetSocketAddress remoteAddress;
     private final short mtu;
-    private final AtomicLong lastKnownUpdate = new AtomicLong(System.currentTimeMillis());
     private final ConcurrentMap<Short, SplitPacketHelper> splitPackets = new ConcurrentHashMap<>();
     private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
     private final AtomicInteger reliabilitySequenceGenerator = new AtomicInteger();
@@ -34,6 +35,7 @@ public class RakNetSession {
     private final Channel channel;
     private final VoxelwindServer server;
     private boolean closed = false;
+    private boolean useOrdering = false;
 
     public RakNetSession(InetSocketAddress remoteAddress, short mtu, Channel channel, VoxelwindServer server) {
         this.remoteAddress = remoteAddress;
@@ -42,16 +44,12 @@ public class RakNetSession {
         this.server = server;
     }
 
-    public InetSocketAddress getRemoteAddress() {
-        return remoteAddress;
+    public Optional<InetSocketAddress> getRemoteAddress() {
+        return Optional.of(remoteAddress);
     }
 
     public short getMtu() {
         return mtu;
-    }
-
-    public AtomicLong getLastKnownUpdate() {
-        return lastKnownUpdate;
     }
 
     public AtomicInteger getDatagramSequenceGenerator() {
@@ -107,7 +105,7 @@ public class RakNetSession {
     }
 
     protected void internalSendRakNetPackage(ByteBuf encoded) {
-        List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(encoded, this);
+        List<EncapsulatedRakNetPacket> addressed = EncapsulatedRakNetPacket.encapsulatePackage(encoded, this, useOrdering);
         List<RakNetDatagram> datagrams = new ArrayList<>();
         for (EncapsulatedRakNetPacket packet : addressed) {
             RakNetDatagram datagram = new RakNetDatagram();
@@ -122,9 +120,10 @@ public class RakNetSession {
             channel.write(new AddressedRakNetDatagram(netDatagram, remoteAddress), channel.voidPromise());
             datagramAcks.put(netDatagram.getDatagramSequenceNumber(), new SentDatagram(netDatagram));
         }
+        channel.flush();
     }
 
-    public void sendDirectPackage(RakNetPackage netPackage) {
+    public void sendDirectPackage(NetworkPackage netPackage) {
         checkForClosed();
         channel.writeAndFlush(new DirectAddressedRakNetPacket(netPackage, remoteAddress), channel.voidPromise());
     }
@@ -136,11 +135,6 @@ public class RakNetSession {
 
         resendStalePackets();
         cleanSplitPackets();
-
-        if (isTimedOut()) {
-            LOGGER.error("Client {} has timed out, closing connection.", getRemoteAddress());
-            close();
-        }
     }
 
     private void cleanSplitPackets() {
@@ -164,11 +158,7 @@ public class RakNetSession {
         channel.flush();
     }
 
-    public void touch() {
-        lastKnownUpdate.set(System.currentTimeMillis());
-    }
-
-    protected void close() {
+    public void close() {
         checkForClosed();
         closed = true;
 
@@ -178,6 +168,11 @@ public class RakNetSession {
 
         datagramAcks.values().forEach(SentDatagram::tryRelease);
         datagramAcks.clear();
+    }
+
+    @Override
+    public void sendPacket(@Nonnull ByteBuf data) {
+        internalSendRakNetPackage(data);
     }
 
     void checkForClosed() {
@@ -196,7 +191,11 @@ public class RakNetSession {
         return channel;
     }
 
-    public boolean isTimedOut() {
-        return System.currentTimeMillis() - lastKnownUpdate.get() >= TIMEOUT_MS;
+    public boolean isUseOrdering() {
+        return useOrdering;
+    }
+
+    public void setUseOrdering(boolean useOrdering) {
+        this.useOrdering = useOrdering;
     }
 }

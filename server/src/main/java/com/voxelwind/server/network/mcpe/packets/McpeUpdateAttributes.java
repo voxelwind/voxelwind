@@ -2,7 +2,7 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Data
-public class McpeUpdateAttributes implements RakNetPackage {
+public class McpeUpdateAttributes implements NetworkPackage {
     private long entityId;
     private final Collection<Attribute> attributes = new ArrayList<>();
 

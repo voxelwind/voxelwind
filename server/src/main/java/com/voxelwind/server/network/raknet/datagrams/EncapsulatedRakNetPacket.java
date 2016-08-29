@@ -1,6 +1,6 @@
 package com.voxelwind.server.network.raknet.datagrams;
 
-import com.voxelwind.server.network.session.RakNetSession;
+import com.voxelwind.server.network.raknet.RakNetSession;
 import com.voxelwind.server.network.session.McpeSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCounted;
@@ -23,7 +23,7 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
     private int partIndex;
     private ByteBuf buffer;
 
-    public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, RakNetSession session) {
+    public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, RakNetSession session, boolean isOrdered) {
         // Potentially split the package..
         List<ByteBuf> bufs = new ArrayList<>();
         int by = session.getMtu() - 100; // TODO: This could be lowered to as little as 24, but needs to be checked.
@@ -39,16 +39,14 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
         }
 
         // Now create the packets.
-        boolean encrypted = session instanceof McpeSession && ((McpeSession) session).isEncrypted();
-
         List<EncapsulatedRakNetPacket> packets = new ArrayList<>();
         short splitId = (short) (System.nanoTime() % Short.MAX_VALUE);
-        int orderNumber = encrypted ? session.getOrderSequenceGenerator().getAndIncrement() : 0;
+        int orderNumber = isOrdered ? session.getOrderSequenceGenerator().getAndIncrement() : 0;
         for (int i = 0; i < bufs.size(); i++) {
             // Encryption requires RELIABLE_ORDERED
             EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
             packet.setBuffer(bufs.get(i));
-            packet.setReliability(encrypted ? RakNetReliability.RELIABLE_ORDERED : RakNetReliability.RELIABLE);
+            packet.setReliability(isOrdered ? RakNetReliability.RELIABLE_ORDERED : RakNetReliability.RELIABLE);
             packet.setReliabilityNumber(session.getReliabilitySequenceGenerator().getAndIncrement());
             packet.setOrderingIndex(orderNumber);
             if (bufs.size() > 1) {

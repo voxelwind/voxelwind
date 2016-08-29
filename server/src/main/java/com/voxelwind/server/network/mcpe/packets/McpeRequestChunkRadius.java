@@ -1,11 +1,11 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeRequestChunkRadius implements RakNetPackage {
+public class McpeRequestChunkRadius implements NetworkPackage {
     private int radius;
 
     @Override

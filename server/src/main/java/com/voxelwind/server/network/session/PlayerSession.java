@@ -23,7 +23,7 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
 import com.voxelwind.server.game.level.util.Attribute;
-import com.voxelwind.server.network.handler.NetworkPacketHandler;
+import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.api.util.Rotation;
 import org.apache.logging.log4j.LogManager;
@@ -50,6 +50,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
     private Inventory openedInventory;
     private byte openInventoryId = -1;
+    private boolean hasMoved = false;
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
@@ -73,38 +74,28 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             return false;
         }
 
+        if (hasMoved) {
+            hasMoved = false;
+            if (isTeleported()) {
+                sendMovePlayerPacket();
+            }
+            updateViewableEntities();
+            sendNewChunks();
+        }
+
         return true;
     }
 
     @Override
     protected void setPosition(Vector3f position) {
-        setPosition(position, false);
-    }
-
-    private void setPosition(Vector3f position, boolean internal) {
-        Vector3f oldPosition = getPosition();
         super.setPosition(position);
-
-        if (!internal) {
-            sendMovePlayerPacket();
-            if (hasSubstantiallyMoved(oldPosition, position)) {
-                sendNewChunks();
-                updateViewableEntities();
-            }
-        }
+        hasMoved = true;
     }
 
     @Override
     public void setRotation(@Nonnull Rotation rotation) {
-        setRotation(rotation, false);
-    }
-
-    private void setRotation(Rotation rotation, boolean internal) {
         super.setRotation(rotation);
-
-        if (!internal) {
-            sendMovePlayerPacket();
-        }
+        hasMoved = true;
     }
 
     @Override
@@ -112,9 +103,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         throw new UnsupportedOperationException("Do not use remove() on player sessions. Use disconnect() instead.");
     }
 
-    @Override
-    public boolean isRemoved() {
-        return session.isClosed();
+    void removeInternal() {
+        super.remove();
     }
 
     @Override
@@ -142,7 +132,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         respawn.setPosition(respawnLocation);
         session.addToSendQueue(respawn);
 
-        setPosition(respawnLocation, true);
+        setPosition(respawnLocation);
     }
 
     private void sendAttributes() {
@@ -181,8 +171,14 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         PlayerSpawnEvent event = new PlayerSpawnEvent(this, getLevel().getSpawnLocation(), getLevel(), Rotation.ZERO);
         session.getServer().getEventManager().fire(event);
 
-        teleport(event.getSpawnLevel(), event.getSpawnLocation(), event.getRotation());
-        resetStale(); // We haven't sent packets for other players yet, so staleness is superfluous
+        if (getLevel() != event.getSpawnLevel()) {
+            getLevel().getEntityManager().unregister(this);
+            ((VoxelwindLevel) event.getSpawnLevel()).getEntityManager().register(this);
+            setEntityId(((VoxelwindLevel) event.getSpawnLevel()).getEntityManager().allocateEntityId());
+        }
+        setPosition(event.getSpawnLocation());
+        setRotation(event.getRotation());
+        hasMoved = false; // don't send duplicated packets
 
         // Send packets to spawn the player.
         McpeStartGame startGame = new McpeStartGame();
@@ -202,6 +198,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeSetSpawnPosition spawnPosition = new McpeSetSpawnPosition();
         spawnPosition.setPosition(getLevel().getSpawnLocation().toInt());
         session.addToSendQueue(spawnPosition);
+
+        sendMovePlayerPacket();
     }
 
     public McpeSession getMcpeSession() {
@@ -324,7 +322,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     @Nonnull
     @Override
-    public InetSocketAddress getRemoteAddress() {
+    public Optional<InetSocketAddress> getRemoteAddress() {
         return session.getRemoteAddress();
     }
 
@@ -633,8 +631,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Vector3f originalPosition = getPosition();
             Vector3f newPosition = packet.getPosition().sub(0, 1.62, 0);
 
-            setPosition(newPosition, true);
-            setRotation(packet.getRotation(), true);
+            setPosition(newPosition);
+            setRotation(packet.getRotation());
 
             // If we haven't moved in the X or Z axis, don't update viewable entities or try updating chunks - they haven't changed.
             if (hasSubstantiallyMoved(originalPosition, newPosition)) {

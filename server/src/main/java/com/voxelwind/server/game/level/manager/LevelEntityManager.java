@@ -7,6 +7,7 @@ import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;
+import com.voxelwind.server.network.session.McpeSession;
 import com.voxelwind.server.network.session.PlayerSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,7 +109,8 @@ public class LevelEntityManager {
         for (BaseEntity entity : currentEntityList) {
             if (entity instanceof PlayerSession) {
                 PlayerSession session = (PlayerSession) entity;
-                if (!session.getMcpeSession().isClosed()) {
+                McpeSession mcpeSession = session.getMcpeSession();
+                if (mcpeSession != null && mcpeSession.isClosed()) {
                     sessions.add((PlayerSession) entity);
                 }
             }

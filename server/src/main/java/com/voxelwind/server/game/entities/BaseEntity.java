@@ -267,4 +267,8 @@ public class BaseEntity implements Entity {
     final void checkIfAlive() {
         Preconditions.checkState(!removed, "Entity has been removed.");
     }
+
+    protected void setEntityId(long entityId) {
+        this.entityId = entityId;
+    }
 }

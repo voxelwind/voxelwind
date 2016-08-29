@@ -6,18 +6,18 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.jni.hash.VoxelwindHash;
 import com.voxelwind.server.network.Native;
 import com.voxelwind.server.network.PacketRegistry;
-import com.voxelwind.server.network.handler.NetworkPacketHandler;
+import com.voxelwind.server.network.raknet.RakNetSession;
+import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeDisconnect;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.Channel;
 import net.md_5.bungee.jni.cipher.BungeeCipher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,13 +30,13 @@ import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class McpeSession extends RakNetSession {
+public class McpeSession {
     private static final Logger LOGGER = LogManager.getLogger(McpeSession.class);
+    private static final int TIMEOUT_MS = 30000;
     private final AtomicLong encryptedSentPacketGenerator = new AtomicLong();
-    private final Queue<RakNetPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
+    private final Queue<NetworkPackage> currentlyQueued = new ConcurrentLinkedQueue<>();
     private UserAuthenticationProfile authenticationProfile;
     private ClientData clientData;
     private NetworkPacketHandler handler;
@@ -45,10 +45,14 @@ public class McpeSession extends RakNetSession {
     private BungeeCipher decryptionCipher;
     private PlayerSession playerSession;
     private byte[] serverKey;
+    private final SessionConnection connection;
+    private final VoxelwindServer server;
+    private final AtomicLong lastKnownUpdate = new AtomicLong(System.currentTimeMillis());
 
-    public McpeSession(InetSocketAddress remoteAddress, short mtu, NetworkPacketHandler handler, Channel channel, VoxelwindServer server) {
-        super(remoteAddress, mtu, channel, server);
+    public McpeSession(NetworkPacketHandler handler, VoxelwindServer server, SessionConnection connection) {
+        this.server = server;
         this.handler = handler;
+        this.connection = connection;
     }
 
     public SessionState getState() {
@@ -78,7 +82,11 @@ public class McpeSession extends RakNetSession {
         this.handler = handler;
     }
 
-    public void addToSendQueue(RakNetPackage netPackage) {
+    private void checkForClosed() {
+        Preconditions.checkState(!connection.isClosed(), "Connection has been closed!");
+    }
+
+    public void addToSendQueue(NetworkPackage netPackage) {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
 
@@ -88,51 +96,51 @@ public class McpeSession extends RakNetSession {
         currentlyQueued.add(netPackage);
     }
 
-    public void sendImmediatePackage(RakNetPackage netPackage) {
+    public void sendImmediatePackage(NetworkPackage netPackage) {
         checkForClosed();
         Preconditions.checkNotNull(netPackage, "netPackage");
         internalSendPackage(netPackage);
-        getChannel().flush();
     }
 
-    private void internalSendPackage(RakNetPackage netPackage) {
+    private void internalSendPackage(NetworkPackage netPackage) {
         int id = PacketRegistry.getId(netPackage);
 
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
+        ByteBuf encodedPacketData = PooledByteBufAllocator.DEFAULT.directBuffer();
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Sending packet {} to {}", netPackage, getRemoteAddress());
+            String to = connection.getRemoteAddress().map(InetSocketAddress::toString).orElse(connection.toString());
+            LOGGER.debug("Sending packet {} to {}", netPackage, to);
         }
 
-        ByteBuf toEncapsulate;
+        ByteBuf dataToSend;
         if (encryptionCipher == null || netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
             if (!netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
-                buf.writeByte(0xFE);
+                encodedPacketData.writeByte(0xFE);
             }
-            buf.writeByte((id & 0xFF));
-            netPackage.encode(buf);
+            encodedPacketData.writeByte((id & 0xFF));
+            netPackage.encode(encodedPacketData);
 
-            toEncapsulate = buf;
+            dataToSend = encodedPacketData;
         } else {
-            buf.writeByte((id & 0xFF));
-            netPackage.encode(buf);
-            byte[] trailer = generateTrailer(buf);
-            buf.writeBytes(trailer);
+            encodedPacketData.writeByte((id & 0xFF));
+            netPackage.encode(encodedPacketData);
+            byte[] trailer = generateTrailer(encodedPacketData);
+            encodedPacketData.writeBytes(trailer);
 
-            toEncapsulate = PooledByteBufAllocator.DEFAULT.directBuffer();
-            toEncapsulate.writeByte(0xFE);
+            dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer();
+            dataToSend.writeByte(0xFE);
 
             try {
-                encryptionCipher.cipher(buf, toEncapsulate);
+                encryptionCipher.cipher(encodedPacketData, dataToSend);
             } catch (GeneralSecurityException e) {
-                toEncapsulate.release();
+                dataToSend.release();
                 throw new RuntimeException("Unable to encipher package", e);
             } finally {
-                buf.release();
+                encodedPacketData.release();
             }
         }
 
-        internalSendRakNetPackage(toEncapsulate);
+        connection.sendPacket(dataToSend);
     }
 
     public void onTick() {
@@ -140,13 +148,17 @@ public class McpeSession extends RakNetSession {
             return;
         }
 
-        super.onTick();
+        if (isTimedOut()) {
+            close();
+            return;
+        }
 
+        connection.onTick();
         sendQueued();
     }
 
     private void sendQueued() {
-        RakNetPackage netPackage;
+        NetworkPackage netPackage;
         McpeBatch batch = new McpeBatch();
         while ((netPackage = currentlyQueued.poll()) != null) {
             if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class) ||
@@ -175,8 +187,6 @@ public class McpeSession extends RakNetSession {
         if (!batch.getPackages().isEmpty()) {
             internalSendPackage(batch);
         }
-
-        getChannel().flush();
     }
 
     void enableEncryption(byte[] secretKey) {
@@ -194,17 +204,20 @@ public class McpeSession extends RakNetSession {
         } catch (GeneralSecurityException e) {
             throw new RuntimeException("Unable to initialize ciphers", e);
         }
+
+        if (connection instanceof RakNetSession) {
+            ((RakNetSession) connection).setUseOrdering(true);
+        }
     }
 
     public boolean isEncrypted() {
         return encryptionCipher != null;
     }
 
-    @Override
     public void close() {
-        super.close();
+        connection.close();
 
-        getServer().getSessionManager().remove(getRemoteAddress());
+        server.getSessionManager().remove(this);
 
         // Free native resources if required
         if (encryptionCipher != null) {
@@ -212,6 +225,11 @@ public class McpeSession extends RakNetSession {
         }
         if (decryptionCipher != null) {
             decryptionCipher.free();
+        }
+
+        // Make sure the entity is no longer being ticked
+        if (playerSession != null) {
+            playerSession.removeInternal();
         }
     }
 
@@ -272,11 +290,31 @@ public class McpeSession extends RakNetSession {
         packet.setMessage(reason);
         sendImmediatePackage(packet);
 
-        // Wait a little bit for the packet to be sent and close their session
-        getChannel().eventLoop().schedule(() -> {
-            if (!isClosed()) {
-                close();
-            }
-        }, 500, TimeUnit.MILLISECONDS);
+        connection.close();
+    }
+
+    public boolean isClosed() {
+        return connection.isClosed();
+    }
+
+    public Optional<InetSocketAddress> getRemoteAddress() {
+        return connection.getRemoteAddress();
+    }
+
+    private boolean isTimedOut() {
+        return System.currentTimeMillis() - lastKnownUpdate.get() >= TIMEOUT_MS;
+    }
+
+    public void touch() {
+        checkForClosed();
+        lastKnownUpdate.set(System.currentTimeMillis());
+    }
+
+    public SessionConnection getConnection() {
+        return connection;
+    }
+
+    public VoxelwindServer getServer() {
+        return server;
     }
 }

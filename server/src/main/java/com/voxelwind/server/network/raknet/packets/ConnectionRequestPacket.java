@@ -1,11 +1,11 @@
 package com.voxelwind.server.network.raknet.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class ConnectionRequestPacket implements RakNetPackage {
+public class ConnectionRequestPacket implements NetworkPackage {
     private long clientGuid;
     private long timestamp;
     private boolean serverSecurity;

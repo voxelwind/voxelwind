@@ -6,7 +6,7 @@ import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class McpeAddPlayer implements RakNetPackage {
+public class McpeAddPlayer implements NetworkPackage {
     private UUID uuid;
     private String username;
     private long entityId;

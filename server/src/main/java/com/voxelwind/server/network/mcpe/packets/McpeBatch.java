@@ -3,7 +3,7 @@ package com.voxelwind.server.network.mcpe.packets;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.PacketType;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 
 @BatchDisallowed // You don't batch a batch packet, it makes no sense.
-public class McpeBatch implements RakNetPackage {
+public class McpeBatch implements NetworkPackage {
     private byte[] precompressed;
-    private final List<RakNetPackage> packages = new ArrayList<>();
+    private final List<NetworkPackage> packages = new ArrayList<>();
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -33,7 +33,7 @@ public class McpeBatch implements RakNetPackage {
                     throw new DataFormatException("Contained batch packet is empty.");
                 }
 
-                RakNetPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE, true);
+                NetworkPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE, true);
                 if (pkg != null) {
                     packages.add(pkg);
                 } else {
@@ -61,7 +61,7 @@ public class McpeBatch implements RakNetPackage {
         }
     }
 
-    public List<RakNetPackage> getPackages() {
+    public List<NetworkPackage> getPackages() {
         return packages;
     }
 
@@ -69,7 +69,7 @@ public class McpeBatch implements RakNetPackage {
         ByteBuf source = PooledByteBufAllocator.DEFAULT.directBuffer();
 
         try {
-            for (RakNetPackage netPackage : packages) {
+            for (NetworkPackage netPackage : packages) {
                 if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class)) {
                     throw new DataFormatException("Packet " + netPackage + " does not permit batching.");
                 }

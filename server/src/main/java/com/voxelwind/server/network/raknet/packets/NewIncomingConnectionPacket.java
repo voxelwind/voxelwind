@@ -1,6 +1,6 @@
 package com.voxelwind.server.network.raknet.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -8,7 +8,7 @@ import lombok.Data;
 import java.net.InetSocketAddress;
 
 @Data
-public class NewIncomingConnectionPacket implements RakNetPackage {
+public class NewIncomingConnectionPacket implements NetworkPackage {
     private InetSocketAddress clientAddress;
     private InetSocketAddress[] systemAddresses;
     private long clientTimestamp;

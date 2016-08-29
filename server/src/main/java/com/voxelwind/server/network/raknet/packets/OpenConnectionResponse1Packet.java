@@ -1,13 +1,13 @@
 package com.voxelwind.server.network.raknet.packets;
 
 import com.voxelwind.server.network.raknet.RakNetConstants;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class OpenConnectionResponse1Packet implements RakNetPackage {
+public class OpenConnectionResponse1Packet implements NetworkPackage {
     private byte serverSecurity;
     private long serverGuid;
     private short mtuSize;

@@ -1,4 +1,4 @@
-package com.voxelwind.server.network.session;
+package com.voxelwind.server.network.raknet.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
@@ -6,17 +6,17 @@ import com.voxelwind.server.network.raknet.datagrams.RakNetDatagram;
 
 import java.util.concurrent.TimeUnit;
 
-class SentDatagram {
+public class SentDatagram {
     private final RakNetDatagram datagram;
     private final Stopwatch stopwatch;
     private boolean released = false;
 
-    SentDatagram(RakNetDatagram datagram) {
+    public SentDatagram(RakNetDatagram datagram) {
         this.datagram = datagram;
         this.stopwatch = Stopwatch.createStarted();
     }
 
-    RakNetDatagram getDatagram() {
+    public RakNetDatagram getDatagram() {
         return datagram;
     }
 
@@ -24,14 +24,14 @@ class SentDatagram {
         return stopwatch.elapsed(TimeUnit.SECONDS) >= 5;
     }
 
-    void refreshForResend() {
+    public void refreshForResend() {
         Preconditions.checkState(!released, "Already released");
         stopwatch.reset();
         stopwatch.start();
         datagram.retain();
     }
 
-    void tryRelease() {
+    public void tryRelease() {
         if (released) {
             return;
         }

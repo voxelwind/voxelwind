@@ -1,11 +1,11 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeAdventureSettings implements RakNetPackage {
+public class McpeAdventureSettings implements NetworkPackage {
     private int flags;
     private int playerPermissions;
     private int globalPermissions;

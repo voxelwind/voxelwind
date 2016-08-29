@@ -1,9 +1,9 @@
 package com.voxelwind.server.network.raknet.packets;
 
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 
-public class DisconnectNotificationPacket implements RakNetPackage {
+public class DisconnectNotificationPacket implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
 

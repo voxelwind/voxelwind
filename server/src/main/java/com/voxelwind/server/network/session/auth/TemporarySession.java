@@ -5,6 +5,7 @@ import com.voxelwind.server.network.session.McpeSession;
 
 import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class TemporarySession implements Session {
 
     @Nonnull
     @Override
-    public InetSocketAddress getRemoteAddress() {
+    public Optional<InetSocketAddress> getRemoteAddress() {
         return session.getRemoteAddress();
     }
 

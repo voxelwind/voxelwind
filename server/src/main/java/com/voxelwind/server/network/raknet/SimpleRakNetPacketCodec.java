@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.raknet;
 
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.PacketType;
 import com.voxelwind.server.network.raknet.datagrams.RakNetDatagramFlags;
@@ -33,7 +34,7 @@ public class SimpleRakNetPacketCodec extends MessageToMessageCodec<DatagramPacke
             buf.resetReaderIndex();
 
             // We can decode a packet immediately.
-            RakNetPackage netPackage = PacketRegistry.tryDecode(buf, PacketType.RAKNET);
+            NetworkPackage netPackage = PacketRegistry.tryDecode(buf, PacketType.RAKNET);
             if (netPackage != null) {
                 list.add(new DirectAddressedRakNetPacket(netPackage, packet.recipient(), packet.sender()));
             }

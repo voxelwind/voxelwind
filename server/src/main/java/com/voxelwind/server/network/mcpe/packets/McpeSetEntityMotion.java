@@ -2,7 +2,7 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetPackage;
+import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class McpeSetEntityMotion implements RakNetPackage {
+public class McpeSetEntityMotion implements NetworkPackage {
     private final List<EntityMotion> motionList = new ArrayList<>();
 
     @Override
