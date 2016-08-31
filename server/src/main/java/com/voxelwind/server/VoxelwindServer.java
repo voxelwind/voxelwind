@@ -10,6 +10,7 @@ import com.voxelwind.api.server.Server;
 import com.voxelwind.api.server.command.CommandManager;
 import com.voxelwind.api.server.command.sources.ConsoleCommandExecutorSource;
 import com.voxelwind.api.server.event.EventManager;
+import com.voxelwind.api.server.event.player.PlayerJoinEvent;
 import com.voxelwind.api.server.event.server.ServerInitializeEvent;
 import com.voxelwind.api.server.event.server.ServerStartEvent;
 import com.voxelwind.server.command.VoxelwindCommandManager;

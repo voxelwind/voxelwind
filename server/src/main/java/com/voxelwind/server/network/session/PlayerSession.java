@@ -15,6 +15,7 @@ import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
+import com.voxelwind.api.server.event.player.PlayerJoinEvent;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
@@ -198,6 +199,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeSetSpawnPosition spawnPosition = new McpeSetSpawnPosition();
         spawnPosition.setPosition(getLevel().getSpawnLocation().toInt());
         session.addToSendQueue(spawnPosition);
+
+        PlayerJoinEvent joinEvent = new PlayerJoinEvent(this, getName() + " joined the game.");
+        session.getServer().getEventManager().fire(joinEvent);
 
         sendMovePlayerPacket();
     }
