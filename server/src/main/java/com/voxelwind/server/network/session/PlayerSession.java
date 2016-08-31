@@ -200,9 +200,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         spawnPosition.setPosition(getLevel().getSpawnLocation().toInt());
         session.addToSendQueue(spawnPosition);
 
-        PlayerJoinEvent joinEvent = new PlayerJoinEvent(this, getName() + " joined the game.");
-        session.getServer().getEventManager().fire(joinEvent);
-
         sendMovePlayerPacket();
     }
 
@@ -545,6 +542,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     sendPlayerInventory();
 
                     spawned = true;
+                    
+                    PlayerJoinEvent joinEvent = new PlayerJoinEvent(this, TextFormat.YELLOW + getName() + " joined the game.");
+                    session.getServer().getEventManager().fire(joinEvent);
                 }
             });
         }
