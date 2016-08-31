@@ -32,7 +32,7 @@ public class LevelPacketManager {
                 for (PlayerSession session : playersInWorld) {
                     if (session == entity) continue; // Don't move ourselves
 
-                    if (session.getPosition().distance(entity.getPosition()) <= 64F) {
+                    if (session.getPosition().distance(entity.getPosition()) <= 64F && !session.isRemoved()) {
                         for (NetworkPackage aPackage : entry.getValue()) {
                             session.getMcpeSession().addToSendQueue(aPackage);
                         }
