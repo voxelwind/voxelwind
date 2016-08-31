@@ -613,7 +613,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 try {
                     session.getServer().getCommandManager().executeCommand(PlayerSession.this, command);
                 } catch (CommandNotFoundException e) {
-                    sendMessage(TextFormat.RED + "No such command found.");
+                    sendMessage(session.getServer().getConfiguration().getMessages().getUnknownCommand().replace("&", "§"));
                 } catch (CommandException e) {
                     LOGGER.error("Error while running command '{}' for {}", command, getName(), e);
                     sendMessage(TextFormat.RED + "An error has occurred while running the command.");

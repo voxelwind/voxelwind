@@ -43,6 +43,10 @@ public class VoxelwindConfiguration {
      * Configuration for the RCON service.
      */
     private RconConfiguration rcon;
+    /**
+     * Configuration for the... ummm.. messages.
+     */
+    private MessagesConfiguration messages;
 
     @Getter
     @ToString
@@ -85,6 +89,16 @@ public class VoxelwindConfiguration {
         }
     }
 
+    @Getter
+    @ToString
+    public static class MessagesConfiguration {
+        /**
+         * The message displayed when the sender attempts to execute a non-existent command.
+         */
+        private String unknownCommand;
+    }
+
+
     public XboxAuthenticationConfiguration getXboxAuthentication() {
         return xboxAuthentication;
     }
@@ -115,6 +129,8 @@ public class VoxelwindConfiguration {
         configuration.rcon.port = 27015;
         configuration.rcon.password = generateRandomPassword();
         configuration.maximumPlayerLimit = -1;
+        configuration.messages = new MessagesConfiguration();
+        configuration.messages.unknownCommand = "&cNo such command found.";
         return configuration;
     }
 
