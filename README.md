@@ -7,7 +7,7 @@
 Voxelwind is an upcoming _Minecraft: Pocket Edition_ server project written in Java. It aims to provide a Java-first API,
 provide high performance, high scalability and flexibility while being easy to use for causal users.
 
-Voxelwind aims to be a comprehensive implementation of MCPE.
+Voxelwind aims to be a comprehensive implementation of MCPE, **but is currently incomplete and lacks several important features**.
 
 Voxelwind is licensed under the permissive **MIT** license. However, we would love if you submit improvements you make to
 Voxelwind upstream so that the larger community can benefit from them.
