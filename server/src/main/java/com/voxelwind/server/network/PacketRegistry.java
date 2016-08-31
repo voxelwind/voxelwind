@@ -43,28 +43,28 @@ public class PacketRegistry {
         MCPE_PACKETS[0x0a] = McpeAddPlayer.class;
         MCPE_PACKETS[0x0b] = McpeAddEntity.class;
         MCPE_PACKETS[0x0c] = McpeRemoveEntity.class;
-        MCPE_PACKETS[0x10] = McpeMoveEntity.class;
-        MCPE_PACKETS[0x11] = McpeMovePlayer.class;
-        MCPE_PACKETS[0x14] = McpeUpdateBlock.class;
-        MCPE_PACKETS[0x19] = McpeEntityEvent.class;
-        MCPE_PACKETS[0x1b] = McpeUpdateAttributes.class;
-        MCPE_PACKETS[0x1c] = McpeMobEquipment.class;
+        MCPE_PACKETS[0x0f] = McpeMoveEntity.class;
+        MCPE_PACKETS[0x10] = McpeMovePlayer.class;
+        MCPE_PACKETS[0x13] = McpeUpdateBlock.class;
+        MCPE_PACKETS[0x18] = McpeEntityEvent.class;
+        MCPE_PACKETS[0x1a] = McpeUpdateAttributes.class;
+        MCPE_PACKETS[0x1b] = McpeMobEquipment.class;
         MCPE_PACKETS[0x20] = McpePlayerAction.class;
         MCPE_PACKETS[0x22] = McpeSetEntityData.class;
         MCPE_PACKETS[0x23] = McpeSetEntityMotion.class;
         MCPE_PACKETS[0x26] = McpeSetSpawnPosition.class;
         MCPE_PACKETS[0x27] = McpeAnimate.class;
         MCPE_PACKETS[0x28] = McpeRespawn.class;
-        MCPE_PACKETS[0x2b] = McpeContainerOpen.class;
-        MCPE_PACKETS[0x2c] = McpeContainerClose.class;
-        MCPE_PACKETS[0x2d] = McpeContainerSetSlot.class;
-        MCPE_PACKETS[0x2e] = McpeContainerSetData.class;
-        MCPE_PACKETS[0x2f] = McpeContainerSetContents.class;
-        MCPE_PACKETS[0x32] = McpeAdventureSettings.class;
-        MCPE_PACKETS[0x35] = McpeFullChunkData.class;
-        MCPE_PACKETS[0x39] = McpeSetPlayerGameMode.class;
-        MCPE_PACKETS[0x3f] = McpeRequestChunkRadius.class;
-        MCPE_PACKETS[0x40] = McpeChunkRadiusUpdated.class;
+        MCPE_PACKETS[0x2a] = McpeContainerOpen.class;
+        MCPE_PACKETS[0x2b] = McpeContainerClose.class;
+        MCPE_PACKETS[0x2c] = McpeContainerSetSlot.class;
+        MCPE_PACKETS[0x2d] = McpeContainerSetData.class;
+        MCPE_PACKETS[0x2e] = McpeContainerSetContents.class;
+        MCPE_PACKETS[0x31] = McpeAdventureSettings.class;
+        MCPE_PACKETS[0x34] = McpeFullChunkData.class;
+        MCPE_PACKETS[0x37] = McpeSetPlayerGameMode.class;
+        MCPE_PACKETS[0x3d] = McpeRequestChunkRadius.class;
+        MCPE_PACKETS[0x3e] = McpeChunkRadiusUpdated.class;
     }
 
     private PacketRegistry() {
