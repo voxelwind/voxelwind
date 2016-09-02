@@ -16,7 +16,7 @@ public class VersionCommand implements CommandExecutor {
     public void execute(CommandExecutorSource source, String[] args) throws Exception {
         if (source instanceof MessageRecipient) {
             MessageRecipient recipient = (MessageRecipient) source;
-            recipient.sendMessage("This is " + server.getName() + " " + server.getVersion());
+            recipient.sendMessage("This server is running " + server.getName() + " " + server.getVersion());
             recipient.sendMessage("Voxelwind is freely licensed under the MIT license.");
             recipient.sendMessage("Check out Voxelwind at https://voxelwind.com");
         }
