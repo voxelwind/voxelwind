@@ -16,6 +16,7 @@ Voxelwind upstream so that the larger community can benefit from them.
 
 * [Gitter chat room](https://gitter.im/minecrafter/voxelwind)
 * [Wiki](https://wiki.voxelwind.com)
+* [Chat on the Forums](https://forums.voxelwind.com/)
 * [Latest Jenkins builds](https://ci.voxelwind.com/job/Voxelwind/)
 
 ## Special Thanks
