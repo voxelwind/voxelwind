@@ -9,6 +9,9 @@ import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetUtil;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import io.netty.buffer.ByteBuf;
 
 import java.util.HashMap;
@@ -16,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public final class MetadataDictionary {
-    private final Map<Integer, Object> typeMap = new HashMap<>();
+    private final TIntObjectMap<Object> typeMap = new TIntObjectHashMap<>();
 
     public void putAll(MetadataDictionary dictionary) {
         Preconditions.checkNotNull(dictionary, "dictionary");
@@ -35,9 +38,10 @@ public final class MetadataDictionary {
     }
 
     public void writeTo(ByteBuf buf) {
-        for (Map.Entry<Integer, Object> entry : typeMap.entrySet()) {
-            serialize(buf, entry.getKey(), entry.getValue());
-        }
+        typeMap.forEachEntry((i, o) -> {
+            serialize(buf, i, o);
+            return true;
+        });
         buf.writeByte(0x7F);
     }
 

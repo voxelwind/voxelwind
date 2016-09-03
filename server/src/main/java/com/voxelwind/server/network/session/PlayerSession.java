@@ -27,6 +27,8 @@ import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.api.util.Rotation;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +46,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     private final McpeSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final Set<Long> isViewing = new HashSet<>();
+    private final TLongSet isViewing = new TLongHashSet();
     private GameMode gameMode = GameMode.SURVIVAL;
     private boolean spawned = false;
     private int viewDistance = 5;
@@ -261,9 +263,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     public void updateViewableEntities() {
         synchronized (isViewing) {
             Collection<BaseEntity> inView = getLevel().getEntityManager().getEntitiesInDistance(getPosition(), 64);
-            Collection<Long> mustRemove = new ArrayList<>();
+            TLongSet mustRemove = new TLongHashSet();
             Collection<BaseEntity> mustAdd = new ArrayList<>();
-            for (Long id : isViewing) {
+            isViewing.forEach(id -> {
                 Optional<BaseEntity> optional = getLevel().getEntityManager().findEntityById(id);
                 if (optional.isPresent()) {
                     if (!inView.contains(optional.get())) {
@@ -272,7 +274,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 } else {
                     mustRemove.add(id);
                 }
-            }
+                return true;
+            });
 
             for (BaseEntity entity : inView) {
                 if (entity.getEntityId() == getEntityId()) {
@@ -285,11 +288,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             }
             isViewing.removeAll(mustRemove);
 
-            for (Long id : mustRemove) {
+            mustRemove.forEach(id -> {
                 McpeRemoveEntity entity = new McpeRemoveEntity();
                 entity.setEntityId(id);
                 session.addToSendQueue(entity);
-            }
+                return true;
+            });
 
             for (BaseEntity entity : mustAdd) {
                 session.addToSendQueue(entity.createAddEntityPacket());
