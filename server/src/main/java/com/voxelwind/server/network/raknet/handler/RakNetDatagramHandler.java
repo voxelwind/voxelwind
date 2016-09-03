@@ -78,10 +78,6 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
                 }
             }
         }
-
-        if (datagram.refCnt() > 1) {
-            datagram.release();
-        }
     }
 
     private void handlePackage(NetworkPackage netPackage, McpeSession session) throws Exception {

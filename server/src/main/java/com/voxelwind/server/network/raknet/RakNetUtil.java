@@ -2,7 +2,7 @@ package com.voxelwind.server.network.raknet;
 
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
+import io.netty.util.CharsetUtil;
 import lombok.experimental.UtilityClass;
 
 import java.net.Inet4Address;
@@ -20,7 +20,7 @@ public class RakNetUtil {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
         buffer.writeShort((short) string.length());
-        ByteBufUtil.writeUtf8(buffer, string);
+        buffer.writeBytes(string.getBytes(CharsetUtil.UTF_8));
     }
 
     public static String readString(ByteBuf buffer) {
