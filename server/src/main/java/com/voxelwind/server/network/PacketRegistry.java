@@ -3,6 +3,9 @@ package com.voxelwind.server.network;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.raknet.packets.*;
+import gnu.trove.TCollections;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 
@@ -11,6 +14,7 @@ import java.util.Arrays;
 public class PacketRegistry {
     private static final Class<? extends NetworkPackage>[] RAKNET_PACKETS = new Class[256];
     private static final Class<? extends NetworkPackage>[] MCPE_PACKETS = new Class[256];
+    private static final TObjectIntMap<Class<? extends NetworkPackage>> PACKAGE_MAPPING;
 
     static {
         RAKNET_PACKETS[0x00] = ConnectedPingPacket.class;
@@ -64,6 +68,23 @@ public class PacketRegistry {
         MCPE_PACKETS[0x37] = McpeSetPlayerGameMode.class;
         MCPE_PACKETS[0x3d] = McpeRequestChunkRadius.class;
         MCPE_PACKETS[0x3e] = McpeChunkRadiusUpdated.class;
+
+        TObjectIntMap<Class<? extends NetworkPackage>> classToIdMap = new TObjectIntHashMap<>(64, 0.75f, -1);
+        for (int i = 0; i < RAKNET_PACKETS.length; i++) {
+            Class clazz = RAKNET_PACKETS[i];
+            if (clazz != null) {
+                classToIdMap.put(clazz, i);
+            }
+        }
+
+        for (int i = 0; i < MCPE_PACKETS.length; i++) {
+            Class clazz = MCPE_PACKETS[i];
+            if (clazz != null) {
+                classToIdMap.put(clazz, i);
+            }
+        }
+
+        PACKAGE_MAPPING = TCollections.unmodifiableMap(classToIdMap);
     }
 
     private PacketRegistry() {
@@ -109,13 +130,9 @@ public class PacketRegistry {
         return netPackage;
     }
 
-    public static Integer getId(NetworkPackage pkg) {
-        // TODO: Might be a regression going from two O(1) operations to two O(n) operations. Requires some profiling.
+    public static int getId(NetworkPackage pkg) {
         Class<? extends NetworkPackage> pkgClass = pkg.getClass();
-        int res = Arrays.asList(RAKNET_PACKETS).indexOf(pkg.getClass());
-        if (res == -1) {
-            res = Arrays.asList(MCPE_PACKETS).indexOf(pkg.getClass());
-        }
+        int res = PACKAGE_MAPPING.get(pkgClass);
         if (res == -1) {
             throw new IllegalArgumentException("Packet ID for " + pkgClass.getName() + " does not exist.");
         }
