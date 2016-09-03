@@ -41,7 +41,7 @@ public class DatagramRakNetPacketCodec extends MessageToMessageCodec<DatagramPac
         if (flags.isValid() && !flags.isAck() && !flags.isNak()) {
             RakNetDatagram datagram = new RakNetDatagram();
             datagram.decode(packet.content());
-            list.add(new AddressedRakNetDatagram(datagram, packet.recipient(), packet.sender()).retain());
+            list.add(new AddressedRakNetDatagram(datagram, packet.recipient(), packet.sender()));
         }
     }
 }
