@@ -141,7 +141,10 @@ public class VoxelwindServer implements Server {
         // Send another event.
         eventManager.fire(ServerStartEvent.INSTANCE);
 
-        Thread.sleep(10000000);
+        // Sleep forever for now until we have a console reader.
+        while (true) {
+            Thread.sleep(1000);
+        }
     }
 
     public VoxelwindLevel getDefaultLevel() {
