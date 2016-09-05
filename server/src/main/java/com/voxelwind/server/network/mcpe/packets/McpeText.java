@@ -60,10 +60,10 @@ public class McpeText implements NetworkPackage {
                 RakNetUtil.writeString(buffer, message);
                 break;
             case TIP:
-                message = RakNetUtil.readString(buffer);
+                RakNetUtil.writeString(buffer, message);
                 break;
             case SYSTEM:
-                message = RakNetUtil.readString(buffer);
+                RakNetUtil.writeString(buffer, message);
                 break;
         }
     }
