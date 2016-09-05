@@ -11,6 +11,8 @@ import com.voxelwind.api.game.item.util.ItemTypeUtil;
 import com.voxelwind.api.game.level.block.data.Crops;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.DyeColor;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.Builder;
 import lombok.experimental.UtilityClass;
 
@@ -21,7 +23,7 @@ import java.util.*;
  */
 @UtilityClass
 public class BlockTypes {
-    private static Map<Integer, BlockType> BY_ID = new HashMap<>();
+    private static TIntObjectMap<BlockType> BY_ID = new TIntObjectHashMap<>(192);
     private static final Random RANDOM = new Random();
 
     public static final BlockType AIR = IntBlock.builder().id(0).name("AIR").maxStackSize(0).diggable(false).transparent(true).emitLight(0).filterLight(0).dropHandler(NothingDrop.INSTANCE).build();

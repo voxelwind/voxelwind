@@ -6,6 +6,8 @@ import com.voxelwind.api.game.item.data.GenericDamageValue;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +17,7 @@ import java.util.Optional;
  * Represents all items available on the server.
  */
 public class ItemTypes {
-    private static Map<Integer, IntItem> BY_ID = new HashMap<>();
+    private static TIntObjectMap<ItemType> BY_ID = new TIntObjectHashMap<>(192);
 
     public static final ItemType IRON_SHOVEL = new IntItem(256, "iron_shovel", 1, null);
     public static final ItemType IRON_PICKAXE = new IntItem(257, "iron_pickaxe", 1, null);
