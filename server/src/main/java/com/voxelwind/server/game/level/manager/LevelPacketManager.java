@@ -20,7 +20,9 @@ public class LevelPacketManager {
     public synchronized void onTick() {
         for (NetworkPackage aPackage : broadcastQueue) {
             for (PlayerSession session : level.getEntityManager().getPlayers()) {
-                session.getMcpeSession().addToSendQueue(aPackage);
+                if (!session.isRemoved()) {
+                    session.getMcpeSession().addToSendQueue(aPackage);
+                }
             }
         }
 
