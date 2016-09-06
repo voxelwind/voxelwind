@@ -243,10 +243,15 @@ public class McpeUtil {
     }
 
     public static Rotation readFloatRotation(ByteBuf buffer) {
-        return Rotation.fromVector3f(readVector3f(buffer));
+        float yaw = buffer.readFloat();
+        float headYaw = buffer.readFloat();
+        float pitch = buffer.readFloat();
+        return new Rotation(yaw, headYaw, pitch);
     }
 
     public static void writeFloatRotation(ByteBuf buffer, Rotation rotation) {
-        writeVector3f(buffer, rotation.toVector3f());
+        buffer.writeFloat(rotation.getYaw());
+        buffer.writeFloat(rotation.getHeadYaw());
+        buffer.writeFloat(rotation.getPitch());
     }
 }
