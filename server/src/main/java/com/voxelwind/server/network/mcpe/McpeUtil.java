@@ -246,7 +246,7 @@ public class McpeUtil {
         float yaw = buffer.readFloat();
         float headYaw = buffer.readFloat();
         float pitch = buffer.readFloat();
-        return new Rotation(yaw, headYaw, pitch);
+        return new Rotation(pitch, yaw, headYaw);
     }
 
     public static void writeFloatRotation(ByteBuf buffer, Rotation rotation) {
