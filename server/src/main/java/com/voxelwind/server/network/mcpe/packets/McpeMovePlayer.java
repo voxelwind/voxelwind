@@ -19,7 +19,10 @@ public class McpeMovePlayer implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         entityId = buffer.readLong();
         position = McpeUtil.readVector3f(buffer);
-        rotation = McpeUtil.readRotation(buffer);
+        rotation = Rotation.builder()
+                .yaw(buffer.readFloat())
+                .headYaw(buffer.readFloat())
+                .pitch(buffer.readFloat()).build();
         mode = buffer.readBoolean();
         onGround = buffer.readBoolean();
     }
@@ -29,6 +32,9 @@ public class McpeMovePlayer implements NetworkPackage {
         buffer.writeLong(entityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeRotation(buffer, rotation);
+        buffer.writeFloat(rotation.getYaw());
+        buffer.writeFloat(rotation.getHeadYaw());
+        buffer.writeFloat(rotation.getPitch());
         buffer.writeBoolean(mode);
         buffer.writeBoolean(onGround);
     }
