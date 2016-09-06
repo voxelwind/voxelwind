@@ -93,14 +93,14 @@ public class McpeUtil {
         return new Vector3f(x, y, z);
     }
 
-    public static Rotation readRotation(ByteBuf buf) {
+    public static Rotation readByteRotation(ByteBuf buf) {
         byte pitchByte = buf.readByte();
         byte yawByte = buf.readByte();
         byte headYawByte = buf.readByte();
         return new Rotation(rotationByteToAngle(pitchByte), rotationByteToAngle(yawByte), rotationByteToAngle(headYawByte));
     }
 
-    public static void writeRotation(ByteBuf buf, Rotation rotation) {
+    public static void writeByteRotation(ByteBuf buf, Rotation rotation) {
         buf.writeByte(rotationAngleToByte(rotation.getPitch()));
         buf.writeByte(rotationAngleToByte(rotation.getYaw()));
         buf.writeByte(rotationAngleToByte(rotation.getHeadYaw()));
@@ -240,5 +240,13 @@ public class McpeUtil {
     public static void writeUuid(ByteBuf buf, UUID uuid) {
         buf.writeLong(uuid.getMostSignificantBits());
         buf.writeLong(uuid.getLeastSignificantBits());
+    }
+
+    public static Rotation readFloatRotation(ByteBuf buffer) {
+        return Rotation.fromVector3f(readVector3f(buffer));
+    }
+
+    public static void writeFloatRotation(ByteBuf buffer, Rotation rotation) {
+        writeVector3f(buffer, rotation.toVector3f());
     }
 }

@@ -17,13 +17,13 @@ public class McpeMoveEntity implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         entityId = buffer.readLong();
         position = McpeUtil.readVector3f(buffer);
-        rotation = McpeUtil.readRotation(buffer);
+        rotation = McpeUtil.readByteRotation(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeLong(entityId);
         McpeUtil.writeVector3f(buffer, position);
-        McpeUtil.writeRotation(buffer, rotation);
+        McpeUtil.writeByteRotation(buffer, rotation);
     }
 }
