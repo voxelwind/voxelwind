@@ -2,10 +2,12 @@ package com.voxelwind.api.util;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
+import lombok.Builder;
 
 /**
  * This class represents a rotation. Pocket Edition uses degrees to measure angles. This class is immutable.
  */
+@Builder
 public final class Rotation {
     public static final Rotation ZERO = new Rotation(0f, 0f, 0f);
 
