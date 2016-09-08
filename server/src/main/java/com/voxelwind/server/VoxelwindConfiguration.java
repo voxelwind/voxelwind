@@ -1,7 +1,7 @@
 package com.voxelwind.server;
 
 import com.voxelwind.server.jni.CryptoUtil;
-import com.voxelwind.server.network.Native;
+import com.voxelwind.server.network.util.NativeCodeFactory;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -106,7 +106,7 @@ public class VoxelwindConfiguration {
         configuration.bindHost = "0.0.0.0";
         configuration.useSoReuseport = false;
         configuration.xboxAuthentication = new XboxAuthenticationConfiguration();
-        configuration.xboxAuthentication.enabled = CryptoUtil.isJCEUnlimitedStrength() || Native.cipher.isLoaded();
+        configuration.xboxAuthentication.enabled = CryptoUtil.isJCEUnlimitedStrength() || NativeCodeFactory.cipher.isLoaded();
         configuration.xboxAuthentication.forceAuthentication = false;
         configuration.port = 19132;
         configuration.rcon = new RconConfiguration();

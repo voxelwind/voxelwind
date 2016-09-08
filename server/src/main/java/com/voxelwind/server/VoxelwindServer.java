@@ -23,7 +23,7 @@ import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
-import com.voxelwind.server.network.Native;
+import com.voxelwind.server.network.util.NativeCodeFactory;
 import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
 import com.voxelwind.server.network.rcon.NettyVoxelwindRconListener;
 import com.voxelwind.server.network.session.SessionManager;
@@ -65,12 +65,12 @@ public class VoxelwindServer implements Server {
 
         // Load native libraries early.
         boolean partiallySupportedLinux = Epoll.isAvailable();
-        boolean fullySupportedLinux = Native.cipher.load();
+        boolean fullySupportedLinux = NativeCodeFactory.cipher.load();
 
         if (partiallySupportedLinux) {
-            Native.zlib.load();
+            NativeCodeFactory.zlib.load();
             if (fullySupportedLinux) {
-                Native.hash.load();
+                NativeCodeFactory.hash.load();
             } else {
                 LOGGER.warn("You are running x64 Linux, but you are not using a fully-supported distribution. Server throughput and performance will be affected. Visit https://wiki.voxelwind.com/why_linux for more information.");
             }

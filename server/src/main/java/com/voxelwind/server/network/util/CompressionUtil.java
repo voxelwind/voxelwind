@@ -1,6 +1,5 @@
 package com.voxelwind.server.network.util;
 
-import com.voxelwind.server.network.Native;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import net.md_5.bungee.jni.zlib.BungeeZlib;
@@ -12,7 +11,7 @@ public class CompressionUtil {
     private static final ThreadLocal<BungeeZlib> inflaterLocal = new ThreadLocal<BungeeZlib>() {
         @Override
         protected net.md_5.bungee.jni.zlib.BungeeZlib initialValue() {
-            BungeeZlib zlib = Native.zlib.newInstance();
+            BungeeZlib zlib = NativeCodeFactory.zlib.newInstance();
             zlib.init(false, Deflater.DEFAULT_COMPRESSION);
             return zlib;
         }
@@ -20,7 +19,7 @@ public class CompressionUtil {
     private static final ThreadLocal<BungeeZlib> deflaterLocal = new ThreadLocal<BungeeZlib>() {
         @Override
         protected net.md_5.bungee.jni.zlib.BungeeZlib initialValue() {
-            BungeeZlib zlib = Native.zlib.newInstance();
+            BungeeZlib zlib = NativeCodeFactory.zlib.newInstance();
             zlib.init(true, Deflater.DEFAULT_COMPRESSION);
             return zlib;
         }

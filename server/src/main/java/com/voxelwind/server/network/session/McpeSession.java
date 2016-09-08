@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.jni.hash.VoxelwindHash;
-import com.voxelwind.server.network.Native;
+import com.voxelwind.server.network.util.NativeCodeFactory;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.raknet.RakNetSession;
 import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
@@ -196,8 +196,8 @@ public class McpeSession {
         byte[] iv = Arrays.copyOf(secretKey, 16);
         SecretKey key = new SecretKeySpec(secretKey, "AES");
         try {
-            encryptionCipher = Native.cipher.newInstance();
-            decryptionCipher = Native.cipher.newInstance();
+            encryptionCipher = NativeCodeFactory.cipher.newInstance();
+            decryptionCipher = NativeCodeFactory.cipher.newInstance();
 
             encryptionCipher.init(true, key, iv);
             decryptionCipher.init(false, key, iv);
@@ -242,7 +242,7 @@ public class McpeSession {
     }
 
     private byte[] generateTrailer(ByteBuf buf) {
-        VoxelwindHash hash = Native.hash.newInstance();
+        VoxelwindHash hash = NativeCodeFactory.hash.newInstance();
 
         ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer(8);
         ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer(serverKey.length);
