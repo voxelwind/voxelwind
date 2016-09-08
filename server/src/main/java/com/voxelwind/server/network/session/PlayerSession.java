@@ -712,13 +712,18 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         @Override
         public void handle(McpeRemoveBlock packet) {
             // TODO: Perform sanity checks and drop items.
-            Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(packet.getPosition().getX() / 16, packet.getPosition().getZ() / 16);
+            int chunkX = packet.getPosition().getX() / 16;
+            int chunkZ = packet.getPosition().getZ() / 16;
+            Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(chunkX, chunkZ);
             if (!chunkOptional.isPresent()) {
                 // Chunk not loaded, danger ahead!
+                LOGGER.error("{} tried to remove block at unloaded chunk ({}, {})", getName(), chunkX, chunkZ);
                 return;
             }
-            chunkOptional.get().setBlock(packet.getPosition().getX() % 16, packet.getPosition().getY(), packet.getPosition().getZ() % 16,
-                    new BasicBlockState(BlockTypes.AIR, null));
+
+            int inChunkX = Math.abs(packet.getPosition().getX() % 16);
+            int inChunkZ = Math.abs(packet.getPosition().getZ() % 16);
+            chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
             getLevel().getPacketManager().queuePacketForPlayers(packet);
         }
     }

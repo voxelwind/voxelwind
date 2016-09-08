@@ -78,7 +78,7 @@ public interface Level {
      * @return an {@link CompletableFuture} with the block
      */
     default CompletableFuture<Block> getBlock(int x, int y, int z) {
-        return getChunk(x / 16, z / 16).thenApply(chunk -> chunk.getBlock(x % 16, y, z % 16));
+        return getChunk(x / 16, z / 16).thenApply(chunk -> chunk.getBlock(Math.abs(x % 16), y, Math.abs(z % 16)));
     }
 
     /**
@@ -100,6 +100,6 @@ public interface Level {
      */
     default Optional<Block> getBlockIfChunkLoaded(int x, int y, int z) {
         Optional<Chunk> chunkOptional = getChunkIfLoaded(x / 16, z / 16);
-        return chunkOptional.map(c -> c.getBlock(x % 16, y, z % 16));
+        return chunkOptional.map(c -> c.getBlock(Math.abs(x % 16), y, Math.abs(z % 16)));
     }
 }

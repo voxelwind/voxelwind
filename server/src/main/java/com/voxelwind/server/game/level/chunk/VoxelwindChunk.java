@@ -1,6 +1,7 @@
 package com.voxelwind.server.game.level.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
@@ -152,16 +153,8 @@ public class VoxelwindChunk implements Chunk {
     }
 
     private static void checkPosition(int x, int y, int z) {
-        if (x < 0 || x >= 16) {
-            throw new IllegalArgumentException("x not in range (0 to 15)");
-        }
-
-        if (z < 0 || z >= 16) {
-            throw new IllegalArgumentException("z not in range (0 to 15)");
-        }
-
-        if (y < 0 || y > 128) {
-            throw new IllegalArgumentException("y not in range (0 to 128)");
-        }
+        Preconditions.checkArgument(x >= 0 && x <= 15, "x value (%s) not in range (0 to 15)", x);
+        Preconditions.checkArgument(z >= 0 && z <= 15, "z value (%s) not in range (0 to 15)", z);
+        Preconditions.checkArgument(y >= 0 && y <= 128, "y value (%s) not in range (0 to 128)", y);
     }
 }
