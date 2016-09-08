@@ -3,6 +3,7 @@ package com.voxelwind.server.network.mcpe.packets;
 import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.util.Rotation;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
@@ -20,8 +21,7 @@ public class McpeAddPlayer implements NetworkPackage {
     private long entityId;
     private Vector3f position;
     private Vector3f velocity;
-    private float yaw;
-    private float pitch;
+    private Rotation rotation;
     private ItemStack held = new VoxelwindItemStack(BlockTypes.AIR, 1, null);
     private final MetadataDictionary metadata = new MetadataDictionary();
 
@@ -32,8 +32,7 @@ public class McpeAddPlayer implements NetworkPackage {
         entityId = buffer.readLong();
         position = McpeUtil.readVector3f(buffer);
         velocity = McpeUtil.readVector3f(buffer);
-        yaw = buffer.readFloat();
-        pitch = buffer.readFloat();
+        rotation = McpeUtil.readFloatRotation(buffer);
         held = McpeUtil.readItemStack(buffer);
         metadata.putAll(MetadataDictionary.deserialize(buffer));
     }
@@ -45,8 +44,7 @@ public class McpeAddPlayer implements NetworkPackage {
         buffer.writeLong(entityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);
-        buffer.writeFloat(yaw);
-        buffer.writeFloat(pitch);
+        McpeUtil.writeFloatRotation(buffer, rotation);
         McpeUtil.writeItemStack(buffer, held);
         metadata.writeTo(buffer);
     }
