@@ -81,6 +81,8 @@ public class VoxelwindChunk implements Chunk {
         BlockData blockData = state.getBlockData();
         if (blockData != null) {
             blockMetadata.set(index, (byte) blockData.toBlockMetadata());
+        } else {
+            blockMetadata.set(index, (byte) 0);
         }
 
         stale = true;

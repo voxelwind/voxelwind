@@ -200,5 +200,8 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
         if (netPackage instanceof McpeMobEquipment) {
             session.getHandler().handle((McpeMobEquipment) netPackage);
         }
+        if (netPackage instanceof McpeRemoveBlock) {
+            session.getHandler().handle((McpeRemoveBlock) netPackage);
+        }
     }
 }

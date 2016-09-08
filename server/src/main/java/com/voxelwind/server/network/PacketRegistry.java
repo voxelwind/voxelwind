@@ -48,6 +48,7 @@ public class PacketRegistry {
         MCPE_PACKETS[0x0c] = McpeRemoveEntity.class;
         MCPE_PACKETS[0x0f] = McpeMoveEntity.class;
         MCPE_PACKETS[0x10] = McpeMovePlayer.class;
+        MCPE_PACKETS[0x12] = McpeRemoveBlock.class;
         MCPE_PACKETS[0x13] = McpeUpdateBlock.class;
         MCPE_PACKETS[0x18] = McpeEntityEvent.class;
         MCPE_PACKETS[0x1a] = McpeUpdateAttributes.class;

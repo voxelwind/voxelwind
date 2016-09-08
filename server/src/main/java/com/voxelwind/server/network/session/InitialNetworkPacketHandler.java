@@ -164,6 +164,11 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         throw new IllegalStateException("Got unexpected McpeMobEquipment");
     }
 
+    @Override
+    public void handle(McpeRemoveBlock packet) {
+        throw new IllegalStateException("Got unexpected McpeRemoveBlock");
+    }
+
     private void initializePlayerSession() {
         TemporarySession apiSession = new TemporarySession(session);
         SessionLoginEvent event = new SessionLoginEvent(apiSession);

@@ -22,4 +22,6 @@ public interface NetworkPacketHandler {
     void handle(McpeContainerSetSlot packet);
 
     void handle(McpeMobEquipment packet);
+
+    void handle(McpeRemoveBlock packet);
 }

@@ -203,11 +203,12 @@ public class McpeUtil {
     }
 
     public static void writeItemStack(ByteBuf buf, ItemStack stack) {
-        buf.writeShort(stack.getItemType().getId());
-        if (stack.getItemType() == BlockTypes.AIR) {
+        if (stack == null || stack.getItemType() == BlockTypes.AIR) {
+            buf.writeShort(0);
             return;
         }
 
+        buf.writeShort(stack.getItemType().getId());
         buf.writeByte(stack.getAmount());
         Optional<ItemData> dataOptional = stack.getItemData();
         if (dataOptional.isPresent()) {

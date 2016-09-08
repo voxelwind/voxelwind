@@ -10,6 +10,7 @@ import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Skin;
@@ -21,6 +22,7 @@ import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
 import com.voxelwind.server.game.level.util.Attribute;
@@ -705,6 +707,19 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             playerInventory.setLink(packet.getHotbarSlot(), finalSlot);
             playerInventory.setHeldSlot(packet.getHotbarSlot(), false);
+        }
+
+        @Override
+        public void handle(McpeRemoveBlock packet) {
+            // TODO: Perform sanity checks and drop items.
+            Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(packet.getPosition().getX() / 16, packet.getPosition().getZ() / 16);
+            if (!chunkOptional.isPresent()) {
+                // Chunk not loaded, danger ahead!
+                return;
+            }
+            chunkOptional.get().setBlock(packet.getPosition().getX() % 16, packet.getPosition().getY(), packet.getPosition().getZ() % 16,
+                    new BasicBlockState(BlockTypes.AIR, null));
+            getLevel().getPacketManager().queuePacketForPlayers(packet);
         }
     }
 
