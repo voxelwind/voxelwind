@@ -48,12 +48,6 @@ public class VoxelwindConfiguration {
     @ToString
     public static class XboxAuthenticationConfiguration {
         /**
-         * Whether or not to use Xbox authentication. This setting will be overridden on a system that does not have the
-         * unlimited strength JCE policy installed and 64-bit Linux is not in use. Enabling this setting will also encrypt
-         * all player connections.
-         */
-        private boolean enabled;
-        /**
          * Whether or not Xbox authentication is the only authentication method permitted. If a player attempts to connect
          * without using Xbox authentication, they will be disconnected when trying to log in.
          */
@@ -106,7 +100,6 @@ public class VoxelwindConfiguration {
         configuration.bindHost = "0.0.0.0";
         configuration.useSoReuseport = false;
         configuration.xboxAuthentication = new XboxAuthenticationConfiguration();
-        configuration.xboxAuthentication.enabled = CryptoUtil.isJCEUnlimitedStrength() || NativeCodeFactory.cipher.isLoaded();
         configuration.xboxAuthentication.forceAuthentication = false;
         configuration.port = 19132;
         configuration.rcon = new RconConfiguration();

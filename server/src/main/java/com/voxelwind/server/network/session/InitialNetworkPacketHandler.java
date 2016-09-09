@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -81,19 +82,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             ClientData clientData = getClientData(key, packet.getSkinData());
             session.setClientData(clientData);
 
-            if (CAN_USE_ENCRYPTION && session.getServer().getConfiguration().getXboxAuthentication().isEnabled()) {
-                // ...and begin encrypting the connection.
-                byte[] token = EncryptionUtil.generateRandomToken();
-                byte[] serverKey = EncryptionUtil.getServerKey(key, token);
-                session.enableEncryption(serverKey);
-                session.sendImmediatePackage(EncryptionUtil.createHandshakePacket(token));
-            } else {
-                // Will not use encryption - initialize the player's session
-                initializePlayerSession();
-            }
+            startEncryptionHandshake(key);
         } catch (ChainTrustInvalidException e) {
-            // If configuration permits us to continue logging the player in, then initialize the player session without
-            // encrypting the connection.
+            // If configuration permits us to continue logging the player in, then initialize all authentication fields
+            // as if Xbox authentication successfully completed.
             if (!session.getServer().getConfiguration().getXboxAuthentication().isForceAuthentication()) {
                 // Fill in all data and try again.
                 try {
@@ -102,14 +94,15 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                     payload.getExtraData().setXuid(null);
                     session.setAuthenticationProfile(payload.getExtraData());
                     session.setClientData(VoxelwindServer.MAPPER.convertValue(getPayload(packet.getSkinData()), ClientData.class));
-                } catch (IOException e1) {
+
+                    // Start encrypting the connection.
+                    PublicKey key = getKey(payload.getIdentityPublicKey());
+                    startEncryptionHandshake(key);
+                } catch (Exception e1) {
                     // Disconnect the player.
                     LOGGER.error("Unable to initialize player session", e);
                     session.disconnect("Internal server error");
-                    return;
                 }
-                // Since all data is fake, don't bother encrypting the connection.
-                initializePlayerSession();
             } else {
                 session.disconnect("This server requires that you sign in with Xbox Live.");
             }
@@ -167,6 +160,18 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     @Override
     public void handle(McpeRemoveBlock packet) {
         throw new IllegalStateException("Got unexpected McpeRemoveBlock");
+    }
+
+    private void startEncryptionHandshake(PublicKey key) throws InvalidKeyException {
+        if (!CAN_USE_ENCRYPTION) {
+            // Can't use encryption.
+            initializePlayerSession();
+        }
+
+        byte[] token = EncryptionUtil.generateRandomToken();
+        byte[] serverKey = EncryptionUtil.getServerKey(key, token);
+        session.enableEncryption(serverKey);
+        session.sendImmediatePackage(EncryptionUtil.createHandshakePacket(token));
     }
 
     private void initializePlayerSession() {
