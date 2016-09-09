@@ -166,6 +166,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         if (!CAN_USE_ENCRYPTION) {
             // Can't use encryption.
             initializePlayerSession();
+            return;
         }
 
         byte[] token = EncryptionUtil.generateRandomToken();
