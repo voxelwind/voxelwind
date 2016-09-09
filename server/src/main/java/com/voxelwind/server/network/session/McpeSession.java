@@ -17,6 +17,7 @@ import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import net.md_5.bungee.jni.cipher.BungeeCipher;
 import org.apache.logging.log4j.LogManager;
@@ -124,7 +125,11 @@ public class McpeSession {
         } else {
             encodedPacketData.writeByte((id & 0xFF));
             netPackage.encode(encodedPacketData);
+
+            encodedPacketData.readerIndex(0);
             byte[] trailer = generateTrailer(encodedPacketData);
+            encodedPacketData.readerIndex(0);
+
             encodedPacketData.writeBytes(trailer);
 
             dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer();
