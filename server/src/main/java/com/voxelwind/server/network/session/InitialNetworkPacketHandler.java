@@ -221,7 +221,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
         JsonNode payload = getPayload(data.get(data.size() - 1).asText());
         JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
-        if (!CAN_USE_ENCRYPTION || !session.getServer().getConfiguration().getXboxAuthentication().isEnabled()) {
+        if (!CAN_USE_ENCRYPTION) {
             // Not authenticated, don't allow faking the XUID.
             jwtPayload.getExtraData().setXuid(null);
         }
