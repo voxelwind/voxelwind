@@ -2,7 +2,9 @@ package com.voxelwind.server.game.level.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.ChunkSnapshot;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
@@ -96,6 +98,20 @@ public class VoxelwindChunk implements Chunk {
 
         stale = true;
         return getBlock(x, y, z);
+    }
+
+    @Override
+    public ChunkSnapshot toSnapshot() {
+        // TODO: Do a better job of this
+        return new VoxelwindChunkSnapshot(
+                Arrays.copyOf(blockData, blockData.length),
+                blockMetadata.copy(),
+                skyLightData.copy(),
+                blockLightData.copy(),
+                ImmutableMap.copyOf(blockEntities),
+                x,
+                z
+        );
     }
 
     public synchronized McpeBatch getChunkDataPacket() {

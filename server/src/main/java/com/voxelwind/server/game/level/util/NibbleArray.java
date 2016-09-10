@@ -2,6 +2,8 @@ package com.voxelwind.server.game.level.util;
 
 import com.google.common.base.Preconditions;
 
+import java.util.Arrays;
+
 public class NibbleArray {
     private final byte[] data;
 
@@ -27,6 +29,10 @@ public class NibbleArray {
     }
 
     public byte[] getData() {
-        return data;
+        return Arrays.copyOf(data, data.length);
+    }
+
+    public NibbleArray copy() {
+        return new NibbleArray(getData());
     }
 }

@@ -1,16 +1,12 @@
 package com.voxelwind.server.game.level.provider;
 
-import com.flowpowered.math.vector.Vector2i;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class FlatworldChunkProvider implements ChunkProvider {
     public static final FlatworldChunkProvider INSTANCE = new FlatworldChunkProvider();
