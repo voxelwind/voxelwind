@@ -8,6 +8,8 @@ public interface Chunk {
 
     int getZ();
 
+    Level getLevel();
+
     Block getBlock(int x, int y, int z);
 
     Block setBlock(int x, int y, int z, BlockState state);

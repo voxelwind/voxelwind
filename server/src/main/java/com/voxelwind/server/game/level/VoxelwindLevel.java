@@ -3,6 +3,7 @@ package com.voxelwind.server.game.level;
 import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
 import com.voxelwind.server.game.level.provider.ChunkProvider;
@@ -19,7 +20,7 @@ public class VoxelwindLevel implements Level {
     private static final int FULL_TIME = 24000;
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindLevel.class);
 
-    private final ChunkProvider chunkProvider;
+    private final LevelChunkManager chunkManager;
     private final LevelDataProvider dataProvider;
     private final String name;
     private final UUID uuid;
@@ -28,18 +29,13 @@ public class VoxelwindLevel implements Level {
     private long currentTick;
 
     public VoxelwindLevel(LevelCreator creator) {
-        chunkProvider = creator.getChunkProvider();
+        chunkManager = new LevelChunkManager(this, creator.getChunkProvider());
         name = creator.getName();
         uuid = UUID.randomUUID();
         entityManager = new LevelEntityManager(this);
         packetManager = new LevelPacketManager(this);
         dataProvider = creator.getDataProvider();
     }
-
-    public ChunkProvider getChunkProvider() {
-        return chunkProvider;
-    }
-
     @Override
     public String getName() {
         return name;
@@ -75,12 +71,12 @@ public class VoxelwindLevel implements Level {
 
     @Override
     public Optional<Chunk> getChunkIfLoaded(int x, int z) {
-        return chunkProvider.getIfLoaded(x, z);
+        return chunkManager.getChunkIfLoaded(x, z);
     }
 
     @Override
     public CompletableFuture<Chunk> getChunk(int x, int z) {
-        return chunkProvider.get(x, z);
+        return chunkManager.getChunk(x, z);
     }
 
     public void onTick() {

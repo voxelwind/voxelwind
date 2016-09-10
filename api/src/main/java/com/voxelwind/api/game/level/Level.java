@@ -53,12 +53,30 @@ public interface Level {
     Optional<Chunk> getChunkIfLoaded(int x, int z);
 
     /**
+     * Determines the chunk for a block position and returns the chunk if it is currently loaded.
+     * @param position a block position
+     * @return an {@link Optional}, potentially empty
+     */
+    default Optional<Chunk> getChunkIfLoadedForPosition(Vector3i position) {
+        return getChunkIfLoaded(position.getX() >> 4, position.getY() >> 4);
+    }
+
+    /**
      * Gets a chunk, possibly loading or generating it asynchronously if required.
      * @param x the chunk's X value
      * @param z the chunk's Z value
      * @return an {@link CompletableFuture} with the chunk
      */
     CompletableFuture<Chunk> getChunk(int x, int z);
+
+    /**
+     * Determines the chunk for a block position and returns the chunk, possibly loading or generating it asynchronously if required.
+     * @param position a block position
+     * @return an {@link CompletableFuture} with the chunk
+     */
+    default CompletableFuture<Chunk> getChunkForPosition(Vector3i position) {
+        return getChunk(position.getX() >> 4, position.getY() >> 4);
+    }
 
     /**
      * Returns the block at the specified vector.
@@ -78,7 +96,7 @@ public interface Level {
      * @return an {@link CompletableFuture} with the block
      */
     default CompletableFuture<Block> getBlock(int x, int y, int z) {
-        return getChunk(x / 16, z / 16).thenApply(chunk -> chunk.getBlock(Math.abs(x % 16), y, Math.abs(z % 16)));
+        return getChunk(x >> 4, z >> 4).thenApply(chunk -> chunk.getBlock(x & 0x0f, y, z & 0x0f));
     }
 
     /**
@@ -99,7 +117,7 @@ public interface Level {
      * @return an {@link Optional} with the block
      */
     default Optional<Block> getBlockIfChunkLoaded(int x, int y, int z) {
-        Optional<Chunk> chunkOptional = getChunkIfLoaded(x / 16, z / 16);
-        return chunkOptional.map(c -> c.getBlock(Math.abs(x % 16), y, Math.abs(z % 16)));
+        Optional<Chunk> chunkOptional = getChunkIfLoaded(x >> 4, z >> 4);
+        return chunkOptional.map(c -> c.getBlock(x & 0x0f, y, z & 0x0f));
     }
 }

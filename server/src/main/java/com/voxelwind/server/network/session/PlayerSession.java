@@ -238,7 +238,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     }
                 }
 
-                completableFutures.add(getLevel().getChunkProvider().get(newChunkX, newChunkZ));
+                completableFutures.add(getLevel().getChunk(newChunkX, newChunkZ));
             }
         }
 
@@ -712,8 +712,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         @Override
         public void handle(McpeRemoveBlock packet) {
             // TODO: Perform sanity checks and drop items.
-            int chunkX = packet.getPosition().getX() / 16;
-            int chunkZ = packet.getPosition().getZ() / 16;
+            int chunkX = packet.getPosition().getX() >> 4;
+            int chunkZ = packet.getPosition().getZ() >> 4;
+
             Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(chunkX, chunkZ);
             if (!chunkOptional.isPresent()) {
                 // Chunk not loaded, danger ahead!
@@ -721,10 +722,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 return;
             }
 
-            int inChunkX = Math.abs(packet.getPosition().getX() % 16);
-            int inChunkZ = Math.abs(packet.getPosition().getZ() % 16);
+            int inChunkX = packet.getPosition().getX() & 0x0f;
+            int inChunkZ = packet.getPosition().getZ() & 0x0f;
             chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
-            getLevel().getPacketManager().queuePacketForPlayers(packet);
         }
     }
 

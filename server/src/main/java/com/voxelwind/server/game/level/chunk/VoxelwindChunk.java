@@ -3,6 +3,7 @@ package com.voxelwind.server.game.level.chunk;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
@@ -29,6 +30,7 @@ public class VoxelwindChunk implements Chunk {
     private final NibbleArray blockLightData = new NibbleArray(FULL_CHUNK_SIZE);
     private final Map<Vector3i, BlockEntity> blockEntities = new HashMap<>();
 
+    private final Level level;
     private final int x;
     private final int z;
     private final byte[] biomeId = new byte[256];
@@ -37,7 +39,8 @@ public class VoxelwindChunk implements Chunk {
     private McpeBatch chunkDataPacket;
     private boolean stale = true;
 
-    public VoxelwindChunk(int x, int z) {
+    public VoxelwindChunk(Level level, int x, int z) {
+        this.level = level;
         this.x = x;
         this.z = z;
         Arrays.fill(biomeId, (byte) 1);
@@ -55,6 +58,11 @@ public class VoxelwindChunk implements Chunk {
 
     public int getZ() {
         return z;
+    }
+
+    @Override
+    public Level getLevel() {
+        return level;
     }
 
     @Override
