@@ -86,6 +86,7 @@ public class VoxelwindChunk implements Chunk {
     @Override
     public synchronized Block setBlock(int x, int y, int z, BlockState state) {
         checkPosition(x, y, z);
+        Preconditions.checkNotNull(state, "state");
         int index = xyzIdx(x, y, z);
 
         blockData[index] = (byte) state.getBlockType().getId();
