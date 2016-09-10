@@ -6,18 +6,18 @@ import lombok.Data;
 
 @Data
 public class McpeSetTime implements NetworkPackage {
-    private long time;
+    private int time;
     private boolean running;
 
     @Override
     public void decode(ByteBuf buffer) {
-        time = buffer.readLong();
+        time = buffer.readInt();
         running = buffer.readBoolean();
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeLong(time);
+        buffer.writeInt(time);
         buffer.writeBoolean(running);
     }
 }
