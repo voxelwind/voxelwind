@@ -15,12 +15,17 @@ import com.voxelwind.api.util.BlockFace;
 import com.voxelwind.server.game.item.BlockBehavior;
 import com.voxelwind.server.game.item.behaviors.BehaviorUtils;
 import com.voxelwind.server.game.level.block.BasicBlockState;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SimpleBlockItemBehavior implements BlockBehavior {
+    public static final SimpleBlockItemBehavior INSTANCE = new SimpleBlockItemBehavior();
+
     @Override
     public boolean handleItemInteraction(Server server, Player player, Vector3i against, BlockFace face, ItemStack withItem) {
         // This is a simple block, so call handlePlacement().
