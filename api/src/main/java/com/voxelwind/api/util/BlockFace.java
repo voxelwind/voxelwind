@@ -11,7 +11,7 @@ public enum BlockFace {
     EAST(new Vector3i(0, 0, -1)),
     WEST(new Vector3i(0, 0, 1)),
     NORTH(new Vector3i(1, 0, 0)),
-    SOUTH(new Vector3i(-0, 0, 0));
+    SOUTH(new Vector3i(-1, 0, 0));
 
     private Vector3i offset;
 
