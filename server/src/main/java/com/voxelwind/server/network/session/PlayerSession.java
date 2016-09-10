@@ -9,7 +9,10 @@ import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.block.BlockData;
+import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
@@ -20,6 +23,7 @@ import com.voxelwind.api.server.event.player.PlayerJoinEvent;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.api.util.BlockFace;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.BasicBlockState;
@@ -653,9 +657,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeContainerClose packet) {
-            ((VoxelwindBaseInventory) openedInventory).getObserverList().remove(PlayerSession.this);
-            openedInventory = null;
-            openInventoryId = -1;
+            if (openedInventory != null) {
+                ((VoxelwindBaseInventory) openedInventory).getObserverList().remove(PlayerSession.this);
+                openedInventory = null;
+                openInventoryId = -1;
+            }
         }
 
         @Override
@@ -725,6 +731,43 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int inChunkX = packet.getPosition().getX() & 0x0f;
             int inChunkZ = packet.getPosition().getZ() & 0x0f;
             chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
+            getLevel().broadcastBlockUpdate(packet.getPosition());
+        }
+
+        @Override
+        public void handle(McpeUseItem packet) {
+            if (packet.getFace() == 0xff) {
+                // TODO: Item usage
+            } else {
+                // Probably trying to place a block
+                // TODO: Perform sanity checks.
+
+                // Get the adjusted position as soon as possible as we might be placing into another chunk.
+                Vector3i adjusted = BlockFace.values()[packet.getFace()].getOffset().add(packet.getLocation());
+                int chunkX = adjusted.getX() >> 4;
+                int chunkZ = adjusted.getZ() >> 4;
+
+                Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(chunkX, chunkZ);
+                if (!chunkOptional.isPresent()) {
+                    // Chunk not loaded, danger ahead!
+                    LOGGER.error("{} tried to place block at unloaded chunk ({}, {})", getName(), chunkX, chunkZ);
+                    return;
+                }
+
+                // TODO: Handle pseudo-items somehow.
+                if (packet.getStack().getItemType().isBlock()) {
+                    // TODO: Handle situations where we may not be able to place items.
+                    // TODO: More custom handling.
+                    int inChunkX = adjusted.getX() & 0x0f;
+                    int inChunkZ = adjusted.getZ() & 0x0f;
+
+                    BlockType type = BlockTypes.forId(packet.getStack().getItemType().getId());
+                    BlockData data = packet.getStack().getItemData().isPresent() ?
+                            type.createBlockDataFor(packet.getStack().getItemData().get().toMetadata()).orElse(null) : null;
+                    chunkOptional.get().setBlock(inChunkX, adjusted.getY(), inChunkZ, new BasicBlockState(type, data));
+                    getLevel().broadcastBlockUpdate(packet.getLocation());
+                }
+            }
         }
     }
 

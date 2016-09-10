@@ -53,6 +53,7 @@ public class PacketRegistry {
         MCPE_PACKETS[0x18] = McpeEntityEvent.class;
         MCPE_PACKETS[0x1a] = McpeUpdateAttributes.class;
         MCPE_PACKETS[0x1b] = McpeMobEquipment.class;
+        MCPE_PACKETS[0x1f] = McpeUseItem.class;
         MCPE_PACKETS[0x20] = McpePlayerAction.class;
         MCPE_PACKETS[0x22] = McpeSetEntityData.class;
         MCPE_PACKETS[0x23] = McpeSetEntityMotion.class;

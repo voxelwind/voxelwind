@@ -1,14 +1,18 @@
 package com.voxelwind.server.game.level;
 
 import com.flowpowered.math.vector.Vector3f;
+import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.api.game.level.block.Block;
+import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
 import com.voxelwind.server.game.level.provider.ChunkProvider;
 import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import com.voxelwind.server.network.mcpe.packets.McpeSetTime;
+import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -92,5 +96,21 @@ public class VoxelwindLevel implements Level {
 
         entityManager.onTick();
         packetManager.onTick();
+    }
+
+    public void broadcastBlockUpdate(Vector3i position) {
+        Optional<Block> blockOptional = getBlockIfChunkLoaded(position);
+        if (!blockOptional.isPresent()) {
+            LOGGER.error("Can't update for {} as chunk is not loaded", position);
+            return;
+        }
+
+        BlockState state = blockOptional.get().getBlockState();
+        McpeUpdateBlock packet = new McpeUpdateBlock();
+        packet.setPosition(position);
+        packet.setBlockId((byte) state.getBlockType().getId());
+        short blockData = state.getBlockData() == null ? 0 : state.getBlockData().toBlockMetadata();
+        packet.setMetadata((byte) (0xb << 4 | (blockData & 0xf)));
+        packetManager.queuePacketForPlayers(packet);
     }
 }

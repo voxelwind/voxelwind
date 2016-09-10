@@ -162,6 +162,11 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         throw new IllegalStateException("Got unexpected McpeRemoveBlock");
     }
 
+    @Override
+    public void handle(McpeUseItem packet) {
+        throw new IllegalStateException("Got unexpected McpeUseItem");
+    }
+
     private void startEncryptionHandshake(PublicKey key) throws InvalidKeyException {
         if (!CAN_USE_ENCRYPTION) {
             // Can't use encryption.

@@ -110,7 +110,7 @@ public class LevelEntityManager {
             if (entity instanceof PlayerSession) {
                 PlayerSession session = (PlayerSession) entity;
                 McpeSession mcpeSession = session.getMcpeSession();
-                if (mcpeSession != null && mcpeSession.isClosed()) {
+                if (mcpeSession != null && !mcpeSession.isClosed()) {
                     sessions.add((PlayerSession) entity);
                 }
             }
