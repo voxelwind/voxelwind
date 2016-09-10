@@ -43,7 +43,8 @@ public class SimpleBlockItemBehavior implements BlockBehavior {
             }
         }
 
-        return BehaviorUtils.setBlockState(player.getLevel(), against.add(face.getOffset()), new BasicBlockState(blockType, blockData));
+        BehaviorUtils.setBlockState(player.getLevel(), against.add(face.getOffset()), new BasicBlockState(blockType, blockData));
+        return true;
     }
 
     @Override
