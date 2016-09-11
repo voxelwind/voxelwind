@@ -25,6 +25,7 @@ import com.voxelwind.api.util.BlockFace;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.item.BlockBehavior;
 import com.voxelwind.server.game.item.BlockBehaviors;
+import com.voxelwind.server.game.item.behaviors.BehaviorUtils;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
@@ -512,7 +513,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int radius = Math.max(5, Math.min(16, packet.getRadius()));
             McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
             updated.setRadius(radius);
-            session.addToSendQueue(updated);
+            session.sendImmediatePackage(updated);
             viewDistance = radius;
 
             getChunksForRadius(radius, true).whenComplete((chunks, throwable) -> {
@@ -732,11 +733,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int inChunkZ = packet.getPosition().getZ() & 0x0f;
 
             Block block = chunkOptional.get().getBlock(inChunkX, packet.getPosition().getY(), inChunkZ);
-            if (gameMode == GameMode.CREATIVE) {
+            if (gameMode != GameMode.CREATIVE) {
                 BlockBehavior blockBehavior = BlockBehaviors.getBlockBehavior(block.getBlockState().getBlockType());
                 if (!blockBehavior.handleBreak(getMcpeSession().getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null))) {
                     chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
                 }
+            } else {
+                chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
             }
 
             getLevel().broadcastBlockUpdate(packet.getPosition());
@@ -749,6 +752,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             } else if (packet.getFace() >= 0 && packet.getFace() <= 5) {
                 // Sanity check:
                 Optional<ItemStack> actuallyInHand = playerInventory.getStackInHand();
+                LOGGER.info("Held: {}, slot: {}", actuallyInHand, playerInventory.getHeldSlot());
                 if ((actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == packet.getStack().getItemType()) ||
                         !actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == BlockTypes.AIR) {
                     // Not actually the same item.
@@ -769,6 +773,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 switch (againstBehavior.handleItemInteraction(getMcpeSession().getServer(), PlayerSession.this, packet.getLocation(), face, serverInHand)) {
                     case NOTHING:
                         break;
+                    case PLACE_BLOCK_AND_REMOVE_ITEM:
+                        LOGGER.info("In hand: {}", serverInHand);
+                        if (serverInHand != null) {
+                            BehaviorUtils.setBlockState(PlayerSession.this, getLevel(), packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand));
+                        }
+                        // This will fall through
                     case REMOVE_ONE_ITEM:
                         if (serverInHand != null) {
                             int newItemAmount = serverInHand.getAmount() - 1;

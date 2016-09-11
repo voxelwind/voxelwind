@@ -23,25 +23,19 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SimpleBlockItemBehavior implements BlockBehavior {
     public static final SimpleBlockItemBehavior INSTANCE = new SimpleBlockItemBehavior();
 
     @Override
     public BehaviorResult handleItemInteraction(Server server, Player player, Vector3i against, BlockFace face, ItemStack withItem) {
         // This is a simple block, so call handlePlacement().
-        return handlePlacement(server, player, against, face, withItem) ? BehaviorResult.REMOVE_ONE_ITEM : BehaviorResult.NOTHING;
+        return handlePlacement(server, player, against, face, withItem) ? BehaviorResult.PLACE_BLOCK_AND_REMOVE_ITEM : BehaviorResult.NOTHING;
     }
 
     @Override
     public boolean handlePlacement(Server server, Player player, Vector3i against, BlockFace face, @Nullable ItemStack withItem) {
-        // Convert the current item stack into a block state, then set it.
-        Preconditions.checkNotNull(withItem, "withItem");
-        if (!(withItem.getItemType() instanceof BlockType)) {
-            throw new IllegalArgumentException("Item type " + withItem.getItemType().getName() + " is not a block type.");
-        }
-
-        return BehaviorUtils.setBlockState(player, player.getLevel(), against.add(face.getOffset()), BehaviorUtils.createBlockState(withItem));
+        return true;
     }
 
     @Override
