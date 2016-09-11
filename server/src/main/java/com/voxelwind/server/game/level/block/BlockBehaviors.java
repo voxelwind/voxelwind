@@ -2,9 +2,11 @@ package com.voxelwind.server.game.level.block;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.level.block.behaviors.blocks.DirtBlockBehavior;
+import com.voxelwind.server.game.level.block.behaviors.blocks.DroppableBySpecificToolsBlockBehavior;
 import com.voxelwind.server.game.level.block.behaviors.blocks.FarmlandBlockBehavior;
 import com.voxelwind.server.game.level.block.behaviors.blocks.SimpleBlockBehavior;
 import gnu.trove.TCollections;
@@ -25,7 +27,13 @@ public class BlockBehaviors {
                 .put(BlockTypes.DIRT, DirtBlockBehavior.INSTANCE)
                 .put(BlockTypes.GRASS_BLOCK, DirtBlockBehavior.INSTANCE)
                 .put(BlockTypes.GRASS_PATH, DirtBlockBehavior.INSTANCE)
+                .put(BlockTypes.MYCELIUM, DirtBlockBehavior.INSTANCE)
                 .put(BlockTypes.FARMLAND, FarmlandBlockBehavior.INSTANCE)
+                .put(BlockTypes.STONE, DroppableBySpecificToolsBlockBehavior.ALL_PICKAXES)
+                .put(BlockTypes.COAL_ORE, DroppableBySpecificToolsBlockBehavior.ALL_PICKAXES)
+                .put(BlockTypes.COAL_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_PICKAXES)
+                .put(BlockTypes.IRON_ORE, DroppableBySpecificToolsBlockBehavior.ALL_STONE_PICKAXES)
+                .put(BlockTypes.LEAVES, DroppableBySpecificToolsBlockBehavior.SHEARS_ONLY)
                 .build();
     }
 

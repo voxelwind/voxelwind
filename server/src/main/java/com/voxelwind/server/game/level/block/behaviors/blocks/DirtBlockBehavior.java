@@ -15,6 +15,8 @@ import com.voxelwind.server.game.level.block.behaviors.BehaviorUtils;
 import java.util.Optional;
 
 public class DirtBlockBehavior extends SimpleBlockBehavior {
+    public static final DirtBlockBehavior INSTANCE = new DirtBlockBehavior();
+
     @Override
     public BehaviorResult handleItemInteraction(Server server, Player player, Vector3i against, BlockFace face, ItemStack withItem) {
         if (withItem.getItemType() == ItemTypes.DIAMOND_HOE || withItem.getItemType() == ItemTypes.GOLD_HOE ||
