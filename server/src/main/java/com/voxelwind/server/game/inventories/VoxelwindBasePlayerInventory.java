@@ -52,7 +52,7 @@ public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory impleme
             McpeMobEquipment equipmentForSelf = new McpeMobEquipment();
             equipmentForSelf.setEntityId(0);
             equipmentForSelf.setHotbarSlot((byte) heldSlot);
-            equipmentForSelf.setInventorySlot((byte) hotbarLinks[heldSlot]);
+            equipmentForSelf.setInventorySlot((byte) (hotbarLinks[heldSlot] + 9)); // Corrected for the benefit of MCPE
             equipmentForSelf.setStack(getStackInHand().orElse(null));
             session.getMcpeSession().addToSendQueue(equipmentForSelf);
         }

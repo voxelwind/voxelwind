@@ -11,6 +11,7 @@ import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.block.Block;
+import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
@@ -713,7 +714,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     -1 : correctedInventorySlot;
 
             playerInventory.setLink(packet.getHotbarSlot(), finalSlot);
-            playerInventory.setHeldSlot(packet.getHotbarSlot(), false);
+            playerInventory.setHeldSlot(packet.getHotbarSlot(), true);
         }
 
         @Override
@@ -753,7 +754,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 // Sanity check:
                 Optional<ItemStack> actuallyInHand = playerInventory.getStackInHand();
                 LOGGER.info("Held: {}, slot: {}", actuallyInHand, playerInventory.getHeldSlot());
-                if ((actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == packet.getStack().getItemType()) ||
+                if ((actuallyInHand.isPresent() && actuallyInHand.get().getItemType() != packet.getStack().getItemType()) ||
                         !actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == BlockTypes.AIR) {
                     // Not actually the same item.
                     return;
@@ -774,10 +775,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     case NOTHING:
                         break;
                     case PLACE_BLOCK_AND_REMOVE_ITEM:
+                        Preconditions.checkState(serverInHand != null && serverInHand.getItemType() instanceof BlockType, "Tried to place air or non-block.");
                         LOGGER.info("In hand: {}", serverInHand);
-                        if (serverInHand != null) {
-                            BehaviorUtils.setBlockState(PlayerSession.this, getLevel(), packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand));
-                        }
+                        BehaviorUtils.setBlockState(PlayerSession.this, getLevel(), packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand));
                         // This will fall through
                     case REMOVE_ONE_ITEM:
                         if (serverInHand != null) {
@@ -793,8 +793,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         // TODO: Implement
                         break;
                 }
-
-                sendPlayerInventory();
             }
         }
     }
