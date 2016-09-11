@@ -9,7 +9,11 @@ public enum BehaviorResult {
      * One item should be removed from the inventory.
      */
     REMOVE_ONE_ITEM,
-    PLACE_BLOCK_AND_REMOVE_ITEM, /**
+    /**
+     * One item should be removed from the inventory and the block placed.
+     */
+    PLACE_BLOCK_AND_REMOVE_ITEM,
+    /**
      * The durability of the item should be reduced.
      */
     REDUCE_DURABILITY

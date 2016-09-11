@@ -6,6 +6,7 @@ import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockData;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockType;
@@ -18,19 +19,26 @@ import java.util.Optional;
 
 @UtilityClass
 public class BehaviorUtils {
-    public static boolean setBlockState(Player player, Level level, Vector3i position, BlockState state) {
+    public static boolean setBlockState(Player player, Vector3i position, BlockState state) {
         // TODO: Events
         int chunkX = position.getX() >> 4;
         int chunkZ = position.getZ() >> 4;
 
-        Optional<Chunk> chunkOptional = level.getChunkIfLoaded(chunkX, chunkZ);
+        Optional<Chunk> chunkOptional = player.getLevel().getChunkIfLoaded(chunkX, chunkZ);
         if (!chunkOptional.isPresent()) {
             // Chunk not loaded, danger ahead!
             return false;
         }
 
         chunkOptional.get().setBlock(position.getX() & 0x0f, position.getY(), position.getZ() & 0x0f, state);
-        ((VoxelwindLevel) level).broadcastBlockUpdate(position);
+        ((VoxelwindLevel) player.getLevel()).broadcastBlockUpdate(position);
+        return true;
+    }
+
+    public static boolean replaceBlockState(Player player, Block block, BlockState replacementState) {
+        // TODO: Events
+        block.getChunk().setBlock(block.getChunkLocation().getX(), block.getChunkLocation().getY(), block.getChunkLocation().getZ(), replacementState);
+        ((VoxelwindLevel) player.getLevel()).broadcastBlockUpdate(block.getLevelLocation());
         return true;
     }
 

@@ -18,13 +18,14 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SimpleBlockItemBehavior implements BlockBehavior {
-    public static final SimpleBlockItemBehavior INSTANCE = new SimpleBlockItemBehavior();
+public class SimpleBlockBehavior implements BlockBehavior {
+    public static final SimpleBlockBehavior INSTANCE = new SimpleBlockBehavior();
 
     @Override
     public BehaviorResult handleItemInteraction(Server server, Player player, Vector3i against, BlockFace face, ItemStack withItem) {
         // This is a simple block, so call handlePlacement().
-        return handlePlacement(server, player, against, face, withItem) ? BehaviorResult.PLACE_BLOCK_AND_REMOVE_ITEM : BehaviorResult.NOTHING;
+        return withItem.getItemType().isBlock() && handlePlacement(server, player, against, face, withItem) ?
+                BehaviorResult.PLACE_BLOCK_AND_REMOVE_ITEM : BehaviorResult.NOTHING;
     }
 
     @Override

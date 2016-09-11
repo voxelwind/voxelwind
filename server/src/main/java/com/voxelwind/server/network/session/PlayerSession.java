@@ -773,11 +773,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 BlockBehavior againstBehavior = BlockBehaviors.getBlockBehavior(usedAgainst.get().getBlockState().getBlockType());
                 switch (againstBehavior.handleItemInteraction(getMcpeSession().getServer(), PlayerSession.this, packet.getLocation(), face, serverInHand)) {
                     case NOTHING:
+                        // Update inventory
+                        sendPlayerInventory();
                         break;
                     case PLACE_BLOCK_AND_REMOVE_ITEM:
                         Preconditions.checkState(serverInHand != null && serverInHand.getItemType() instanceof BlockType, "Tried to place air or non-block.");
                         LOGGER.info("In hand: {}", serverInHand);
-                        BehaviorUtils.setBlockState(PlayerSession.this, getLevel(), packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand));
+                        BehaviorUtils.setBlockState(PlayerSession.this, packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand));
                         // This will fall through
                     case REMOVE_ONE_ITEM:
                         if (serverInHand != null) {

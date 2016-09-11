@@ -1,7 +1,7 @@
 package com.voxelwind.server.game.level.block;
 
 import com.voxelwind.api.game.level.block.BlockType;
-import com.voxelwind.server.game.level.block.behaviors.blocks.SimpleBlockItemBehavior;
+import com.voxelwind.server.game.level.block.behaviors.blocks.SimpleBlockBehavior;
 import gnu.trove.TCollections;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -20,7 +20,7 @@ public class BlockBehaviors {
     public static BlockBehavior getBlockBehavior(BlockType type) {
         BlockBehavior behavior = SPECIAL_BEHAVIORS.get(type.getId());
         if (behavior == null) {
-            return SimpleBlockItemBehavior.INSTANCE;
+            return SimpleBlockBehavior.INSTANCE;
         }
         return behavior;
     }
