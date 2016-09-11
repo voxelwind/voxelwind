@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.item;
+package com.voxelwind.server.game.level.block;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.item.ItemStack;

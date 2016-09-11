@@ -1,8 +1,7 @@
-package com.voxelwind.server.game.item;
+package com.voxelwind.server.game.level.block;
 
-import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.level.block.BlockType;
-import com.voxelwind.server.game.item.behaviors.blocks.SimpleBlockItemBehavior;
+import com.voxelwind.server.game.level.block.behaviors.blocks.SimpleBlockItemBehavior;
 import gnu.trove.TCollections;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;

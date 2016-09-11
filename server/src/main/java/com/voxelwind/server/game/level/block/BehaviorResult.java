@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.item;
+package com.voxelwind.server.game.level.block;
 
 public enum BehaviorResult {
     /**

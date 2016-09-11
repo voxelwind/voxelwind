@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.item.behaviors.blocks;
+package com.voxelwind.server.game.level.block.behaviors.blocks;
 
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.game.item.ItemStack;

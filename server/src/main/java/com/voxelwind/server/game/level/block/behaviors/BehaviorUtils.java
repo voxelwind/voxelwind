@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.item.behaviors;
+package com.voxelwind.server.game.level.block.behaviors;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;

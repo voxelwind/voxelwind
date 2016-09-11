@@ -1,27 +1,21 @@
-package com.voxelwind.server.game.item.behaviors.blocks;
+package com.voxelwind.server.game.level.block.behaviors.blocks;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.block.Block;
-import com.voxelwind.api.game.level.block.BlockData;
-import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.BlockFace;
-import com.voxelwind.server.game.item.BehaviorResult;
-import com.voxelwind.server.game.item.BlockBehavior;
-import com.voxelwind.server.game.item.behaviors.BehaviorUtils;
-import com.voxelwind.server.game.level.block.BasicBlockState;
+import com.voxelwind.server.game.level.block.BehaviorResult;
+import com.voxelwind.server.game.level.block.BlockBehavior;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SimpleBlockItemBehavior implements BlockBehavior {
