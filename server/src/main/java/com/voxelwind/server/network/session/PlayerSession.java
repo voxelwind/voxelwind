@@ -9,10 +9,8 @@ import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
-import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.Chunk;
-import com.voxelwind.api.game.level.block.BlockData;
-import com.voxelwind.api.game.level.block.BlockType;
+import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
@@ -25,6 +23,8 @@ import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.api.util.BlockFace;
 import com.voxelwind.server.game.inventories.*;
+import com.voxelwind.server.game.item.BlockBehavior;
+import com.voxelwind.server.game.item.BlockBehaviors;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
@@ -730,43 +730,61 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             int inChunkX = packet.getPosition().getX() & 0x0f;
             int inChunkZ = packet.getPosition().getZ() & 0x0f;
-            chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
+
+            Block block = chunkOptional.get().getBlock(inChunkX, packet.getPosition().getY(), inChunkZ);
+            if (gameMode == GameMode.CREATIVE) {
+                BlockBehavior blockBehavior = BlockBehaviors.getBlockBehavior(block.getBlockState().getBlockType());
+                if (!blockBehavior.handleBreak(getMcpeSession().getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null))) {
+                    chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
+                }
+            }
+
             getLevel().broadcastBlockUpdate(packet.getPosition());
         }
 
         @Override
         public void handle(McpeUseItem packet) {
             if (packet.getFace() == 0xff) {
-                // TODO: Item usage
-            } else {
-                // Probably trying to place a block
-                // TODO: Perform sanity checks.
-
-                // Get the adjusted position as soon as possible as we might be placing into another chunk.
-                Vector3i adjusted = BlockFace.values()[packet.getFace()].getOffset().add(packet.getLocation());
-                int chunkX = adjusted.getX() >> 4;
-                int chunkZ = adjusted.getZ() >> 4;
-
-                Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(chunkX, chunkZ);
-                if (!chunkOptional.isPresent()) {
-                    // Chunk not loaded, danger ahead!
-                    LOGGER.error("{} tried to place block at unloaded chunk ({}, {})", getName(), chunkX, chunkZ);
+                // TODO: Snowballs.
+            } else if (packet.getFace() >= 0 && packet.getFace() <= 5) {
+                // Sanity check:
+                Optional<ItemStack> actuallyInHand = playerInventory.getStackInHand();
+                if ((actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == packet.getStack().getItemType()) ||
+                        !actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == BlockTypes.AIR) {
+                    // Not actually the same item.
                     return;
                 }
 
-                // TODO: Handle pseudo-items somehow.
-                if (packet.getStack().getItemType().isBlock()) {
-                    // TODO: Handle situations where we may not be able to place items.
-                    // TODO: More custom handling.
-                    int inChunkX = adjusted.getX() & 0x0f;
-                    int inChunkZ = adjusted.getZ() & 0x0f;
-
-                    BlockType type = BlockTypes.forId(packet.getStack().getItemType().getId());
-                    BlockData data = packet.getStack().getItemData().isPresent() ?
-                            type.createBlockDataFor(packet.getStack().getItemData().get().toMetadata()).orElse(null) : null;
-                    chunkOptional.get().setBlock(inChunkX, adjusted.getY(), inChunkZ, new BasicBlockState(type, data));
-                    getLevel().broadcastBlockUpdate(packet.getLocation());
+                // What block is this item being used against?
+                Optional<Block> usedAgainst = getLevel().getBlockIfChunkLoaded(packet.getLocation());
+                if (!usedAgainst.isPresent()) {
+                    // Not loaded into memory.
+                    return;
                 }
+
+                // Ask the block being checked.
+                ItemStack serverInHand = actuallyInHand.orElse(null);
+                BlockFace face = BlockFace.values()[packet.getFace()];
+                BlockBehavior againstBehavior = BlockBehaviors.getBlockBehavior(usedAgainst.get().getBlockState().getBlockType());
+                switch (againstBehavior.handleItemInteraction(getMcpeSession().getServer(), PlayerSession.this, packet.getLocation(), face, serverInHand)) {
+                    case NOTHING:
+                        break;
+                    case REMOVE_ONE_ITEM:
+                        if (serverInHand != null) {
+                            int newItemAmount = serverInHand.getAmount() - 1;
+                            if (newItemAmount <= 0) {
+                                playerInventory.clearItem(playerInventory.getHeldSlot());
+                            } else {
+                                playerInventory.setItem(playerInventory.getHeldSlot(), serverInHand.toBuilder().amount(newItemAmount).build());
+                            }
+                        }
+                        break;
+                    case REDUCE_DURABILITY:
+                        // TODO: Implement
+                        break;
+                }
+
+                sendPlayerInventory();
             }
         }
     }
