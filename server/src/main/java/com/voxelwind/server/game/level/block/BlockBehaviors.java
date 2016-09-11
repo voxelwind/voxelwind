@@ -1,24 +1,37 @@
 package com.voxelwind.server.game.level.block;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.level.block.BlockType;
+import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.server.game.level.block.behaviors.blocks.DirtBlockBehavior;
+import com.voxelwind.server.game.level.block.behaviors.blocks.FarmlandBlockBehavior;
 import com.voxelwind.server.game.level.block.behaviors.blocks.SimpleBlockBehavior;
 import gnu.trove.TCollections;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TMap;
+import gnu.trove.map.hash.THashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.experimental.UtilityClass;
 
+import java.util.Map;
+
 @UtilityClass
 public class BlockBehaviors {
-    private static final TIntObjectMap<BlockBehavior> SPECIAL_BEHAVIORS;
+    private static final Map<BlockType, BlockBehavior> SPECIAL_BEHAVIORS;
 
     static {
-        TIntObjectMap<BlockBehavior> behaviors = new TIntObjectHashMap<>();
-
-        SPECIAL_BEHAVIORS = TCollections.unmodifiableMap(behaviors);
+        SPECIAL_BEHAVIORS = ImmutableMap.<BlockType, BlockBehavior>builder()
+                .put(BlockTypes.DIRT, DirtBlockBehavior.INSTANCE)
+                .put(BlockTypes.GRASS_BLOCK, DirtBlockBehavior.INSTANCE)
+                .put(BlockTypes.GRASS_PATH, DirtBlockBehavior.INSTANCE)
+                .put(BlockTypes.FARMLAND, FarmlandBlockBehavior.INSTANCE)
+                .build();
     }
 
     public static BlockBehavior getBlockBehavior(BlockType type) {
-        BlockBehavior behavior = SPECIAL_BEHAVIORS.get(type.getId());
+        Preconditions.checkNotNull(type, "type");
+        BlockBehavior behavior = SPECIAL_BEHAVIORS.get(type);
         if (behavior == null) {
             return SimpleBlockBehavior.INSTANCE;
         }
