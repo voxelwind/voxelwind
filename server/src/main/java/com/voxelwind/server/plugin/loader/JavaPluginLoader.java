@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -49,6 +48,10 @@ public class JavaPluginLoader implements PluginLoader {
             JarEntry entry;
             while ((entry = in.getNextJarEntry()) != null) {
                 if (entry.isDirectory()) {
+                    continue;
+                }
+
+                if (!entry.getName().endsWith(".class")) {
                     continue;
                 }
 
