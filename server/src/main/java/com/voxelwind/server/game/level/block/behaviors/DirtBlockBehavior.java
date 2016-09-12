@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.block.behaviors.blocks;
+package com.voxelwind.server.game.level.block.behaviors;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.item.ItemStack;
@@ -10,7 +10,6 @@ import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.BlockFace;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.BehaviorResult;
-import com.voxelwind.server.game.level.block.behaviors.BehaviorUtils;
 
 import java.util.Optional;
 

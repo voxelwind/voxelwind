@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.block.behaviors.blocks;
+package com.voxelwind.server.game.level.block.behaviors;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;

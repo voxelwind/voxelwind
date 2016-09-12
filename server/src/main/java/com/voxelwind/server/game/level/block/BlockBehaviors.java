@@ -2,18 +2,9 @@ package com.voxelwind.server.game.level.block;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
-import com.voxelwind.server.game.level.block.behaviors.blocks.DirtBlockBehavior;
-import com.voxelwind.server.game.level.block.behaviors.blocks.DroppableBySpecificToolsBlockBehavior;
-import com.voxelwind.server.game.level.block.behaviors.blocks.FarmlandBlockBehavior;
-import com.voxelwind.server.game.level.block.behaviors.blocks.SimpleBlockBehavior;
-import gnu.trove.TCollections;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TMap;
-import gnu.trove.map.hash.THashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import com.voxelwind.server.game.level.block.behaviors.*;
 import lombok.experimental.UtilityClass;
 
 import java.util.Map;
@@ -33,7 +24,14 @@ public class BlockBehaviors {
                 .put(BlockTypes.COAL_ORE, DroppableBySpecificToolsBlockBehavior.ALL_PICKAXES)
                 .put(BlockTypes.COAL_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_PICKAXES)
                 .put(BlockTypes.IRON_ORE, DroppableBySpecificToolsBlockBehavior.ALL_STONE_PICKAXES)
-                .put(BlockTypes.LEAVES, DroppableBySpecificToolsBlockBehavior.SHEARS_ONLY)
+                .put(BlockTypes.IRON_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_STONE_PICKAXES)
+                .put(BlockTypes.GOLD_ORE, DroppableBySpecificToolsBlockBehavior.ALL_IRON_PICKAXES)
+                .put(BlockTypes.GOLD_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_IRON_PICKAXES)
+                .put(BlockTypes.LAPIS_LAZULI_ORE, LapisLazuliOreBlockBehavior.INSTANCE)
+                .put(BlockTypes.LAPIS_LAZULI_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_STONE_PICKAXES)
+                .put(BlockTypes.DIAMOND_ORE, DiamondOreBlockBehavior.INSTANCE)
+                .put(BlockTypes.DIAMOND_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_IRON_PICKAXES)
+                .put(BlockTypes.LEAVES, DroppableBySpecificToolsBlockBehavior.SHEARS_ONLY) // TODO: Handle this better.
                 .build();
     }
 
