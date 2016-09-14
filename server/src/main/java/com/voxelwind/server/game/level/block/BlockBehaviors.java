@@ -41,6 +41,16 @@ public class BlockBehaviors {
                 .put(BlockTypes.REDSTONE_REPEATER_ACTIVE, new DropOtherItemBlockBehavior(BlockTypes.REDSTONE_REPEATER, 1))
                 .put(BlockTypes.REDSTONE_TORCH, new DropOtherItemBlockBehavior(BlockTypes.REDSTONE_TORCH_ACTIVE, 1))
                 .put(BlockTypes.TRIPWIRE, new DropOtherItemBlockBehavior(ItemTypes.STRING, 1))
+                .put(BlockTypes.SIGN, new DropOtherItemBlockBehavior(ItemTypes.SIGN, 1))
+                .put(BlockTypes.WALL_SIGN, new DropOtherItemBlockBehavior(ItemTypes.SIGN, 1))
+                .put(BlockTypes.REDSTONE_ORE, RedstoneOreBlockBehavior.INSTANCE)
+                .put(BlockTypes.GLOWING_REDSTONE_ORE, RedstoneOreBlockBehavior.INSTANCE)
+                .put(BlockTypes.SNOW, SnowBlockBehavior.INSTANCE)
+                .put(BlockTypes.TOP_SNOW, TopSnowBlockBehavior.INSTANCE)
+                .put(BlockTypes.CLAY, ClayBlockBehavior.INSTANCE)
+                .put(BlockTypes.BROWN_MUSHROOM_BLOCK, new DropOtherItemBlockBehavior(BlockTypes.BROWN_MUSHROOM, 0, 2))
+                .put(BlockTypes.RED_MUSHROOM_BLOCK, new DropOtherItemBlockBehavior(BlockTypes.RED_MUSHROOM, 0, 2))
+                .put(BlockTypes.MELON, new DropOtherItemBlockBehavior(ItemTypes.MELON, 3, 7))
                 .build();
     }
 
