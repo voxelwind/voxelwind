@@ -33,6 +33,7 @@ public class BlockBehaviors {
                 .put(BlockTypes.DIAMOND_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_IRON_PICKAXES)
                 .put(BlockTypes.LEAVES, DroppableBySpecificToolsBlockBehavior.SHEARS_ONLY) // TODO: Handle this better.
                 .put(BlockTypes.COBWEB, CobwebBlockBehavior.INSTANCE)
+                .put(BlockTypes.BOOKSHELF, BookshelfBlockBehavior.INSTANCE)
                 .build();
     }
 
