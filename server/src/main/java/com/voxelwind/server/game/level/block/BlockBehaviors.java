@@ -34,6 +34,8 @@ public class BlockBehaviors {
                 .put(BlockTypes.LEAVES, DroppableBySpecificToolsBlockBehavior.SHEARS_ONLY) // TODO: Handle this better.
                 .put(BlockTypes.COBWEB, CobwebBlockBehavior.INSTANCE)
                 .put(BlockTypes.BOOKSHELF, BookshelfBlockBehavior.INSTANCE)
+                .put(BlockTypes.CROPS, CropsBlockBehavior.INSTANCE)
+                .put(BlockTypes.REDSTONE_WIRE, RedstoneWireBlockBehavior.INSTANCE)
                 .build();
     }
 
