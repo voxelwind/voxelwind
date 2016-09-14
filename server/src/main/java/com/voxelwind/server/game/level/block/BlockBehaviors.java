@@ -2,6 +2,7 @@ package com.voxelwind.server.game.level.block;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.level.block.behaviors.*;
@@ -33,9 +34,13 @@ public class BlockBehaviors {
                 .put(BlockTypes.DIAMOND_BLOCK, DroppableBySpecificToolsBlockBehavior.ALL_IRON_PICKAXES)
                 .put(BlockTypes.LEAVES, DroppableBySpecificToolsBlockBehavior.SHEARS_ONLY) // TODO: Handle this better.
                 .put(BlockTypes.COBWEB, CobwebBlockBehavior.INSTANCE)
-                .put(BlockTypes.BOOKSHELF, BookshelfBlockBehavior.INSTANCE)
+                .put(BlockTypes.BOOKSHELF, new DropOtherItemBlockBehavior(ItemTypes.BOOK, 3))
                 .put(BlockTypes.CROPS, CropsBlockBehavior.INSTANCE)
-                .put(BlockTypes.REDSTONE_WIRE, RedstoneWireBlockBehavior.INSTANCE)
+                .put(BlockTypes.REDSTONE_WIRE, new DropOtherItemBlockBehavior(ItemTypes.REDSTONE, 1))
+                .put(BlockTypes.REDSTONE_LAMP_ACTIVE, new DropOtherItemBlockBehavior(BlockTypes.REDSTONE_LAMP, 1))
+                .put(BlockTypes.REDSTONE_REPEATER_ACTIVE, new DropOtherItemBlockBehavior(BlockTypes.REDSTONE_REPEATER, 1))
+                .put(BlockTypes.REDSTONE_TORCH, new DropOtherItemBlockBehavior(BlockTypes.REDSTONE_TORCH_ACTIVE, 1))
+                .put(BlockTypes.TRIPWIRE, new DropOtherItemBlockBehavior(ItemTypes.STRING, 1))
                 .build();
     }
 

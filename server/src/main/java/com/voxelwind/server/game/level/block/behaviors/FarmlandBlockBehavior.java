@@ -32,6 +32,11 @@ public class FarmlandBlockBehavior extends SimpleBlockBehavior {
                 return BehaviorResult.NOTHING;
             }
 
+            // If a block is already on the farmland, don't proceed.
+            if (originalBlockOptional.get().getBlockState().getBlockType() != BlockTypes.AIR) {
+                return BehaviorResult.NOTHING;
+            }
+
             // Seeds
             if (withItem.getItemType() == ItemTypes.SEEDS) {
                 return BehaviorUtils.setBlockState(player, adjusted, new BasicBlockState(BlockTypes.CROPS, Crops.NEW)) ?
