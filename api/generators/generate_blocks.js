@@ -1,4 +1,4 @@
-const peData = require('minecraft-data')('pe_0.14'); // todo: update
+const peData = require('minecraft-data')('pe_0.15'); // todo: update
 const fs = require('fs');
 const titlize = require('titlize');
 
@@ -12,7 +12,7 @@ Object.keys(blocks).forEach(function(blockId) {
     }
 
     var line = "public static final BlockType " + name + " = IntBlock.builder()" +
-        ".name(\"" + name + "\").id(" + blockId + ").maxStackSize(" + block.stackSize + ").diggable(" + block.diggable + ").transparent(" + block.transparent +
+        ".name(\"" + name.toLowerCase() + "\").id(" + blockId + ").maxStackSize(" + block.stackSize + ").diggable(" + block.diggable + ").transparent(" + block.transparent +
         ").emitLight(" + block.emitLight + ").filterLight(" + block.filterLight + ").build();";
     lines.push(line);
 });

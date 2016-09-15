@@ -23,8 +23,5 @@ public interface BlockType extends ItemType {
     int emitsLight();
     int filtersLight();
 
-    @Deprecated
-    Collection<ItemStack> getDrops(Server server, Block block, ItemStack with);
-
     Class<? extends BlockData> getBlockDataClass();
 }
