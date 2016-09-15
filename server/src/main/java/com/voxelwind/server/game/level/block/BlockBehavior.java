@@ -7,6 +7,7 @@ import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.BlockFace;
+import com.voxelwind.server.game.level.util.BoundingBox;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -19,5 +20,8 @@ public interface BlockBehavior {
     Collection<ItemStack> getDrops(Server server, Player player, Block block, @Nullable ItemStack withItem);
     default Optional<BlockEntity> createBlockEntity() {
         return Optional.empty();
+    }
+    default BoundingBox getBoundingBox(Block block) {
+        return new BoundingBox(block.getLevelLocation(), block.getLevelLocation().add(1, 1, 1));
     }
 }
