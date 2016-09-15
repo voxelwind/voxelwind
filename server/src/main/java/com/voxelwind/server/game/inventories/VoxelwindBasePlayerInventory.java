@@ -12,7 +12,7 @@ import java.util.Optional;
 public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory implements PlayerInventory {
     private final PlayerSession session;
     private final int[] hotbarLinks = new int[9];
-    private int heldSlot = 0;
+    private int heldSlot = -1;
 
     public VoxelwindBasePlayerInventory(PlayerSession session) {
         // TODO: Verify
@@ -38,7 +38,11 @@ public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory impleme
 
     @Override
     public Optional<ItemStack> getStackInHand() {
-        return getItem(getHeldSlot());
+        int slot = heldSlot;
+        if (slot == -1) {
+            return Optional.empty();
+        }
+        return getItem(slot);
     }
 
     public void setHeldSlot(int heldSlot, boolean sendToPlayer) {
@@ -48,7 +52,7 @@ public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory impleme
             McpeMobEquipment equipmentForSelf = new McpeMobEquipment();
             equipmentForSelf.setEntityId(0);
             equipmentForSelf.setHotbarSlot((byte) heldSlot);
-            equipmentForSelf.setInventorySlot((byte) hotbarLinks[heldSlot]);
+            equipmentForSelf.setInventorySlot((byte) (hotbarLinks[heldSlot] + 9)); // Corrected for the benefit of MCPE
             equipmentForSelf.setStack(getStackInHand().orElse(null));
             session.getMcpeSession().addToSendQueue(equipmentForSelf);
         }

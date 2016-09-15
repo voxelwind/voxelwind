@@ -13,7 +13,7 @@ public class Cake implements BlockData {
     public static final Cake ALMOST_EATEN = new Cake(6);
 
     public static Cake ofStage(int data) {
-        Preconditions.checkArgument(data >= 0 && data < 7, "data is not valid (wanted 0-8)");
+        Preconditions.checkArgument(data >= 0 && data < 7, "data is not valid (wanted 0-6)");
         return new Cake(data);
     }
 

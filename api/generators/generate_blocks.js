@@ -13,15 +13,7 @@ Object.keys(blocks).forEach(function(blockId) {
 
     var line = "public static final BlockType " + name + " = IntBlock.builder()" +
         ".name(\"" + name + "\").id(" + blockId + ").maxStackSize(" + block.stackSize + ").diggable(" + block.diggable + ").transparent(" + block.transparent +
-        ").emitLight(" + block.emitLight + ").filterLight(" + block.filterLight + ").dropHandler(";
-
-    if (block.drops.length == 0) {
-        line += "NothingDrop.INSTANCE";
-    } else if (block.drops.length == 1 && block.drops[0].drop == block.id) {
-        line += "SelfDrop.INSTANCE";
-    }
-
-    line += ").build();";
+        ").emitLight(" + block.emitLight + ").filterLight(" + block.filterLight + ").build();";
     lines.push(line);
 });
 
