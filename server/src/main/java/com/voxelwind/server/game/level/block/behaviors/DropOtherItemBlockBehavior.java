@@ -10,12 +10,14 @@ import com.voxelwind.api.server.Server;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class DropOtherItemBlockBehavior extends SimpleBlockBehavior {
     private static final Random RANDOM = new Random();
     private final ItemType type;
     private final int minAmount;
     private final int maxAmount;
+    private final Predicate<ItemStack> canDrop;
 
     public DropOtherItemBlockBehavior(ItemType type) {
         this(type, 1);
@@ -25,12 +27,21 @@ public class DropOtherItemBlockBehavior extends SimpleBlockBehavior {
         this.type = type;
         this.minAmount = amount;
         this.maxAmount = amount;
+        this.canDrop = s -> true;
     }
 
     public DropOtherItemBlockBehavior(ItemType type, int minAmount, int maxAmount) {
         this.type = type;
         this.minAmount = minAmount;
         this.maxAmount = maxAmount;
+        this.canDrop = s -> true;
+    }
+
+    public DropOtherItemBlockBehavior(ItemType type, int minAmount, int maxAmount, Predicate<ItemStack> canDrop) {
+        this.type = type;
+        this.minAmount = minAmount;
+        this.maxAmount = maxAmount;
+        this.canDrop = canDrop;
     }
 
     @Override

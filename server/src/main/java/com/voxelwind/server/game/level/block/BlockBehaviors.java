@@ -2,7 +2,9 @@ package com.voxelwind.server.game.level.block;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
+import com.voxelwind.api.game.item.util.ItemTypeUtil;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.level.block.behaviors.*;
@@ -51,6 +53,12 @@ public class BlockBehaviors {
                 .put(BlockTypes.BROWN_MUSHROOM_BLOCK, new DropOtherItemBlockBehavior(BlockTypes.BROWN_MUSHROOM, 0, 2))
                 .put(BlockTypes.RED_MUSHROOM_BLOCK, new DropOtherItemBlockBehavior(BlockTypes.RED_MUSHROOM, 0, 2))
                 .put(BlockTypes.MELON, new DropOtherItemBlockBehavior(ItemTypes.MELON, 3, 7))
+                .put(BlockTypes.MELON_STEM, PumpkinMelonStemBlockBehavior.MELON)
+                .put(BlockTypes.PUMPKIN_STEM, PumpkinMelonStemBlockBehavior.PUMPKIN)
+                .put(BlockTypes.NETHER_WART, NetherWartBlockBehavior.INSTANCE)
+                .put(BlockTypes.EMERALD_ORE, new DropOtherItemBlockBehavior(ItemTypes.EMERALD, 1, 1, stack -> stack != null &&
+                        stack.getItemType() == ItemTypes.IRON_PICKAXE && stack.getItemType() == ItemTypes.DIAMOND_PICKAXE))
+                .put(BlockTypes.NETHER_QUARTZ_ORE, new DropOtherItemBlockBehavior(ItemTypes.NETHER_QUARTZ, 1, 1, s -> s != null && ItemTypeUtil.isPickaxe(s.getItemType())))
                 .build();
     }
 
