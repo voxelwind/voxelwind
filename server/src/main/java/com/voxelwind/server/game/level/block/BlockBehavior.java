@@ -1,5 +1,6 @@
 package com.voxelwind.server.game.level.block;
 
+import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.Block;
@@ -22,6 +23,7 @@ public interface BlockBehavior {
         return Optional.empty();
     }
     default BoundingBox getBoundingBox(Block block) {
-        return new BoundingBox(block.getLevelLocation(), block.getLevelLocation().add(1, 1, 1));
+        Vector3f asFloat = block.getLevelLocation().toFloat();
+        return new BoundingBox(asFloat, asFloat.add(1, 1, 1));
     }
 }
