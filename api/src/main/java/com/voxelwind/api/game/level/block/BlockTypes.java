@@ -9,6 +9,7 @@ import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.item.util.ItemTypeUtil;
 import com.voxelwind.api.game.level.block.data.Crops;
+import com.voxelwind.api.game.level.block.data.TopSnow;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.DyeColor;
 import gnu.trove.map.TIntObjectMap;
@@ -102,7 +103,7 @@ public class BlockTypes {
     public static final BlockType REDSTONE_TORCH = IntBlock.builder().name("redstone_torch").id(75).maxStackSize(64).diggable(true).transparent(true).emitLight(7).filterLight(0).build();
     public static final BlockType REDSTONE_TORCH_ACTIVE = IntBlock.builder().name("redstone_torch_active").id(76).maxStackSize(64).diggable(true).transparent(true).emitLight(7).filterLight(0).build();
     public static final BlockType STONE_BUTTON = IntBlock.builder().name("stone_button").id(77).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType TOP_SNOW = IntBlock.builder().name("top_snow").id(78).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType TOP_SNOW = IntBlock.builder().name("top_snow").id(78).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).blockDataClass(TopSnow.class).fromBlockMetadata(TopSnow::from).build();
     public static final BlockType ICE = IntBlock.builder().name("ice").id(79).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType SNOW = IntBlock.builder().name("snow").id(80).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType CACTUS = IntBlock.builder().name("cactus").id(81).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
