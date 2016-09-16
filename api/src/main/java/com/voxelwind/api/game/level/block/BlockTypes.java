@@ -8,7 +8,9 @@ import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.item.util.ItemTypeUtil;
+import com.voxelwind.api.game.level.block.data.Cake;
 import com.voxelwind.api.game.level.block.data.Crops;
+import com.voxelwind.api.game.level.block.data.FlowerPot;
 import com.voxelwind.api.game.level.block.data.TopSnow;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.DyeColor;
@@ -116,7 +118,7 @@ public class BlockTypes {
     public static final BlockType GLOWSTONE = IntBlock.builder().name("glowstone").id(89).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType PORTAL = IntBlock.builder().name("portal").id(90).maxStackSize(0).diggable(false).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType JACK_OLANTERN = IntBlock.builder().name("jack_olantern").id(91).maxStackSize(64).diggable(true).transparent(true).emitLight(15).filterLight(15).build();
-    public static final BlockType CAKE = IntBlock.builder().name("cake").id(92).maxStackSize(1).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType CAKE = IntBlock.builder().name("cake").id(92).maxStackSize(1).diggable(true).transparent(true).emitLight(0).filterLight(0).blockDataClass(Cake.class).fromBlockMetadata(Cake::ofStage).build();
     public static final BlockType REDSTONE_REPEATER = IntBlock.builder().name("redstone_repeater").id(93).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType REDSTONE_REPEATER_ACTIVE = IntBlock.builder().name("redstone_repeater_active").id(94).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType INVISIBLE_BEDROCK = IntBlock.builder().name("invisible_bedrock").id(95).maxStackSize(64).diggable(false).transparent(true).emitLight(0).filterLight(0).build();
@@ -159,7 +161,7 @@ public class BlockTypes {
     public static final BlockType BIRCH_WOOD_STAIRS = IntBlock.builder().name("birch_wood_stairs").id(135).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
     public static final BlockType JUNGLE_WOOD_STAIRS = IntBlock.builder().name("jungle_wood_stairs").id(136).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
     public static final BlockType COBBLESTONE_WALL = IntBlock.builder().name("cobblestone_wall").id(139).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType FLOWER_POT = IntBlock.builder().name("flower_pot").id(140).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType FLOWER_POT = IntBlock.builder().name("flower_pot").id(140).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).blockDataClass(FlowerPot.class).fromBlockMetadata(FlowerPot::of).build();
     public static final BlockType CARROTS = IntBlock.builder().name("carrots").id(141).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).fromBlockMetadata(Crops::ofStage).blockDataClass(Crops.class).build();
     public static final BlockType POTATO = IntBlock.builder().name("potato").id(142).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).fromBlockMetadata(Crops::ofStage).blockDataClass(Crops.class).build();
     public static final BlockType WOODEN_BUTTON = IntBlock.builder().name("wooden_button").id(143).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
