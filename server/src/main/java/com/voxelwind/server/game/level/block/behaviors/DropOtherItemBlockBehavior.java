@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.level.block.Block;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
+import com.voxelwind.server.game.item.VoxelwindItemStack;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -46,12 +48,14 @@ public class DropOtherItemBlockBehavior extends SimpleBlockBehavior {
 
     @Override
     public Collection<ItemStack> getDrops(Server server, Player player, Block block, @Nullable ItemStack withItem) {
-        int amount = minAmount == maxAmount ? minAmount : (minAmount + RANDOM.nextInt(maxAmount - minAmount + 1));
-        if (amount > 0) {
-            return ImmutableList.of(server.createItemStackBuilder()
-                    .itemType(type)
-                    .amount(amount)
-                    .build());
+        if (canDrop.test(withItem)) {
+            int amount = minAmount == maxAmount ? minAmount : (minAmount + RANDOM.nextInt(maxAmount - minAmount + 1));
+            if (amount > 0) {
+                return ImmutableList.of(server.createItemStackBuilder()
+                        .itemType(type)
+                        .amount(amount)
+                        .build());
+            }
         }
         return ImmutableList.of();
     }
