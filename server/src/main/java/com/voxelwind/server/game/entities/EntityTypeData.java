@@ -1,16 +1,16 @@
 package com.voxelwind.server.game.entities;
 
 public enum EntityTypeData {
-    PLAYER(63, 1.62f),
+    PLAYER(63, 1.8f, 0.6f, 0.6f),
     
     CHICKEN(10, 0.7f),
     COW(11, 1.3f),
     PIG(12, 0.9f),
     SHEEP(13, 1.3f),
     WOLF(14, 0.8f),
-    VILLAGER(15, 1.8f),
+    VILLAGER(15, 1.8f, 0.6f, 0.6f),
     MOOSHROOM(16, 1.3f),
-    SQUID(17, 0.95f),
+    SQUID(17, 0.95f, 0.95f, 0.95f),
     RABBIT(18, 0f),
     BAT(19, 0.3f),
     IRON_GOLEM(20, 2.9f),
@@ -40,14 +40,25 @@ public enum EntityTypeData {
     HUSK(47, 1.8f),
     WITHER_SKELETON(48, 3.5f),
 
-    ITEM(63, 0.0f);
+    ITEM(63, 0.25f, 0.25f, 0.25f),
+    PRIMED_TNT(65, 0.98f, 0.98f, 0.98f),
+    FALLING_SAND(66, 0.98f, 0.98f, 0.98f),
+    ARROW(80, 0.5f, 0.5f, 0.5f);
     
     private final int type;
     private final float height;
+    private final float length;
+    private final float width;
 
     EntityTypeData(int type, float height) {
+        this(type, height, 0f, 0f);
+    }
+
+    EntityTypeData(int type, float height, float length, float width) {
         this.type = type;
         this.height = height;
+        this.length = length;
+        this.width = width;
     }
 
     public int getType() {
@@ -56,5 +67,13 @@ public enum EntityTypeData {
 
     public float getHeight() {
         return height;
+    }
+
+    public float getLength() {
+        return length;
+    }
+
+    public float getWidth() {
+        return width;
     }
 }

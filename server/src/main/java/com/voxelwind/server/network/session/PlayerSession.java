@@ -34,6 +34,7 @@ import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
 import com.voxelwind.server.game.level.util.Attribute;
+import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.api.util.Rotation;
@@ -103,7 +104,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     private void pickupAdjacent() {
-        for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInDistance(getPosition().sub(0, 0.5, 0), 1f)) {
+        BoundingBox box = getBoundingBox().grow(1f, 0.5f, 1f);
+        for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInBounds(box)) {
             if (entity instanceof DroppedItem) {
                 // TODO: Check pickup delay and fire events.
                 if (getInventory().addItem(((VoxelwindDroppedItem) entity).getItemStack())) {
@@ -763,6 +765,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             if (gameMode != GameMode.CREATIVE) {
                 BlockBehavior blockBehavior = BlockBehaviors.getBlockBehavior(block.getBlockState().getBlockType());
                 if (!blockBehavior.handleBreak(getMcpeSession().getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null))) {
+                    Collection<ItemStack> drops = blockBehavior.getDrops(getMcpeSession().getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null));
+                    for (ItemStack drop : drops) {
+                        getLevel().dropItem(drop, block.getLevelLocation().toFloat().add(0.5, 0.5, 0.5));
+                    }
                     chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
                 }
             } else {
@@ -781,7 +787,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 Optional<ItemStack> actuallyInHand = playerInventory.getStackInHand();
                 LOGGER.info("Held: {}, slot: {}", actuallyInHand, playerInventory.getHeldHotbarSlot());
                 if ((actuallyInHand.isPresent() && actuallyInHand.get().getItemType() != packet.getStack().getItemType()) ||
-                        !actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == BlockTypes.AIR) {
+                        !actuallyInHand.isPresent() && packet.getStack().getItemType() == BlockTypes.AIR) {
                     // Not actually the same item.
                     return;
                 }
@@ -836,7 +842,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
             playerInventory.clearItem(playerInventory.getHeldInventorySlot());
-            updateViewableEntities();
         }
     }
 

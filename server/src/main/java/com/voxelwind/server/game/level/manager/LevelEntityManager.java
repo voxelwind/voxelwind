@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;
 import com.voxelwind.server.network.session.McpeSession;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -27,6 +29,7 @@ public class LevelEntityManager {
     private final List<BaseEntity> entities = new ArrayList<>();
     private final Object entityLock = new Object();
     private final AtomicLong entityIdAllocator = new AtomicLong();
+    private final AtomicBoolean entitiesAdded = new AtomicBoolean(false);
     private final VoxelwindLevel level;
 
     public LevelEntityManager(VoxelwindLevel level) {
@@ -37,6 +40,7 @@ public class LevelEntityManager {
         synchronized (entityLock) {
             entities.add(entity);
         }
+        entitiesAdded.set(true);
     }
 
     public void onTick() {
@@ -90,8 +94,10 @@ public class LevelEntityManager {
                     entity.remove();
                 }
             }
+        }
 
-            // Perform a view check so that the entities are removed on the client side.
+        // Perform a view check for all players.
+        if (entitiesAdded.getAndSet(false) || !toRemove.isEmpty()) {
             for (PlayerSession session : getPlayers()) {
                 session.updateViewableEntities();
             }
@@ -159,6 +165,22 @@ public class LevelEntityManager {
                 }
 
                 if (entity.getPosition().distance(origin) <= distance) {
+                    inDistance.add(entity);
+                }
+            }
+        }
+        return inDistance;
+    }
+
+    public Collection<BaseEntity> getEntitiesInBounds(BoundingBox boundingBox) {
+        Collection<BaseEntity> inDistance = new ArrayList<>();
+        synchronized (entityLock) {
+            for (BaseEntity entity : entities) {
+                if (entity.isRemoved()) {
+                    continue;
+                }
+
+                if (boundingBox.isWithin(entity.getPosition())) {
                     inDistance.add(entity);
                 }
             }

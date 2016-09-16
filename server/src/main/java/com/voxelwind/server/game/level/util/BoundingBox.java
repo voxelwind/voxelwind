@@ -31,4 +31,8 @@ public class BoundingBox {
                 Float.compare(vector.getZ(), start.getZ()) >= 0 &&
                 Float.compare(vector.getZ(), end.getZ()) <= 0;
     }
+
+    public BoundingBox grow(float x, float y, float z) {
+        return new BoundingBox(start.sub(x, y, z), end.add(x, y, z));
+    }
 }

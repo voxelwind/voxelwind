@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.packets.McpeAddEntity;
 import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
@@ -28,6 +29,7 @@ public class BaseEntity implements Entity {
     private boolean invisible = false;
     private boolean removed = false;
     private int tickedFor;
+    private BoundingBox boundingBox;
 
     public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level) {
         this.data = data;
@@ -37,6 +39,7 @@ public class BaseEntity implements Entity {
         this.rotation = Rotation.ZERO;
         this.motion = Vector3f.ZERO;
         this.level.getEntityManager().register(this);
+        refreshBoundingBox();
     }
 
     @Override
@@ -69,6 +72,8 @@ public class BaseEntity implements Entity {
         if (!this.position.equals(position)) {
             this.position = position;
             stale = true;
+
+            refreshBoundingBox();
         }
     }
 
@@ -148,6 +153,14 @@ public class BaseEntity implements Entity {
             this.invisible = invisible;
             stale = true;
         }
+    }
+
+    public BoundingBox getBoundingBox() {
+        return boundingBox;
+    }
+
+    private void refreshBoundingBox() {
+        boundingBox = new BoundingBox(getPosition(), getPosition()).grow(data.getWidth() / 2, data.getLength() / 2, data.getWidth() / 2);
     }
 
     protected byte getFlagValue() {

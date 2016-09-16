@@ -3,9 +3,13 @@ package com.voxelwind.api.game.level;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.misc.DroppedItem;
+import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.Block;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Represents a game level.
  */
+@ParametersAreNonnullByDefault
 public interface Level {
     /**
      * Returns the name of the world.
@@ -120,4 +125,21 @@ public interface Level {
         Optional<Chunk> chunkOptional = getChunkIfLoaded(x >> 4, z >> 4);
         return chunkOptional.map(c -> c.getBlock(x & 0x0f, y, z & 0x0f));
     }
+
+    /**
+     * Spawns an entity at a specified position.
+     * @param klass the entity class name from the API
+     * @param position the position to spawn at
+     * @param <T> entity type parameter
+     * @return a new {@link Entity} instance
+     */
+    <T extends Entity> T spawn(Class<?> klass, Vector3f position);
+
+    /**
+     * Drops an item at a specified position.
+     * @param stack the stack to drop
+     * @param position the position to spawn the dropped item at
+     * @return a {@link DroppedItem} instance
+     */
+    DroppedItem dropItem(ItemStack stack, Vector3f position);
 }

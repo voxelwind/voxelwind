@@ -2,10 +2,17 @@ package com.voxelwind.server.game.level;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.misc.DroppedItem;
+import com.voxelwind.api.game.entities.monsters.Zombie;
+import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
+import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
+import com.voxelwind.server.game.entities.monsters.ZombieEntity;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
@@ -16,6 +23,7 @@ import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -81,6 +89,26 @@ public class VoxelwindLevel implements Level {
     @Override
     public CompletableFuture<Chunk> getChunk(int x, int z) {
         return chunkManager.getChunk(x, z);
+    }
+
+    @Override
+    @SuppressWarnings({ "unchecked "})
+    public <T extends Entity> T spawn(@Nonnull Class<?> klass, @Nonnull Vector3f position) {
+        Preconditions.checkNotNull(klass, "klass");
+        Preconditions.checkNotNull(position, "position");
+        Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
+        if (klass.isAssignableFrom(Zombie.class)) {
+            return (T) new ZombieEntity(this, position);
+        }
+        throw new IllegalArgumentException("Entity class " + klass.getName() + " not recognized.");
+    }
+
+    @Override
+    public DroppedItem dropItem(@Nonnull ItemStack stack, @Nonnull Vector3f position) {
+        Preconditions.checkNotNull(stack, "stack");
+        Preconditions.checkNotNull(position, "position");
+        Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
+        return new VoxelwindDroppedItem(position, this, stack);
     }
 
     public void onTick() {
