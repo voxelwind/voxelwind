@@ -132,6 +132,10 @@ public class LevelEntityManager {
     public Optional<BaseEntity> findEntityById(long id) {
         synchronized (entityLock) {
             for (BaseEntity entity : entities) {
+                if (entity.isRemoved()) {
+                    continue;
+                }
+
                 if (entity.getEntityId() == id) {
                     return Optional.of(entity);
                 }
@@ -150,6 +154,10 @@ public class LevelEntityManager {
         Collection<BaseEntity> inDistance = new ArrayList<>();
         synchronized (entityLock) {
             for (BaseEntity entity : entities) {
+                if (entity.isRemoved()) {
+                    continue;
+                }
+
                 if (entity.getPosition().distance(origin) <= distance) {
                     inDistance.add(entity);
                 }

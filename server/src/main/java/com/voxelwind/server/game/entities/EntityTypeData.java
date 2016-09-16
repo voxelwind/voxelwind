@@ -38,7 +38,9 @@ public enum EntityTypeData {
     WITCH(45, 1.8f),
     STRAY(46, 1.8f),
     HUSK(47, 1.8f),
-    WITHER_SKELETON(48, 3.5f);
+    WITHER_SKELETON(48, 3.5f),
+
+    ITEM(63, 0.0f);
     
     private final int type;
     private final float height;

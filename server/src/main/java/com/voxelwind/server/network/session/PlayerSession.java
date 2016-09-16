@@ -5,6 +5,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.spotify.futures.CompletableFutures;
+import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
@@ -23,6 +24,7 @@ import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.api.util.BlockFace;
+import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.block.BlockBehavior;
 import com.voxelwind.server.game.level.block.BlockBehaviors;
@@ -94,7 +96,31 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             sendNewChunks();
         }
 
+        // Check for items on the ground.
+        pickupAdjacent();
+
         return true;
+    }
+
+    private void pickupAdjacent() {
+        for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInDistance(getPosition().sub(0, 0.5, 0), 1f)) {
+            if (entity instanceof DroppedItem) {
+                // TODO: Check pickup delay and fire events.
+                if (getInventory().addItem(((VoxelwindDroppedItem) entity).getItemStack())) {
+                    McpeTakeItem packetBroadcast = new McpeTakeItem();
+                    packetBroadcast.setItemEntityId(entity.getEntityId());
+                    packetBroadcast.setPlayerEntityId(getEntityId());
+                    getLevel().getPacketManager().queuePacketForViewers(this, packetBroadcast);
+
+                    McpeTakeItem packetSelf = new McpeTakeItem();
+                    packetSelf.setItemEntityId(entity.getEntityId());
+                    packetSelf.setPlayerEntityId(0);
+                    session.addToSendQueue(packetSelf);
+
+                    entity.remove();
+                }
+            }
+        }
     }
 
     @Override
@@ -796,6 +822,21 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         break;
                 }
             }
+        }
+
+        @Override
+        public void handle(McpeDropItem packet) {
+            // TODO: Events
+            Optional<ItemStack> stackOptional = playerInventory.getStackInHand();
+            if (!stackOptional.isPresent()) {
+                sendPlayerInventory();
+                return;
+            }
+
+            DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), stackOptional.get());
+            item.setMotion(getDirectionVector().mul(0.4));
+            playerInventory.clearItem(playerInventory.getHeldSlot());
+            updateViewableEntities();
         }
     }
 

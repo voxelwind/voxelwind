@@ -26,4 +26,6 @@ public interface NetworkPacketHandler {
     void handle(McpeRemoveBlock packet);
 
     void handle(McpeUseItem packet);
+
+    void handle(McpeDropItem packet);
 }

@@ -14,9 +14,9 @@ public final class Rotation {
     private final float headYaw;
 
     public Rotation(float pitch, float yaw, float headYaw) {
-        this.pitch = pitch;
-        this.yaw = yaw;
-        this.headYaw = headYaw;
+        this.pitch = validate(pitch, "pitch");
+        this.yaw = validate(yaw, "yaw");
+        this.headYaw = validate(headYaw, "headYaw");
     }
 
     public float getPitch() {
@@ -78,5 +78,10 @@ public final class Rotation {
                 ", yaw=" + yaw +
                 ", headYaw=" + headYaw +
                 '}';
+    }
+
+    private static float validate(float val, String name) {
+        Preconditions.checkArgument(Float.compare(val, -360f) >= 0 && Float.compare(val, 360f) <= 0, "%s value (%s) is not within range 0-360f", name, val);
+        return val;
     }
 }

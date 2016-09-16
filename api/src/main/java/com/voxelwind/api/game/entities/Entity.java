@@ -56,8 +56,8 @@ public interface Entity {
 
         int chunkX = blockPosition.getX() >> 4;
         int chunkZ = blockPosition.getZ() >> 4;
-        int chunkInX = blockPosition.getX() % 16;
-        int chunkInZ = blockPosition.getZ() % 16;
+        int chunkInX = blockPosition.getX() & 0x0f;
+        int chunkInZ = blockPosition.getZ() & 0x0f;
 
         Optional<Chunk> chunkOptional = getLevel().getChunkIfLoaded(chunkX, chunkZ);
         return chunkOptional.isPresent() && chunkOptional.get().getBlock(chunkInX, blockPosition.getY(), chunkInZ).getBlockState().getBlockType() != BlockTypes.AIR;
@@ -72,4 +72,13 @@ public interface Entity {
     void remove();
 
     boolean isRemoved();
+
+    default Vector3f getDirectionVector() {
+        Rotation rotation = getRotation();
+        double y = -Math.sin(Math.toRadians(rotation.getPitch()));
+        double xz = Math.cos(Math.toRadians(rotation.getPitch()));
+        double x = -xz * Math.sin(Math.toRadians(rotation.getYaw()));
+        double z = xz * Math.cos(Math.toRadians(rotation.getYaw()));
+        return new Vector3f(x, y, z).normalize();
+    }
 }

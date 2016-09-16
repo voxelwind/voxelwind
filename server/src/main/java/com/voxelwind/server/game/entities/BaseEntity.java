@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.packets.McpeAddEntity;
 import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
@@ -26,8 +27,9 @@ public class BaseEntity implements Entity {
     protected boolean sneaking = false;
     private boolean invisible = false;
     private boolean removed = false;
+    private int tickedFor;
 
-    BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level) {
+    public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level) {
         this.data = data;
         this.level = Preconditions.checkNotNull(level, "level");
         this.position = Preconditions.checkNotNull(position, "position");
@@ -161,7 +163,7 @@ public class BaseEntity implements Entity {
         return array.length == 0 ? 0 : array[0];
     }
 
-    private MetadataDictionary getMetadata() {
+    protected MetadataDictionary getMetadata() {
         checkIfAlive();
 
         // TODO: Implement more than this.
@@ -179,7 +181,7 @@ public class BaseEntity implements Entity {
         return dictionary;
     }
 
-    public McpeAddEntity createAddEntityPacket() {
+    public NetworkPackage createAddEntityPacket() {
         checkIfAlive();
 
         McpeAddEntity packet = new McpeAddEntity();
@@ -203,6 +205,8 @@ public class BaseEntity implements Entity {
             // Remove the entity.
             return false;
         }
+
+        tickedFor++;
 
         // Continue ticking this entity
         return true;
@@ -270,5 +274,27 @@ public class BaseEntity implements Entity {
 
     protected void setEntityId(long entityId) {
         this.entityId = entityId;
+    }
+
+    protected void doMovement() {
+        doMovement(0.02f, 0.08f);
+    }
+
+    protected void doMovement(float drag, double gravity) {
+        if (getMotion().lengthSquared() > 0) {
+            boolean onGroundPreviously = isOnGround();
+            setPosition(getPosition().add(getMotion()));
+            boolean onGroundNow = isOnGround();
+
+            if (!onGroundPreviously && onGroundNow) {
+                setPosition(new Vector3f(getPosition().getX(), getPosition().getFloorY(), getPosition().getZ()));
+                setMotion(Vector3f.ZERO);
+            } else {
+                setMotion(getMotion().mul(1f - drag));
+                if (!onGroundNow) {
+                    setMotion(getMotion().sub(0, gravity, 0));
+                }
+            }
+        }
     }
 }

@@ -26,21 +26,7 @@ public class LivingEntity extends BaseEntity implements Living {
     public boolean onTick() {
         super.onTick();
 
-        if (getMotion().lengthSquared() > 0) {
-            boolean onGroundPreviously = isOnGround();
-            setPosition(getPosition().add(getMotion()));
-            boolean onGroundNow = isOnGround();
-
-            if (!onGroundPreviously && onGroundNow) {
-                setPosition(new Vector3f(getPosition().getX(), getPosition().getFloorY(), getPosition().getZ()));
-                setMotion(Vector3f.ZERO);
-            } else {
-                setMotion(getMotion().mul(1f - drag));
-                if (!onGroundNow) {
-                    setMotion(getMotion().sub(0, gravity, 0));
-                }
-            }
-        }
+        doMovement(drag, gravity);
 
         return true;
     }

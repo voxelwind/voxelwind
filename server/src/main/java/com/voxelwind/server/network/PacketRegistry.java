@@ -46,6 +46,8 @@ public class PacketRegistry {
         MCPE_PACKETS[0x0a] = McpeAddPlayer.class;
         MCPE_PACKETS[0x0b] = McpeAddEntity.class;
         MCPE_PACKETS[0x0c] = McpeRemoveEntity.class;
+        MCPE_PACKETS[0x0d] = McpeAddItem.class;
+        MCPE_PACKETS[0x0e] = McpeTakeItem.class;
         MCPE_PACKETS[0x0f] = McpeMoveEntity.class;
         MCPE_PACKETS[0x10] = McpeMovePlayer.class;
         MCPE_PACKETS[0x12] = McpeRemoveBlock.class;
@@ -60,6 +62,7 @@ public class PacketRegistry {
         MCPE_PACKETS[0x26] = McpeSetSpawnPosition.class;
         MCPE_PACKETS[0x27] = McpeAnimate.class;
         MCPE_PACKETS[0x28] = McpeRespawn.class;
+        MCPE_PACKETS[0x29] = McpeDropItem.class;
         MCPE_PACKETS[0x2a] = McpeContainerOpen.class;
         MCPE_PACKETS[0x2b] = McpeContainerClose.class;
         MCPE_PACKETS[0x2c] = McpeContainerSetSlot.class;
