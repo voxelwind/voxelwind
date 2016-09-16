@@ -6,24 +6,24 @@ import com.voxelwind.api.game.level.block.BlockData;
 import java.util.Objects;
 
 public class TopSnow implements BlockData {
-    private final int layer;
+    private final int layers;
 
     public static TopSnow from(int layer) {
-        Preconditions.checkArgument(layer >= 0 && layer <= 7, "layer %s is not between 0 and 7", layer);
+        Preconditions.checkArgument(layer >= 0 && layer <= 7, "layers %s is not between 0 and 7", layer);
         return new TopSnow(layer);
     }
 
-    private TopSnow(int layer) {
-        this.layer = layer;
+    private TopSnow(int layers) {
+        this.layers = layers;
     }
 
-    public int getLayer() {
-        return layer;
+    public int getLayers() {
+        return layers;
     }
 
     @Override
     public short toBlockMetadata() {
-        return (short) layer;
+        return (short) layers;
     }
 
     @Override
@@ -31,18 +31,18 @@ public class TopSnow implements BlockData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TopSnow topSnow = (TopSnow) o;
-        return layer == topSnow.layer;
+        return layers == topSnow.layers;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(layer);
+        return Objects.hash(layers);
     }
 
     @Override
     public String toString() {
         return "TopSnow{" +
-                "layer=" + layer +
+                "layers=" + layers +
                 '}';
     }
 }

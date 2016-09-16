@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Random;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TopSnowBlockBehavior extends SimpleBlockBehavior {
@@ -39,7 +38,7 @@ public class TopSnowBlockBehavior extends SimpleBlockBehavior {
                 // Add another layer to the snow block if needed
                 Block againstBlock = originalBlockOptional.get();
                 if (againstBlock.getBlockState().getBlockType() == BlockTypes.TOP_SNOW && againstBlock.getBlockState().getBlockData() instanceof TopSnow) {
-                    int layer = ((TopSnow) againstBlock.getBlockState().getBlockData()).getLayer();
+                    int layer = ((TopSnow) againstBlock.getBlockState().getBlockData()).getLayers();
                     if (layer >= 7) {
                         // Need to place a new block down.
                         return BehaviorResult.PLACE_BLOCK_AND_REMOVE_ITEM;
