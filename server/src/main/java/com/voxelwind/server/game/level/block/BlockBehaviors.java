@@ -59,6 +59,12 @@ public class BlockBehaviors {
                 .put(BlockTypes.EMERALD_ORE, new DropOtherItemBlockBehavior(ItemTypes.EMERALD, 1, 1, stack -> stack != null &&
                         stack.getItemType() == ItemTypes.IRON_PICKAXE && stack.getItemType() == ItemTypes.DIAMOND_PICKAXE))
                 .put(BlockTypes.NETHER_QUARTZ_ORE, new DropOtherItemBlockBehavior(ItemTypes.NETHER_QUARTZ, 1, 1, s -> s != null && ItemTypeUtil.isPickaxe(s.getItemType())))
+                .put(BlockTypes.GLASS, DropNothingBlockBehavior.INSTANCE)
+                .put(BlockTypes.GLASS_PANE, DropNothingBlockBehavior.INSTANCE)
+                .put(BlockTypes.DEAD_BUSH, DropNothingBlockBehavior.INSTANCE)
+                .put(BlockTypes.MONSTER_EGG, DropNothingBlockBehavior.INSTANCE)
+                .put(BlockTypes.MONSTER_SPAWNER, DropNothingBlockBehavior.INSTANCE)
+                .put(BlockTypes.CAKE, DropNothingBlockBehavior.INSTANCE)
                 .build();
     }
 
