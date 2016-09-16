@@ -12,7 +12,7 @@ import java.util.Optional;
 public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory implements PlayerInventory {
     private final PlayerSession session;
     private final int[] hotbarLinks = new int[9];
-    private int heldSlot = -1;
+    private int heldHotbarSlot = -1;
 
     public VoxelwindBasePlayerInventory(PlayerSession session) {
         // TODO: Verify
@@ -27,44 +27,49 @@ public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory impleme
         return Arrays.copyOf(hotbarLinks, hotbarLinks.length);
     }
 
-    public void setLink(int hotbarSlot, int inventorySlot) {
+    public void setHotbarLink(int hotbarSlot, int inventorySlot) {
         hotbarLinks[hotbarSlot] = inventorySlot;
     }
 
     @Override
-    public int getHeldSlot() {
-        return heldSlot;
+    public int getHeldHotbarSlot() {
+        return heldHotbarSlot;
+    }
+
+    @Override
+    public int getHeldInventorySlot() {
+        int slot = heldHotbarSlot;
+        if (slot == -1) {
+            return -1;
+        }
+        return hotbarLinks[slot];
     }
 
     @Override
     public Optional<ItemStack> getStackInHand() {
-        int slot = heldSlot;
+        int slot = getHeldInventorySlot();
         if (slot == -1) {
             return Optional.empty();
         }
-        int linked = hotbarLinks[slot];
-        if (linked == -1) {
-            return Optional.empty();
-        }
-        return getItem(linked);
+        return getItem(slot);
     }
 
-    public void setHeldSlot(int heldSlot, boolean sendToPlayer) {
-        this.heldSlot = heldSlot;
+    public void setHeldHotbarSlot(int hotbarSlot, boolean sendToPlayer) {
+        this.heldHotbarSlot = hotbarSlot;
 
         if (sendToPlayer) {
             McpeMobEquipment equipmentForSelf = new McpeMobEquipment();
             equipmentForSelf.setEntityId(0);
-            equipmentForSelf.setHotbarSlot((byte) heldSlot);
-            equipmentForSelf.setInventorySlot((byte) (hotbarLinks[heldSlot] + 9)); // Corrected for the benefit of MCPE
+            equipmentForSelf.setHotbarSlot((byte) hotbarSlot);
+            equipmentForSelf.setInventorySlot((byte) (hotbarLinks[hotbarSlot] + 9)); // Corrected for the benefit of MCPE
             equipmentForSelf.setStack(getStackInHand().orElse(null));
             session.getMcpeSession().addToSendQueue(equipmentForSelf);
         }
 
         McpeMobEquipment equipmentForAll = new McpeMobEquipment();
         equipmentForAll.setEntityId(session.getEntityId());
-        equipmentForAll.setHotbarSlot((byte) heldSlot);
-        equipmentForAll.setInventorySlot((byte) hotbarLinks[heldSlot]);
+        equipmentForAll.setHotbarSlot((byte) hotbarSlot);
+        equipmentForAll.setInventorySlot((byte) hotbarLinks[hotbarSlot]);
         equipmentForAll.setStack(getStackInHand().orElse(null));
         session.getLevel().getPacketManager().queuePacketForViewers(session, equipmentForAll);
     }

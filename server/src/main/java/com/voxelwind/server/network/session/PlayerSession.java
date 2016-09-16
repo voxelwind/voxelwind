@@ -739,8 +739,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int finalSlot = correctedInventorySlot < 0 || correctedInventorySlot >= playerInventory.getInventoryType().getInventorySize() ?
                     -1 : correctedInventorySlot;
 
-            playerInventory.setLink(packet.getHotbarSlot(), finalSlot);
-            playerInventory.setHeldSlot(packet.getHotbarSlot(), true);
+            playerInventory.setHotbarLink(packet.getHotbarSlot(), finalSlot);
+            playerInventory.setHeldHotbarSlot(packet.getHotbarSlot(), true);
         }
 
         @Override
@@ -779,7 +779,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             } else if (packet.getFace() >= 0 && packet.getFace() <= 5) {
                 // Sanity check:
                 Optional<ItemStack> actuallyInHand = playerInventory.getStackInHand();
-                LOGGER.info("Held: {}, slot: {}", actuallyInHand, playerInventory.getHeldSlot());
+                LOGGER.info("Held: {}, slot: {}", actuallyInHand, playerInventory.getHeldHotbarSlot());
                 if ((actuallyInHand.isPresent() && actuallyInHand.get().getItemType() != packet.getStack().getItemType()) ||
                         !actuallyInHand.isPresent() && actuallyInHand.get().getItemType() == BlockTypes.AIR) {
                     // Not actually the same item.
@@ -811,9 +811,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         if (serverInHand != null) {
                             int newItemAmount = serverInHand.getAmount() - 1;
                             if (newItemAmount <= 0) {
-                                playerInventory.clearItem(playerInventory.getHeldSlot());
+                                playerInventory.clearItem(playerInventory.getHeldHotbarSlot());
                             } else {
-                                playerInventory.setItem(playerInventory.getHeldSlot(), serverInHand.toBuilder().amount(newItemAmount).build());
+                                playerInventory.setItem(playerInventory.getHeldHotbarSlot(), serverInHand.toBuilder().amount(newItemAmount).build());
                             }
                         }
                         break;
@@ -835,7 +835,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
-            playerInventory.clearItem(playerInventory.getHeldSlot());
+            playerInventory.clearItem(playerInventory.getHeldHotbarSlot());
             updateViewableEntities();
         }
     }

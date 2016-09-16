@@ -10,7 +10,9 @@ import java.util.Optional;
 public interface PlayerInventory extends Inventory {
     int[] getHotbarLinks();
 
-    int getHeldSlot();
+    int getHeldHotbarSlot();
+
+    int getHeldInventorySlot();
 
     Optional<ItemStack> getStackInHand();
 }
