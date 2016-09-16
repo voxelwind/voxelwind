@@ -42,7 +42,11 @@ public class VoxelwindBasePlayerInventory extends VoxelwindBaseInventory impleme
         if (slot == -1) {
             return Optional.empty();
         }
-        return getItem(slot);
+        int linked = hotbarLinks[slot];
+        if (linked == -1) {
+            return Optional.empty();
+        }
+        return getItem(linked);
     }
 
     public void setHeldSlot(int heldSlot, boolean sendToPlayer) {
