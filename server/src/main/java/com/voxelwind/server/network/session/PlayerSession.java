@@ -811,9 +811,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         if (serverInHand != null) {
                             int newItemAmount = serverInHand.getAmount() - 1;
                             if (newItemAmount <= 0) {
-                                playerInventory.clearItem(playerInventory.getHeldHotbarSlot());
+                                playerInventory.clearItem(playerInventory.getHeldInventorySlot());
                             } else {
-                                playerInventory.setItem(playerInventory.getHeldHotbarSlot(), serverInHand.toBuilder().amount(newItemAmount).build());
+                                playerInventory.setItem(playerInventory.getHeldInventorySlot(), serverInHand.toBuilder().amount(newItemAmount).build());
                             }
                         }
                         break;
@@ -835,7 +835,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
-            playerInventory.clearItem(playerInventory.getHeldHotbarSlot());
+            playerInventory.clearItem(playerInventory.getHeldInventorySlot());
             updateViewableEntities();
         }
     }
