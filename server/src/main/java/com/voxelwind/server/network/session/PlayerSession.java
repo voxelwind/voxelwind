@@ -649,7 +649,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeText packet) {
-            Preconditions.checkArgument(!packet.getMessage().contains("\0"), "Text packet contains a null byte");
+            Preconditions.checkArgument(packet.getType() == McpeText.TextType.SOURCE, "Text packet type from client is not SOURCE");
+            Preconditions.checkArgument(!packet.getMessage().contains("\0"), "Text packet from client contains a null byte");
+            Preconditions.checkArgument(!packet.getMessage().trim().isEmpty(), "Text packet from client is effectively empty");
 
             // Debugging commands.
             if (packet.getMessage().startsWith("/")) {
