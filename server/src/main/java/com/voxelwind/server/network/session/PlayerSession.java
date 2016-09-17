@@ -677,6 +677,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Vector3f originalPosition = getPosition();
             Vector3f newPosition = packet.getPosition().sub(0, 1.62, 0);
 
+            // Reject moves that are obviously too fast. (>=100 blocks)
+            if (newPosition.distanceSquared(newPosition) >= 10000) {
+                setPosition(originalPosition);
+                setRotation(packet.getRotation());
+                return;
+            }
+
             setPosition(newPosition);
             setRotation(packet.getRotation());
 
