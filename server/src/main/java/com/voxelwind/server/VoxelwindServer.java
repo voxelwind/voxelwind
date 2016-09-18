@@ -23,9 +23,10 @@ import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
+import com.voxelwind.server.network.listeners.McpeOverRakNetNetworkListener;
+import com.voxelwind.server.network.listeners.NetworkListener;
 import com.voxelwind.server.network.util.NativeCodeFactory;
-import com.voxelwind.server.network.NettyVoxelwindNetworkListener;
-import com.voxelwind.server.network.rcon.NettyVoxelwindRconListener;
+import com.voxelwind.server.network.listeners.RconNetworkListener;
 import com.voxelwind.server.network.session.SessionManager;
 import com.voxelwind.server.plugin.VoxelwindPluginManager;
 import io.netty.channel.epoll.Epoll;
@@ -39,6 +40,8 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +53,7 @@ public class VoxelwindServer implements Server {
     private final LevelManager levelManager = new LevelManager();
     private final ScheduledExecutorService timerService = Executors.unconfigurableScheduledExecutorService(
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
-    private NettyVoxelwindNetworkListener listener;
+    private List<NetworkListener> listeners = new CopyOnWriteArrayList<>();
     private VoxelwindLevel defaultLevel;
     private final VoxelwindPluginManager pluginManager = new VoxelwindPluginManager(this);
     private final VoxelwindEventManager eventManager = new VoxelwindEventManager();
@@ -119,13 +122,15 @@ public class VoxelwindServer implements Server {
         eventManager.fire(ServerInitializeEvent.INSTANCE);
 
         // Bind to a port.
-        listener = new NettyVoxelwindNetworkListener(this, configuration.getBindHost(), configuration.getPort(),
+        McpeOverRakNetNetworkListener listener = new McpeOverRakNetNetworkListener(this, configuration.getBindHost(), configuration.getPort(),
                 configuration.isUseSoReuseport());
         listener.bind();
+        listeners.add(listener);
 
         if (configuration.getRcon().isEnabled()) {
-            NettyVoxelwindRconListener rconListener = new NettyVoxelwindRconListener(this, configuration.getRcon().getPassword().getBytes(StandardCharsets.UTF_8));
-            rconListener.bind(configuration.getRcon().getBindHost(), configuration.getRcon().getPort());
+            RconNetworkListener rconListener = new RconNetworkListener(this, configuration.getRcon().getPassword().getBytes(StandardCharsets.UTF_8));
+            rconListener.bind();
+            listeners.add(rconListener);
         }
         configuration.getRcon().clearPassword();
 

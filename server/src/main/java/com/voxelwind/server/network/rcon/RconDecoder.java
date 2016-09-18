@@ -7,7 +7,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import java.nio.ByteOrder;
 import java.util.List;
 
-class RconDecoder extends ByteToMessageDecoder {
+public class RconDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> list) throws Exception {
         ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);

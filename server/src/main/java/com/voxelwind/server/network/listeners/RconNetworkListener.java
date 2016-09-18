@@ -1,13 +1,13 @@
-package com.voxelwind.server.network.rcon;
+package com.voxelwind.server.network.listeners;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.voxelwind.api.server.Server;
+import com.voxelwind.server.VoxelwindServer;
+import com.voxelwind.server.network.rcon.RconDecoder;
+import com.voxelwind.server.network.rcon.RconEncoder;
+import com.voxelwind.server.network.rcon.RconHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -22,17 +22,19 @@ import java.nio.ByteOrder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
-public class NettyVoxelwindRconListener extends ChannelInitializer<SocketChannel> {
-    private static final Logger LOGGER = LogManager.getLogger(NettyVoxelwindRconListener.class);
+public class RconNetworkListener extends ChannelInitializer<SocketChannel> implements NetworkListener {
+    private static final Logger LOGGER = LogManager.getLogger(RconNetworkListener.class);
 
-    private final Server server;
+    private final VoxelwindServer server;
     private final EventLoopGroup group;
     private final ExecutorService commandExecutionService = Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind RCON Command Executor").build());
     private final byte[] password;
+    private Channel channel;
 
-    public NettyVoxelwindRconListener(Server server, byte[] password) {
+    public RconNetworkListener(VoxelwindServer server, byte[] password) {
         this.server = server;
         this.password = password;
         ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Voxelwind RCON Listener").build();
@@ -52,19 +54,36 @@ public class NettyVoxelwindRconListener extends ChannelInitializer<SocketChannel
         return commandExecutionService;
     }
 
-    public void bind(String host, int port) {
-        new ServerBootstrap()
+    @Override
+    public boolean bind() {
+        ChannelFuture future = new ServerBootstrap()
                 .channel(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .group(group)
                 .childHandler(this)
-                .bind(host, port)
-                .addListener((ChannelFutureListener) future -> {
-                    if (future.isSuccess()) {
-                        LOGGER.info("RCON listening on port {}", future.channel().localAddress());
-                    } else {
-                        LOGGER.info("RCON can't bind", future.cause());
-                    }
-                });
+                .bind(server.getConfiguration().getRcon().getBindHost(), server.getConfiguration().getRcon().getPort())
+                .awaitUninterruptibly();
+
+        if (future.isSuccess()) {
+            this.channel = future.channel();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void close() {
+        commandExecutionService.shutdown();
+        try {
+            commandExecutionService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            // not handling
+        }
+        commandExecutionService.shutdownNow();
+        group.shutdownGracefully();
+        if (channel != null) {
+            channel.close();
+        }
     }
 }

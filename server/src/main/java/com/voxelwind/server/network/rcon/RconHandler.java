@@ -6,6 +6,7 @@ import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
+import com.voxelwind.server.network.listeners.RconNetworkListener;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -15,14 +16,14 @@ import org.apache.logging.log4j.Logger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
-class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
+public class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
     private static final Logger LOGGER = LogManager.getLogger(RconHandler.class);
     private final byte[] password;
     private final Server server;
-    private final NettyVoxelwindRconListener listener;
+    private final RconNetworkListener listener;
     private boolean authenticated = false;
 
-    public RconHandler(byte[] password, Server server, NettyVoxelwindRconListener listener) {
+    public RconHandler(byte[] password, Server server, RconNetworkListener listener) {
         this.password = password;
         this.server = server;
         this.listener = listener;
