@@ -59,7 +59,7 @@ public class McpeOverRakNetNetworkListener extends ChannelInitializer<DatagramCh
         this.channel = channel;
         channel.pipeline()
                 .addLast("simpleRaknetHandler", new SimpleRakNetPacketCodec())
-                .addLast("voxelwindPacketHandler", new RakNetDirectPacketHandler(server))
+                .addLast("raknetDirectPacketHandler", new RakNetDirectPacketHandler(server))
                 .addLast("raknetDatagramHandler", new DatagramRakNetPacketCodec(server))
                 .addLast("voxelwindDatagramHandler", new RakNetDatagramHandler(server))
                 .addLast("tailHandler", new TailHandler());
