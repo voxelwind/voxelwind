@@ -6,13 +6,12 @@ import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
-import com.voxelwind.api.game.level.block.Block;
-import com.voxelwind.api.game.level.block.BlockData;
-import com.voxelwind.api.game.level.block.BlockState;
-import com.voxelwind.api.game.level.block.BlockType;
+import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.server.Player;
+import com.voxelwind.api.server.event.block.BlockReplaceEvent;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.BasicBlockState;
+import com.voxelwind.server.network.session.PlayerSession;
 import lombok.experimental.UtilityClass;
 
 import java.util.Optional;
@@ -30,6 +29,10 @@ public class BehaviorUtils {
             return false;
         }
 
+        Block old = chunkOptional.get().getBlock(position.getX() & 0x0f, position.getY(), position.getZ() & 0x0f);
+        if (!canProceed(old, state, player)) {
+            return false;
+        }
         chunkOptional.get().setBlock(position.getX() & 0x0f, position.getY(), position.getZ() & 0x0f, state);
         ((VoxelwindLevel) player.getLevel()).broadcastBlockUpdate(position);
         return true;
@@ -37,9 +40,19 @@ public class BehaviorUtils {
 
     public static boolean replaceBlockState(Player player, Block block, BlockState replacementState) {
         // TODO: Events
+        if (!canProceed(block, replacementState, player)) {
+            return false;
+        }
         block.getChunk().setBlock(block.getChunkLocation().getX(), block.getChunkLocation().getY(), block.getChunkLocation().getZ(), replacementState);
         ((VoxelwindLevel) player.getLevel()).broadcastBlockUpdate(block.getLevelLocation());
         return true;
+    }
+
+    private static boolean canProceed(Block block, BlockState newState, Player player) {
+        BlockReplaceEvent event = new BlockReplaceEvent(block, block.getBlockState(), new BasicBlockState(BlockTypes.AIR, null),
+                player, BlockReplaceEvent.ReplaceReason.PLAYER_PLACE);
+        player.getServer().getEventManager().fire(event);
+        return event.getResult() == BlockReplaceEvent.Result.CONTINUE;
     }
 
     public static BlockState createBlockState(ItemStack stack) {

@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.NetworkPackage;
@@ -17,6 +18,7 @@ import java.util.BitSet;
 
 public class BaseEntity implements Entity {
     private long entityId;
+    private final Server server;
     private final EntityTypeData data;
     private VoxelwindLevel level;
     private Vector3f position;
@@ -31,11 +33,12 @@ public class BaseEntity implements Entity {
     private int tickedFor;
     private BoundingBox boundingBox;
 
-    public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level) {
+    public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level, Server server) {
         this.data = data;
         this.level = Preconditions.checkNotNull(level, "level");
         this.position = Preconditions.checkNotNull(position, "position");
         this.entityId = level.getEntityManager().allocateEntityId();
+        this.server = server;
         this.rotation = Rotation.ZERO;
         this.motion = Vector3f.ZERO;
         this.level.getEntityManager().register(this);
@@ -279,6 +282,11 @@ public class BaseEntity implements Entity {
     @Override
     public boolean isRemoved() {
         return removed;
+    }
+
+    @Override
+    public Server getServer() {
+        return server;
     }
 
     final void checkIfAlive() {

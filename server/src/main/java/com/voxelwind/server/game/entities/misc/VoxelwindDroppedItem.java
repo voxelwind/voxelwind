@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.server.game.entities.EntityTypeData;
 import com.voxelwind.server.game.level.VoxelwindLevel;
@@ -13,8 +14,8 @@ import com.voxelwind.server.network.mcpe.packets.McpeAddItem;
 public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
     private final ItemStack dropped;
 
-    public VoxelwindDroppedItem(Vector3f position, VoxelwindLevel level, ItemStack dropped) {
-        super(EntityTypeData.ITEM, position, level);
+    public VoxelwindDroppedItem(Vector3f position, VoxelwindLevel level, Server server, ItemStack dropped) {
+        super(EntityTypeData.ITEM, position, level, server);
         this.dropped = dropped;
     }
 

@@ -5,6 +5,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.Rotation;
 
 import javax.annotation.Nonnull;
@@ -81,4 +82,6 @@ public interface Entity {
         double z = xz * Math.cos(Math.toRadians(rotation.getYaw()));
         return new Vector3f(x, y, z).normalize();
     }
+
+    Server getServer();
 }

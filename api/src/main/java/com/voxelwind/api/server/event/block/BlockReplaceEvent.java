@@ -123,7 +123,7 @@ public class BlockReplaceEvent implements BlockEvent {
         PISTON
     }
 
-    private enum Result {
+    public enum Result {
         /**
          * The operation should be continued and the block placed into the world.
          */

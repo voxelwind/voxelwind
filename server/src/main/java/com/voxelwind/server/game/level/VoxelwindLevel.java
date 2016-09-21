@@ -11,6 +11,7 @@ import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
+import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.monsters.ZombieEntity;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
@@ -39,8 +40,10 @@ public class VoxelwindLevel implements Level {
     private final LevelEntityManager entityManager;
     private final LevelPacketManager packetManager;
     private long currentTick;
+    private final Server server;
 
-    public VoxelwindLevel(LevelCreator creator) {
+    public VoxelwindLevel(Server server, LevelCreator creator) {
+        this.server = server;
         chunkManager = new LevelChunkManager(this, creator.getChunkProvider());
         name = creator.getName();
         uuid = UUID.randomUUID();
@@ -98,7 +101,7 @@ public class VoxelwindLevel implements Level {
         Preconditions.checkNotNull(position, "position");
         Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
         if (klass.isAssignableFrom(Zombie.class)) {
-            return (T) new ZombieEntity(this, position);
+            return (T) new ZombieEntity(this, position, server);
         }
         throw new IllegalArgumentException("Entity class " + klass.getName() + " not recognized.");
     }
@@ -108,7 +111,7 @@ public class VoxelwindLevel implements Level {
         Preconditions.checkNotNull(stack, "stack");
         Preconditions.checkNotNull(position, "position");
         Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
-        return new VoxelwindDroppedItem(position, this, stack);
+        return new VoxelwindDroppedItem(position, this, server, stack);
     }
 
     public void onTick() {

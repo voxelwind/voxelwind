@@ -19,6 +19,7 @@ import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
+import com.voxelwind.api.server.event.block.BlockReplaceEvent;
 import com.voxelwind.api.server.event.player.PlayerJoinEvent;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
@@ -68,7 +69,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
-        super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), 20f);
+        super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20f);
         this.session = session;
     }
 
@@ -771,17 +772,23 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int inChunkZ = packet.getPosition().getZ() & 0x0f;
 
             Block block = chunkOptional.get().getBlock(inChunkX, packet.getPosition().getY(), inChunkZ);
-            if (gameMode != GameMode.CREATIVE) {
-                BlockBehavior blockBehavior = BlockBehaviors.getBlockBehavior(block.getBlockState().getBlockType());
-                if (!blockBehavior.handleBreak(getMcpeSession().getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null))) {
-                    Collection<ItemStack> drops = blockBehavior.getDrops(getMcpeSession().getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null));
-                    for (ItemStack drop : drops) {
-                        getLevel().dropItem(drop, block.getLevelLocation().toFloat().add(0.5, 0.5, 0.5));
+            // Call BlockReplaceEvent.
+            BlockReplaceEvent event = new BlockReplaceEvent(block, block.getBlockState(), new BasicBlockState(BlockTypes.AIR, null),
+                    PlayerSession.this, BlockReplaceEvent.ReplaceReason.PLAYER_BREAK);
+            getServer().getEventManager().fire(event);
+            if (event.getResult() == BlockReplaceEvent.Result.CONTINUE) {
+                if (gameMode != GameMode.CREATIVE) {
+                    BlockBehavior blockBehavior = BlockBehaviors.getBlockBehavior(block.getBlockState().getBlockType());
+                    if (!blockBehavior.handleBreak(getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null))) {
+                        Collection<ItemStack> drops = blockBehavior.getDrops(getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null));
+                        for (ItemStack drop : drops) {
+                            getLevel().dropItem(drop, block.getLevelLocation().toFloat().add(0.5, 0.5, 0.5));
+                        }
+                        chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
                     }
+                } else {
                     chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
                 }
-            } else {
-                chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
             }
 
             getLevel().broadcastBlockUpdate(packet.getPosition());
@@ -812,15 +819,17 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 ItemStack serverInHand = actuallyInHand.orElse(null);
                 BlockFace face = BlockFace.values()[packet.getFace()];
                 BlockBehavior againstBehavior = BlockBehaviors.getBlockBehavior(usedAgainst.get().getBlockState().getBlockType());
-                switch (againstBehavior.handleItemInteraction(getMcpeSession().getServer(), PlayerSession.this, packet.getLocation(), face, serverInHand)) {
+                switch (againstBehavior.handleItemInteraction(getServer(), PlayerSession.this, packet.getLocation(), face, serverInHand)) {
                     case NOTHING:
                         // Update inventory
                         sendPlayerInventory();
                         break;
                     case PLACE_BLOCK_AND_REMOVE_ITEM:
                         Preconditions.checkState(serverInHand != null && serverInHand.getItemType() instanceof BlockType, "Tried to place air or non-block.");
-                        LOGGER.info("In hand: {}", serverInHand);
-                        BehaviorUtils.setBlockState(PlayerSession.this, packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand));
+                        if (!BehaviorUtils.setBlockState(PlayerSession.this, packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand))) {
+                            sendPlayerInventory();
+                            return;
+                        }
                         // This will fall through
                     case REMOVE_ONE_ITEM:
                         if (serverInHand != null) {
@@ -848,7 +857,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 return;
             }
 
-            DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), stackOptional.get());
+            DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), getServer(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
             playerInventory.clearItem(playerInventory.getHeldInventorySlot());
         }
