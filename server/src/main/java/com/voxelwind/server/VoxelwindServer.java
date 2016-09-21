@@ -135,7 +135,7 @@ public class VoxelwindServer implements Server {
         configuration.getRcon().clearPassword();
 
         // Start the example level.
-        defaultLevel = new VoxelwindLevel(new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
+        defaultLevel = new VoxelwindLevel(this, new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
         levelManager.register(defaultLevel);
         levelManager.start(defaultLevel);
 
