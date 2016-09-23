@@ -81,7 +81,7 @@ public final class Rotation {
     }
 
     private static float validate(float val, String name) {
-        Preconditions.checkArgument(Float.compare(val, -360f) >= 0 && Float.compare(val, 360f) <= 0, "%s value (%s) is not within range 0-360f", name, val);
+        Preconditions.checkArgument(Float.isFinite(val), "%s value (%s) is not finite", name, val);
         return val;
     }
 }
