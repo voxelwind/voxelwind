@@ -201,6 +201,11 @@ public class VoxelwindServer implements Server {
         return new VoxelwindItemStackBuilder();
     }
 
+    @Override
+    public Collection<Player> getAllOnlinePlayers() {
+        return sessionManager.allPlayers();
+    }
+
     public VoxelwindConfiguration getConfiguration() {
         return configuration;
     }

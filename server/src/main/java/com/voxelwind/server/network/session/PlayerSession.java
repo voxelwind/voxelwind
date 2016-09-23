@@ -68,6 +68,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private byte openInventoryId = -1;
     private boolean hasMoved = false;
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
+    private final Set<UUID> playersSentForList = new HashSet<>();
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20f);
@@ -101,6 +102,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         // Check for items on the ground.
         pickupAdjacent();
+
+        // Update player list.
+        updatePlayerList();
 
         return true;
     }
@@ -600,6 +604,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
                     PlayerJoinEvent event = new PlayerJoinEvent((Player) this, TextFormat.YELLOW + getName() + " joined the game.");
                     session.getServer().getEventManager().fire(event);
+
+                    updatePlayerList();
                 }
             });
         }
@@ -874,6 +880,48 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), getServer(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
             playerInventory.clearItem(playerInventory.getHeldInventorySlot());
+        }
+    }
+
+    private void updatePlayerList() {
+        synchronized (playersSentForList) {
+            Set<Player> toAdd = new HashSet<>();
+            Set<UUID> toRemove = new HashSet<>();
+            Collection<Player> players = getServer().getAllOnlinePlayers();
+
+            for (Player player : players) {
+                if (!playersSentForList.contains(player.getUniqueId())) {
+                    toAdd.add(player);
+                }
+            }
+
+            for (UUID uuid : playersSentForList) {
+                if (!players.stream().anyMatch(p -> p.getUniqueId().equals(uuid))) {
+                    toRemove.add(uuid);
+                }
+            }
+
+            if (!toAdd.isEmpty()) {
+                McpePlayerList list = new McpePlayerList();
+                list.setRemove(false);
+                for (Player player : toAdd) {
+                    McpePlayerList.Record record = new McpePlayerList.Record(player.getUniqueId());
+                    record.setEntityId(player.getEntityId());
+                    record.setSkin(player.getSkin());
+                    record.setName(player.getName());
+                    list.getRecords().add(record);
+                }
+                session.addToSendQueue(list);
+            }
+
+            if (!toRemove.isEmpty()) {
+                McpePlayerList list = new McpePlayerList();
+                list.setRemove(true);
+                for (UUID uuid : toRemove) {
+                    list.getRecords().add(new McpePlayerList.Record(uuid));
+                }
+                session.addToSendQueue(list);
+            }
         }
     }
 

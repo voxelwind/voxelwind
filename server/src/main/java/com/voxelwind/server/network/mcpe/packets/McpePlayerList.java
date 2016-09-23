@@ -36,7 +36,7 @@ public class McpePlayerList implements NetworkPackage {
     }
 
     @Data
-    private class Record {
+    public static class Record {
         private final UUID uuid;
         private long entityId;
         private String name;

@@ -52,4 +52,6 @@ public interface Server {
      * @return the item stack builder
      */
     ItemStackBuilder createItemStackBuilder();
+
+    Collection<Player> getAllOnlinePlayers();
 }

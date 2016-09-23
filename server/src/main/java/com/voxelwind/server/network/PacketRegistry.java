@@ -71,6 +71,7 @@ public class PacketRegistry {
         MCPE_PACKETS[0x31] = McpeAdventureSettings.class;
         MCPE_PACKETS[0x34] = McpeFullChunkData.class;
         MCPE_PACKETS[0x37] = McpeSetPlayerGameMode.class;
+        MCPE_PACKETS[0x38] = McpePlayerList.class;
         MCPE_PACKETS[0x3d] = McpeRequestChunkRadius.class;
         MCPE_PACKETS[0x3e] = McpeChunkRadiusUpdated.class;
 
