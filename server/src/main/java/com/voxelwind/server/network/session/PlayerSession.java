@@ -36,6 +36,7 @@ import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.entities.*;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.game.level.util.BoundingBox;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.api.util.Rotation;
@@ -102,6 +103,19 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         pickupAdjacent();
 
         return true;
+    }
+
+    @Override
+    public NetworkPackage createAddEntityPacket() {
+        McpeAddPlayer addPlayer = new McpeAddPlayer();
+        addPlayer.setEntityId(getEntityId());
+        addPlayer.setVelocity(getMotion());
+        addPlayer.setPosition(getPosition());
+        addPlayer.setHeld(playerInventory.getStackInHand().orElse(null));
+        addPlayer.setUsername(getMcpeSession().getAuthenticationProfile().getDisplayName());
+        addPlayer.setUuid(getMcpeSession().getAuthenticationProfile().getIdentity());
+        addPlayer.getMetadata().putAll(getMetadata());
+        return addPlayer;
     }
 
     private void pickupAdjacent() {
