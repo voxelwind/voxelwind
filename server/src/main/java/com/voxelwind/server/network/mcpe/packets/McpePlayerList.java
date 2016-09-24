@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Data
 public class McpePlayerList implements NetworkPackage {
-    private boolean remove;
+    private byte type;
     private final List<Record> records = new ArrayList<>();
 
     @Override
@@ -23,11 +23,12 @@ public class McpePlayerList implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeBoolean(remove);
+        buffer.writeByte(type);
         buffer.writeInt(records.size());
         for (Record record : records) {
             McpeUtil.writeUuid(buffer, record.uuid);
-            if (!remove) {
+            // 0 is ADD, 1 is REMOVE
+            if (type == 0) {
                 buffer.writeLong(record.entityId);
                 RakNetUtil.writeString(buffer, record.name);
                 McpeUtil.writeSkin(buffer, record.skin);

@@ -30,7 +30,7 @@ public class BaseEntity implements Entity {
     protected boolean sneaking = false;
     private boolean invisible = false;
     private boolean removed = false;
-    private int tickedFor;
+    protected int tickedFor;
     private BoundingBox boundingBox;
 
     public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level, Server server) {

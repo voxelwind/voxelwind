@@ -104,7 +104,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         pickupAdjacent();
 
         // Update player list.
-        updatePlayerList();
+        // TODO: Packet doesn't currently encode correctly.
+        //updatePlayerList();
 
         return true;
     }
@@ -604,8 +605,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
                     PlayerJoinEvent event = new PlayerJoinEvent((Player) this, TextFormat.YELLOW + getName() + " joined the game.");
                     session.getServer().getEventManager().fire(event);
-
-                    updatePlayerList();
                 }
             });
         }
@@ -890,7 +889,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Collection<Player> players = getServer().getAllOnlinePlayers();
 
             for (Player player : players) {
-                if (!playersSentForList.contains(player.getUniqueId())) {
+                if (playersSentForList.add(player.getUniqueId())) {
                     toAdd.add(player);
                 }
             }
@@ -903,7 +902,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             if (!toAdd.isEmpty()) {
                 McpePlayerList list = new McpePlayerList();
-                list.setRemove(false);
+                list.setType((byte) 0);
                 for (Player player : toAdd) {
                     McpePlayerList.Record record = new McpePlayerList.Record(player.getUniqueId());
                     record.setEntityId(player.getEntityId());
@@ -915,8 +914,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             }
 
             if (!toRemove.isEmpty()) {
+                playersSentForList.removeAll(toRemove);
+
                 McpePlayerList list = new McpePlayerList();
-                list.setRemove(true);
+                list.setType((byte) 1);
                 for (UUID uuid : toRemove) {
                     list.getRecords().add(new McpePlayerList.Record(uuid));
                 }
