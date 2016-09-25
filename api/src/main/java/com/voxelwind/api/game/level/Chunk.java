@@ -14,5 +14,7 @@ public interface Chunk {
 
     Block setBlock(int x, int y, int z, BlockState state);
 
+    int getHighestLayer(int x, int z);
+
     ChunkSnapshot toSnapshot();
 }

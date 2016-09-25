@@ -47,7 +47,6 @@ public class VoxelwindChunk implements Chunk {
         this.z = z;
         Arrays.fill(biomeId, (byte) 1);
         Arrays.fill(biomeColor, 0x0185b24a);
-        Arrays.fill(height, (byte) 0xFF);
     }
 
     private static int xyzIdx(int x, int y, int z) {
@@ -98,8 +97,36 @@ public class VoxelwindChunk implements Chunk {
         blockData[index] = (byte) blockId;
         blockMetadata.set(index, (byte) metadata);
 
+        // Recalculate the height map for this chunk section.
+        if (height[(z << 4) + x] <= y && blockId != 0) {
+            // Slight optimization
+            height[(z << 4) + x] = (byte) y;
+        } else {
+            height[(z << 4) + x] = (byte) getHighestLayer(x, z);
+        }
+
+        // TODO: Recalculate chunk lighting
         stale = true;
         return getBlock(x, y, z);
+    }
+
+    private synchronized void recalculateHeightMap() {
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                int highest = getHighestLayer(x, z);
+                height[(z << 4) + x] = (byte) highest;
+            }
+        }
+    }
+
+    @Override
+    public int getHighestLayer(int x, int z) {
+        for (int i = 128; i > 0; i--) {
+            if (blockData[xyzIdx(x, i, z)] != 0) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     @Override
