@@ -23,6 +23,8 @@ import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
+import com.voxelwind.server.game.level.provider.anvil.AnvilChunkProvider;
+import com.voxelwind.server.game.level.provider.anvil.AnvilLevelDataProvider;
 import com.voxelwind.server.network.listeners.McpeOverRakNetNetworkListener;
 import com.voxelwind.server.network.listeners.NetworkListener;
 import com.voxelwind.server.network.util.NativeCodeFactory;
@@ -135,6 +137,9 @@ public class VoxelwindServer implements Server {
         configuration.getRcon().clearPassword();
 
         // Start the example level.
+        //defaultLevel = new VoxelwindLevel(this, new LevelCreator("test",
+        //        new AnvilChunkProvider(Paths.get("/Users/andrew/Library/Application Support/minecraft/saves/test-mca")),
+        //        AnvilLevelDataProvider.load(Paths.get("/Users/andrew/Library/Application Support/minecraft/saves/test-mca/level.dat"))));
         defaultLevel = new VoxelwindLevel(this, new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
         levelManager.register(defaultLevel);
         levelManager.start(defaultLevel);

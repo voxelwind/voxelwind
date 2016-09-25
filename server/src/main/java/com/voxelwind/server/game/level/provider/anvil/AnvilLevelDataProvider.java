@@ -33,8 +33,8 @@ public class AnvilLevelDataProvider implements LevelDataProvider {
         CompoundMap map = dataTag.getValue();
 
         Vector3i out = new Vector3i(((IntTag) map.get("SpawnX")).getValue(), ((IntTag) map.get("SpawnY")).getValue(), ((IntTag) map.get("SpawnZ")).getValue());
-        int dayTime = ((IntTag) map.get("DayTime")).getValue();
-        return new AnvilLevelDataProvider(out.toFloat(), dayTime);
+        long dayTime = ((LongTag) map.get("DayTime")).getValue();
+        return new AnvilLevelDataProvider(out.toFloat(), (int) dayTime);
     }
 
     @Override

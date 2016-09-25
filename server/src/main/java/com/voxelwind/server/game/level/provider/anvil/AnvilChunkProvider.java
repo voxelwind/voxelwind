@@ -55,8 +55,8 @@ public class AnvilChunkProvider implements ChunkProvider {
                 CompoundMap map = ((CompoundTag) tag).getValue();
                 CompoundMap levelMap = ((CompoundMap) map.get("Level").getValue());
 
-                // We are done:
-                chunkFuture.complete(new AnvilChunk(x, z, level, levelMap));
+                // Convert the Anvil chunk into a Voxelwind-friendly format.
+                chunkFuture.complete(AnvilConversion.convertChunkToVoxelwind(levelMap, level));
             } catch (Exception e) {
                 chunkFuture.completeExceptionally(e);
             }

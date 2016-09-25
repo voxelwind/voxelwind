@@ -87,15 +87,16 @@ public class VoxelwindChunk implements Chunk {
     public synchronized Block setBlock(int x, int y, int z, BlockState state) {
         checkPosition(x, y, z);
         Preconditions.checkNotNull(state, "state");
+        setBlockId(x, y, z, state.getBlockType().getId(), state.getBlockData() == null ? 0 : state.getBlockData().toBlockMetadata());
+        return getBlock(x, y, z);
+    }
+
+    public synchronized Block setBlockId(int x, int y, int z, int blockId, short metadata) {
+        checkPosition(x, y, z);
         int index = xyzIdx(x, y, z);
 
-        blockData[index] = (byte) state.getBlockType().getId();
-        BlockData blockData = state.getBlockData();
-        if (blockData != null) {
-            blockMetadata.set(index, (byte) blockData.toBlockMetadata());
-        } else {
-            blockMetadata.set(index, (byte) 0);
-        }
+        blockData[index] = (byte) blockId;
+        blockMetadata.set(index, (byte) metadata);
 
         stale = true;
         return getBlock(x, y, z);
