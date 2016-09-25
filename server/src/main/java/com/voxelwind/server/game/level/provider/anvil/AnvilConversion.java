@@ -19,7 +19,7 @@ public class AnvilConversion {
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
                         for (int y = 0; y < 16; y++) {
-                            destinationChunk.setBlockId(x, (ySec * 16) + y, z, 0, (short) 0);
+                            destinationChunk.setBlockId(x, (ySec * 16) + y, z, 0, (short) 0, false);
                         }
                     }
                 }
@@ -30,13 +30,14 @@ public class AnvilConversion {
                     for (int z = 0; z < 16; z++) {
                         for (int y = 0; y < 16; y++) {
                             int pos = anvilBlockPosition(x, (ySec * 16) + y, z);
-                            destinationChunk.setBlockId(x, (ySec * 16) + y, z, blockIds[pos], data.get(pos));
+                            destinationChunk.setBlockId(x, (ySec * 16) + y, z, blockIds[pos], data.get(pos), false);
                         }
                     }
                 }
             }
         }
 
+        destinationChunk.recalculateLight();
         return destinationChunk;
     }
 

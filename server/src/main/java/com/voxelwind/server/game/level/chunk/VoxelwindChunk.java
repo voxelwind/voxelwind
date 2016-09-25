@@ -84,30 +84,45 @@ public class VoxelwindChunk implements Chunk {
 
     @Override
     public synchronized Block setBlock(int x, int y, int z, BlockState state) {
+        return setBlock(x, y, z, state, true);
+    }
+
+    @Override
+    public synchronized Block setBlock(int x, int y, int z, BlockState state, boolean shouldRecalculateLight) {
         checkPosition(x, y, z);
         Preconditions.checkNotNull(state, "state");
-        setBlockId(x, y, z, state.getBlockType().getId(), state.getBlockData() == null ? 0 : state.getBlockData().toBlockMetadata());
+        setBlockId(x, y, z, state.getBlockType().getId(), state.getBlockData() == null ? 0 : state.getBlockData().toBlockMetadata(), shouldRecalculateLight);
         return getBlock(x, y, z);
     }
 
-    public synchronized Block setBlockId(int x, int y, int z, int blockId, short metadata) {
+    public synchronized void setBlockId(int x, int y, int z, int blockId, short metadata) {
+        setBlockId(x, y, z, blockId, metadata, true);
+    }
+
+    public synchronized void setBlockId(int x, int y, int z, int blockId, short metadata, boolean shouldRecalculateLight) {
         checkPosition(x, y, z);
         int index = xyzIdx(x, y, z);
 
         blockData[index] = (byte) blockId;
         blockMetadata.set(index, (byte) metadata);
 
-        // Recalculate the height map for this chunk section.
-        if (height[(z << 4) + x] <= y && blockId != 0) {
-            // Slight optimization
-            height[(z << 4) + x] = (byte) y;
-        } else {
-            height[(z << 4) + x] = (byte) getHighestLayer(x, z);
-        }
+        if (shouldRecalculateLight) {
+            // Recalculate the height map and lighting for this chunk section.
+            if (height[(z << 4) + x] <= y && blockId != 0) {
+                // Slight optimization
+                height[(z << 4) + x] = (byte) y;
+            } else {
+                height[(z << 4) + x] = (byte) getHighestLayer(x, z);
+            }
 
-        // TODO: Recalculate chunk lighting
+            populateSkyLightAt(x, z);
+        }
         stale = true;
-        return getBlock(x, y, z);
+    }
+
+    public synchronized void recalculateLight() {
+        recalculateHeightMap();
+        populateSkyLight();
     }
 
     private synchronized void recalculateHeightMap() {
@@ -119,9 +134,36 @@ public class VoxelwindChunk implements Chunk {
         }
     }
 
+    private synchronized void populateSkyLight() {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                populateSkyLightAt(x, z);
+            }
+        }
+    }
+
+    private synchronized void populateSkyLightAt(int x, int z) {
+        int maxHeight = height[(z << 4) + x];
+
+        // There's no blocks above this block, so it's always 15.
+        for (int y = 127; y > maxHeight; y--) {
+            skyLightData.set(xyzIdx(x, y, z), (byte) 15);
+        }
+
+        // From the top, however...
+        for (int y = maxHeight; y > 0; y--) {
+            BlockType type = BlockTypes.forId(blockData[y]);
+            if (!type.isTransparent()) {
+                break;
+            }
+
+            skyLightData.set(xyzIdx(x, y, z), (byte) 15);
+        }
+    }
+
     @Override
-    public int getHighestLayer(int x, int z) {
-        for (int i = 128; i > 0; i--) {
+    public synchronized int getHighestLayer(int x, int z) {
+        for (int i = 127; i > 0; i--) {
             if (blockData[xyzIdx(x, i, z)] != 0) {
                 return i;
             }
@@ -208,6 +250,6 @@ public class VoxelwindChunk implements Chunk {
     private static void checkPosition(int x, int y, int z) {
         Preconditions.checkArgument(x >= 0 && x <= 15, "x value (%s) not in range (0 to 15)", x);
         Preconditions.checkArgument(z >= 0 && z <= 15, "z value (%s) not in range (0 to 15)", z);
-        Preconditions.checkArgument(y >= 0 && y <= 128, "y value (%s) not in range (0 to 128)", y);
+        Preconditions.checkArgument(y >= 0 && y < 128, "y value (%s) not in range (0 to 128)", y);
     }
 }
