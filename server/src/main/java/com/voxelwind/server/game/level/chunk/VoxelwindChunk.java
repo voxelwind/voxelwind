@@ -116,6 +116,11 @@ public class VoxelwindChunk implements Chunk {
             }
 
             populateSkyLightAt(x, z);
+        } else {
+            // If this is the quick case, then update the height map.
+            if (height[(z << 4) + x] <= y && blockId != 0) {
+                height[(z << 4) + x] = (byte) y;
+            }
         }
         stale = true;
     }
@@ -250,6 +255,6 @@ public class VoxelwindChunk implements Chunk {
     private static void checkPosition(int x, int y, int z) {
         Preconditions.checkArgument(x >= 0 && x <= 15, "x value (%s) not in range (0 to 15)", x);
         Preconditions.checkArgument(z >= 0 && z <= 15, "z value (%s) not in range (0 to 15)", z);
-        Preconditions.checkArgument(y >= 0 && y < 128, "y value (%s) not in range (0 to 128)", y);
+        Preconditions.checkArgument(y >= 0 && y < 128, "y value (%s) not in range (0 to 127)", y);
     }
 }
