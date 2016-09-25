@@ -12,7 +12,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
 /**
- * This class reads an Anvil/McRegion region file. It is not thread-safe.
+ * This class reads an Anvil/McRegion region file.
  */
 public class AnvilRegionReader implements Closeable {
     private static final int SECTOR_BYTES = 4096;
@@ -51,7 +51,7 @@ public class AnvilRegionReader implements Closeable {
         this.channel.close();
     }
 
-    public InputStream readChunk(int x, int z) throws IOException {
+    public synchronized InputStream readChunk(int x, int z) throws IOException {
         Preconditions.checkArgument(!outOfBounds(x, z), "position (%s, %s) is out of range (0 through 32)", x, z);
         Preconditions.checkArgument(hasChunk(x, z), "chunk (%s, %s) does not exist", x, z);
         int offset = getOffset(x, z);
