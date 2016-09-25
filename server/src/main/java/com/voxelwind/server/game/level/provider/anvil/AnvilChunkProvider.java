@@ -6,10 +6,13 @@ import com.flowpowered.nbt.Tag;
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.level.provider.ChunkProvider;
 import com.voxelwind.server.game.level.provider.anvil.util.AnvilRegionReader;
 import lombok.Value;
 
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,23 +43,35 @@ public class AnvilChunkProvider implements ChunkProvider {
                 synchronized (regionReaders) {
                     regionReader = regionReaders.get(rXZ);
                     if (regionReader == null) {
-                        regionReader = new AnvilRegionReader(basePath.resolve("region").resolve("r." + rXZ.x + "." + rXZ.z + ".mca"));
-                        regionReaders.put(rXZ, regionReader);
+                        Path regionPath = basePath.resolve("region").resolve("r." + rXZ.x + "." + rXZ.z + ".mca");
+                        try {
+                            regionReader = new AnvilRegionReader(regionPath);
+                            regionReaders.put(rXZ, regionReader);
+                        } catch (NoSuchFileException e) {
+                            // Doesn't exist, return empty chunk.
+                            chunkFuture.complete(new VoxelwindChunk(level, x, z));
+                            return;
+                        }
                     }
                 }
 
                 // Now load the root tag from this chunk.
-                Tag<?> tag;
-                try (NBTInputStream stream = new NBTInputStream(regionReader.readChunk(irXZ.x, irXZ.z), false)) {
-                    tag = stream.readTag();
+                if (regionReader.hasChunk(irXZ.x, irXZ.z)) {
+                    Tag<?> tag;
+                    try (NBTInputStream stream = new NBTInputStream(regionReader.readChunk(irXZ.x, irXZ.z), false)) {
+                        tag = stream.readTag();
+                    }
+
+                    // Grab the sections.
+                    CompoundMap map = ((CompoundTag) tag).getValue();
+                    CompoundMap levelMap = ((CompoundMap) map.get("Level").getValue());
+
+                    // Convert the Anvil chunk into a Voxelwind-friendly format.
+                    chunkFuture.complete(AnvilConversion.convertChunkToVoxelwind(levelMap, level));
+                } else {
+                    // Doesn't exist, return empty chunk.
+                    chunkFuture.complete(new VoxelwindChunk(level, x, z));
                 }
-
-                // Grab the sections.
-                CompoundMap map = ((CompoundTag) tag).getValue();
-                CompoundMap levelMap = ((CompoundMap) map.get("Level").getValue());
-
-                // Convert the Anvil chunk into a Voxelwind-friendly format.
-                chunkFuture.complete(AnvilConversion.convertChunkToVoxelwind(levelMap, level));
             } catch (Exception e) {
                 chunkFuture.completeExceptionally(e);
             }
