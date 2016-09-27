@@ -124,7 +124,7 @@ public class VoxelwindServer implements Server {
         eventManager.fire(ServerInitializeEvent.INSTANCE);
 
         // Bind to a port.
-        McpeOverRakNetNetworkListener listener = new McpeOverRakNetNetworkListener(this, configuration.getBindHost(), configuration.getPort(),
+        McpeOverRakNetNetworkListener listener = new McpeOverRakNetNetworkListener(this, configuration.getMcpeListener().getHost(), configuration.getMcpeListener().getPort(),
                 configuration.isUseSoReuseport());
         listener.bind();
         listeners.add(listener);

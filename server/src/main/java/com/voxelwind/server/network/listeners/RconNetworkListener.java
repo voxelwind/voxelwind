@@ -61,7 +61,7 @@ public class RconNetworkListener extends ChannelInitializer<SocketChannel> imple
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .group(group)
                 .childHandler(this)
-                .bind(server.getConfiguration().getRcon().getBindHost(), server.getConfiguration().getRcon().getPort())
+                .bind(server.getConfiguration().getRcon().getHost(), server.getConfiguration().getRcon().getPort())
                 .awaitUninterruptibly();
 
         if (future.isSuccess()) {

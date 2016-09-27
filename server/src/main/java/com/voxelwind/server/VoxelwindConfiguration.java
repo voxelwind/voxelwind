@@ -22,13 +22,9 @@ public class VoxelwindConfiguration {
      */
     private XboxAuthenticationConfiguration xboxAuthentication;
     /**
-     * The host name or IP address Voxelwind will bind to. By default, Voxelwind will bind to 0.0.0.0.
+     * Configuration for MCPE network listener.
      */
-    private String bindHost;
-    /**
-     * The port number Voxelwind will bind to. By default, Voxelwind will bind to port 19132.
-     */
-    private int port;
+    private McpeListenerConfiguration mcpeListener;
     /**
      * The maximum number of players Voxelwind will accept before rejecting further connections. By default, this is set
      * to -1 (unlimited).
@@ -56,6 +52,19 @@ public class VoxelwindConfiguration {
 
     @Getter
     @ToString
+    public static class McpeListenerConfiguration {
+        /**
+         * The host name or IP address Voxelwind will bind to. By default, Voxelwind will bind to 0.0.0.0.
+         */
+        private String host;
+        /**
+         * The port number Voxelwind will bind to. By default, Voxelwind will bind to port 19132.
+         */
+        private int port;
+    }
+
+    @Getter
+    @ToString
     public static class RconConfiguration {
         /**
          * Whether or not RCON is enabled.
@@ -64,7 +73,7 @@ public class VoxelwindConfiguration {
         /**
          * The host name or IP address Voxelwind will bind to. By default, Voxelwind will bind to 0.0.0.0.
          */
-        private String bindHost;
+        private String host;
         /**
          * The port number Voxelwind will bind to. By default, Voxelwind will bind to port 19132.
          */
@@ -97,14 +106,15 @@ public class VoxelwindConfiguration {
 
     public static VoxelwindConfiguration defaultConfiguration() {
         VoxelwindConfiguration configuration = new VoxelwindConfiguration();
-        configuration.bindHost = "0.0.0.0";
         configuration.useSoReuseport = false;
         configuration.xboxAuthentication = new XboxAuthenticationConfiguration();
         configuration.xboxAuthentication.forceAuthentication = false;
-        configuration.port = 19132;
+        configuration.mcpeListener = new McpeListenerConfiguration();
+        configuration.mcpeListener.host = "0.0.0.0";
+        configuration.mcpeListener.port = 19132;
         configuration.rcon = new RconConfiguration();
         configuration.rcon.enabled = false;
-        configuration.rcon.bindHost = "127.0.0.1";
+        configuration.rcon.host = "127.0.0.1";
         configuration.rcon.port = 27015;
         configuration.rcon.password = generateRandomPassword();
         configuration.maximumPlayerLimit = -1;
