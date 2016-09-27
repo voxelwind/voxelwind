@@ -18,6 +18,7 @@ Voxelwind upstream so that the larger community can benefit from them.
 * [Wiki](https://wiki.voxelwind.com)
 * [Chat on the Forums](https://forums.voxelwind.com/)
 * [Latest Jenkins builds](https://ci.voxelwind.com/job/Voxelwind/)
+* [Follow @Voxelwind on Twitter](https://twitter.com/Voxelwind)
 
 ## Special Thanks
 
