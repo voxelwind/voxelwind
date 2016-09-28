@@ -13,8 +13,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AnvilLevelDataProvider implements LevelDataProvider {
@@ -23,7 +21,6 @@ public class AnvilLevelDataProvider implements LevelDataProvider {
 
     public static AnvilLevelDataProvider load(@NonNull Path levelDatPath) throws IOException {
         // level.dat is Notchian, so it's big-endian and GZIP compressed
-        List<Tag<?>> levelDatTags = new ArrayList<>();
         CompoundTag tag;
         try (NBTInputStream stream = new NBTInputStream(new BufferedInputStream(Files.newInputStream(levelDatPath)), true)) {
             tag = (CompoundTag) stream.readTag();

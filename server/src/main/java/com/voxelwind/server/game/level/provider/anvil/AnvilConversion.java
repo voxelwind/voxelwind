@@ -13,6 +13,7 @@ public class AnvilConversion {
         VoxelwindChunk destinationChunk = new VoxelwindChunk(level, ((IntTag) levelData.get("xPos")).getValue(), ((IntTag) levelData.get("zPos")).getValue());
         TIntObjectHashMap<CompoundMap> sectionMap = generateMap(levelData);
 
+        // Translate block data
         for (int ySec = 0; ySec < 8; ySec++) {
             CompoundMap map = sectionMap.get(ySec);
             if (map == null) {
