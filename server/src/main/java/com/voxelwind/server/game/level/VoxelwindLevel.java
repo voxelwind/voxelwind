@@ -14,10 +14,10 @@ import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.monsters.ZombieEntity;
+import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
-import com.voxelwind.server.game.level.provider.ChunkProvider;
 import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import com.voxelwind.server.network.mcpe.packets.McpeSetTime;
 import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
@@ -51,6 +51,7 @@ public class VoxelwindLevel implements Level {
         packetManager = new LevelPacketManager(this);
         dataProvider = creator.getDataProvider();
     }
+
     @Override
     public String getName() {
         return name;
@@ -140,7 +141,7 @@ public class VoxelwindLevel implements Level {
         McpeUpdateBlock packet = new McpeUpdateBlock();
         packet.setPosition(position);
         packet.setBlockId((byte) state.getBlockType().getId());
-        short blockData = state.getBlockData() == null ? 0 : state.getBlockData().toBlockMetadata();
+        short blockData = state.getBlockData() == null ? 0 : MetadataSerializer.serializeMetadata(state);
         packet.setMetadata((byte) (0xb << 4 | (blockData & 0xf)));
         packetManager.queuePacketForPlayers(packet);
     }

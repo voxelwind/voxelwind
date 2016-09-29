@@ -1,6 +1,6 @@
 package com.voxelwind.api.game.item;
 
-import com.voxelwind.api.game.item.data.ItemData;
+import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.server.Server;
 
 import javax.annotation.Nonnull;
@@ -29,7 +29,7 @@ public interface ItemStackBuilder {
      * @param data the material data to use
      * @return the builder, for chaining
      */
-    ItemStackBuilder itemData(ItemData data);
+    ItemStackBuilder itemData(Metadata data);
 
     // TODO: Add more methods as more functionality is implemented
 

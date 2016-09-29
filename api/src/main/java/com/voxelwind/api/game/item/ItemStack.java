@@ -1,6 +1,6 @@
 package com.voxelwind.api.game.item;
 
-import com.voxelwind.api.game.item.data.ItemData;
+import com.voxelwind.api.game.Metadata;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public interface ItemStack {
      * Returns the item data that this item has.
      * @return the item data
      */
-    Optional<ItemData> getItemData();
+    Optional<Metadata> getItemData();
 
     /**
      * Creates a builder from this item stack.

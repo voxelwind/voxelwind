@@ -2,16 +2,17 @@ package com.voxelwind.server.game.level.block.behaviors;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
-import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.Chunk;
-import com.voxelwind.api.game.level.Level;
-import com.voxelwind.api.game.level.block.*;
+import com.voxelwind.api.game.level.block.Block;
+import com.voxelwind.api.game.level.block.BlockState;
+import com.voxelwind.api.game.level.block.BlockType;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.event.block.BlockReplaceEvent;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.BasicBlockState;
-import com.voxelwind.server.network.session.PlayerSession;
 import lombok.experimental.UtilityClass;
 
 import java.util.Optional;
@@ -61,15 +62,10 @@ public class BehaviorUtils {
         if (!(stack.getItemType() instanceof BlockType)) {
             throw new IllegalArgumentException("Item type " + stack.getItemType().getName() + " is not a block type.");
         }
-        BlockType blockType = (BlockType) stack.getItemType();
-        Optional<ItemData> itemData = stack.getItemData();
-        BlockData blockData = null;
-        if (itemData.isPresent()) {
-            if (itemData.get() instanceof BlockData) {
-                blockData = (BlockData) itemData.get();
-            }
-        }
 
+        BlockType blockType = (BlockType) stack.getItemType();
+        Optional<Metadata> itemData = stack.getItemData();
+        Metadata blockData = itemData.isPresent() ? itemData.get() : null;
         return new BasicBlockState(blockType, blockData);
     }
 }

@@ -1,17 +1,17 @@
 package com.voxelwind.server.game.item;
 
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
-import com.voxelwind.api.game.item.data.ItemData;
 
 import javax.annotation.Nonnull;
 
 public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     private ItemType itemType;
     private int amount = 1;
-    private ItemData data;
+    private Metadata data;
 
     @Override
     public ItemStackBuilder itemType(@Nonnull ItemType itemType) {
@@ -30,12 +30,12 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
-    public ItemStackBuilder itemData(ItemData data) {
+    public ItemStackBuilder itemData(Metadata data) {
         if (data != null) {
             Preconditions.checkState(itemType != null, "ItemType has not been set");
-            Preconditions.checkArgument(itemType.getMaterialDataClass() != null, "Item does not have any data associated with it.");
-            Preconditions.checkArgument(data.getClass().isAssignableFrom(itemType.getMaterialDataClass()), "ItemType data is not valid (wanted %s)",
-                    itemType.getMaterialDataClass().getName());
+            Preconditions.checkArgument(itemType.getMetadataClass() != null, "Item does not have any data associated with it.");
+            Preconditions.checkArgument(data.getClass().isAssignableFrom(itemType.getMetadataClass()), "ItemType data is not valid (wanted %s)",
+                    itemType.getMetadataClass().getName());
         }
         this.data = data;
         return this;

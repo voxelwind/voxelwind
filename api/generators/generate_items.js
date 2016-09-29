@@ -1,4 +1,4 @@
-const peData = require('minecraft-data')('pe_0.14'); // todo: update
+const peData = require('minecraft-data')('pe_0.15'); // todo: update
 const fs = require('fs');
 
 const items = peData.items;

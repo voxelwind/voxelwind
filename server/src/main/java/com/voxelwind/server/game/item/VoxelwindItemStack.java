@@ -2,10 +2,10 @@ package com.voxelwind.server.game.item;
 
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.flowpowered.nbt.stream.NBTOutputStream;
+import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
-import com.voxelwind.api.game.item.data.ItemData;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -15,9 +15,9 @@ import java.util.Optional;
 public class VoxelwindItemStack implements ItemStack {
     private final ItemType itemType;
     private final int amount;
-    private final ItemData data;
+    private final Metadata data;
 
-    public VoxelwindItemStack(ItemType itemType, int amount, ItemData data) {
+    public VoxelwindItemStack(ItemType itemType, int amount, Metadata data) {
         this.itemType = itemType;
         this.amount = amount;
         this.data = data;
@@ -33,7 +33,7 @@ public class VoxelwindItemStack implements ItemStack {
     }
 
     @Override
-    public Optional<ItemData> getItemData() {
+    public Optional<Metadata> getItemData() {
         return Optional.ofNullable(data);
     }
 

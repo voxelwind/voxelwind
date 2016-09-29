@@ -1,20 +1,18 @@
 package com.voxelwind.api.game.level.block.data;
 
-import com.google.common.base.Preconditions;
-import com.voxelwind.api.game.level.block.BlockData;
+import com.voxelwind.api.game.Metadata;
 
 /**
  * Represents a block of cake.
  */
-public class Cake implements BlockData {
+public class Cake implements Metadata {
     private final int level;
 
     public static final Cake NEW = new Cake(0);
     public static final Cake ALMOST_EATEN = new Cake(6);
 
-    public static Cake ofStage(int data) {
-        Preconditions.checkArgument(data >= 0 && data < 7, "data is not valid (wanted 0-6)");
-        return new Cake(data);
+    public static Cake of(short meta) {
+        return new Cake(meta);
     }
 
     private Cake(int level) {
@@ -35,10 +33,5 @@ public class Cake implements BlockData {
      */
     public int getSlicesLeft() {
         return 7 - level;
-    }
-
-    @Override
-    public short toBlockMetadata() {
-        return (short) level;
     }
 }

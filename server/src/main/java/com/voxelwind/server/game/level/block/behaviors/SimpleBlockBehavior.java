@@ -4,7 +4,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
-import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
@@ -48,12 +47,14 @@ public class SimpleBlockBehavior implements BlockBehavior {
         if (!block.getBlockState().getBlockType().isDiggable()) {
             return ImmutableList.of();
         }
+
         ItemStackBuilder builder = server.createItemStackBuilder()
                 .itemType(block.getBlockState().getBlockType())
                 .amount(1);
-        if (block.getBlockState().getBlockData() instanceof ItemData) {
-            builder.itemData((ItemData) block.getBlockState().getBlockData());
+        if (block.getBlockState().getBlockData() != null) {
+            builder.itemData(block.getBlockState().getBlockData());
         }
+
         return ImmutableList.of(builder.build());
     }
 }
