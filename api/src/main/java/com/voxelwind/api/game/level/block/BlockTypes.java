@@ -282,11 +282,6 @@ public class BlockTypes {
         }
 
         @Override
-        public Class<? extends BlockEntity> getBlockEntityClass() {
-            return null;
-        }
-
-        @Override
         public String toString() {
             return getName();
         }
