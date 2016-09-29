@@ -15,14 +15,14 @@ import com.voxelwind.server.game.level.util.NibbleArray;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class VoxelwindChunk implements Chunk {
@@ -32,7 +32,7 @@ public class VoxelwindChunk implements Chunk {
     private final NibbleArray blockMetadata = new NibbleArray(FULL_CHUNK_SIZE);
     private final NibbleArray skyLightData = new NibbleArray(FULL_CHUNK_SIZE);
     private final NibbleArray blockLightData = new NibbleArray(FULL_CHUNK_SIZE);
-    private final Map<Vector3i, BlockEntity> blockEntities = new HashMap<>();
+    private final TIntObjectMap<BlockEntity> blockEntities = new TIntObjectHashMap<>();
 
     private final Level level;
     private final int x;
@@ -85,8 +85,7 @@ public class VoxelwindChunk implements Chunk {
         }
 
         // TODO: Add level and associated block data
-        return new VoxelwindBlock(null, this, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null)), blockEntities.get(
-                new Vector3i(x, y, z)));
+        return new VoxelwindBlock(level, this, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null), blockEntities.get(index)));
     }
 
     @Override
@@ -98,7 +97,16 @@ public class VoxelwindChunk implements Chunk {
     public synchronized Block setBlock(int x, int y, int z, BlockState state, boolean shouldRecalculateLight) {
         checkPosition(x, y, z);
         Preconditions.checkNotNull(state, "state");
+
+        // set up block data
         setBlockId(x, y, z, state.getBlockType().getId(), state.getBlockData() == null ? 0 : MetadataSerializer.serializeMetadata(state), shouldRecalculateLight);
+
+        // now set the block entity, if any
+        Optional<BlockEntity> entity = state.getBlockEntity();
+        if (entity.isPresent()) {
+            blockEntities.put(xyzIdx(x, y, z), entity.get());
+        }
+
         return getBlock(x, y, z);
     }
 
@@ -124,11 +132,15 @@ public class VoxelwindChunk implements Chunk {
 
             populateSkyLightAt(x, z);
         } else {
-            // If this is the quick case, then update the height map.
+            // If this is the quick case, then just update the height map.
             if (height[(z << 4) + x] <= y && blockId != 0) {
                 height[(z << 4) + x] = (byte) y;
             }
         }
+
+        // Remove the block entity that exists here.
+        blockEntities.remove(index);
+
         stale = true;
     }
 
@@ -191,7 +203,7 @@ public class VoxelwindChunk implements Chunk {
                 blockMetadata.copy(),
                 skyLightData.copy(),
                 blockLightData.copy(),
-                ImmutableMap.copyOf(blockEntities),
+                new TIntObjectHashMap<>(blockEntities),
                 x,
                 z
         );
@@ -244,7 +256,7 @@ public class VoxelwindChunk implements Chunk {
         return chunkDataPacket;
     }
 
-    public void writeTo(OutputStream stream) {
+    public void writeTo(OutputStream stream) throws IOException {
         try (DataOutputStream dos = new DataOutputStream(stream)) {
             dos.write(blockData);
             dos.write(blockMetadata.getData());
@@ -254,8 +266,6 @@ public class VoxelwindChunk implements Chunk {
             for (int i : biomeColor) {
                 dos.writeInt(i);
             }
-        } catch (IOException e) {
-            throw new AssertionError(e);
         }
     }
 

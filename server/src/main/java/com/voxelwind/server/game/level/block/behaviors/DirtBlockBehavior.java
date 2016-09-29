@@ -30,7 +30,7 @@ public class DirtBlockBehavior extends SimpleBlockBehavior {
                 return BehaviorResult.NOTHING;
             }
 
-            if (BehaviorUtils.replaceBlockState(player, originalBlockOptional.get(), new BasicBlockState(BlockTypes.FARMLAND, null))) {
+            if (BehaviorUtils.replaceBlockState(player, originalBlockOptional.get(), new BasicBlockState(BlockTypes.FARMLAND, null, null))) {
                 return BehaviorResult.REDUCE_DURABILITY;
             } else {
                 return BehaviorResult.NOTHING;

@@ -27,8 +27,8 @@ public interface Serializer {
         return (T) block.getBlockData();
     }
 
-    default <T> T getBlockEntity(Block block) {
-        Optional<BlockEntity> optional = block.getBlockEntity();
+    default <T> T getBlockStateEntity(Block block) {
+        Optional<BlockEntity> optional = block.getBlockState().getBlockEntity();
         return optional.isPresent() ? (T) optional.get() : null;
     }
 }

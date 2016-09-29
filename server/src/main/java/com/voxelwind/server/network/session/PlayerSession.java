@@ -792,7 +792,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             Block block = chunkOptional.get().getBlock(inChunkX, packet.getPosition().getY(), inChunkZ);
             // Call BlockReplaceEvent.
-            BlockReplaceEvent event = new BlockReplaceEvent(block, block.getBlockState(), new BasicBlockState(BlockTypes.AIR, null),
+            BlockReplaceEvent event = new BlockReplaceEvent(block, block.getBlockState(), new BasicBlockState(BlockTypes.AIR, null, null),
                     PlayerSession.this, BlockReplaceEvent.ReplaceReason.PLAYER_BREAK);
             getServer().getEventManager().fire(event);
             if (event.getResult() == BlockReplaceEvent.Result.CONTINUE) {
@@ -803,10 +803,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         for (ItemStack drop : drops) {
                             getLevel().dropItem(drop, block.getLevelLocation().toFloat().add(0.5, 0.5, 0.5));
                         }
-                        chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
+                        chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null, null));
                     }
                 } else {
-                    chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null));
+                    chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null, null));
                 }
             }
 

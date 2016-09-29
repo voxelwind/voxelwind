@@ -5,7 +5,6 @@ import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockStateBuilder;
 import com.voxelwind.api.game.level.block.BlockType;
-import com.voxelwind.server.game.item.VoxelwindItemStack;
 
 import javax.annotation.Nonnull;
 
@@ -36,6 +35,6 @@ public class VoxelwindBlockStateBuilder implements BlockStateBuilder {
     @Override
     public BlockState build() {
         Preconditions.checkArgument(type != null, "block type has not been set");
-        return new BasicBlockState(type, metadata);
+        return new BasicBlockState(type, metadata, null);
     }
 }

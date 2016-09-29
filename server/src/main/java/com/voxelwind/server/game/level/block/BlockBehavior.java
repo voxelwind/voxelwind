@@ -19,9 +19,7 @@ public interface BlockBehavior {
     BehaviorResult handleItemInteraction(Server server, Player player, Vector3i against, BlockFace face, ItemStack withItem);
     boolean handleBreak(Server server, Player player, Block block, @Nullable ItemStack withItem);
     Collection<ItemStack> getDrops(Server server, Player player, Block block, @Nullable ItemStack withItem);
-    default Optional<BlockEntity> createBlockEntity() {
-        return Optional.empty();
-    }
+
     default BoundingBox getBoundingBox(Block block) {
         Vector3f asFloat = block.getLevelLocation().toFloat();
         return new BoundingBox(asFloat, asFloat.add(1, 1, 1));

@@ -39,14 +39,14 @@ public class FarmlandBlockBehavior extends SimpleBlockBehavior {
 
             // Seeds
             if (withItem.getItemType() == ItemTypes.SEEDS) {
-                return BehaviorUtils.setBlockState(player, adjusted, new BasicBlockState(BlockTypes.CROPS, Crops.NEW)) ?
+                return BehaviorUtils.setBlockState(player, adjusted, new BasicBlockState(BlockTypes.CROPS, Crops.NEW, null)) ?
                         BehaviorResult.REMOVE_ONE_ITEM : BehaviorResult.NOTHING;
             }
 
             // TODO: Other seeds
             if (withItem.getItemType().isBlock()) {
                 // Destroy the farmland.
-                if (BehaviorUtils.replaceBlockState(player, originalBlockOptional.get(), new BasicBlockState(BlockTypes.DIRT, null))) {
+                if (BehaviorUtils.replaceBlockState(player, originalBlockOptional.get(), new BasicBlockState(BlockTypes.DIRT, null, null))) {
                     return BehaviorResult.PLACE_BLOCK_AND_REMOVE_ITEM;
                 } else {
                     return BehaviorResult.NOTHING;

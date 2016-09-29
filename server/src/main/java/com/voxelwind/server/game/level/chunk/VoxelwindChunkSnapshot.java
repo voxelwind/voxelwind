@@ -10,6 +10,7 @@ import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.game.level.util.NibbleArray;
+import gnu.trove.map.TIntObjectMap;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +22,7 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
     private final NibbleArray blockMetadata;
     private final NibbleArray skyLightData;
     private final NibbleArray blockLightData;
-    private final Map<Vector3i, BlockEntity> blockEntities;
+    private final TIntObjectMap<BlockEntity> blockEntities;
 
     private final int x;
     private final int z;
@@ -29,7 +30,7 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
     private final int[] biomeColor = new int[256];
     private final byte[] height = new byte[256];
 
-    VoxelwindChunkSnapshot(byte[] blockData, NibbleArray blockMetadata, NibbleArray skyLightData, NibbleArray blockLightData, Map<Vector3i, BlockEntity> blockEntities, int x, int z) {
+    VoxelwindChunkSnapshot(byte[] blockData, NibbleArray blockMetadata, NibbleArray skyLightData, NibbleArray blockLightData, TIntObjectMap<BlockEntity> blockEntities, int x, int z) {
         this.blockData = blockData;
         this.blockMetadata = blockMetadata;
         this.skyLightData = skyLightData;
@@ -66,8 +67,7 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
         }
 
         // TODO: Add level and chunk
-        return new VoxelwindBlock(null, null, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null)),
-                blockEntities.get(new Vector3i(x, y, z)));
+        return new VoxelwindBlock(null, null, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null), blockEntities.get(index)));
     }
 
     private static int xyzIdx(int x, int y, int z) {

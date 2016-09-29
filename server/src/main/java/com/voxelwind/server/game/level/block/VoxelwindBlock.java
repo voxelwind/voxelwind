@@ -14,14 +14,12 @@ public class VoxelwindBlock implements Block {
     private final Chunk chunk;
     private final Vector3i location;
     private final BlockState state;
-    private final BlockEntity blockEntity;
 
-    public VoxelwindBlock(Level level, Chunk chunk, Vector3i location, BlockState state, BlockEntity blockEntity) {
+    public VoxelwindBlock(Level level, Chunk chunk, Vector3i location, BlockState state) {
         this.level = level;
         this.chunk = chunk;
         this.location = location;
         this.state = state;
-        this.blockEntity = blockEntity;
     }
 
     @Override
@@ -42,10 +40,5 @@ public class VoxelwindBlock implements Block {
     @Override
     public Vector3i getLevelLocation() {
         return location;
-    }
-
-    @Override
-    public Optional<BlockEntity> getBlockEntity() {
-        return Optional.ofNullable(blockEntity);
     }
 }

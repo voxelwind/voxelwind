@@ -46,12 +46,12 @@ class SerializerTestBase {
                     public Metadata getBlockData() {
                         return null;
                     }
-                };
-            }
 
-            @Override
-            public Optional<BlockEntity> getBlockEntity() {
-                return Optional.ofNullable(blockEntity);
+                    @Override
+                    public Optional<BlockEntity> getBlockEntity() {
+                        return Optional.ofNullable(blockEntity);
+                    }
+                };
             }
         };
     }

@@ -21,16 +21,16 @@ public class FlatworldChunkProvider implements ChunkProvider {
             VoxelwindChunk chunk = new VoxelwindChunk(level, x, z);
             for (int x1 = 0; x1 < 16; x1++) {
                 for (int z1 = 0; z1 < 16; z1++) {
-                    chunk.setBlock(x1, 0, z1, new BasicBlockState(BlockTypes.BEDROCK, null), false);
+                    chunk.setBlock(x1, 0, z1, new BasicBlockState(BlockTypes.BEDROCK, null, null), false);
                     for (int y = 1; y < 4; y++) {
-                        chunk.setBlock(x1, y, z1, new BasicBlockState(BlockTypes.DIRT, null), false);
+                        chunk.setBlock(x1, y, z1, new BasicBlockState(BlockTypes.DIRT, null, null), false);
                     }
-                    chunk.setBlock(x1, 4, z1, new BasicBlockState(BlockTypes.GRASS_BLOCK, null), false);
+                    chunk.setBlock(x1, 4, z1, new BasicBlockState(BlockTypes.GRASS_BLOCK, null, null), false);
                 }
             }
 
             if (x == 0 && z == 0) {
-                chunk.setBlock(0, 4, 0, new BasicBlockState(BlockTypes.BEDROCK, null), false);
+                chunk.setBlock(0, 4, 0, new BasicBlockState(BlockTypes.BEDROCK, null, null), false);
             }
 
             chunk.recalculateLight();
