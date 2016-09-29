@@ -25,6 +25,51 @@ public class MetadataSerializer implements Serializer {
         // All additional items which need this
         SERIALIZERS.put(ItemTypes.COAL.getId(), new CoalSerializer());
         SERIALIZERS.put(ItemTypes.DYE.getId(), new DyedSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_SHOVEL.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_PICKAXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_AXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.FLINT_AND_STEEL.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.WOODEN_SWORD.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.WOODEN_SHOVEL.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.WOODEN_PICKAXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.WOODEN_AXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.STONE_SWORD.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.STONE_SHOVEL.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.STONE_PICKAXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.STONE_AXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_SWORD.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_SHOVEL.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_PICKAXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_AXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_SWORD.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_SHOVEL.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_PICKAXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_AXE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.WOODEN_HOE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.STONE_HOE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_HOE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_HOE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_HOE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.LEATHER_CAP.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.LEATHER_TUNIC.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.LEATHER_PANTS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.LEATHER_BOOTS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.CHAIN_HELMET.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.CHAIN_CHESTPLATE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.CHAIN_LEGGINGS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.CHAIN_BOOTS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_HELMET.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_CHESTPLATE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_LEGGINGS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.IRON_BOOTS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_HELMET.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_CHESTPLATE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_LEGGINGS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.DIAMOND_BOOTS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_HELMET.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_CHESTPLATE.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_LEGGINGS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.GOLDEN_BOOTS.getId(), new GenericDamageSerializer());
     }
 
     private MetadataSerializer() {

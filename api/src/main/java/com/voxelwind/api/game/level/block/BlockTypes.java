@@ -5,6 +5,7 @@ import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.level.block.data.Cake;
 import com.voxelwind.api.game.level.block.data.Crops;
 import com.voxelwind.api.game.level.block.data.TopSnow;
+import com.voxelwind.api.game.level.blockentities.FlowerpotBlockEntity;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.Builder;
@@ -150,7 +151,7 @@ public class BlockTypes {
     public static final BlockType BIRCH_WOOD_STAIRS = IntBlock.builder().name("birch_wood_stairs").id(135).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
     public static final BlockType JUNGLE_WOOD_STAIRS = IntBlock.builder().name("jungle_wood_stairs").id(136).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
     public static final BlockType COBBLESTONE_WALL = IntBlock.builder().name("cobblestone_wall").id(139).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType FLOWER_POT = IntBlock.builder().name("flower_pot").id(140).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType FLOWER_POT = IntBlock.builder().name("flower_pot").id(140).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).metadataClass(FlowerpotBlockEntity.class).build();
     public static final BlockType CARROTS = IntBlock.builder().name("carrots").id(141).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Crops.class).build();
     public static final BlockType POTATO = IntBlock.builder().name("potato").id(142).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Crops.class).build();
     public static final BlockType WOODEN_BUTTON = IntBlock.builder().name("wooden_button").id(143).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
