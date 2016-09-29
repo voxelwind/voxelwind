@@ -17,41 +17,21 @@ import java.util.Optional;
  * @version 1.0
  */
 class SerializerTestBase {
-    Block generateTestBlock( BlockType blockType, BlockEntity blockEntity ) {
-        return new Block() {
+    BlockState generateTestBlockState( BlockType blockType, BlockEntity blockEntity ) {
+        return new BlockState() {
             @Override
-            public Level getLevel() {
+            public BlockType getBlockType() {
+                return BlockTypes.FLOWER_POT;
+            }
+
+            @Override
+            public Metadata getBlockData() {
                 return null;
             }
 
             @Override
-            public Chunk getChunk() {
-                return null;
-            }
-
-            @Override
-            public Vector3i getLevelLocation() {
-                return null;
-            }
-
-            @Override
-            public BlockState getBlockState() {
-                return new BlockState() {
-                    @Override
-                    public BlockType getBlockType() {
-                        return BlockTypes.FLOWER_POT;
-                    }
-
-                    @Override
-                    public Metadata getBlockData() {
-                        return null;
-                    }
-
-                    @Override
-                    public Optional<BlockEntity> getBlockEntity() {
-                        return Optional.ofNullable(blockEntity);
-                    }
-                };
+            public Optional<BlockEntity> getBlockEntity() {
+                return Optional.ofNullable(blockEntity);
             }
         };
     }

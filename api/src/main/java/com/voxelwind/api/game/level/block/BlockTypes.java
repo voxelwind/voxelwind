@@ -5,6 +5,7 @@ import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.level.block.data.Cake;
 import com.voxelwind.api.game.level.block.data.Crops;
 import com.voxelwind.api.game.level.block.data.TopSnow;
+import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.api.game.level.blockentities.FlowerpotBlockEntity;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -224,8 +225,9 @@ public class BlockTypes {
         private final int emitLight;
         private final int filterLight;
         private final Class<? extends Metadata> metadataClass;
+        private final Class<? extends BlockEntity> blockEntityClass;
 
-        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, Class<? extends Metadata> aClass) {
+        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, Class<? extends Metadata> aClass, Class<? extends BlockEntity> blockEntityClass) {
             this.id = id;
             this.name = name;
             this.maxStackSize = maxStackSize;
@@ -234,6 +236,7 @@ public class BlockTypes {
             this.emitLight = emitLight;
             this.filterLight = filterLight;
             this.metadataClass = aClass;
+            this.blockEntityClass = blockEntityClass;
 
             BY_ID.put(id, this);
         }
@@ -276,6 +279,11 @@ public class BlockTypes {
         @Override
         public int filtersLight() {
             return filterLight;
+        }
+
+        @Override
+        public Class<? extends BlockEntity> getBlockEntityClass() {
+            return null;
         }
 
         @Override

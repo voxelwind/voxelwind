@@ -2,6 +2,8 @@ package com.voxelwind.server.game.level;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.IntTag;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
@@ -19,6 +21,7 @@ import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
 import com.voxelwind.server.game.level.provider.LevelDataProvider;
+import com.voxelwind.server.network.mcpe.packets.McpeBlockEntityData;
 import com.voxelwind.server.network.mcpe.packets.McpeSetTime;
 import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
 import org.apache.logging.log4j.LogManager;
@@ -144,5 +147,18 @@ public class VoxelwindLevel implements Level {
         short blockData = state.getBlockData() == null ? 0 : MetadataSerializer.serializeMetadata(state);
         packet.setMetadata((byte) (0xb << 4 | (blockData & 0xf)));
         packetManager.queuePacketForPlayers(packet);
+
+        // Block entities may have changed too.
+        if (state.getBlockEntity().isPresent()) {
+            CompoundTag blockEntityTag = MetadataSerializer.serializeNBT(state);
+            blockEntityTag.getValue().put(new IntTag("x", position.getX()));
+            blockEntityTag.getValue().put(new IntTag("y", position.getY()));
+            blockEntityTag.getValue().put(new IntTag("z", position.getZ()));
+
+            McpeBlockEntityData packet2 = new McpeBlockEntityData();
+            packet2.setPosition(position);
+            packet2.setBlockEntityData(blockEntityTag);
+            packetManager.queuePacketForPlayers(packet2);
+        }
     }
 }

@@ -18,7 +18,7 @@ public interface BlockStateBuilder {
     BlockStateBuilder blockType(@Nonnull BlockType type);
 
     /**
-     * Specifies the data to use for this item. This requires that a block type already be set.
+     * Specifies the data to use for this block. This requires that a block type already be set.
      * @param data the material data to use
      * @return the builder, for chaining
      */

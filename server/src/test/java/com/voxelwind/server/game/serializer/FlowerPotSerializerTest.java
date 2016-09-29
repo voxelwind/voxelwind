@@ -14,7 +14,7 @@ public class FlowerPotSerializerTest extends SerializerTestBase {
                 FlowerType.ACACIA_SAPLING
         );
 
-        CompoundTag tag = MetadataSerializer.serializeNBT(generateTestBlock(BlockTypes.FLOWER_POT, voxelwindFlowerpotBlockEntity));
+        CompoundTag tag = MetadataSerializer.serializeNBT(generateTestBlockState(BlockTypes.FLOWER_POT, voxelwindFlowerpotBlockEntity));
 
         assertNotNull(tag);
         assertTrue(tag.getValue().containsKey("contents"));

@@ -78,8 +78,8 @@ public class MetadataSerializer implements Serializer {
     }
 
     @Override
-    public CompoundTag readNBT(Block block) {
-        Serializer dataSerializer = SERIALIZERS.get(block.getBlockState().getBlockType().getId());
+    public CompoundTag readNBT(BlockState block) {
+        Serializer dataSerializer = SERIALIZERS.get(block.getBlockType().getId());
         if (dataSerializer == null) {
             return null;
         }
@@ -141,6 +141,10 @@ public class MetadataSerializer implements Serializer {
         return INSTANCE.writeMetadata(type, metadata);
     }
 
+    public static BlockEntity deserializeNBT(ItemType type, CompoundTag tag) {
+        return INSTANCE.writeNBT(type, tag);
+    }
+
     public static short serializeMetadata(BlockState block) {
         return INSTANCE.readMetadata(block);
     }
@@ -149,7 +153,7 @@ public class MetadataSerializer implements Serializer {
         return INSTANCE.readMetadata(itemStack);
     }
 
-    public static CompoundTag serializeNBT(Block block) {
+    public static CompoundTag serializeNBT(BlockState block) {
         return INSTANCE.readNBT(block);
     }
 }

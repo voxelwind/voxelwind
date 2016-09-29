@@ -11,7 +11,7 @@ import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import java.util.Optional;
 
 public interface Serializer {
-    CompoundTag readNBT(Block block);
+    CompoundTag readNBT(BlockState block);
     short readMetadata(BlockState block);
     CompoundTag readNBT(ItemStack itemStack);
     short readMetadata(ItemStack itemStack);
@@ -27,8 +27,8 @@ public interface Serializer {
         return (T) block.getBlockData();
     }
 
-    default <T> T getBlockStateEntity(Block block) {
-        Optional<BlockEntity> optional = block.getBlockState().getBlockEntity();
+    default <T> T getBlockStateEntity(BlockState block) {
+        Optional<BlockEntity> optional = block.getBlockEntity();
         return optional.isPresent() ? (T) optional.get() : null;
     }
 }

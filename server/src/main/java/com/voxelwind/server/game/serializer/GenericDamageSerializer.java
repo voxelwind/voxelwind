@@ -11,7 +11,7 @@ import com.voxelwind.api.game.level.blockentities.BlockEntity;
 
 public class GenericDamageSerializer implements Serializer {
     @Override
-    public CompoundTag readNBT(Block block) {
+    public CompoundTag readNBT(BlockState block) {
         return null;
     }
 

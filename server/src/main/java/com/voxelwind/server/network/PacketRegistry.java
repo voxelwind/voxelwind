@@ -69,6 +69,7 @@ public class PacketRegistry {
         MCPE_PACKETS[0x2d] = McpeContainerSetData.class;
         MCPE_PACKETS[0x2e] = McpeContainerSetContents.class;
         MCPE_PACKETS[0x31] = McpeAdventureSettings.class;
+        MCPE_PACKETS[0x32] = McpeBlockEntityData.class;
         MCPE_PACKETS[0x34] = McpeFullChunkData.class;
         MCPE_PACKETS[0x37] = McpeSetPlayerGameMode.class;
         MCPE_PACKETS[0x38] = McpePlayerList.class;

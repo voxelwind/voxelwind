@@ -13,7 +13,7 @@ import com.voxelwind.api.util.DyeColor;
 
 public class DyedSerializer implements Serializer {
     @Override
-    public CompoundTag readNBT(Block block) {
+    public CompoundTag readNBT(BlockState block) {
         return null;
     }
 

@@ -14,7 +14,7 @@ import com.voxelwind.server.game.level.blockentities.VoxelwindFlowerpotBlockEnti
 
 public class FlowerpotSerializer implements Serializer {
     @Override
-    public CompoundTag readNBT(Block block) {
+    public CompoundTag readNBT(BlockState block) {
         VoxelwindFlowerpotBlockEntity flowerPot = getBlockStateEntity(block);
 
         CompoundMap map = new CompoundMap();

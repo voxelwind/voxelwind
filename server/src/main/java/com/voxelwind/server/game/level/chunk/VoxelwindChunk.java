@@ -1,8 +1,11 @@
 package com.voxelwind.server.game.level.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.nbt.CompoundMap;
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.IntTag;
+import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.ChunkSnapshot;
@@ -17,12 +20,15 @@ import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class VoxelwindChunk implements Chunk {
@@ -32,6 +38,7 @@ public class VoxelwindChunk implements Chunk {
     private final NibbleArray blockMetadata = new NibbleArray(FULL_CHUNK_SIZE);
     private final NibbleArray skyLightData = new NibbleArray(FULL_CHUNK_SIZE);
     private final NibbleArray blockLightData = new NibbleArray(FULL_CHUNK_SIZE);
+    private final TIntObjectMap<CompoundTag> serializedBlockEntities = new TIntObjectHashMap<>();
     private final TIntObjectMap<BlockEntity> blockEntities = new TIntObjectHashMap<>();
 
     private final Level level;
@@ -84,7 +91,6 @@ public class VoxelwindChunk implements Chunk {
             createdData = Optional.empty();
         }
 
-        // TODO: Add level and associated block data
         return new VoxelwindBlock(level, this, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null), blockEntities.get(index)));
     }
 
@@ -104,7 +110,13 @@ public class VoxelwindChunk implements Chunk {
         // now set the block entity, if any
         Optional<BlockEntity> entity = state.getBlockEntity();
         if (entity.isPresent()) {
-            blockEntities.put(xyzIdx(x, y, z), entity.get());
+            int pos = xyzIdx(x, y, z);
+            CompoundTag blockEntityTag = MetadataSerializer.serializeNBT(state);
+            blockEntityTag.getValue().put(new IntTag("x", x + (this.x * 16)));
+            blockEntityTag.getValue().put(new IntTag("y", y));
+            blockEntityTag.getValue().put(new IntTag("z", z + (this.z * 16)));
+            serializedBlockEntities.put(pos, blockEntityTag);
+            blockEntities.put(pos, entity.get());
         }
 
         return getBlock(x, y, z);
@@ -139,6 +151,7 @@ public class VoxelwindChunk implements Chunk {
         }
 
         // Remove the block entity that exists here.
+        serializedBlockEntities.remove(index);
         blockEntities.remove(index);
 
         stale = true;
@@ -240,12 +253,20 @@ public class VoxelwindChunk implements Chunk {
                 throw new AssertionError(e);
             }
 
-            // Finally, write an empty NBT compound.
-            /*try (NBTOutputStream outputStream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
-                outputStream.writeTag(new ListTag<>("", CompoundTag.class, ImmutableList.of()));
+            // Finally, write out block entity compounds for block entities;
+            try (NBTOutputStream stream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
+                if (serializedBlockEntities.isEmpty()) {
+                    // Write out an empty root tag
+                    stream.writeTag(new CompoundTag("", new CompoundMap()));
+                } else {
+                    // Write out NBT compounds for all block entities.
+                    for (CompoundTag entity : serializedBlockEntities.valueCollection()) {
+                        stream.writeTag(entity);
+                    }
+                }
             } catch (IOException e) {
-                throw new AssertionError(e);
-            }*/
+                e.printStackTrace();
+            }
 
             data.setData(memoryStream.toByteArray());
             chunkDataPacket.getPackages().add(data);
