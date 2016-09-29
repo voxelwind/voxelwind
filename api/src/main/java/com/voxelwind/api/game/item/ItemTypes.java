@@ -18,7 +18,7 @@ public class ItemTypes {
     public static final ItemType IRON_AXE = new IntItem(258, "iron_axe", 1, GenericDamageValue.class);
     public static final ItemType FLINT_AND_STEEL = new IntItem(259, "flint_and_steel", 1, GenericDamageValue.class);
     public static final ItemType APPLE = new IntItem(260, "apple", 64, null);
-    public static final ItemType BOW = new IntItem(261, "bow", 1, null);
+    public static final ItemType BOW = new IntItem(261, "bow", 1, GenericDamageValue.class);
     public static final ItemType ARROW = new IntItem(262, "arrow", 64, null);
     public static final ItemType COAL = new IntItem(263, "coal", 64, null);
     public static final ItemType DIAMOND = new IntItem(264, "diamond", 64, null);

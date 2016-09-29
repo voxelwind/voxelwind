@@ -1,5 +1,6 @@
 package com.voxelwind.api.game.level.block.data;
 
+import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
 
 /**
@@ -11,8 +12,9 @@ public class Cake implements Metadata {
     public static final Cake NEW = new Cake(0);
     public static final Cake ALMOST_EATEN = new Cake(6);
 
-    public static Cake of(short meta) {
-        return new Cake(meta);
+    public static Cake of(short data) {
+        Preconditions.checkArgument(data >= 0 && data < 8, "data is not valid (wanted 0-7)");
+        return new Cake(data);
     }
 
     private Cake(int level) {

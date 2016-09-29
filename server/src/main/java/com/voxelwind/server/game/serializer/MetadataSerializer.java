@@ -70,6 +70,7 @@ public class MetadataSerializer implements Serializer {
         SERIALIZERS.put(ItemTypes.GOLDEN_CHESTPLATE.getId(), new GenericDamageSerializer());
         SERIALIZERS.put(ItemTypes.GOLDEN_LEGGINGS.getId(), new GenericDamageSerializer());
         SERIALIZERS.put(ItemTypes.GOLDEN_BOOTS.getId(), new GenericDamageSerializer());
+        SERIALIZERS.put(ItemTypes.BOW.getId(), new GenericDamageSerializer());
     }
 
     private MetadataSerializer() {

@@ -34,7 +34,6 @@ public class CropsSerializer implements Serializer {
 
     @Override
     public Metadata writeMetadata(ItemType block, short metadata) {
-        Preconditions.checkArgument(metadata >= 0 && metadata < 8, "data is not valid (wanted 0-7)");
         return Crops.of(metadata);
     }
 

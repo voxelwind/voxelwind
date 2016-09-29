@@ -1,5 +1,6 @@
 package com.voxelwind.api.game.level.block.data;
 
+import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
 
 import java.util.Objects;
@@ -14,6 +15,7 @@ public class Crops implements Metadata {
     public static final Crops FULLY_GROWN = new Crops(7);
 
     public static Crops of(int data) {
+        Preconditions.checkArgument(data >= 0 && data < 8, "data is not valid (wanted 0-7)");
         return new Crops(data);
     }
 
