@@ -17,7 +17,7 @@ public class CobwebBlockBehavior extends SimpleBlockBehavior {
     @Override
     public Collection<ItemStack> getDrops(Server server, Player player, Block block, @Nullable ItemStack with) {
         if (with != null) {
-            if (with.getItemType() == ItemTypes.SHEARS || with.getItemType() == ItemTypes.IRON_SWORD || with.getItemType() == ItemTypes.GOLD_SWORD ||
+            if (with.getItemType() == ItemTypes.SHEARS || with.getItemType() == ItemTypes.IRON_SWORD || with.getItemType() == ItemTypes.GOLDEN_SWORD ||
                     with.getItemType() == ItemTypes.DIAMOND_SWORD) {
                 return ImmutableList.of(server.createItemStackBuilder()
                         .itemType(with.getItemType() == ItemTypes.SHEARS ? block.getBlockState().getBlockType() : ItemTypes.STRING)

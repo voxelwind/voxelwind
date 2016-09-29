@@ -5,17 +5,18 @@ import com.flowpowered.math.vector.Vector3i;
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
-import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.api.util.Rotation;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.level.util.Attribute;
+import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.raknet.RakNetUtil;
-import com.voxelwind.api.util.Rotation;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
@@ -190,7 +191,7 @@ public class McpeUtil {
         short nbtSize = buf.readShort();
 
         ItemType type = ItemTypes.forId(id);
-        VoxelwindItemStack stack = new VoxelwindItemStack(type, count, type.createDataFor(damage).orElse(null));
+        VoxelwindItemStack stack = new VoxelwindItemStack(type, count, MetadataSerializer.deserializeMetadata(type, damage));
 
         if (nbtSize > 0) {
             try (NBTInputStream stream = new NBTInputStream(new ByteBufInputStream(buf.readSlice(nbtSize)), false, ByteOrder.LITTLE_ENDIAN)) {
@@ -210,9 +211,9 @@ public class McpeUtil {
 
         buf.writeShort(stack.getItemType().getId());
         buf.writeByte(stack.getAmount());
-        Optional<ItemData> dataOptional = stack.getItemData();
+        Optional<Metadata> dataOptional = stack.getItemData();
         if (dataOptional.isPresent()) {
-            buf.writeShort(dataOptional.get().toMetadata());
+            buf.writeShort(MetadataSerializer.serializeMetadata(stack));
         } else {
             buf.writeShort(0);
         }

@@ -6,6 +6,7 @@ import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
+import com.voxelwind.server.game.serializer.MetadataSerializer;
 
 public class VoxelwindNBTUtils {
     public static ItemStack createItemStack(CompoundMap map) {
@@ -15,7 +16,7 @@ public class VoxelwindNBTUtils {
 
         // TODO: "tag" compound
         ItemType type = ItemTypes.forId(idTag.getValue());
-        return new VoxelwindItemStack(type, countTag.getValue(), type.createDataFor(damageTag.getValue()).orElse(null));
+        return new VoxelwindItemStack(type, countTag.getValue(), MetadataSerializer.deserializeMetadata(type,damageTag.getValue()));
     }
 
     public static ItemStack[] createItemStacks(ListTag<CompoundTag> tag, int knownSize) {

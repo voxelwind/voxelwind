@@ -17,15 +17,15 @@ import static com.voxelwind.api.game.item.ItemTypes.*;
 
 public class DroppableBySpecificToolsBlockBehavior extends SimpleBlockBehavior {
     public static final BlockBehavior ALL_PICKAXES = new DroppableBySpecificToolsBlockBehavior(ImmutableList.of(WOODEN_PICKAXE, DIAMOND_PICKAXE,
-            GOLD_PICKAXE, IRON_PICKAXE, STONE_PICKAXE));
+            GOLDEN_PICKAXE, IRON_PICKAXE, STONE_PICKAXE));
     public static final BlockBehavior ALL_STONE_PICKAXES = new DroppableBySpecificToolsBlockBehavior(ImmutableList.of(DIAMOND_PICKAXE,
-            GOLD_PICKAXE, IRON_PICKAXE, STONE_PICKAXE));
+            GOLDEN_PICKAXE, IRON_PICKAXE, STONE_PICKAXE));
     public static final BlockBehavior ALL_IRON_PICKAXES = new DroppableBySpecificToolsBlockBehavior(ImmutableList.of(DIAMOND_PICKAXE,
-            GOLD_PICKAXE, IRON_PICKAXE));
+            GOLDEN_PICKAXE, IRON_PICKAXE));
     public static final BlockBehavior ALL_GOLD_PICKAXES = new DroppableBySpecificToolsBlockBehavior(ImmutableList.of(DIAMOND_PICKAXE,
-            GOLD_PICKAXE));
+            GOLDEN_PICKAXE));
     public static final BlockBehavior DIAMOND_PICKAXES = new DroppableBySpecificToolsBlockBehavior(ImmutableList.of(DIAMOND_PICKAXE,
-            GOLD_PICKAXE));
+            GOLDEN_PICKAXE));
     public static final BlockBehavior SHEARS_ONLY = new DroppableBySpecificToolsBlockBehavior(ImmutableList.of(SHEARS));
 
     private final List<ItemType> allowedTypes;

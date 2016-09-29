@@ -13,14 +13,12 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
-import static com.voxelwind.api.game.item.ItemTypes.DIAMOND_PICKAXE;
-import static com.voxelwind.api.game.item.ItemTypes.GOLD_PICKAXE;
-import static com.voxelwind.api.game.item.ItemTypes.IRON_PICKAXE;
+import static com.voxelwind.api.game.item.ItemTypes.*;
 
 public class DiamondOreBlockBehavior extends SimpleBlockBehavior {
     public static final BlockBehavior INSTANCE = new DiamondOreBlockBehavior();
     private static final List<ItemType> ALLOWED_TO_BREAK = ImmutableList.of(DIAMOND_PICKAXE,
-            GOLD_PICKAXE, IRON_PICKAXE);
+            GOLDEN_PICKAXE, IRON_PICKAXE);
 
     @Override
     public Collection<ItemStack> getDrops(Server server, Player player, Block block, @Nullable ItemStack withItem) {
@@ -30,6 +28,7 @@ public class DiamondOreBlockBehavior extends SimpleBlockBehavior {
                     .amount(1)
                     .build());
         }
+
         return ImmutableList.of();
     }
 }

@@ -2,11 +2,13 @@ package com.voxelwind.server.game.level.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.level.ChunkSnapshot;
 import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
+import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.game.level.util.NibbleArray;
 
 import java.util.Map;
@@ -56,11 +58,16 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
         Vector3i full = new Vector3i(x + (this.x * 16), y, z + (this.z * 16));
 
         BlockType type = BlockTypes.forId(data);
-        Optional<BlockData> createdData = type.createBlockDataFor(blockMetadata.get(index));
+        Optional<Metadata> createdData;
+        if (type.getMetadataClass() != null) {
+            createdData = Optional.of(MetadataSerializer.deserializeMetadata(type, blockMetadata.get(index)));
+        } else {
+            createdData = Optional.empty();
+        }
 
-        // TODO: Add level and associated block data
-        return new VoxelwindBlock(null, null, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null)), blockEntities.get(
-                new Vector3i(x, y, z)));
+        // TODO: Add level and chunk
+        return new VoxelwindBlock(null, null, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null)),
+                blockEntities.get(new Vector3i(x, y, z)));
     }
 
     private static int xyzIdx(int x, int y, int z) {

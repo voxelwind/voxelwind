@@ -2,20 +2,18 @@ package com.voxelwind.server.network.mcpe.util.metadata;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
+import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
-import com.voxelwind.api.game.item.data.ItemData;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
+import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
 import io.netty.buffer.ByteBuf;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public final class MetadataDictionary {
@@ -82,7 +80,7 @@ public final class MetadataDictionary {
                     short data = buf.readShort();
 
                     ItemType type1 = ItemTypes.forId(id);
-                    Optional<ItemData> data1 = type1.createDataFor(data);
+                    Optional<Metadata> data1 = Optional.ofNullable(MetadataSerializer.deserializeMetadata(type1, data));
                     dictionary.put(idx, new VoxelwindItemStack(type1, amount, data1.orElse(null)));
                     break;
                 default:
@@ -121,9 +119,9 @@ public final class MetadataDictionary {
             buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_SLOT, idx));
             buf.writeShort(stack.getItemType().getId());
             buf.writeByte(stack.getAmount());
-            Optional<ItemData> data = stack.getItemData();
+            Optional<Metadata> data = stack.getItemData();
             if (data.isPresent()) {
-                buf.writeShort(data.get().toMetadata());
+                buf.writeShort(MetadataSerializer.serializeMetadata(stack));
             } else {
                 buf.writeShort(0);
             }

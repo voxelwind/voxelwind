@@ -1,14 +1,10 @@
 package com.voxelwind.api.game.level.blockentities;
 
-import com.voxelwind.api.game.level.block.Block;
+import com.voxelwind.api.game.Metadata;
 
 /**
  * This interface represents a block entity.
  */
-public interface BlockEntity {
-    /**
-     * Returns the block associated with this entity.
-     * @return a block
-     */
-    Block getBlock();
+public interface BlockEntity extends Metadata {
+
 }

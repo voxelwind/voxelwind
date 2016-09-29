@@ -1,9 +1,11 @@
 package com.voxelwind.api.game.item.data;
 
+import com.voxelwind.api.game.Metadata;
+
 /**
  * This class provides a generic damage value.
  */
-public class GenericDamageValue implements ItemData {
+public class GenericDamageValue implements Metadata {
     private final short damage;
 
     public GenericDamageValue(short damage) {
@@ -11,11 +13,6 @@ public class GenericDamageValue implements ItemData {
     }
 
     public short getDamage() {
-        return damage;
-    }
-
-    @Override
-    public short toMetadata() {
         return damage;
     }
 }

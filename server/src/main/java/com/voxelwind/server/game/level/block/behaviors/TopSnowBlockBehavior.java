@@ -43,7 +43,7 @@ public class TopSnowBlockBehavior extends SimpleBlockBehavior {
                         // Need to place a new block down.
                         return BehaviorResult.PLACE_BLOCK_AND_REMOVE_ITEM;
                     } else {
-                        BlockState newBlockState = new BasicBlockState(BlockTypes.TOP_SNOW, TopSnow.from(layer + 1));
+                        BlockState newBlockState = new BasicBlockState(BlockTypes.TOP_SNOW, TopSnow.of(layer + 1));
                         return BehaviorUtils.replaceBlockState(player, againstBlock, newBlockState) ? BehaviorResult.REMOVE_ONE_ITEM : BehaviorResult.NOTHING;
                     }
                 }

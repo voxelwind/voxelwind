@@ -21,7 +21,7 @@ public class DirtBlockBehavior extends SimpleBlockBehavior {
 
     @Override
     public BehaviorResult handleItemInteraction(Server server, Player player, Vector3i against, BlockFace face, ItemStack withItem) {
-        if (withItem.getItemType() == ItemTypes.DIAMOND_HOE || withItem.getItemType() == ItemTypes.GOLD_HOE ||
+        if (withItem.getItemType() == ItemTypes.DIAMOND_HOE || withItem.getItemType() == ItemTypes.GOLDEN_HOE ||
                 withItem.getItemType() == ItemTypes.IRON_HOE || withItem.getItemType() == ItemTypes.STONE_HOE ||
                 withItem.getItemType() == ItemTypes.WOODEN_HOE) {
             Vector3i adjusted = against.add(face.getOffset());
