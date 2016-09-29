@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.api.game.level.block.BlockStateBuilder;
 import com.voxelwind.api.plugin.PluginManager;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
@@ -21,6 +22,7 @@ import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
 import com.voxelwind.server.game.level.LevelCreator;
 import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.block.VoxelwindBlockStateBuilder;
 import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
 import com.voxelwind.server.game.level.provider.anvil.AnvilChunkProvider;
@@ -204,6 +206,11 @@ public class VoxelwindServer implements Server {
     @Override
     public ItemStackBuilder createItemStackBuilder() {
         return new VoxelwindItemStackBuilder();
+    }
+
+    @Override
+    public BlockStateBuilder createBlockStateBuilder() {
+        return new VoxelwindBlockStateBuilder();
     }
 
     @Override

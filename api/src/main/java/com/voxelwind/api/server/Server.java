@@ -1,6 +1,7 @@
 package com.voxelwind.api.server;
 
 import com.voxelwind.api.game.item.ItemStackBuilder;
+import com.voxelwind.api.game.level.block.BlockStateBuilder;
 import com.voxelwind.api.server.command.CommandManager;
 import com.voxelwind.api.server.command.sources.ConsoleCommandExecutorSource;
 import com.voxelwind.api.server.event.EventManager;
@@ -52,6 +53,12 @@ public interface Server {
      * @return the item stack builder
      */
     ItemStackBuilder createItemStackBuilder();
+
+    /**
+     * Returns a {@link BlockStateBuilder} for this server.
+     * @return the item stack builder
+     */
+    BlockStateBuilder createBlockStateBuilder();
 
     Collection<Player> getAllOnlinePlayers();
 }
