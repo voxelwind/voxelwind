@@ -73,10 +73,18 @@ public class McpeBatch implements NetworkPackage {
                 if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class)) {
                     throw new DataFormatException("Packet " + netPackage + " does not permit batching.");
                 }
-                ByteBuf encodedPackage = PacketRegistry.tryEncode(netPackage);
-                source.writeInt(encodedPackage.readableBytes());
-                source.writeBytes(encodedPackage);
-                encodedPackage.release();
+
+                // Write dummy size
+                int lengthPositionForPacket = source.writerIndex();
+                source.writeInt(0);
+                int afterLength = source.writerIndex();
+
+                // Encode the packet
+                source.writeByte((PacketRegistry.getId(netPackage) & 0xFF));
+                netPackage.encode(source);
+
+                // Replace the dummy length
+                source.setInt(lengthPositionForPacket, source.writerIndex() - afterLength);
             }
 
             // Write a temporary size here. We'll replace it later.

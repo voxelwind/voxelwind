@@ -9,8 +9,6 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 
-import java.util.Arrays;
-
 public class PacketRegistry {
     private static final Class<? extends NetworkPackage>[] RAKNET_PACKETS = new Class[256];
     private static final Class<? extends NetworkPackage>[] MCPE_PACKETS = new Class[256];

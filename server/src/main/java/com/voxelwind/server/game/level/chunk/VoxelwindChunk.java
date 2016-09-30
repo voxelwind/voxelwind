@@ -224,53 +224,53 @@ public class VoxelwindChunk implements Chunk {
 
     public synchronized McpeBatch getChunkDataPacket() {
         if (stale) {
-            if (chunkDataPacket == null) {
-                chunkDataPacket = new McpeBatch();
-            } else {
-                chunkDataPacket.releasePrecompressed();
-                chunkDataPacket.getPackages().clear();
-            }
-
-            // Generate the inner data
+            // Populate the initial packet data
             McpeFullChunkData data = new McpeFullChunkData();
             data.setChunkX(x);
             data.setChunkZ(z);
             data.setOrder((byte) 1);
-            ByteArrayOutputStream memoryStream = new ByteArrayOutputStream(83204);
 
-            try (DataOutputStream dos = new DataOutputStream(memoryStream)) {
-                dos.write(blockData);
-                dos.write(blockMetadata.getData());
-                dos.write(skyLightData.getData());
-                dos.write(blockLightData.getData());
-                dos.write(height);
-                for (int i : biomeColor) {
-                    dos.writeInt(i);
+            // Populate the actual chunk data to send
+            ByteArrayOutputStream memoryStream = new ByteArrayOutputStream();
+            try {
+                memoryStream.write(blockData);
+                memoryStream.write(blockMetadata.getData());
+                memoryStream.write(skyLightData.getData());
+                memoryStream.write(blockLightData.getData());
+                memoryStream.write(height);
+
+                // Write some miscellaneous data
+                try (DataOutputStream dos = new DataOutputStream(memoryStream)) {
+                    for (int i : biomeColor) {
+                        dos.writeInt(i);
+                    }
+                    // extra data, we have none
+                    dos.writeInt(0);
                 }
-                // extra data, we have none
-                dos.writeInt(0);
+
+                // Finally, write out block entity compounds for block entities;
+                try (NBTOutputStream stream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
+                    if (serializedBlockEntities.isEmpty()) {
+                        // Write out an empty root tag
+                        stream.writeTag(new CompoundTag("", new CompoundMap()));
+                    } else {
+                        // Write out NBT compounds for all block entities.
+                        for (CompoundTag entity : serializedBlockEntities.valueCollection()) {
+                            stream.writeTag(entity);
+                        }
+                    }
+                }
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
 
-            // Finally, write out block entity compounds for block entities;
-            try (NBTOutputStream stream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
-                if (serializedBlockEntities.isEmpty()) {
-                    // Write out an empty root tag
-                    stream.writeTag(new CompoundTag("", new CompoundMap()));
-                } else {
-                    // Write out NBT compounds for all block entities.
-                    for (CompoundTag entity : serializedBlockEntities.valueCollection()) {
-                        stream.writeTag(entity);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             data.setData(memoryStream.toByteArray());
+
+            chunkDataPacket = new McpeBatch();
             chunkDataPacket.getPackages().add(data);
             chunkDataPacket.precompress();
+            // After precompression, clean the McpeFullChunkData since it is no longer being used
+            chunkDataPacket.getPackages().clear();
             stale = false;
         }
 
