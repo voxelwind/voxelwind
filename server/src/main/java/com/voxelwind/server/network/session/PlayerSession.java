@@ -582,7 +582,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeRequestChunkRadius packet) {
-            int radius = Math.min(5, Math.max(16, packet.getRadius()));
+            int radius = Math.max(5, Math.min(16, packet.getRadius()));
             McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
             updated.setRadius(radius);
             session.sendImmediatePackage(updated);
