@@ -438,7 +438,18 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         Preconditions.checkNotNull(message, "message");
         Preconditions.checkNotNull(type, "type");
         McpeText text = new McpeText();
-        text.setType(type == PlayerMessageDisplayType.CHAT ? McpeText.TextType.RAW : McpeText.TextType.TIP);
+        switch (type) {
+            case CHAT:
+                text.setType(McpeText.TextType.RAW);
+                break;
+            case TIP:
+                text.setType(McpeText.TextType.TIP);
+                break;
+            case POPUP:
+                text.setType(McpeText.TextType.POPUP);
+                text.setSource(""); // TODO: Is it worth adding a caption for this?
+                break;
+        }
         text.setMessage(message);
         session.addToSendQueue(text);
     }

@@ -11,5 +11,9 @@ public enum PlayerMessageDisplayType {
     /**
      * The message should be displayed above the hotbar.
      */
-    TIP
+    TIP,
+    /**
+     * The message should be displayed above the hotbar.
+     */
+    POPUP
 }
