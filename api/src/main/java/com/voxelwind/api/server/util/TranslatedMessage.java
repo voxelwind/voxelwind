@@ -19,6 +19,11 @@ public class TranslatedMessage {
         this.replacements = ImmutableList.copyOf(Preconditions.checkNotNull(replacements, "replacements"));
     }
 
+    public TranslatedMessage(String name, String... replacements) {
+        this.name = Preconditions.checkNotNull(name, "name");
+        this.replacements = ImmutableList.copyOf(replacements);
+    }
+
     public String getName() {
         return name;
     }
