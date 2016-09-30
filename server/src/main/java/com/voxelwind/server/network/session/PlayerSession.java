@@ -23,6 +23,7 @@ import com.voxelwind.api.server.event.block.BlockReplaceEvent;
 import com.voxelwind.api.server.event.player.PlayerJoinEvent;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
+import com.voxelwind.api.server.player.PlayerMessageDisplayType;
 import com.voxelwind.api.server.util.TranslatedMessage;
 import com.voxelwind.api.util.BlockFace;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
@@ -310,6 +311,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     @Override
     public void sendMessage(@Nonnull String message) {
+        Preconditions.checkNotNull(message, "message");
         McpeText text = new McpeText();
         text.setType(McpeText.TextType.RAW);
         text.setMessage(message);
@@ -429,6 +431,16 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             packet.setGamemode(mode.ordinal());
             session.addToSendQueue(packet);
         }
+    }
+
+    @Override
+    public void sendMessage(@Nonnull String message, @Nonnull PlayerMessageDisplayType type) {
+        Preconditions.checkNotNull(message, "message");
+        Preconditions.checkNotNull(type, "type");
+        McpeText text = new McpeText();
+        text.setType(type == PlayerMessageDisplayType.CHAT ? McpeText.TextType.RAW : McpeText.TextType.TIP);
+        text.setMessage(message);
+        session.addToSendQueue(text);
     }
 
     @Override

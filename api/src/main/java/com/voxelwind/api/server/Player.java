@@ -7,12 +7,11 @@ import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.server.command.CommandExecutorSource;
 import com.voxelwind.api.server.event.block.iface.BlockReplacer;
 import com.voxelwind.api.server.player.GameMode;
+import com.voxelwind.api.server.player.PlayerMessageDisplayType;
 import com.voxelwind.api.server.util.TranslatedMessage;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.UUID;
 
 public interface Player extends Entity, CommandExecutorSource, MessageRecipient, Session, InventoryHolder, BlockReplacer {
     void disconnect(@Nonnull String reason);
@@ -23,6 +22,8 @@ public interface Player extends Entity, CommandExecutorSource, MessageRecipient,
     GameMode getGameMode();
 
     void setGameMode(@Nonnull GameMode mode);
+
+    void sendMessage(@Nonnull String message, @Nonnull PlayerMessageDisplayType type);
 
     void sendTranslatedMessage(@Nonnull TranslatedMessage message);
 
