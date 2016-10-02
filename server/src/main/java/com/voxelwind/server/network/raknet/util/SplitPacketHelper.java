@@ -13,7 +13,7 @@ public class SplitPacketHelper {
     private boolean released = false;
 
     public SplitPacketHelper(int expectedLength) {
-        Preconditions.checkArgument(expectedLength >= 1, "expectedLength is less than 2 (%s)", expectedLength);
+        Preconditions.checkArgument(expectedLength >= 1, "expectedLength is less than 1 (%s)", expectedLength);
         this.packets = new EncapsulatedRakNetPacket[expectedLength];
     }
 

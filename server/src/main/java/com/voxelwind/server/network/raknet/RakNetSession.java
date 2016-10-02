@@ -113,7 +113,7 @@ public class RakNetSession implements SessionConnection {
             for (int i = range.getStart(); i <= range.getEnd(); i++) {
                 SentDatagram datagram = datagramAcks.get(i);
                 if (datagram != null) {
-                    LOGGER.warn("Must resend datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
+                    LOGGER.debug("Resending datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to NAK");
                     datagram.refreshForResend();
                     channel.write(new AddressedRakNetDatagram(datagram.getDatagram(), remoteAddress), channel.voidPromise());
                 }
@@ -171,7 +171,7 @@ public class RakNetSession implements SessionConnection {
     private void resendStalePackets() {
         for (SentDatagram datagram : datagramAcks.values()) {
             if (datagram.isStale()) {
-                LOGGER.warn("Datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " for " + remoteAddress + " is stale, resending!");
+                LOGGER.debug("Resending datagram " + datagram.getDatagram().getDatagramSequenceNumber() + " due to being stale");
                 datagram.refreshForResend();
                 channel.write(new AddressedRakNetDatagram(datagram.getDatagram(), remoteAddress), channel.voidPromise());
             }
