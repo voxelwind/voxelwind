@@ -11,6 +11,8 @@ import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket
 import com.voxelwind.server.network.raknet.util.SentDatagram;
 import com.voxelwind.server.network.raknet.util.SplitPacketHelper;
 import com.voxelwind.server.network.session.SessionConnection;
+import gnu.trove.map.TShortObjectMap;
+import gnu.trove.map.hash.TShortObjectHashMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
@@ -25,9 +27,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RakNetSession implements SessionConnection {
     private static final Logger LOGGER = LogManager.getLogger(RakNetSession.class);
+    private static final int ALLOWED_OUTSTANDING_SPLIT_PACKETS = 32;
     private final InetSocketAddress remoteAddress;
     private final short mtu;
-    private final ConcurrentMap<Short, SplitPacketHelper> splitPackets = new ConcurrentHashMap<>();
+    private final TShortObjectMap<SplitPacketHelper> splitPackets = new TShortObjectHashMap<>();
     private final AtomicInteger datagramSequenceGenerator = new AtomicInteger();
     private final AtomicInteger reliabilitySequenceGenerator = new AtomicInteger();
     private final AtomicInteger orderSequenceGenerator = new AtomicInteger();
@@ -66,14 +69,30 @@ public class RakNetSession implements SessionConnection {
 
     public Optional<ByteBuf> addSplitPacket(EncapsulatedRakNetPacket packet) {
         checkForClosed();
-        // Retain the packet so it can be reassembled later.
-        packet.retain();
-        SplitPacketHelper helper = splitPackets.computeIfAbsent(packet.getPartId(), (k) -> new SplitPacketHelper());
-        Optional<ByteBuf> result = helper.add(packet);
-        if (result.isPresent()) {
-            splitPackets.remove(packet.getPartId());
+
+        SplitPacketHelper helper;
+        synchronized (splitPackets) {
+            // Make sure that we don't exceed a reasonable number of outstanding total split packets.
+            if (splitPackets.size() >= ALLOWED_OUTSTANDING_SPLIT_PACKETS) {
+                if (!splitPackets.containsKey(packet.getPartId())) {
+                    throw new IllegalStateException("Too many outstanding split packets");
+                }
+            }
+
+            helper = splitPackets.get(packet.getPartId());
+            if (helper == null) {
+                splitPackets.put(packet.getPartId(), helper = new SplitPacketHelper());
+            }
+
+            // Retain the packet so it can be reassembled later.
+            packet.retain();
+            Optional<ByteBuf> result = helper.add(packet);
+            if (result.isPresent()) {
+                splitPackets.remove(packet.getPartId());
+            }
+
+            return result;
         }
-        return result;
     }
 
     public void onAck(List<IntRange> acked) {
@@ -138,11 +157,13 @@ public class RakNetSession implements SessionConnection {
     }
 
     private void cleanSplitPackets() {
-        for (Iterator<SplitPacketHelper> it = splitPackets.values().iterator(); it.hasNext(); ) {
-            SplitPacketHelper sph = it.next();
-            if (sph.expired()) {
-                sph.release();
-                it.remove();
+        synchronized (splitPackets) {
+            for (Iterator<SplitPacketHelper> it = splitPackets.valueCollection().iterator(); it.hasNext(); ) {
+                SplitPacketHelper sph = it.next();
+                if (sph.expired()) {
+                    sph.release();
+                    it.remove();
+                }
             }
         }
     }
@@ -163,8 +184,13 @@ public class RakNetSession implements SessionConnection {
         closed = true;
 
         // Perform resource clean up.
-        splitPackets.values().forEach(SplitPacketHelper::release);
-        splitPackets.clear();
+        synchronized (splitPackets) {
+            splitPackets.forEachValue(v -> {
+                v.release();
+                return true;
+            });
+            splitPackets.clear();
+        }
 
         datagramAcks.values().forEach(SentDatagram::tryRelease);
         datagramAcks.clear();
