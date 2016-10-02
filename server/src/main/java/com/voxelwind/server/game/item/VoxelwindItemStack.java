@@ -55,10 +55,6 @@ public class VoxelwindItemStack implements ItemStack {
         // TODO: Implement
     }
 
-    public void readNbt(NBTInputStream stream) throws IOException {
-        // TODO: Implement
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

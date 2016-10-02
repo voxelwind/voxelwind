@@ -7,6 +7,7 @@ import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.level.block.BlockTypes;
@@ -14,6 +15,7 @@ import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.util.Rotation;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
+import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.raknet.RakNetUtil;
@@ -187,20 +189,23 @@ public class McpeUtil {
 
         int count = buf.readByte();
         short damage = buf.readShort();
-
         short nbtSize = buf.readShort();
 
         ItemType type = ItemTypes.forId(id);
-        VoxelwindItemStack stack = new VoxelwindItemStack(type, count, MetadataSerializer.deserializeMetadata(type, damage));
+
+        ItemStackBuilder builder = new VoxelwindItemStackBuilder()
+                .itemType(type)
+                .itemData(MetadataSerializer.deserializeMetadata(type, damage))
+                .amount(count);
 
         if (nbtSize > 0) {
             try (NBTInputStream stream = new NBTInputStream(new ByteBufInputStream(buf.readSlice(nbtSize)), false, ByteOrder.LITTLE_ENDIAN)) {
-                stack.readNbt(stream);
+                // TODO: Actually try to deserialize
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to load NBT data", e);
             }
         }
-        return stack;
+        return builder.build();
     }
 
     public static void writeItemStack(ByteBuf buf, ItemStack stack) {
