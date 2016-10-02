@@ -8,41 +8,35 @@ import io.netty.buffer.PooledByteBufAllocator;
 import java.util.*;
 
 public class SplitPacketHelper {
-    private final Queue<EncapsulatedRakNetPacket> packets = new ArrayDeque<>();
-    private final BitSet contained = new BitSet();
+    private final EncapsulatedRakNetPacket[] packets;
     private final long created = System.currentTimeMillis();
     private boolean released = false;
 
-    public synchronized Optional<ByteBuf> add(EncapsulatedRakNetPacket packet) {
+    public SplitPacketHelper(int expectedLength) {
+        Preconditions.checkArgument(expectedLength >= 1, "expectedLength is less than 2 (%s)", expectedLength);
+        this.packets = new EncapsulatedRakNetPacket[expectedLength];
+    }
+
+    public Optional<ByteBuf> add(EncapsulatedRakNetPacket packet) {
         Preconditions.checkNotNull(packet, "packet");
         Preconditions.checkArgument(packet.isHasSplit(), "packet is not split");
         Preconditions.checkState(!released, "packet has been released");
+        Preconditions.checkElementIndex(packet.getPartIndex(), packets.length);
 
-        if (contained.get(packet.getPartIndex())) {
-            // Duplicate packet, ignore it.
-            return Optional.empty();
-        }
+        packets[packet.getPartIndex()] = packet;
 
-        contained.set(packet.getPartIndex(), true);
-        packets.add(packet);
-
-        for (int i = 0; i < packet.getPartCount(); i++) {
-            if (!contained.get(i))
+        for (EncapsulatedRakNetPacket netPacket : packets) {
+            if (netPacket == null) {
                 return Optional.empty();
+            }
         }
-
-        contained.clear();
-        List<EncapsulatedRakNetPacket> sortedPackets = new ArrayList<>(packets);
-        sortedPackets.sort((o1, o2) -> Integer.compare(o1.getPartIndex(), o2.getPartIndex()));
 
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
-        for (EncapsulatedRakNetPacket netPacket : sortedPackets) {
+        for (EncapsulatedRakNetPacket netPacket : packets) {
             buf.writeBytes(netPacket.getBuffer());
         }
 
         release();
-        packets.clear();
-
         return Optional.of(buf);
     }
 
@@ -60,5 +54,7 @@ public class SplitPacketHelper {
         for (EncapsulatedRakNetPacket packet : packets) {
             packet.release();
         }
+
+        Arrays.fill(packets, null);
     }
 }

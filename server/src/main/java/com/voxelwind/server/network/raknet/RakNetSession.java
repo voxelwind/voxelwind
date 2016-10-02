@@ -81,7 +81,7 @@ public class RakNetSession implements SessionConnection {
 
             helper = splitPackets.get(packet.getPartId());
             if (helper == null) {
-                splitPackets.put(packet.getPartId(), helper = new SplitPacketHelper());
+                splitPackets.put(packet.getPartId(), helper = new SplitPacketHelper(packet.getPartCount()));
             }
 
             // Retain the packet so it can be reassembled later.
