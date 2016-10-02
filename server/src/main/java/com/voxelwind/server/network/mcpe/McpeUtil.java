@@ -11,7 +11,7 @@ import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Skin;
-import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.util.Rotation;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.level.util.Attribute;

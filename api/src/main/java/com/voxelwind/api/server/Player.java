@@ -8,7 +8,8 @@ import com.voxelwind.api.server.command.CommandExecutorSource;
 import com.voxelwind.api.server.event.block.iface.BlockReplacer;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.player.PlayerMessageDisplayType;
-import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.api.server.player.PopupMessage;
+import com.voxelwind.api.server.player.TranslatedMessage;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -26,6 +27,8 @@ public interface Player extends Entity, CommandExecutorSource, MessageRecipient,
     void sendMessage(@Nonnull String message, @Nonnull PlayerMessageDisplayType type);
 
     void sendTranslatedMessage(@Nonnull TranslatedMessage message);
+
+    void sendPopupMessage(@Nonnull PopupMessage message);
 
     @Override
     PlayerInventory getInventory();

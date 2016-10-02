@@ -24,7 +24,8 @@ import com.voxelwind.api.server.event.player.PlayerJoinEvent;
 import com.voxelwind.api.server.event.player.PlayerSpawnEvent;
 import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.player.PlayerMessageDisplayType;
-import com.voxelwind.api.server.util.TranslatedMessage;
+import com.voxelwind.api.server.player.PopupMessage;
+import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.util.BlockFace;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.inventories.*;
@@ -460,6 +461,16 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeText text = new McpeText();
         text.setType(McpeText.TextType.TRANSLATE);
         text.setTranslatedMessage(message);
+        session.addToSendQueue(text);
+    }
+
+    @Override
+    public void sendPopupMessage(@Nonnull PopupMessage message) {
+        Preconditions.checkNotNull(message, "message");
+        McpeText text = new McpeText();
+        text.setType(McpeText.TextType.POPUP);
+        text.setSource(message.getCaption());
+        text.setMessage(message.getMessage());
         session.addToSendQueue(text);
     }
 
