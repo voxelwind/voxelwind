@@ -125,6 +125,26 @@ public class LevelEntityManager {
         return sessions;
     }
 
+    public List<Entity> getEntitiesInChunk(int x, int z) {
+        List<BaseEntity> currentEntityList;
+        synchronized (entityLock) {
+            currentEntityList = ImmutableList.copyOf(entities);
+        }
+
+        List<Entity> entities = new ArrayList<>();
+
+        for (BaseEntity entity : currentEntityList) {
+            int entityChunkX = entity.getPosition().getFloorX() >> 4;
+            int entityChunkZ = entity.getPosition().getFloorZ() >> 4;
+
+            if (!entity.isRemoved() && entityChunkX == x && entityChunkZ == z) {
+                entities.add(entity);
+            }
+        }
+
+        return entities;
+    }
+
     public long allocateEntityId() {
         return entityIdAllocator.incrementAndGet();
     }

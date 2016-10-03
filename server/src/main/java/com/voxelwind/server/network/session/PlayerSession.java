@@ -528,6 +528,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         return (byte) (1 + (windowIdGenerator.incrementAndGet() % 2));
     }
 
+    public boolean isChunkInView(int x, int z) {
+        return sentChunks.contains(new Vector2i(x, z));
+    }
+
     @Override
     public void onInventoryChange(int slot, @Nullable ItemStack oldItem, @Nullable ItemStack newItem, VoxelwindBaseInventory inventory, @Nullable PlayerSession session) {
         byte windowId;

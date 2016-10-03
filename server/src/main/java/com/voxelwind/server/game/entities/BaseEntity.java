@@ -255,6 +255,7 @@ public class BaseEntity implements Entity {
         Preconditions.checkNotNull(position, "position");
         Preconditions.checkNotNull(rotation, "rotation");
         Preconditions.checkArgument(level instanceof VoxelwindLevel, "Not a valid level.");
+        Preconditions.checkArgument(level.getChunkIfLoadedForPosition(position.toInt()).isPresent(), "Position is in a chunk that is not loaded.");
 
         checkIfAlive();
 

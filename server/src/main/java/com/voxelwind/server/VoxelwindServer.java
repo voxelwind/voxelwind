@@ -105,6 +105,9 @@ public class VoxelwindServer implements Server {
         Path configFile = Paths.get("voxelwind.json");
         try {
             configuration = VoxelwindConfiguration.load(configFile);
+            if (configuration.addMissingFields()) {
+                VoxelwindConfiguration.save(configFile, configuration);
+            }
         } catch (NoSuchFileException e) {
             configuration = VoxelwindConfiguration.defaultConfiguration();
             VoxelwindConfiguration.save(configFile, configuration);

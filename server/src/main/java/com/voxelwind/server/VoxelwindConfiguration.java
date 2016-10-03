@@ -116,6 +116,43 @@ public class VoxelwindConfiguration {
         return xboxAuthentication;
     }
 
+    public boolean addMissingFields() {
+        boolean needToSave = false;
+
+        if (mcpeListener == null) {
+            mcpeListener = new McpeListenerConfiguration();
+            mcpeListener.host = "0.0.0.0";
+            mcpeListener.port = 19132;
+            needToSave = true;
+        }
+
+        if (rcon == null) {
+            rcon = new RconConfiguration();
+            rcon.enabled = false;
+            rcon.host = "127.0.0.1";
+            rcon.port = 27015;
+            rcon.password = generateRandomPassword();
+            needToSave = true;
+        }
+
+        if (chunkGC == null) {
+            chunkGC = new ChunkGCConfiguration();
+            chunkGC.enabled = true;
+            chunkGC.releaseAfterLastAccess = 30;
+            chunkGC.releaseAfterLoadSeconds = 120;
+            chunkGC.spawnRadiusToKeep = 6;
+            needToSave = true;
+        }
+
+        if (xboxAuthentication == null) {
+            xboxAuthentication = new XboxAuthenticationConfiguration();
+            xboxAuthentication.forceAuthentication = false;
+            needToSave = true;
+        }
+
+        return needToSave;
+    }
+
     public static VoxelwindConfiguration load(Path path) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             return VoxelwindServer.MAPPER.readValue(reader, VoxelwindConfiguration.class);
