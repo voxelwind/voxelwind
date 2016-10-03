@@ -399,11 +399,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             }
 
             // Sort by whichever chunks are closest to the player for smoother loading
-            Vector3f spawnPosition = getPosition();
-            int spawnChunkX = spawnPosition.getFloorX() >> 4;
-            int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
-            Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
-            chunks.sort(new AroundPointComparator(originCoord));
+            Vector3f currentPosition = getPosition();
+            int currentChunkX = currentPosition.getFloorX() >> 4;
+            int currentChunkZ = currentPosition.getFloorZ() >> 4;
+            chunks.sort(new AroundPointComparator(currentChunkX, currentChunkZ));
 
             for (Chunk chunk : chunks) {
                 session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
@@ -615,7 +614,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 int spawnChunkX = spawnPosition.getFloorX() >> 4;
                 int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
                 Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
-                chunks.sort(new AroundPointComparator(originCoord));
+                chunks.sort(new AroundPointComparator(spawnChunkX, spawnChunkZ));
 
                 for (Chunk chunk : chunks) {
                     session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
@@ -965,20 +964,24 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     private static class AroundPointComparator implements Comparator<Chunk> {
-        private final Vector2i originCoord;
+        private final int spawnX;
+        private final int spawnZ;
 
-        private AroundPointComparator(Vector2i originCoord) {
-            this.originCoord = Preconditions.checkNotNull(originCoord, "originCoord");
+        private AroundPointComparator(int spawnX, int spawnZ) {
+            this.spawnX = spawnX;
+            this.spawnZ = spawnZ;
         }
 
         @Override
         public int compare(Chunk o1, Chunk o2) {
-            Vector2i o1Coord = new Vector2i(o1.getX(), o1.getZ());
-            Vector2i o2Coord = new Vector2i(o2.getX(), o2.getZ());
-
             // Use whichever is closest to the origin.
-            return Integer.compare(o1Coord.distanceSquared(originCoord),
-                    o2Coord.distanceSquared(originCoord));
+            return Integer.compare(distance(o1.getX(), o1.getZ()), distance(o2.getX(), o2.getZ()));
+        }
+
+        private int distance(int x, int z) {
+            int dx = spawnX - x;
+            int dz = spawnZ - z;
+            return dx * dx + dz * dz;
         }
     }
 
