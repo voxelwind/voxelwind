@@ -146,9 +146,12 @@ public class LevelChunkManager {
 
                 done.set(true);
                 chunksToLoad.remove(chunkKey);
-                long current = System.currentTimeMillis();
-                loadedTimes.put(chunkKey, current);
-                lastAccessTimes.put(chunkKey, current);
+
+                if (throwable == null) {
+                    long current = System.currentTimeMillis();
+                    loadedTimes.put(chunkKey, current);
+                    lastAccessTimes.put(chunkKey, current);
+                }
 
                 for (CompletableFuture<Chunk> future : futuresToComplete) {
                     if (throwable != null) {
