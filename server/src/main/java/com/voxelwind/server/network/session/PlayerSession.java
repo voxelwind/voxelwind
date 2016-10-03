@@ -27,6 +27,7 @@ import com.voxelwind.api.server.player.PlayerMessageDisplayType;
 import com.voxelwind.api.server.player.PopupMessage;
 import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.util.BlockFace;
+import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.block.BlockBehavior;
@@ -70,11 +71,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private byte openInventoryId = -1;
     private boolean hasMoved = false;
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
+    private final VoxelwindServer vwServer;
     private final Set<UUID> playersSentForList = new HashSet<>();
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20f);
         this.session = session;
+        this.vwServer = session.getServer();
     }
 
     @Override
@@ -596,7 +599,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeRequestChunkRadius packet) {
-            int radius = Math.max(5, Math.min(16, packet.getRadius()));
+            int radius = Math.max(5, Math.min(vwServer.getConfiguration().getMaximumViewDistance(), packet.getRadius()));
             McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
             updated.setRadius(radius);
             session.sendImmediatePackage(updated);
@@ -613,7 +616,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 Vector3f spawnPosition = getPosition();
                 int spawnChunkX = spawnPosition.getFloorX() >> 4;
                 int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
-                Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
                 chunks.sort(new AroundPointComparator(spawnChunkX, spawnChunkZ));
 
                 for (Chunk chunk : chunks) {
