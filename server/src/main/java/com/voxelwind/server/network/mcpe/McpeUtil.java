@@ -2,6 +2,8 @@ package com.voxelwind.server.network.mcpe;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.flowpowered.nbt.CompoundTag;
+import com.flowpowered.nbt.Tag;
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
@@ -16,6 +18,7 @@ import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.util.Rotation;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
+import com.voxelwind.server.game.item.VoxelwindNBTUtils;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.raknet.RakNetUtil;
@@ -200,7 +203,10 @@ public class McpeUtil {
 
         if (nbtSize > 0) {
             try (NBTInputStream stream = new NBTInputStream(new ByteBufInputStream(buf.readSlice(nbtSize)), false, ByteOrder.LITTLE_ENDIAN)) {
-                // TODO: Actually try to deserialize
+                Tag<?> tag = stream.readTag();
+                if (tag instanceof CompoundTag) {
+                    VoxelwindNBTUtils.applyItemData(builder, ((CompoundTag) tag).getValue());
+                }
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to load NBT data", e);
             }
@@ -226,6 +232,7 @@ public class McpeUtil {
         // Remember this position, since we'll be writing the true NBT size here later:
         int sizeIndex = buf.writerIndex();
         buf.writeShort(0);
+        int afterSizeIndex = buf.writerIndex();
 
         if (stack instanceof VoxelwindItemStack) {
             try (NBTOutputStream stream = new NBTOutputStream(new ByteBufOutputStream(buf), false, ByteOrder.LITTLE_ENDIAN)) {
@@ -236,7 +243,7 @@ public class McpeUtil {
             }
 
             // Set to the written NBT size
-            buf.setShort(sizeIndex, buf.writerIndex() - sizeIndex);
+            buf.setShort(sizeIndex, buf.writerIndex() - afterSizeIndex);
         }
     }
 
