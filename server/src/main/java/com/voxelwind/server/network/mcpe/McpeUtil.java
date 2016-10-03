@@ -229,7 +229,7 @@ public class McpeUtil {
 
         if (stack instanceof VoxelwindItemStack) {
             try (NBTOutputStream stream = new NBTOutputStream(new ByteBufOutputStream(buf), false, ByteOrder.LITTLE_ENDIAN)) {
-                ((VoxelwindItemStack) stack).writeNbt(stream);
+                stream.writeTag(((VoxelwindItemStack) stack).toSpecificNBT());
             } catch (IOException e) {
                 // This shouldn't happen (as this is backed by a Netty ByteBuf), but okay...
                 throw new IllegalStateException("Unable to save NBT data", e);

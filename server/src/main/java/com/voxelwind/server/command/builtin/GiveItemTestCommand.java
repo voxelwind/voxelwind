@@ -10,7 +10,7 @@ public class GiveItemTestCommand implements CommandExecutor {
     @Override
     public void execute(CommandExecutorSource source, String[] args) throws Exception {
         if (source instanceof Player) {
-            ((Player) source).getInventory().addItem(new VoxelwindItemStack(BlockTypes.DIRT, 1, null));
+            ((Player) source).getInventory().addItem(new VoxelwindItemStack(BlockTypes.DIRT, 1, null, "test"));
         }
     }
 }

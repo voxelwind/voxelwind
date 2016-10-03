@@ -25,6 +25,19 @@ public interface ItemStackBuilder {
     ItemStackBuilder amount(int amount);
 
     /**
+     * Specifies the name for this item.
+     * @param name the name to use
+     * @return the builder, for chaining
+     */
+    ItemStackBuilder name(@Nonnull String name);
+
+    /**
+     * Clears the name for this item.
+     * @return the builder, for chaining
+     */
+    ItemStackBuilder clearName();
+
+    /**
      * Specifies the data to use for this item. This requires a material already be set.
      * @param data the material data to use
      * @return the builder, for chaining

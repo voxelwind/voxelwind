@@ -5,14 +5,14 @@ import com.voxelwind.api.game.Metadata;
 /**
  * This class provides a generic damage value.
  */
-public class GenericDamageValue implements Metadata {
+public final class GenericDamageValue implements Metadata {
     private final short damage;
 
     public GenericDamageValue(short damage) {
         this.damage = damage;
     }
 
-    public short getDamage() {
+    public final short getDamage() {
         return damage;
     }
 }

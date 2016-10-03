@@ -1,6 +1,7 @@
 package com.voxelwind.api.game.item;
 
 import com.voxelwind.api.game.Metadata;
+import com.voxelwind.api.game.item.data.Coal;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.data.GenericDamageValue;
 import com.voxelwind.api.game.level.block.BlockTypes;
@@ -20,7 +21,7 @@ public class ItemTypes {
     public static final ItemType APPLE = new IntItem(260, "apple", 64, null);
     public static final ItemType BOW = new IntItem(261, "bow", 1, GenericDamageValue.class);
     public static final ItemType ARROW = new IntItem(262, "arrow", 64, null);
-    public static final ItemType COAL = new IntItem(263, "coal", 64, null);
+    public static final ItemType COAL = new IntItem(263, "coal", 64, Coal.class);
     public static final ItemType DIAMOND = new IntItem(264, "diamond", 64, null);
     public static final ItemType IRON_INGOT = new IntItem(265, "iron_ingot", 64, null);
     public static final ItemType GOLD_INGOT = new IntItem(266, "gold_ingot", 64, null);

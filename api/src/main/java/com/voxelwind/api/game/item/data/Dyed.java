@@ -5,11 +5,12 @@ import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.util.DyeColor;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * Represents any dyed item, such as stained glass, wool, or dyes.
  */
-public class Dyed implements Metadata {
+public final class Dyed implements Metadata {
     @Nonnull
     public static Dyed of(@Nonnull DyeColor color) {
         Preconditions.checkNotNull(color, "color");
@@ -23,7 +24,27 @@ public class Dyed implements Metadata {
     }
 
     @Nonnull
-    public DyeColor getColor() {
+    public final DyeColor getColor() {
         return color;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Dyed dyed = (Dyed) o;
+        return color == dyed.color;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(color);
+    }
+
+    @Override
+    public final String toString() {
+        return "Dyed{" +
+                "color=" + color +
+                '}';
     }
 }

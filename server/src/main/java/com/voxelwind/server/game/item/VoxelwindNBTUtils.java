@@ -1,8 +1,9 @@
-package com.voxelwind.server.game.level.provider.anvil.util;
+package com.voxelwind.server.game.item;
 
 import com.flowpowered.nbt.*;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
@@ -13,10 +14,28 @@ public class VoxelwindNBTUtils {
         ByteTag countTag = (ByteTag) map.get("Count");
         ShortTag damageTag = (ShortTag) map.get("Damage");
         ShortTag idTag = (ShortTag) map.get("id");
-
-        // TODO: "tag" compound
         ItemType type = ItemTypes.forId(idTag.getValue());
-        return new VoxelwindItemStack(type, countTag.getValue(), MetadataSerializer.deserializeMetadata(type,damageTag.getValue()));
+
+        ItemStackBuilder builder = new VoxelwindItemStackBuilder()
+                .itemType(type)
+                .amount(countTag.getValue())
+                .itemData(MetadataSerializer.deserializeMetadata(type, damageTag.getValue()));
+
+        Tag<?> tagTag = map.get("tag");
+        if (tagTag != null) {
+            applyItemData(builder, (CompoundMap) tagTag.getValue());
+        }
+
+        return builder.build();
+    }
+
+    public static void applyItemData(ItemStackBuilder builder, CompoundMap map) {
+        if (map.containsKey("display")) {
+            CompoundMap displayTag = ((CompoundTag) map.get("display")).getValue();
+            if (displayTag.containsKey("Name")) {
+                builder.name((String) displayTag.get("Name").getValue());
+            }
+        }
     }
 
     public static ItemStack[] createItemStacks(ListTag<CompoundTag> tag, int knownSize) {

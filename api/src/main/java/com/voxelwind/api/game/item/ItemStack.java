@@ -29,6 +29,12 @@ public interface ItemStack {
     Optional<Metadata> getItemData();
 
     /**
+     * Returns the item's name.
+     * @return the item's name
+     */
+    Optional<String> getName();
+
+    /**
      * Creates a builder from this item stack.
      * @return a {@link ItemStackBuilder}
      */

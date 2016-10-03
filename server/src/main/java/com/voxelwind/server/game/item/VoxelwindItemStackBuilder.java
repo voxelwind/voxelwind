@@ -5,13 +5,16 @@ import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
+import lombok.ToString;
 
 import javax.annotation.Nonnull;
 
+@ToString
 public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     private ItemType itemType;
     private int amount = 1;
     private Metadata data;
+    private String name;
 
     @Override
     public ItemStackBuilder itemType(@Nonnull ItemType itemType) {
@@ -30,6 +33,19 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     }
 
     @Override
+    public ItemStackBuilder name(@Nonnull String name) {
+        Preconditions.checkNotNull(name, "name");
+        this.name = name;
+        return this;
+    }
+
+    @Override
+    public ItemStackBuilder clearName() {
+        this.name = null;
+        return this;
+    }
+
+    @Override
     public ItemStackBuilder itemData(Metadata data) {
         if (data != null) {
             Preconditions.checkState(itemType != null, "ItemType has not been set");
@@ -44,15 +60,6 @@ public class VoxelwindItemStackBuilder implements ItemStackBuilder {
     @Override
     public ItemStack build() {
         Preconditions.checkArgument(itemType != null, "ItemType has not been set");
-        return new VoxelwindItemStack(itemType, amount, data);
-    }
-
-    @Override
-    public String toString() {
-        return "VoxelwindItemStackBuilder{" +
-                "itemType=" + itemType +
-                ", amount=" + amount +
-                ", data=" + data +
-                '}';
+        return new VoxelwindItemStack(itemType, amount, data, name);
     }
 }
