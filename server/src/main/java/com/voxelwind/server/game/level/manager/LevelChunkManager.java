@@ -112,7 +112,7 @@ public class LevelChunkManager {
                     continue;
                 }
 
-                // Check if players are in the chunk
+                // Check if a player has loaded the chunk
                 for (PlayerSession session : level.getEntityManager().getPlayers()) {
                     if (session.isChunkInView(x, z)) {
                         // Chunk has been loaded by a player, skip it
