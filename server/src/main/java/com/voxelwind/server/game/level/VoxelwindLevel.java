@@ -14,6 +14,7 @@ import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.server.Server;
+import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.monsters.ZombieEntity;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
@@ -45,9 +46,9 @@ public class VoxelwindLevel implements Level {
     private long currentTick;
     private final Server server;
 
-    public VoxelwindLevel(Server server, LevelCreator creator) {
+    public VoxelwindLevel(VoxelwindServer server, LevelCreator creator) {
         this.server = server;
-        chunkManager = new LevelChunkManager(this, creator.getChunkProvider());
+        chunkManager = new LevelChunkManager(server, this, creator.getChunkProvider());
         name = creator.getName();
         uuid = UUID.randomUUID();
         entityManager = new LevelEntityManager(this);
@@ -131,6 +132,10 @@ public class VoxelwindLevel implements Level {
 
         entityManager.onTick();
         packetManager.onTick();
+
+        if (currentTick % 20 == 0) {
+            chunkManager.onTick();
+        }
     }
 
     public void broadcastBlockUpdate(Vector3i position) {

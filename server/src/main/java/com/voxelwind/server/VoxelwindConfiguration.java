@@ -1,7 +1,5 @@
 package com.voxelwind.server;
 
-import com.voxelwind.server.jni.CryptoUtil;
-import com.voxelwind.server.network.util.NativeCodeFactory;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -39,6 +37,11 @@ public class VoxelwindConfiguration {
      * Configuration for the RCON service.
      */
     private RconConfiguration rcon;
+
+    /**
+     * Configuration for the Chunk GC.
+     */
+    private ChunkGCConfiguration chunkGC;
 
     @Getter
     @ToString
@@ -88,6 +91,27 @@ public class VoxelwindConfiguration {
         }
     }
 
+    @Getter
+    @ToString
+    public static class ChunkGCConfiguration {
+        /**
+         * Should we GC?
+         */
+        private boolean enabled;
+        /**
+         * When should we release a newly loaded chunk? (atlest this time the chunk will stay loaded after read from disk)
+         */
+        private int releaseAfterLoadSeconds;
+        /**
+         * Release the chunk after x seconds after the last access was on it
+         */
+        private int releaseAfterLastAccess;
+        /**
+         * Spawn radius to keep in memory
+         */
+        private int spawnRadiusToKeep;
+    }
+
     public XboxAuthenticationConfiguration getXboxAuthentication() {
         return xboxAuthentication;
     }
@@ -118,6 +142,11 @@ public class VoxelwindConfiguration {
         configuration.rcon.port = 27015;
         configuration.rcon.password = generateRandomPassword();
         configuration.maximumPlayerLimit = -1;
+        configuration.chunkGC = new ChunkGCConfiguration();
+        configuration.chunkGC.enabled = true;
+        configuration.chunkGC.releaseAfterLastAccess = 30;
+        configuration.chunkGC.releaseAfterLoadSeconds = 120;
+        configuration.chunkGC.spawnRadiusToKeep = 6;
         return configuration;
     }
 
