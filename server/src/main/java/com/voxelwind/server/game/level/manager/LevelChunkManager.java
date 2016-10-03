@@ -2,16 +2,22 @@ package com.voxelwind.server.game.level.manager;
 
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.level.provider.ChunkProvider;
 import gnu.trove.TCollections;
+import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -21,12 +27,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * loaded asynchronously and only one attempt to load the same chunk is made, even with concurrent callers.
  */
 public class LevelChunkManager {
+    private static final Logger LOGGER = LogManager.getLogger(LevelChunkManager.class);
+
     private final TLongObjectMap<Chunk> chunksLoaded = TCollections.synchronizedMap(new TLongObjectHashMap<Chunk>());
     private final TLongObjectMap<LoadingTask> chunksToLoad = TCollections.synchronizedMap(new TLongObjectHashMap<LoadingTask>());
+    private final TLongLongMap loadedTimes = TCollections.synchronizedMap(new TLongLongHashMap());
+    private final TLongLongMap lastAccessTimes = TCollections.synchronizedMap(new TLongLongHashMap());
+
     private final Level level;
     private final ChunkProvider backingChunkProvider;
+    private final VoxelwindServer server;
 
-    public LevelChunkManager(@Nonnull Level level, @Nonnull ChunkProvider backingChunkProvider) {
+    public LevelChunkManager(@Nonnull VoxelwindServer server, @Nonnull Level level, @Nonnull ChunkProvider backingChunkProvider) {
+        this.server = server;
         this.level = level;
         this.backingChunkProvider = backingChunkProvider;
     }
@@ -54,11 +67,54 @@ public class LevelChunkManager {
     }
 
     public Optional<Chunk> getChunkIfLoaded(int x, int z) {
-        return Optional.ofNullable(chunksLoaded.get(toLong(x, z)));
+        long chunkKey = toLong(x, z);
+        Chunk chunk = chunksLoaded.get(chunkKey);
+        if (chunk != null) {
+            lastAccessTimes.put(chunkKey, System.currentTimeMillis());
+        }
+
+        return Optional.ofNullable(chunk);
     }
 
     public void onTick() {
-        // TODO: Unload logic
+        long current = System.currentTimeMillis();
+
+        int spawnChunkX = level.getSpawnLocation().getFloorX() >> 4;
+        int spawnChunkZ = level.getSpawnLocation().getFloorZ() >> 4;
+
+        // Create a copy of all chunk indexes
+        for (long chunkKey : chunksLoaded.keys()) {
+            // Check for spawnchunk
+            int x = (int) (chunkKey >> 32);
+            int z = (int) chunkKey + Integer.MIN_VALUE;
+
+            if ( Math.abs( x - spawnChunkX ) <= server.getConfiguration().getChunkGC().getSpawnRadiusToKeep() ||
+                    Math.abs( z - spawnChunkZ ) <= server.getConfiguration().getChunkGC().getSpawnRadiusToKeep() ) {
+                // Chunk is part of the spawn, skip it
+                continue;
+            }
+
+            // Get the loaded times
+            long loadedTime = loadedTimes.get(chunkKey);
+            if (current - loadedTime < TimeUnit.SECONDS.toMillis(server.getConfiguration().getChunkGC().getReleaseAfterLoadSeconds())) {
+                // This chunk has been loaded recently, skip it
+                continue;
+            }
+
+            // Check for last access
+            long lastAccessTime = lastAccessTimes.get(chunkKey);
+            if ( current - lastAccessTime < TimeUnit.SECONDS.toMillis(server.getConfiguration().getChunkGC().getReleaseAfterLastAccess())) {
+                // There was a access recently, skip it
+                continue;
+            }
+
+            // Unload the chunk
+            chunksLoaded.remove(chunkKey);
+            lastAccessTimes.remove(chunkKey);
+            loadedTimes.remove(chunkKey);
+
+            LOGGER.debug("Chunk GC cleared chunk @ " + level.getName() + " x" + x + " z" + z );
+        }
     }
 
     private class LoadingTask {
@@ -90,6 +146,10 @@ public class LevelChunkManager {
 
                 done.set(true);
                 chunksToLoad.remove(chunkKey);
+                long current = System.currentTimeMillis();
+                loadedTimes.put(chunkKey, current);
+                lastAccessTimes.put(chunkKey, current);
+
                 for (CompletableFuture<Chunk> future : futuresToComplete) {
                     if (throwable != null) {
                         future.completeExceptionally(throwable);
