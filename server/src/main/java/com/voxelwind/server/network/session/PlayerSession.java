@@ -6,6 +6,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
+import com.voxelwind.api.game.entities.monsters.*;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
@@ -27,6 +28,7 @@ import com.voxelwind.api.server.player.PlayerMessageDisplayType;
 import com.voxelwind.api.server.player.PopupMessage;
 import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.util.BlockFace;
+import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.block.BlockBehavior;
@@ -54,6 +56,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
 public class PlayerSession extends LivingEntity implements Player, InventoryObserver {
     private static final int REQUIRED_TO_SPAWN = 56;
@@ -61,6 +64,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     private final McpeSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<Vector2i> fullySentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final TLongSet isViewing = new TLongHashSet();
     private GameMode gameMode = GameMode.SURVIVAL;
     private boolean spawned = false;
@@ -70,11 +74,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private byte openInventoryId = -1;
     private boolean hasMoved = false;
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
+    private final VoxelwindServer vwServer;
     private final Set<UUID> playersSentForList = new HashSet<>();
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20f);
         this.session = session;
+        this.vwServer = session.getServer();
     }
 
     @Override
@@ -241,6 +247,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         setRotation(event.getRotation());
         hasMoved = false; // don't send duplicated packets
 
+        McpeSetTime setTime = new McpeSetTime();
+        setTime.setTime(getLevel().getTime());
+        setTime.setRunning(true);
+        session.addToSendQueue(setTime);
+
         // Send packets to spawn the player.
         McpeStartGame startGame = new McpeStartGame();
         startGame.setSeed(-1);
@@ -251,6 +262,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         startGame.setSpawnLocation(getPosition().toInt());
         startGame.setPosition(getGamePosition());
         session.addToSendQueue(startGame);
+
+        session.addToSendQueue(setTime);
 
         McpeAdventureSettings settings = new McpeAdventureSettings();
         settings.setPlayerPermissions(3);
@@ -271,11 +284,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         return new PlayerSessionNetworkPacketHandler();
     }
 
-    private CompletableFuture<List<Chunk>> getChunksForRadius(int radius, boolean updateSent) {
-        // Get current player's position in chunks.
-        Vector3i positionAsInt = getPosition().toInt();
-        int chunkX = positionAsInt.getX() >> 4;
-        int chunkZ = positionAsInt.getZ() >> 4;
+    private CompletableFuture<List<Chunk>> getChunksForRadius(int radius) {
+        // Get current player's position in chunk coordinates.
+        int chunkX = getPosition().getFloorX() >> 4;
+        int chunkZ = getPosition().getFloorZ() >> 4;
 
         // Now get and send chunk data.
         Set<Vector2i> chunksForRadius = new HashSet<>();
@@ -287,20 +299,16 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 Vector2i chunkCoords = new Vector2i(newChunkX, newChunkZ);
                 chunksForRadius.add(chunkCoords);
 
-                if (updateSent) {
-                    if (!sentChunks.add(chunkCoords)) {
-                        // Already sent, don't need to resend.
-                        continue;
-                    }
+                if (!sentChunks.add(chunkCoords)) {
+                    // Already sent, don't need to resend.
+                    continue;
                 }
 
                 completableFutures.add(getLevel().getChunk(newChunkX, newChunkZ));
             }
         }
 
-        if (updateSent) {
-            sentChunks.retainAll(chunksForRadius);
-        }
+        sentChunks.retainAll(chunksForRadius);
 
         return CompletableFutures.allAsList(completableFutures);
     }
@@ -324,6 +332,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Collection<BaseEntity> inView = getLevel().getEntityManager().getEntitiesInDistance(getPosition(), 64);
             TLongSet mustRemove = new TLongHashSet();
             Collection<BaseEntity> mustAdd = new ArrayList<>();
+
             isViewing.forEach(id -> {
                 Optional<BaseEntity> optional = getLevel().getEntityManager().findEntityById(id);
                 if (optional.isPresent()) {
@@ -341,10 +350,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     continue;
                 }
 
-                if (isViewing.add(entity.getEntityId())) {
+                // Check if user has loaded the chunk, otherwise the client will crash
+                Vector2i chunkVector = new Vector2i(entity.getPosition().getFloorX() >> 4, entity.getPosition().getFloorZ() >> 4);
+                if (fullySentChunks.contains(chunkVector) && isViewing.add(entity.getEntityId())) {
                     mustAdd.add(entity);
                 }
             }
+
             isViewing.removeAll(mustRemove);
 
             mustRemove.forEach(id -> {
@@ -389,9 +401,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     public Optional<InetSocketAddress> getRemoteAddress() {
         return session.getRemoteAddress();
     }
-
-    private void sendNewChunks() {
-        getChunksForRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
+    
+    private CompletableFuture<List<Chunk>> sendNewChunks() {
+        return getChunksForRadius(viewDistance).whenComplete((chunks, throwable) -> {
             if (throwable != null) {
                 LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
                 disconnect("Internal server error");
@@ -404,9 +416,15 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int currentChunkZ = currentPosition.getFloorZ() >> 4;
             chunks.sort(new AroundPointComparator(currentChunkX, currentChunkZ));
 
+            Set<Vector2i> localSentChunks = new HashSet<>();
             for (Chunk chunk : chunks) {
+                Vector2i chunkVector = new Vector2i(chunk.getX(), chunk.getZ());
+                localSentChunks.add(chunkVector);
+                fullySentChunks.add(chunkVector);
                 session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
             }
+
+            fullySentChunks.retainAll(localSentChunks);
         });
     }
 
@@ -596,52 +614,39 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeRequestChunkRadius packet) {
-            int radius = Math.max(5, Math.min(16, packet.getRadius()));
+            int radius = Math.max(5, Math.min(vwServer.getConfiguration().getMaximumViewDistance(), packet.getRadius()));
             McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
             updated.setRadius(radius);
             session.sendImmediatePackage(updated);
             viewDistance = radius;
 
-            getChunksForRadius(radius, true).whenComplete((chunks, throwable) -> {
-                if (throwable != null) {
-                    LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
-                    disconnect("Internal server error");
-                    return;
-                }
+            CompletableFuture<List<Chunk>> sendChunksFuture = sendNewChunks();
+            sendChunksFuture.whenComplete(new BiConsumer<List<Chunk>, Throwable>() {
+                @Override
+                public void accept(List<Chunk> chunks, Throwable throwable) {
+                    if (!spawned) {
+                        McpePlayStatus status = new McpePlayStatus();
+                        status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
+                        session.sendImmediatePackage(status);
 
-                // Sort the chunks to be sent by whichever is closest to the spawn chunk for smoother loading.
-                Vector3f spawnPosition = getPosition();
-                int spawnChunkX = spawnPosition.getFloorX() >> 4;
-                int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
-                Vector2i originCoord = new Vector2i(spawnChunkX, spawnChunkZ);
-                chunks.sort(new AroundPointComparator(spawnChunkX, spawnChunkZ));
+                        McpeSetTime setTime = new McpeSetTime();
+                        setTime.setTime(getLevel().getTime());
+                        setTime.setRunning(true);
+                        session.sendImmediatePackage(setTime);
 
-                for (Chunk chunk : chunks) {
-                    session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
-                }
+                        McpeRespawn respawn = new McpeRespawn();
+                        respawn.setPosition(getPosition());
+                        session.sendImmediatePackage(respawn);
 
-                if (!spawned) {
-                    McpePlayStatus status = new McpePlayStatus();
-                    status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
-                    session.sendImmediatePackage(status);
+                        updateViewableEntities();
+                        sendAttributes();
+                        sendPlayerInventory();
 
-                    McpeSetTime setTime = new McpeSetTime();
-                    setTime.setTime(getLevel().getTime());
-                    setTime.setRunning(true);
-                    session.sendImmediatePackage(setTime);
+                        spawned = true;
 
-                    McpeRespawn respawn = new McpeRespawn();
-                    respawn.setPosition(getPosition());
-                    session.sendImmediatePackage(respawn);
-
-                    updateViewableEntities();
-                    sendAttributes();
-                    sendPlayerInventory();
-
-                    spawned = true;
-
-                    PlayerJoinEvent event = new PlayerJoinEvent((Player) this, TextFormat.YELLOW + getName() + " joined the game.");
-                    session.getServer().getEventManager().fire(event);
+                        PlayerJoinEvent event = new PlayerJoinEvent(PlayerSession.this, TextFormat.YELLOW + getName() + " joined the game.");
+                        session.getServer().getEventManager().fire(event);
+                    }
                 }
             });
         }
@@ -913,7 +918,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 return;
             }
 
-            DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), getServer(), stackOptional.get());
+            DroppedItem item = new VoxelwindDroppedItem(getLevel(), getPosition().add(0, 1.3, 0), getServer(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
             playerInventory.clearItem(playerInventory.getHeldInventorySlot());
         }

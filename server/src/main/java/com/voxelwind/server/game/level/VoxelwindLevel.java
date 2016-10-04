@@ -5,6 +5,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.flowpowered.nbt.CompoundTag;
 import com.flowpowered.nbt.IntTag;
 import com.google.common.base.Preconditions;
+import com.google.common.reflect.ClassPath;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.entities.monsters.Zombie;
@@ -15,27 +16,58 @@ import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.VoxelwindServer;
+import com.voxelwind.server.game.entities.BaseEntity;
+import com.voxelwind.server.game.entities.EntitySpawner;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
-import com.voxelwind.server.game.entities.monsters.ZombieEntity;
-import com.voxelwind.server.game.serializer.MetadataSerializer;
+import com.voxelwind.server.game.entities.visitor.EntityClassVisitor;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
 import com.voxelwind.server.game.level.provider.LevelDataProvider;
+import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBlockEntityData;
 import com.voxelwind.server.network.mcpe.packets.McpeSetTime;
 import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.objectweb.asm.ClassReader;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 public class VoxelwindLevel implements Level {
     private static final int FULL_TIME = 24000;
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindLevel.class);
+    private static final Map<Class<? extends Entity>, EntitySpawner> ENTITY_SPAWNER = new HashMap<>();
+
+    static {
+        // Scan the "com.voxelwind.server.game.entities" package for spawnable entities
+        try {
+            for (ClassPath.ClassInfo classInfo : ClassPath.from(VoxelwindServer.class.getClassLoader()).getTopLevelClassesRecursive("com.voxelwind.server.game.entities")) {
+                ClassReader reader = new ClassReader(VoxelwindServer.class.getClassLoader().getResourceAsStream(classInfo.getResourceName()));
+                EntityClassVisitor visitor = new EntityClassVisitor();
+                reader.accept(visitor, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+
+                Optional<String> classOptional = visitor.getEntityClass();
+                if (classOptional.isPresent()) {
+                    try {
+                        Class<? extends Entity> spawnableClass = (Class<? extends Entity>) VoxelwindServer.class.getClassLoader().loadClass(classOptional.get());
+                        ENTITY_SPAWNER.put(spawnableClass, new EntitySpawner((Class<? extends BaseEntity>) classInfo.load()));
+                    } catch (ClassNotFoundException e) {
+                        LOGGER.error("Found linked entity which is not in the classpath: " + classOptional.get());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private final LevelChunkManager chunkManager;
     private final LevelDataProvider dataProvider;
@@ -100,15 +132,28 @@ public class VoxelwindLevel implements Level {
     }
 
     @Override
-    @SuppressWarnings({ "unchecked "})
-    public <T extends Entity> T spawn(@Nonnull Class<?> klass, @Nonnull Vector3f position) {
+    @SuppressWarnings({"unchecked "})
+    public <T extends Entity> CompletableFuture<T> spawn(@Nonnull Class<? extends Entity> klass, @Nonnull Vector3f position) {
         Preconditions.checkNotNull(klass, "klass");
         Preconditions.checkNotNull(position, "position");
-        Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
-        if (klass.isAssignableFrom(Zombie.class)) {
-            return (T) new ZombieEntity(this, position, server);
-        }
-        throw new IllegalArgumentException("Entity class " + klass.getName() + " not recognized.");
+
+        EntitySpawner entitySpawner;
+        Preconditions.checkArgument((entitySpawner = ENTITY_SPAWNER.get(klass)) != null, "Entity class is not valid");
+
+        CompletableFuture<T> future = new CompletableFuture<>();
+        Vector3i vector3i = position.toInt();
+        getChunk(vector3i.getX() >> 4, vector3i.getZ() >> 4).whenComplete(new BiConsumer<Chunk, Throwable>() {
+            @Override
+            public void accept(Chunk chunk, Throwable throwable) {
+                if (throwable != null) {
+                    return;
+                }
+
+                future.complete(entitySpawner.spawnEntity(VoxelwindLevel.this, position, server));
+            }
+        });
+
+        return future;
     }
 
     @Override
@@ -116,19 +161,19 @@ public class VoxelwindLevel implements Level {
         Preconditions.checkNotNull(stack, "stack");
         Preconditions.checkNotNull(position, "position");
         Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
-        return new VoxelwindDroppedItem(position, this, server, stack);
+        return new VoxelwindDroppedItem(this, position, server, stack);
     }
 
     public void onTick() {
         currentTick++;
 
-        if (currentTick % 200 == 0) {
+        /*if (currentTick % 200 == 0) {
             // Broadcast a time update
             McpeSetTime time = new McpeSetTime();
             time.setRunning(true);
             time.setTime(getTime());
             packetManager.queuePacketForPlayers(time);
-        }
+        }*/
 
         entityManager.onTick();
         packetManager.onTick();

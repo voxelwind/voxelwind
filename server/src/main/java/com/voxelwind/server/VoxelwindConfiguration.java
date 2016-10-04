@@ -37,11 +37,14 @@ public class VoxelwindConfiguration {
      * Configuration for the RCON service.
      */
     private RconConfiguration rcon;
-
     /**
      * Configuration for the Chunk GC.
      */
     private ChunkGCConfiguration chunkGC;
+    /**
+     * The maximum view distance permitted. This has an upper limit of 16. By default, it is 8.
+     */
+    private int maximumViewDistance;
 
     @Getter
     @ToString
@@ -150,6 +153,11 @@ public class VoxelwindConfiguration {
             needToSave = true;
         }
 
+        if (maximumViewDistance < 5 || maximumViewDistance > 16) {
+            maximumViewDistance = 8;
+            needToSave = true;
+        }
+
         return needToSave;
     }
 
@@ -184,6 +192,7 @@ public class VoxelwindConfiguration {
         configuration.chunkGC.releaseAfterLastAccess = 30;
         configuration.chunkGC.releaseAfterLoadSeconds = 120;
         configuration.chunkGC.spawnRadiusToKeep = 6;
+        configuration.maximumViewDistance = 8;
         return configuration;
     }
 
