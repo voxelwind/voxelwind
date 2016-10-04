@@ -274,11 +274,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         return new PlayerSessionNetworkPacketHandler();
     }
 
-    private CompletableFuture<List<Chunk>> getChunksForRadius(int radius, boolean updateSent) {
-        // Get current player's position in chunks.
-        Vector3i positionAsInt = getPosition().toInt();
-        int chunkX = positionAsInt.getX() >> 4;
-        int chunkZ = positionAsInt.getZ() >> 4;
+    private CompletableFuture<List<Chunk>> getChunksForRadius(int radius) {
+        // Get current player's position in chunk coordinates.
+        int chunkX = getPosition().getFloorX() >> 4;
+        int chunkZ = getPosition().getFloorZ() >> 4;
 
         // Now get and send chunk data.
         Set<Vector2i> chunksForRadius = new HashSet<>();
@@ -290,20 +289,16 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 Vector2i chunkCoords = new Vector2i(newChunkX, newChunkZ);
                 chunksForRadius.add(chunkCoords);
 
-                if (updateSent) {
-                    if (!sentChunks.add(chunkCoords)) {
-                        // Already sent, don't need to resend.
-                        continue;
-                    }
+                if (!sentChunks.add(chunkCoords)) {
+                    // Already sent, don't need to resend.
+                    continue;
                 }
 
                 completableFutures.add(getLevel().getChunk(newChunkX, newChunkZ));
             }
         }
 
-        if (updateSent) {
-            sentChunks.retainAll(chunksForRadius);
-        }
+        sentChunks.retainAll(chunksForRadius);
 
         return CompletableFutures.allAsList(completableFutures);
     }
@@ -394,7 +389,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     private void sendNewChunks() {
-        getChunksForRadius(viewDistance, true).whenComplete((chunks, throwable) -> {
+        getChunksForRadius(viewDistance).whenComplete((chunks, throwable) -> {
             if (throwable != null) {
                 LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
                 disconnect("Internal server error");
@@ -605,7 +600,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             session.sendImmediatePackage(updated);
             viewDistance = radius;
 
-            getChunksForRadius(radius, true).whenComplete((chunks, throwable) -> {
+            getChunksForRadius(radius).whenComplete((chunks, throwable) -> {
                 if (throwable != null) {
                     LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
                     disconnect("Internal server error");
