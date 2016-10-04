@@ -122,13 +122,13 @@ public class VoxelwindLevel implements Level {
     public void onTick() {
         currentTick++;
 
-        if (currentTick % 200 == 0) {
+        /*if (currentTick % 200 == 0) {
             // Broadcast a time update
             McpeSetTime time = new McpeSetTime();
             time.setRunning(true);
             time.setTime(getTime());
             packetManager.queuePacketForPlayers(time);
-        }
+        }*/
 
         entityManager.onTick();
         packetManager.onTick();

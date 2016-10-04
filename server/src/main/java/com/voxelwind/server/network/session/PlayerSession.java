@@ -244,6 +244,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         setRotation(event.getRotation());
         hasMoved = false; // don't send duplicated packets
 
+        McpeSetTime setTime = new McpeSetTime();
+        setTime.setTime(getLevel().getTime());
+        setTime.setRunning(true);
+        session.addToSendQueue(setTime);
+
         // Send packets to spawn the player.
         McpeStartGame startGame = new McpeStartGame();
         startGame.setSeed(-1);
@@ -254,6 +259,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         startGame.setSpawnLocation(getPosition().toInt());
         startGame.setPosition(getGamePosition());
         session.addToSendQueue(startGame);
+
+        session.addToSendQueue(setTime);
 
         McpeAdventureSettings settings = new McpeAdventureSettings();
         settings.setPlayerPermissions(3);
