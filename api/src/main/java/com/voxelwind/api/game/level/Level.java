@@ -132,9 +132,9 @@ public interface Level {
      * @param klass the entity class name from the API
      * @param position the position to spawn at
      * @param <T> entity type parameter
-     * @return a new {@link Entity} instance
+     * @return a future which contains a new {@link Entity} instance
      */
-    <T extends Entity> T spawn(Class<?> klass, Vector3f position);
+    <T extends Entity> CompletableFuture<T> spawn(Class<? extends Entity> klass, Vector3f position);
 
     /**
      * Drops an item at a specified position.

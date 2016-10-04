@@ -6,6 +6,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
+import com.voxelwind.api.game.entities.monsters.*;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
@@ -55,6 +56,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
 public class PlayerSession extends LivingEntity implements Player, InventoryObserver {
     private static final int REQUIRED_TO_SPAWN = 56;
@@ -62,6 +64,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     private final McpeSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<Vector2i> fullySentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final TLongSet isViewing = new TLongHashSet();
     private GameMode gameMode = GameMode.SURVIVAL;
     private boolean spawned = false;
@@ -329,6 +332,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Collection<BaseEntity> inView = getLevel().getEntityManager().getEntitiesInDistance(getPosition(), 64);
             TLongSet mustRemove = new TLongHashSet();
             Collection<BaseEntity> mustAdd = new ArrayList<>();
+
             isViewing.forEach(id -> {
                 Optional<BaseEntity> optional = getLevel().getEntityManager().findEntityById(id);
                 if (optional.isPresent()) {
@@ -346,10 +350,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     continue;
                 }
 
-                if (isViewing.add(entity.getEntityId())) {
+                // Check if user has loaded the chunk, otherwise the client will crash
+                Vector2i chunkVector = new Vector2i(entity.getPosition().getFloorX() >> 4, entity.getPosition().getFloorZ() >> 4);
+                if (fullySentChunks.contains(chunkVector) && isViewing.add(entity.getEntityId())) {
                     mustAdd.add(entity);
                 }
             }
+
             isViewing.removeAll(mustRemove);
 
             mustRemove.forEach(id -> {
@@ -395,8 +402,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         return session.getRemoteAddress();
     }
 
-    private void sendNewChunks() {
-        getChunksForRadius(viewDistance).whenComplete((chunks, throwable) -> {
+    private CompletableFuture<List<Chunk>> sendNewChunks() {
+        return getChunksForRadius(viewDistance).whenComplete((chunks, throwable) -> {
             if (throwable != null) {
                 LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
                 disconnect("Internal server error");
@@ -409,9 +416,15 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int currentChunkZ = currentPosition.getFloorZ() >> 4;
             chunks.sort(new AroundPointComparator(currentChunkX, currentChunkZ));
 
+            Set<Vector2i> localSentChunks = new HashSet<>();
             for (Chunk chunk : chunks) {
+                Vector2i chunkVector = new Vector2i(chunk.getX(), chunk.getZ());
+                localSentChunks.add(chunkVector);
+                fullySentChunks.add(chunkVector);
                 session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
             }
+
+            fullySentChunks.retainAll(localSentChunks);
         });
     }
 
@@ -607,23 +620,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             session.sendImmediatePackage(updated);
             viewDistance = radius;
 
-            getChunksForRadius(radius).whenComplete((chunks, throwable) -> {
-                if (throwable != null) {
-                    LOGGER.error("Unable to load chunks for " + getMcpeSession().getAuthenticationProfile().getDisplayName(), throwable);
-                    disconnect("Internal server error");
-                    return;
-                }
-
-                // Sort the chunks to be sent by whichever is closest to the spawn chunk for smoother loading.
-                Vector3f spawnPosition = getPosition();
-                int spawnChunkX = spawnPosition.getFloorX() >> 4;
-                int spawnChunkZ = spawnPosition.getFloorZ() >> 4;
-                chunks.sort(new AroundPointComparator(spawnChunkX, spawnChunkZ));
-
-                for (Chunk chunk : chunks) {
-                    session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
-                }
-
+            CompletableFuture<List<Chunk>> sendChunksFuture = sendNewChunks();
+            sendChunksFuture.whenComplete((chunks, throwable) -> {
                 if (!spawned) {
                     McpePlayStatus status = new McpePlayStatus();
                     status.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
@@ -644,7 +642,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
                     spawned = true;
 
-                    PlayerJoinEvent event = new PlayerJoinEvent((Player) this, TextFormat.YELLOW + getName() + " joined the game.");
+                    PlayerJoinEvent event = new PlayerJoinEvent(PlayerSession.this, TextFormat.YELLOW + getName() + " joined the game.");
                     session.getServer().getEventManager().fire(event);
                 }
             });
@@ -917,7 +915,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 return;
             }
 
-            DroppedItem item = new VoxelwindDroppedItem(getPosition().add(0, 1.3, 0), getLevel(), getServer(), stackOptional.get());
+            DroppedItem item = new VoxelwindDroppedItem(getLevel(), getPosition().add(0, 1.3, 0), getServer(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
             playerInventory.clearItem(playerInventory.getHeldInventorySlot());
         }

@@ -44,5 +44,6 @@ public class McpeAddEntity implements NetworkPackage {
         buffer.writeFloat(pitch);
         McpeUtil.writeAttributes(buffer, attributes);
         metadata.writeTo(buffer);
+        buffer.writeShort(0);
     }
 }
