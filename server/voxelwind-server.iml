@@ -12,6 +12,12 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: io.netty:netty-handler:4.0.41.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.0.41.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-transport:4.0.41.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec:4.0.41.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-transport-native-epoll:linux-x86_64:4.0.41.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-common:4.0.41.Final" level="project" />
     <orderEntry type="module" module-name="voxelwind-api" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:19.0" level="project" />

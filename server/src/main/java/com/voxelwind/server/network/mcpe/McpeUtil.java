@@ -137,12 +137,12 @@ public class McpeUtil {
     }
 
     public static void writeAttributes(ByteBuf buf, Collection<Attribute> attributeList) {
-        buf.writeShort(attributeList.size());
+        buf.writeInt(attributeList.size());
         for (Attribute attribute : attributeList) {
-            buf.writeFloat(attribute.getMinimumValue());
-            buf.writeFloat(attribute.getMaximumValue());
-            buf.writeFloat(attribute.getValue());
             RakNetUtil.writeString(buf, attribute.getName());
+            buf.writeFloat(attribute.getMinimumValue());
+            buf.writeFloat(attribute.getValue());
+            buf.writeFloat(attribute.getMaximumValue());
         }
     }
 
