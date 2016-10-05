@@ -16,8 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 
 class VoxelwindChunkSnapshot implements ChunkSnapshot {
-    private static final int FULL_CHUNK_SIZE = 16 * 16 * 128; // 32768
-
     private final byte[] blockData;
     private final NibbleArray blockMetadata;
     private final NibbleArray skyLightData;
@@ -26,9 +24,6 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
 
     private final int x;
     private final int z;
-    private final byte[] biomeId = new byte[256];
-    private final int[] biomeColor = new int[256];
-    private final byte[] height = new byte[256];
 
     VoxelwindChunkSnapshot(byte[] blockData, NibbleArray blockMetadata, NibbleArray skyLightData, NibbleArray blockLightData, TIntObjectMap<BlockEntity> blockEntities, int x, int z) {
         this.blockData = blockData;
