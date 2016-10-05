@@ -125,10 +125,10 @@ public class McpeUtil {
         short size = buf.readShort();
 
         for (int i = 0; i < size; i++) {
-            float min = buf.readFloat();
-            float max = buf.readFloat();
-            float val = buf.readFloat();
             String name = RakNetUtil.readString(buf);
+            float min = buf.readFloat();
+            float val = buf.readFloat();
+            float max = buf.readFloat();
 
             attributes.add(new Attribute(name, min, max, val));
         }
