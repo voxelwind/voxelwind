@@ -10,6 +10,7 @@ import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
+import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
@@ -69,6 +70,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
     private Inventory openedInventory;
     private byte openInventoryId = -1;
+    private final AtomicInteger dimensionIdGenerator = new AtomicInteger();
     private boolean hasMoved = false;
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
     private final VoxelwindServer vwServer;
@@ -596,6 +598,70 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeBatch contentsBatch = new McpeBatch();
         contentsBatch.getPackages().add(contents);
         session.sendImmediatePackage(contentsBatch);
+    }
+
+    @Override
+    public void teleport(@Nonnull Level level, @Nonnull Vector3f position, @Nonnull Rotation rotation) {
+        Level oldLevel = getLevel();
+        super.teleport(level, position, rotation);
+
+        if (oldLevel != level) {
+            doDimensionChange();
+        }
+    }
+
+    private void doDimensionChange() {
+        // Reset spawned status
+        spawned = false;
+        sentChunks.clear();
+        fullySentChunks.clear();
+
+        // Create the packets we will send to do the dimension change
+        McpeChangeDimension changeDim0 = new McpeChangeDimension();
+        changeDim0.setPosition(getGamePosition());
+        changeDim0.setDimension((byte) 0);
+
+        McpeChangeDimension changeDim1 = new McpeChangeDimension();
+        changeDim0.setPosition(getGamePosition());
+        changeDim0.setDimension((byte) 0);
+
+        McpePlayStatus doRespawnPacket = new McpePlayStatus();
+        doRespawnPacket.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
+
+        // Send in order: DIM0, respawn, DIM1, respawn, empty chunks, DIM1, respawn, DIM0, respawn, actual chunks, McpeRespawn
+        session.sendImmediatePackage(changeDim0);
+        session.sendImmediatePackage(doRespawnPacket);
+        session.sendImmediatePackage(changeDim1);
+        session.sendImmediatePackage(doRespawnPacket);
+
+        // Send a bunch of empty chunks around the new position.
+        int chunkX = getPosition().getFloorX() >> 4;
+        int chunkZ = getPosition().getFloorX() >> 4;
+
+        for (int x = -3; x < 3; x++) {
+            for (int z = -3; z < 3; z++) {
+                McpeFullChunkData data = new McpeFullChunkData();
+                data.setChunkX(chunkX + x);
+                data.setChunkZ(chunkZ + z);
+                data.setData(new byte[0]);
+                session.sendImmediatePackage(data);
+            }
+        }
+
+        // Finish sending the dimension change and respawn packets.
+        session.sendImmediatePackage(changeDim1);
+        session.sendImmediatePackage(doRespawnPacket);
+        session.sendImmediatePackage(changeDim0);
+        session.sendImmediatePackage(doRespawnPacket);
+
+        // Now send the real chunks and then use McpeRespawn.
+        sendNewChunks().whenComplete((chunks, throwable) -> {
+            // Chunks sent, respawn player.
+            McpeRespawn respawn = new McpeRespawn();
+            respawn.setPosition(getPosition());
+            session.sendImmediatePackage(respawn);
+            spawned = true;
+        });
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {

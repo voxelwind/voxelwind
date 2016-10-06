@@ -29,7 +29,7 @@ public class LevelEntityManager {
     private final List<BaseEntity> entities = new ArrayList<>();
     private final Object entityLock = new Object();
     private final AtomicLong entityIdAllocator = new AtomicLong();
-    private final AtomicBoolean entitiesAdded = new AtomicBoolean(false);
+    private final AtomicBoolean entitiesChanged = new AtomicBoolean(false);
     private final VoxelwindLevel level;
 
     public LevelEntityManager(VoxelwindLevel level) {
@@ -40,7 +40,7 @@ public class LevelEntityManager {
         synchronized (entityLock) {
             entities.add(entity);
         }
-        entitiesAdded.set(true);
+        entitiesChanged.set(true);
     }
 
     public void onTick() {
@@ -97,7 +97,7 @@ public class LevelEntityManager {
         }
 
         // Perform a view check for all players.
-        if (entitiesAdded.getAndSet(false) || !toRemove.isEmpty()) {
+        if (entitiesChanged.getAndSet(false)) {
             for (PlayerSession session : getPlayers()) {
                 session.updateViewableEntities();
             }
@@ -174,6 +174,7 @@ public class LevelEntityManager {
         synchronized (entityLock) {
             entities.remove(entity);
         }
+        entitiesChanged.set(true);
     }
 
     public Collection<BaseEntity> getEntitiesInDistance(Vector3f origin, double distance) {

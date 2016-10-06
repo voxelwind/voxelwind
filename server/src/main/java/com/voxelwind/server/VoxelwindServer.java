@@ -16,6 +16,7 @@ import com.voxelwind.api.server.event.server.ServerStartEvent;
 import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
 import com.voxelwind.server.command.builtin.GiveItemTestCommand;
+import com.voxelwind.server.command.builtin.LevelTestCommand;
 import com.voxelwind.server.command.builtin.VersionCommand;
 import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
@@ -59,11 +60,16 @@ public class VoxelwindServer implements Server {
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private List<NetworkListener> listeners = new CopyOnWriteArrayList<>();
     private VoxelwindLevel defaultLevel;
+    private VoxelwindLevel defaultLevel2;
     private final VoxelwindPluginManager pluginManager = new VoxelwindPluginManager(this);
     private final VoxelwindEventManager eventManager = new VoxelwindEventManager();
     private final ConsoleCommandExecutorSource consoleCommandExecutorSource = new VoxelwindConsoleCommandExecutorSource();
     private final VoxelwindCommandManager commandManager = new VoxelwindCommandManager();
     private VoxelwindConfiguration configuration;
+
+    public VoxelwindLevel getDefaultLevel2() {
+        return defaultLevel2;
+    }
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6
@@ -100,6 +106,7 @@ public class VoxelwindServer implements Server {
         // Basic initialization.
         commandManager.register("version", new VersionCommand(this));
         commandManager.register("giveitem", new GiveItemTestCommand());
+        commandManager.register("test", new LevelTestCommand());
 
         // Load configuration.
         Path configFile = Paths.get("voxelwind.json");
@@ -146,8 +153,11 @@ public class VoxelwindServer implements Server {
         //        new AnvilChunkProvider(Paths.get("/Users/andrew/Library/Application Support/minecraft/saves/test-mca")),
         //        AnvilLevelDataProvider.load(Paths.get("/Users/andrew/Library/Application Support/minecraft/saves/test-mca/level.dat"))));
         defaultLevel = new VoxelwindLevel(this, new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
+        defaultLevel2 = new VoxelwindLevel(this, new LevelCreator("test2", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
         levelManager.register(defaultLevel);
+        levelManager.register(defaultLevel2);
         levelManager.start(defaultLevel);
+        levelManager.start(defaultLevel2);
 
         LOGGER.info("Now alive on {}.", listener.getAddress());
 
