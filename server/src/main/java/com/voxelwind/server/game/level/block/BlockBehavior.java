@@ -4,15 +4,13 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.Block;
-import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
-import com.voxelwind.api.util.BlockFace;
+import com.voxelwind.api.game.util.data.BlockFace;
 import com.voxelwind.server.game.level.util.BoundingBox;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Optional;
 
 public interface BlockBehavior {
     boolean handlePlacement(Server server, Player player, Vector3i against, BlockFace face, @Nullable ItemStack withItem);

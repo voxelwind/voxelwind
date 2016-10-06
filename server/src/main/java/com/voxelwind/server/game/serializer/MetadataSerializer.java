@@ -9,6 +9,8 @@ import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
+import com.voxelwind.server.game.serializer.wood.LogSerializer;
+import com.voxelwind.server.game.serializer.wood.SimpleWoodSerializer;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class MetadataSerializer implements Serializer {
@@ -21,6 +23,9 @@ public class MetadataSerializer implements Serializer {
         SERIALIZERS.put(BlockTypes.CROPS.getId(), new CropsSerializer());
         SERIALIZERS.put(BlockTypes.FLOWER_POT.getId(), new FlowerpotSerializer());
         SERIALIZERS.put(BlockTypes.WOOL.getId(), new DyedSerializer());
+        SERIALIZERS.put(BlockTypes.WOOD.getId(), new LogSerializer());
+        SERIALIZERS.put(BlockTypes.ACACIA_WOOD.getId(), new LogSerializer());
+        SERIALIZERS.put(BlockTypes.WOOD_PLANKS.getId(), new SimpleWoodSerializer());
 
         // All additional items which need this
         SERIALIZERS.put(ItemTypes.COAL.getId(), new CoalSerializer());

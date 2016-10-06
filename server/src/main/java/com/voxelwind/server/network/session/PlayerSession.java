@@ -2,11 +2,9 @@ package com.voxelwind.server.network.session;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
-import com.voxelwind.api.game.entities.monsters.*;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.OpenableInventory;
 import com.voxelwind.api.game.inventories.PlayerInventory;
@@ -27,7 +25,7 @@ import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.player.PlayerMessageDisplayType;
 import com.voxelwind.api.server.player.PopupMessage;
 import com.voxelwind.api.server.player.TranslatedMessage;
-import com.voxelwind.api.util.BlockFace;
+import com.voxelwind.api.game.util.data.BlockFace;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.inventories.*;
@@ -56,7 +54,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 
 public class PlayerSession extends LivingEntity implements Player, InventoryObserver {
     private static final int REQUIRED_TO_SPAWN = 56;

@@ -1,4 +1,4 @@
-package com.voxelwind.api.util;
+package com.voxelwind.api.game.util.data;
 
 import com.flowpowered.math.vector.Vector3i;
 

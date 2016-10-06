@@ -7,7 +7,7 @@ import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
-import com.voxelwind.api.util.BlockFace;
+import com.voxelwind.api.game.util.data.BlockFace;
 import com.voxelwind.server.game.level.block.BehaviorResult;
 import com.voxelwind.server.game.level.block.BlockBehavior;
 import lombok.AccessLevel;

@@ -6,10 +6,9 @@ import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.data.Dyed;
-import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
-import com.voxelwind.api.util.DyeColor;
+import com.voxelwind.api.game.util.data.DyeColor;
 
 public class DyedSerializer implements Serializer {
     @Override

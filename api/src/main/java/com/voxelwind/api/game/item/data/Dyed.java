@@ -2,7 +2,7 @@ package com.voxelwind.api.game.item.data;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
-import com.voxelwind.api.util.DyeColor;
+import com.voxelwind.api.game.util.data.DyeColor;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

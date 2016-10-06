@@ -2,6 +2,8 @@ package com.voxelwind.api.game.level.block;
 
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.data.Dyed;
+import com.voxelwind.api.game.item.data.wood.Log;
+import com.voxelwind.api.game.item.data.wood.Wood;
 import com.voxelwind.api.game.level.block.data.Cake;
 import com.voxelwind.api.game.level.block.data.Crops;
 import com.voxelwind.api.game.level.block.data.TopSnow;
@@ -24,7 +26,7 @@ public class BlockTypes {
     public static final BlockType GRASS_BLOCK = IntBlock.builder().name("grass_block").id(2).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType DIRT = IntBlock.builder().name("dirt").id(3).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType COBBLESTONE = IntBlock.builder().name("cobblestone").id(4).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
-    public static final BlockType WOOD_PLANKS = IntBlock.builder().name("wood_planks").id(5).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
+    public static final BlockType WOOD_PLANKS = IntBlock.builder().name("wood_planks").id(5).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Wood.class).build();
     public static final BlockType SAPLING = IntBlock.builder().name("sapling").id(6).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType BEDROCK = IntBlock.builder().name("bedrock").id(7).maxStackSize(64).diggable(false).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType WATER = IntBlock.builder().name("water").id(8).maxStackSize(0).diggable(false).transparent(true).emitLight(0).filterLight(2).build();
@@ -36,7 +38,7 @@ public class BlockTypes {
     public static final BlockType GOLD_ORE = IntBlock.builder().name("gold_ore").id(14).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType IRON_ORE = IntBlock.builder().name("iron_ore").id(15).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType COAL_ORE = IntBlock.builder().name("coal_ore").id(16).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
-    public static final BlockType WOOD = IntBlock.builder().name("wood").id(17).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
+    public static final BlockType WOOD = IntBlock.builder().name("wood").id(17).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Log.class).build();
     public static final BlockType LEAVES = IntBlock.builder().name("leaves").id(18).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType SPONGE = IntBlock.builder().name("sponge").id(19).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType GLASS = IntBlock.builder().name("glass").id(20).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
@@ -173,7 +175,7 @@ public class BlockTypes {
     public static final BlockType WOODEN_SLAB = IntBlock.builder().name("wooden_slab").id(158).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType STAINED_CLAY = IntBlock.builder().name("stained_clay").id(159).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Dyed.class).build();
     public static final BlockType ACACIA_LEAVES = IntBlock.builder().name("acacia_leaves").id(161).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType ACACIA_WOOD = IntBlock.builder().name("acacia_wood").id(162).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
+    public static final BlockType ACACIA_WOOD = IntBlock.builder().name("acacia_wood").id(162).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Log.class).build();
     public static final BlockType ACACIA_WOOD_STAIRS = IntBlock.builder().name("acacia_wood_stairs").id(163).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
     public static final BlockType DARK_OAK_WOOD_STAIRS = IntBlock.builder().name("dark_oak_wood_stairs").id(164).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
     public static final BlockType SLIME_BLOCK = IntBlock.builder().name("slime_block").id(165).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();

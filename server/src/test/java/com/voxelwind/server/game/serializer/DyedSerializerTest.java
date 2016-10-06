@@ -2,7 +2,7 @@ package com.voxelwind.server.game.serializer;
 
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.level.block.BlockTypes;
-import com.voxelwind.api.util.DyeColor;
+import com.voxelwind.api.game.util.data.DyeColor;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import org.junit.Test;
 
