@@ -18,15 +18,19 @@ import java.util.Optional;
  */
 class SerializerTestBase {
     BlockState generateTestBlockState( BlockType blockType, BlockEntity blockEntity ) {
+        return generateTestBlockState(blockType, blockEntity, null);
+    }
+
+    BlockState generateTestBlockState( BlockType blockType, BlockEntity blockEntity, Metadata metadata ) {
         return new BlockState() {
             @Override
             public BlockType getBlockType() {
-                return BlockTypes.FLOWER_POT;
+                return blockType;
             }
 
             @Override
             public Metadata getBlockData() {
-                return null;
+                return metadata;
             }
 
             @Override

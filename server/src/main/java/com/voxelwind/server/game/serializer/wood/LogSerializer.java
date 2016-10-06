@@ -29,10 +29,13 @@ public class LogSerializer extends SimpleWoodSerializer {
 
         TreeSpecies[] availableSpecies = BLOCK_SPECIES_MAPPING.get(block.getBlockType());
         if (availableSpecies == null) {
-            return 0;
+            throw new IllegalArgumentException("Did not find mapping for " + block.getBlockType());
         }
 
         int speciesBlockData = Arrays.binarySearch(availableSpecies, log.getSpecies(), null);
+        if (speciesBlockData < 0) {
+            throw new IllegalArgumentException("Tree species " + log.getSpecies() + " isn't valid for " + block.getBlockType());
+        }
         int directionalData = log.getDirection().ordinal();
 
         return (short) (directionalData * 4 + speciesBlockData);
