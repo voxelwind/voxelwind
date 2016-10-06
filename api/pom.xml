@@ -94,9 +94,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+            <groupId>com.spotify</groupId>
+            <artifactId>completable-futures</artifactId>
+            <version>0.1.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

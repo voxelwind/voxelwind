@@ -12,12 +12,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: io.netty:netty-handler:4.0.41.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.0.41.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-transport:4.0.41.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-codec:4.0.41.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-transport-native-epoll:linux-x86_64:4.0.41.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-common:4.0.41.Final" level="project" />
     <orderEntry type="module" module-name="voxelwind-api" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:19.0" level="project" />
@@ -29,7 +23,6 @@
     <orderEntry type="library" name="Maven: net.sf.trove4j:trove4j:3.0.3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.2" level="project" />
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.15" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Maven: com.spotify:completable-futures:0.1.0" level="project" />
     <orderEntry type="library" name="Maven: com.flowpowered:flow-nbt:1.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.nimbusds:nimbus-jose-jwt:4.24" level="project" />
