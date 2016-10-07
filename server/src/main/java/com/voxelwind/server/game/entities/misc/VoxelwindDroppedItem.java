@@ -11,8 +11,11 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.packets.McpeAddItem;
 
+import javax.annotation.Nonnegative;
+
 public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
     private final ItemStack dropped;
+    private int currentDelayPickupTicks;
 
     public VoxelwindDroppedItem(VoxelwindLevel level, Vector3f position, Server server, ItemStack dropped) {
         super(EntityTypeData.ITEM, position, level, server);
@@ -22,6 +25,21 @@ public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
     @Override
     public ItemStack getItemStack() {
         return dropped;
+    }
+
+    @Override
+    public boolean canPickup() {
+        return currentDelayPickupTicks == 0;
+    }
+
+    @Override
+    public int getDelayPickupTicks() {
+        return currentDelayPickupTicks;
+    }
+
+    @Override
+    public void setDelayPickupTicks(@Nonnegative int ticks) {
+        currentDelayPickupTicks = ticks;
     }
 
     @Override
@@ -41,6 +59,9 @@ public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
         }
 
         doMovement();
+        if (currentDelayPickupTicks > 0) {
+            currentDelayPickupTicks--;
+        }
         return true;
     }
 }
