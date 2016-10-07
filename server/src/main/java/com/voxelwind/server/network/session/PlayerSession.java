@@ -947,7 +947,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         break;
                     case PLACE_BLOCK_AND_REMOVE_ITEM:
                         Preconditions.checkState(serverInHand != null && serverInHand.getItemType() instanceof BlockType, "Tried to place air or non-block.");
-                        if (!BehaviorUtils.setBlockState(PlayerSession.this, packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(serverInHand))) {
+                        if (!BehaviorUtils.setBlockState(PlayerSession.this, packet.getLocation().add(face.getOffset()), BehaviorUtils.createBlockState(usedAgainst.get().getLevelLocation(), face, serverInHand))) {
                             sendPlayerInventory();
                             return;
                         }

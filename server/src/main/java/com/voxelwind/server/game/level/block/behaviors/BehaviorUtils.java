@@ -9,10 +9,12 @@ import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockType;
 import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.util.data.BlockFace;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.event.block.BlockReplaceEvent;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.BasicBlockState;
+import com.voxelwind.server.game.level.block.BlockBehaviors;
 import lombok.experimental.UtilityClass;
 
 import java.util.Optional;
@@ -20,7 +22,6 @@ import java.util.Optional;
 @UtilityClass
 public class BehaviorUtils {
     public static boolean setBlockState(Player player, Vector3i position, BlockState state) {
-        // TODO: Events
         int chunkX = position.getX() >> 4;
         int chunkZ = position.getZ() >> 4;
 
@@ -40,7 +41,6 @@ public class BehaviorUtils {
     }
 
     public static boolean replaceBlockState(Player player, Block block, BlockState replacementState) {
-        // TODO: Events
         if (!canProceed(block, replacementState, player)) {
             return false;
         }
@@ -56,11 +56,18 @@ public class BehaviorUtils {
         return event.getResult() == BlockReplaceEvent.Result.CONTINUE;
     }
 
-    public static BlockState createBlockState(ItemStack stack) {
+    public static BlockState createBlockState(Vector3i position, BlockFace face, ItemStack stack) {
         Preconditions.checkNotNull(stack, "stack");
 
         if (!(stack.getItemType() instanceof BlockType)) {
             throw new IllegalArgumentException("Item type " + stack.getItemType().getName() + " is not a block type.");
+        }
+
+        // Consult block state if we want to use this:
+        Optional<BlockState> overrideOptional = BlockBehaviors.getBlockBehavior((BlockType) stack.getItemType())
+                .overrideBlockPlacement(position, face, stack);
+        if (overrideOptional.isPresent()) {
+            return overrideOptional.get();
         }
 
         BlockType blockType = (BlockType) stack.getItemType();
