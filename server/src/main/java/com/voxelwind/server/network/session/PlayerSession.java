@@ -923,7 +923,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             } else if (packet.getFace() >= 0 && packet.getFace() <= 5) {
                 // Sanity check:
                 Optional<ItemStack> actuallyInHand = playerInventory.getStackInHand();
-                LOGGER.info("Held: {}, slot: {}", actuallyInHand, playerInventory.getHeldHotbarSlot());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Held: {}, slot: {}", actuallyInHand, playerInventory.getHeldHotbarSlot());
+                }
                 if ((actuallyInHand.isPresent() && actuallyInHand.get().getItemType() != packet.getStack().getItemType()) ||
                         !actuallyInHand.isPresent() && packet.getStack().getItemType() == BlockTypes.AIR) {
                     // Not actually the same item.
