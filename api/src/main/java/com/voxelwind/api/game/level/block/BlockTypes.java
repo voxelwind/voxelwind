@@ -212,7 +212,7 @@ public class BlockTypes {
     public static BlockType forId(int data) {
         BlockType type = BY_ID.get(data);
         if (type == null) {
-            throw new IllegalArgumentException("ID is not valid.");
+            throw new IllegalArgumentException("ID " + data + " is not valid.");
         }
         return type;
     }

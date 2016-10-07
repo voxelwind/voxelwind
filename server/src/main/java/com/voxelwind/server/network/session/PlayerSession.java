@@ -622,8 +622,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         changeDim0.setDimension((byte) 0);
 
         McpeChangeDimension changeDim1 = new McpeChangeDimension();
-        changeDim0.setPosition(getGamePosition());
-        changeDim0.setDimension((byte) 0);
+        changeDim1.setPosition(getGamePosition());
+        changeDim1.setDimension((byte) 1);
 
         McpePlayStatus doRespawnPacket = new McpePlayStatus();
         doRespawnPacket.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);

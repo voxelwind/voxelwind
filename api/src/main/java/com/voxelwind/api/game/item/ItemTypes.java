@@ -194,7 +194,7 @@ public class ItemTypes {
         ItemType type = BY_ID.get(data);
         if (type == null) {
             if (itemsOnly) {
-                throw new IllegalArgumentException("ID is not valid.");
+                throw new IllegalArgumentException("ID " + data + " is not valid.");
             } else {
                 return BlockTypes.forId(data);
             }
