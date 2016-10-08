@@ -97,7 +97,7 @@ public class LevelEntityManager {
         }
 
         // Perform a view check for all players.
-        if (entitiesChanged.getAndSet(false)) {
+        if (entitiesChanged.compareAndSet(true, false)) {
             for (PlayerSession session : getPlayers()) {
                 session.updateViewableEntities();
             }

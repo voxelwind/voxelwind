@@ -62,7 +62,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     private final McpeSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final Set<Vector2i> fullySentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final TLongSet isViewing = new TLongHashSet();
     private GameMode gameMode = GameMode.SURVIVAL;
     private boolean spawned = false;
@@ -355,7 +354,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
                 // Check if user has loaded the chunk, otherwise the client will crash
                 Vector2i chunkVector = new Vector2i(entity.getPosition().getFloorX() >> 4, entity.getPosition().getFloorZ() >> 4);
-                if (fullySentChunks.contains(chunkVector) && isViewing.add(entity.getEntityId())) {
+                LOGGER.debug("EL: {}, CL: {}, SENT: {}", entity.getPosition(), chunkVector, sentChunks);
+                if (sentChunks.contains(chunkVector) && isViewing.add(entity.getEntityId())) {
                     mustAdd.add(entity);
                 }
             }
@@ -419,15 +419,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int currentChunkZ = currentPosition.getFloorZ() >> 4;
             chunks.sort(new AroundPointComparator(currentChunkX, currentChunkZ));
 
-            Set<Vector2i> localSentChunks = new HashSet<>();
             for (Chunk chunk : chunks) {
-                Vector2i chunkVector = new Vector2i(chunk.getX(), chunk.getZ());
-                localSentChunks.add(chunkVector);
-                fullySentChunks.add(chunkVector);
                 session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
             }
-
-            fullySentChunks.retainAll(localSentChunks);
         });
     }
 
@@ -617,7 +611,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         // Reset spawned status
         spawned = false;
         sentChunks.clear();
-        fullySentChunks.clear();
 
         // Create the packets we will send to do the dimension change
         McpeChangeDimension changeDim0 = new McpeChangeDimension();
