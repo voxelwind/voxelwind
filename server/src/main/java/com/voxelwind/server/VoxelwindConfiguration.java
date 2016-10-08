@@ -10,6 +10,8 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 @Getter
@@ -45,6 +47,7 @@ public class VoxelwindConfiguration {
      * The maximum view distance permitted. This has an upper limit of 16. By default, it is 8.
      */
     private int maximumViewDistance;
+    private Map<String, LevelConfiguration> levels;
 
     @Getter
     @ToString
@@ -115,6 +118,15 @@ public class VoxelwindConfiguration {
         private int spawnRadiusToKeep;
     }
 
+    @Getter
+    @ToString
+    public static class LevelConfiguration {
+        private String directory;
+        private String storage;
+        private String generator;
+        private boolean isDefault;
+    }
+
     public XboxAuthenticationConfiguration getXboxAuthentication() {
         return xboxAuthentication;
     }
@@ -158,6 +170,17 @@ public class VoxelwindConfiguration {
             needToSave = true;
         }
 
+        if (levels == null || levels.isEmpty()) {
+            LevelConfiguration wc = new LevelConfiguration();
+            wc.directory = null;
+            wc.generator = "flatworld";
+            wc.isDefault = true;
+            wc.storage = "null";
+            levels = new HashMap<>();
+            levels.put("world", wc);
+            needToSave = true;
+        }
+
         return needToSave;
     }
 
@@ -193,6 +216,13 @@ public class VoxelwindConfiguration {
         configuration.chunkGC.releaseAfterLoadSeconds = 120;
         configuration.chunkGC.spawnRadiusToKeep = 6;
         configuration.maximumViewDistance = 8;
+        configuration.levels = new HashMap<>();
+        LevelConfiguration wc = new LevelConfiguration();
+        wc.directory = null;
+        wc.generator = "flatworld";
+        wc.isDefault = true;
+        wc.storage = "null";
+        configuration.levels.put("world", wc);
         return configuration;
     }
 

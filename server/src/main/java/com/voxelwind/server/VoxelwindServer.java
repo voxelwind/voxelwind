@@ -16,7 +16,6 @@ import com.voxelwind.api.server.event.server.ServerStartEvent;
 import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.command.VoxelwindConsoleCommandExecutorSource;
 import com.voxelwind.server.command.builtin.GiveItemTestCommand;
-import com.voxelwind.server.command.builtin.LevelTestCommand;
 import com.voxelwind.server.command.builtin.VersionCommand;
 import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
@@ -26,8 +25,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.VoxelwindBlockStateBuilder;
 import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
 import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
-import com.voxelwind.server.game.level.provider.anvil.AnvilChunkProvider;
-import com.voxelwind.server.game.level.provider.anvil.AnvilLevelDataProvider;
 import com.voxelwind.server.network.listeners.McpeOverRakNetNetworkListener;
 import com.voxelwind.server.network.listeners.NetworkListener;
 import com.voxelwind.server.network.util.NativeCodeFactory;
@@ -46,6 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -59,17 +57,12 @@ public class VoxelwindServer implements Server {
     private final ScheduledExecutorService timerService = Executors.unconfigurableScheduledExecutorService(
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Voxelwind Ticker").setDaemon(true).build()));
     private List<NetworkListener> listeners = new CopyOnWriteArrayList<>();
-    private VoxelwindLevel defaultLevel;
-    private VoxelwindLevel defaultLevel2;
     private final VoxelwindPluginManager pluginManager = new VoxelwindPluginManager(this);
     private final VoxelwindEventManager eventManager = new VoxelwindEventManager();
     private final ConsoleCommandExecutorSource consoleCommandExecutorSource = new VoxelwindConsoleCommandExecutorSource();
     private final VoxelwindCommandManager commandManager = new VoxelwindCommandManager();
     private VoxelwindConfiguration configuration;
-
-    public VoxelwindLevel getDefaultLevel2() {
-        return defaultLevel2;
-    }
+    private VoxelwindLevel defaultLevel;
 
     public static void main(String... args) throws Exception {
         // RakNet doesn't really like IPv6
@@ -106,7 +99,6 @@ public class VoxelwindServer implements Server {
         // Basic initialization.
         commandManager.register("version", new VersionCommand(this));
         commandManager.register("giveitem", new GiveItemTestCommand());
-        commandManager.register("test", new LevelTestCommand());
 
         // Load configuration.
         Path configFile = Paths.get("voxelwind.json");
@@ -135,6 +127,23 @@ public class VoxelwindServer implements Server {
         // Fire the initialize event
         eventManager.fire(ServerInitializeEvent.INSTANCE);
 
+        // Start the levels.
+        for (Map.Entry<String, VoxelwindConfiguration.LevelConfiguration> entry : configuration.getLevels().entrySet()) {
+            // TODO: Implement...
+            VoxelwindLevel level = new VoxelwindLevel(this, new LevelCreator(entry.getKey(), FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
+            levelManager.register(level);
+            levelManager.start(level);
+
+            if (entry.getValue().isDefault()) {
+                defaultLevel = level;
+            }
+        }
+
+        if (defaultLevel == null) {
+            LOGGER.fatal("No default level specified. Stopping!");
+            System.exit(1);
+        }
+
         // Bind to a port.
         McpeOverRakNetNetworkListener listener = new McpeOverRakNetNetworkListener(this, configuration.getMcpeListener().getHost(), configuration.getMcpeListener().getPort(),
                 configuration.isUseSoReuseport());
@@ -148,17 +157,6 @@ public class VoxelwindServer implements Server {
         }
         configuration.getRcon().clearPassword();
 
-        // Start the example level.
-        //defaultLevel = new VoxelwindLevel(this, new LevelCreator("test",
-        //        new AnvilChunkProvider(Paths.get("/Users/andrew/Library/Application Support/minecraft/saves/test-mca")),
-        //        AnvilLevelDataProvider.load(Paths.get("/Users/andrew/Library/Application Support/minecraft/saves/test-mca/level.dat"))));
-        defaultLevel = new VoxelwindLevel(this, new LevelCreator("test", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
-        defaultLevel2 = new VoxelwindLevel(this, new LevelCreator("test2", FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
-        levelManager.register(defaultLevel);
-        levelManager.register(defaultLevel2);
-        levelManager.start(defaultLevel);
-        levelManager.start(defaultLevel2);
-
         LOGGER.info("Now alive on {}.", listener.getAddress());
 
         timerService.scheduleAtFixedRate(sessionManager::onTick, 50, 50, TimeUnit.MILLISECONDS);
@@ -170,10 +168,6 @@ public class VoxelwindServer implements Server {
         while (true) {
             Thread.sleep(1000);
         }
-    }
-
-    public VoxelwindLevel getDefaultLevel() {
-        return defaultLevel;
     }
 
     @Override
@@ -233,5 +227,9 @@ public class VoxelwindServer implements Server {
 
     public VoxelwindConfiguration getConfiguration() {
         return configuration;
+    }
+
+    public VoxelwindLevel getDefaultLevel() {
+        return defaultLevel;
     }
 }
