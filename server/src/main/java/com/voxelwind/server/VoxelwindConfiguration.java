@@ -1,5 +1,6 @@
 package com.voxelwind.server;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -124,6 +125,7 @@ public class VoxelwindConfiguration {
         private String directory;
         private String storage;
         private String generator;
+        @JsonProperty("default")
         private boolean isDefault;
     }
 
