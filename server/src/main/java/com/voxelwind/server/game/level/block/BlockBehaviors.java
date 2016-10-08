@@ -65,6 +65,8 @@ public class BlockBehaviors {
                 .put(BlockTypes.MONSTER_EGG, DropNothingBlockBehavior.INSTANCE)
                 .put(BlockTypes.MONSTER_SPAWNER, DropNothingBlockBehavior.INSTANCE)
                 .put(BlockTypes.CAKE, DropNothingBlockBehavior.INSTANCE)
+                .put(BlockTypes.WOOD, new LogBlockBehavior())
+                .put(BlockTypes.ACACIA_WOOD, new LogBlockBehavior())
                 .build();
     }
 
