@@ -70,7 +70,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
     private Inventory openedInventory;
     private byte openInventoryId = -1;
-    private final AtomicInteger dimensionIdGenerator = new AtomicInteger();
     private boolean hasMoved = false;
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
     private final VoxelwindServer vwServer;
@@ -245,6 +244,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         setPosition(event.getSpawnLocation());
         setRotation(event.getRotation());
         hasMoved = false; // don't send duplicated packets
+
+        // TODO: Proper inventory links
+        for (int i = 0; i < 9; i++) {
+            playerInventory.setHotbarLink(i, i);
+        }
 
         McpeSetTime setTime = new McpeSetTime();
         setTime.setTime(getLevel().getTime());
@@ -591,8 +595,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeContainerSetContents contents = new McpeContainerSetContents();
         contents.setWindowId((byte) 0x00);
         // Because MCPE is stupid, we have to add 9 more slots. The rest will be filled in as air.
-        ItemStack[] stacks = Arrays.copyOf(playerInventory.getAllContents(), playerInventory.getInventoryType().getInventorySize() + 9);
-        contents.setStacks(stacks);
+        contents.setStacks(Arrays.copyOf(playerInventory.getAllContents(), playerInventory.getInventoryType().getInventorySize() + 9));
         // Populate hotbar links.
         contents.setHotbarData(playerInventory.getHotbarLinks());
         McpeBatch contentsBatch = new McpeBatch();
@@ -974,6 +977,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeDropItem packet) {
+            if (packet.getUnknown2().getItemType() == BlockTypes.AIR) {
+                return;
+            }
+
             // TODO: Events
             Optional<ItemStack> stackOptional = playerInventory.getStackInHand();
             if (!stackOptional.isPresent()) {
