@@ -63,7 +63,7 @@ public class BehaviorUtils {
             throw new IllegalArgumentException("Item type " + stack.getItemType().getName() + " is not a block type.");
         }
 
-        // Consult block state if we want to use this:
+        // Consult block behavior for the relevant block.
         Optional<BlockState> overrideOptional = BlockBehaviors.getBlockBehavior((BlockType) stack.getItemType())
                 .overrideBlockPlacement(position, face, stack);
         if (overrideOptional.isPresent()) {
