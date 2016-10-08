@@ -3,6 +3,7 @@ package com.voxelwind.server.network.raknet.packets;
 import com.google.common.collect.ImmutableList;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.raknet.datastructs.IntRange;
+import gnu.trove.list.TIntList;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
@@ -13,22 +14,21 @@ import java.util.*;
 public abstract class BaseAckPacket implements NetworkPackage {
     private final List<IntRange> ids = new ArrayList<>();
 
-    public static List<IntRange> intoRanges(Collection<Integer> knownIds) {
-        if (knownIds.isEmpty()) {
+    public static List<IntRange> intoRanges(TIntList ids) {
+        if (ids.isEmpty()) {
             throw new NoSuchElementException();
         }
 
         List<IntRange> ranges = new ArrayList<>();
-        List<Integer> ids = new ArrayList<>(knownIds);
         if (ids.size() == 1) {
             return ImmutableList.of(new IntRange(ids.get(0)));
         }
-        Collections.sort(ids);
+        ids.sort();
 
         int start = ids.get(0);
         int cur = start;
 
-        for (Integer id : ids.subList(1, ids.size())) {
+        for (int id : ids.subList(1, ids.size()).toArray()) {
             if (cur + 1 == id) {
                 cur = id;
             } else {
