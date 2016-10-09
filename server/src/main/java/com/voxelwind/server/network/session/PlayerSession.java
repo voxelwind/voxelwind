@@ -354,7 +354,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
                 // Check if user has loaded the chunk, otherwise the client will crash
                 Vector2i chunkVector = new Vector2i(entity.getPosition().getFloorX() >> 4, entity.getPosition().getFloorZ() >> 4);
-                LOGGER.debug("EL: {}, CL: {}, SENT: {}", entity.getPosition(), chunkVector, sentChunks);
                 if (sentChunks.contains(chunkVector) && isViewing.add(entity.getEntityId())) {
                     mustAdd.add(entity);
                 }
@@ -771,7 +770,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Preconditions.checkArgument(!packet.getMessage().contains("\0"), "Text packet from client contains a null byte");
             Preconditions.checkArgument(!packet.getMessage().trim().isEmpty(), "Text packet from client is effectively empty");
 
-            // Debugging commands.
             if (packet.getMessage().startsWith("/")) {
                 String command = packet.getMessage().substring(1);
                 try {
