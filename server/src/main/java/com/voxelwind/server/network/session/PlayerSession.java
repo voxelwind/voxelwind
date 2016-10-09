@@ -898,7 +898,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                         Collection<ItemStack> drops = blockBehavior.getDrops(getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null));
                         for (ItemStack drop : drops) {
                             DroppedItem item = getLevel().dropItem(drop, block.getLevelLocation().toFloat().add(0.5, 0.5, 0.5));
-                            item.setDelayPickupTicks(60);
+                            item.setDelayPickupTicks(5);
                         }
                         chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null, null));
                     }
