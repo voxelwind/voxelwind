@@ -9,6 +9,8 @@ import com.voxelwind.server.network.session.PlayerSession;
 import java.util.*;
 
 public class LevelPacketManager {
+    private static final int ENTITY_VIEW_DISTANCE_SQ = 64 * 64;
+
     private final Queue<NetworkPackage> broadcastQueue = new ArrayDeque<>();
     private final Map<Long, Queue<NetworkPackage>> specificEntityViewerQueue = new HashMap<>();
     private final VoxelwindLevel level;
@@ -34,7 +36,7 @@ public class LevelPacketManager {
                 for (PlayerSession session : playersInWorld) {
                     if (session == entity) continue; // Don't move ourselves
 
-                    if (session.getPosition().distance(entity.getPosition()) <= 64F && !session.isRemoved()) {
+                    if (session.getPosition().distanceSquared(entity.getPosition()) <= ENTITY_VIEW_DISTANCE_SQ && !session.isRemoved()) {
                         for (NetworkPackage aPackage : entry.getValue()) {
                             session.getMcpeSession().addToSendQueue(aPackage);
                         }
