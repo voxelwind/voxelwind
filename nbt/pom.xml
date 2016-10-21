@@ -11,6 +11,21 @@
 
     <artifactId>voxelwind-nbt</artifactId>
 
+    <build>
+        <finalName>voxelwind-api-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -23,6 +38,12 @@
             <artifactId>netty-buffer</artifactId>
             <version>4.0.41.Final</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
