@@ -42,7 +42,6 @@
                 <configuration>
                     <links>
                         <link>https://flowpowered.com/math</link>
-                        <link>https://flowpowered.com/math</link>
                     </links>
                 </configuration>
             </plugin>

@@ -12,6 +12,7 @@
         <module>api</module>
         <module>server</module>
         <module>natives</module>
+        <module>nbt</module>
     </modules>
 
     <repositories>
