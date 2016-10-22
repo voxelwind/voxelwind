@@ -18,7 +18,7 @@ public class McpeSetTime implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(time, buffer);
+        Varints.encodeSigned(buffer, time);
         buffer.writeBoolean(running);
     }
 }

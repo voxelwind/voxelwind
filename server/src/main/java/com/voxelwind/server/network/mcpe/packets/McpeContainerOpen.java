@@ -30,6 +30,6 @@ public class McpeContainerOpen implements NetworkPackage {
         buffer.writeByte(type);
         buffer.writeShort(slotCount);
         McpeUtil.writeBlockCoords(buffer, position);
-        Varints.encodeSigned(runtimeEntityId, buffer);
+        Varints.encodeSignedLong(buffer, runtimeEntityId);
     }
 }

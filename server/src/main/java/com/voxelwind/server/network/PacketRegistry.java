@@ -38,9 +38,9 @@ public class PacketRegistry {
         MCPE_PACKETS[0x04] = McpeClientMagic.class;
         MCPE_PACKETS[0x05] = McpeDisconnect.class;
         MCPE_PACKETS[0x06] = McpeBatch.class;
-        // RESOURCE_PACKS_INFO_PACKET = 0x07;
+        MCPE_PACKETS[0x07] = McpeResourcePackInfo.class;
 	    // RESOURCE_PACK_STACK_PACKET = 0x08;
-	    // RESOURCE_PACK_CLIENT_RESPONSE_PACKET = 0x09;
+	    MCPE_PACKETS[0x09] = McpeResourcePackClientResponse.class;
         MCPE_PACKETS[0x0a] = McpeText.class;
         MCPE_PACKETS[0x0b] = McpeSetTime.class;
         MCPE_PACKETS[0x0c] = McpeStartGame.class;

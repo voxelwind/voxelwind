@@ -56,7 +56,7 @@ public class NBTWriter implements Closeable {
             case INT:
                 IntTag it = (IntTag) tag;
                 if (encoding == NBTEncoding.MCPE_0_16_NETWORK) {
-                    Varints.encodeSigned(it.getPrimitiveValue(), output);
+                    Varints.encodeSigned(output, it.getPrimitiveValue());
                 } else {
                     output.writeInt(it.getPrimitiveValue());
                 }
@@ -77,7 +77,7 @@ public class NBTWriter implements Closeable {
                 ByteArrayTag bat = (ByteArrayTag) tag;
                 byte[] bValue = bat.getValue();
                 if (encoding == NBTEncoding.MCPE_0_16_NETWORK) {
-                    Varints.encodeSigned(bValue.length, output);
+                    Varints.encodeSigned(output, bValue.length);
                 } else {
                     output.writeInt(bValue.length);
                 }
@@ -91,7 +91,7 @@ public class NBTWriter implements Closeable {
                 ListTag<?> listt = (ListTag<?>) tag;
                 output.writeByte(TagType.fromClass(listt.getTagClass()).ordinal());
                 if (encoding == NBTEncoding.MCPE_0_16_NETWORK) {
-                    Varints.encodeSigned(listt.getValue().size(), output);
+                    Varints.encodeSigned(output, listt.getValue().size());
                 } else {
                     output.writeInt(listt.getValue().size());
                 }
@@ -110,7 +110,7 @@ public class NBTWriter implements Closeable {
                 IntArrayTag iat = (IntArrayTag) tag;
                 int[] iValue = iat.getValue();
                 if (encoding == NBTEncoding.MCPE_0_16_NETWORK) {
-                    Varints.encodeSigned(iValue.length, output);
+                    Varints.encodeSigned(output, iValue.length);
                 } else {
                     output.writeInt(iValue.length);
                 }

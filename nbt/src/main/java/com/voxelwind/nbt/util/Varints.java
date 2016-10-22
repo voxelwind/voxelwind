@@ -10,7 +10,7 @@ public class Varints {
     private static final int MSB = 0x80, REST = 0x7F, MSBALL = ~REST;
     private static final long MSBALL_LONG = ~REST;
 
-    public static void encodeUnsigned(int num, DataOutput output) throws IOException {
+    public static void encodeUnsigned(DataOutput output, int num) throws IOException {
         while ((num & MSBALL) != 0) {
             output.writeByte((byte) ((num & REST) | MSB));
             num >>>= 7;
@@ -18,7 +18,7 @@ public class Varints {
         output.writeByte((byte) num);
     }
 
-    public static void encodeUnsigned(int num, ByteBuf output) {
+    public static void encodeUnsigned(ByteBuf output, int num) {
         while ((num & MSBALL) != 0) {
             output.writeByte((byte) ((num & REST) | MSB));
             num >>>= 7;
@@ -26,7 +26,7 @@ public class Varints {
         output.writeByte((byte) num);
     }
 
-    public static void encodeUnsignedLong(long num, DataOutput output) throws IOException {
+    public static void encodeUnsignedLong(DataOutput output, long num) throws IOException {
         while ((num & MSBALL_LONG) != 0) {
             output.writeByte((byte) ((num & REST) | MSB));
             num >>= 7;
@@ -34,7 +34,7 @@ public class Varints {
         output.writeByte((byte) num);
     }
 
-    public static void encodeUnsignedLong(long num, ByteBuf output) {
+    public static void encodeUnsignedLong(ByteBuf output, long num) {
         while ((num & MSBALL_LONG) != 0) {
             output.writeByte((byte) ((num & REST) | MSB));
             num >>>= 7;
@@ -76,7 +76,7 @@ public class Varints {
         return result;
     }
 
-    private static long decodeUnsignedLong(DataInput input) throws IOException {
+    public static long decodeUnsignedLong(DataInput input) throws IOException {
         long result = 0;
         int j = 0;
         int read;
@@ -93,7 +93,7 @@ public class Varints {
         return result;
     }
 
-    private static long decodeUnsignedLong(ByteBuf input) {
+    public static long decodeUnsignedLong(ByteBuf input) {
         long result = 0;
         int j = 0;
         int read;
@@ -110,20 +110,20 @@ public class Varints {
         return result;
     }
 
-    public static void encodeSigned(int num, DataOutput output) throws IOException {
-        encodeUnsigned((num << 1) ^ (num >> 31), output);
+    public static void encodeSigned(DataOutput output, int num) throws IOException {
+        encodeUnsigned(output, (num << 1) ^ (num >> 31));
     }
 
-    public static void encodeSigned(int num, ByteBuf output) {
-        encodeUnsigned((num << 1) ^ (num >> 31), output);
+    public static void encodeSigned(ByteBuf output, int num) {
+        encodeUnsigned(output, (num << 1) ^ (num >> 31));
     }
 
-    public static void encodeSigned(long num, DataOutput output) throws IOException {
-        encodeUnsignedLong((num << 1) ^ (num >> 63), output);
+    public static void encodeSignedLong(DataOutput output, long num) throws IOException {
+        encodeUnsignedLong(output, (num << 1) ^ (num >> 63));
     }
 
-    public static void encodeSigned(long num, ByteBuf output) {
-        encodeUnsignedLong((num << 1) ^ (num >> 63), output);
+    public static void encodeSignedLong(ByteBuf output, long num) {
+        encodeUnsignedLong(output, (num << 1) ^ (num >> 63));
     }
 
     public static int decodeSigned(DataInput input) throws IOException {

@@ -217,7 +217,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         movePlayerPacket.setEntityId(getEntityId());
         movePlayerPacket.setPosition(getGamePosition());
         movePlayerPacket.setRotation(getRotation());
-        movePlayerPacket.setMode(isTeleported());
+        movePlayerPacket.setMode((byte) (isTeleported() ? 1 : 0));
         movePlayerPacket.setOnGround(isOnGround());
         session.addToSendQueue(movePlayerPacket);
     }
@@ -976,6 +976,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             DroppedItem item = new VoxelwindDroppedItem(getLevel(), getPosition().add(0, 1.3, 0), getServer(), stackOptional.get());
             item.setMotion(getDirectionVector().mul(0.4));
             playerInventory.clearItem(playerInventory.getHeldInventorySlot());
+        }
+
+        @Override
+        public void handle(McpeResourcePackClientResponse packet) {
+            // TODO: Stack packet?
+            doInitialSpawn();
         }
     }
 

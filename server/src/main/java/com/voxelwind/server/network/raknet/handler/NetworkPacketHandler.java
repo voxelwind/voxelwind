@@ -28,4 +28,6 @@ public interface NetworkPacketHandler {
     void handle(McpeUseItem packet);
 
     void handle(McpeDropItem packet);
+
+    void handle(McpeResourcePackClientResponse packet);
 }

@@ -39,20 +39,20 @@ public class McpeStartGame implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(entityId, buffer);
-        Varints.encodeSigned(runtimeEntityId, buffer);
+        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeSignedLong(buffer, runtimeEntityId);
         McpeUtil.writeVector3f(buffer, spawn);
         // TODO: what are these next two?
         buffer.writeFloat(0);
         buffer.writeFloat(0);
-        Varints.encodeSigned(seed, buffer);
-        Varints.encodeSigned(dimension, buffer);
-        Varints.encodeSigned(generator, buffer);
-        Varints.encodeSigned(gamemode, buffer);
-        Varints.encodeSigned(dimension, buffer);
+        Varints.encodeSigned(buffer, seed);
+        Varints.encodeSigned(buffer, dimension);
+        Varints.encodeSigned(buffer, generator);
+        Varints.encodeSigned(buffer, gamemode);
+        Varints.encodeSigned(buffer, dimension);
         McpeUtil.writeBlockCoords(buffer, spawn.toInt());
         buffer.writeBoolean(hasAchievementsDisabled);
-        Varints.encodeSigned(dayCycleStopTime, buffer);
+        Varints.encodeSigned(buffer, dayCycleStopTime);
         buffer.writeBoolean(eduMode);
         buffer.writeFloat(rainLevel);
         buffer.writeFloat(lightingLevel);

@@ -16,6 +16,6 @@ public class McpeRequestChunkRadius implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(radius, buffer);
+        Varints.encodeSigned(buffer, radius);
     }
 }

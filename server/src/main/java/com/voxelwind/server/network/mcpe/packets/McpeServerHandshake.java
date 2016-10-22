@@ -5,7 +5,6 @@ import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import com.voxelwind.server.network.NetworkPackage;
-import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
@@ -42,7 +41,7 @@ public class McpeServerHandshake implements NetworkPackage {
     public void encode(ByteBuf buffer) {
         byte[] encoded = key.getEncoded();
         McpeUtil.writeVarintLengthString(buffer, Base64.getEncoder().encodeToString(encoded));
-        Varints.encodeUnsigned(token.length, buffer);
+        Varints.encodeUnsigned(buffer, token.length);
         buffer.writeBytes(token);
     }
 }

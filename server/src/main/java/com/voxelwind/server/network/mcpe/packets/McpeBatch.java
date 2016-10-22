@@ -81,7 +81,7 @@ public class McpeBatch implements NetworkPackage {
                     packetBuf.writeByte((PacketRegistry.getId(netPackage) & 0xFF));
                     netPackage.encode(packetBuf);
 
-                    Varints.encodeUnsigned(packetBuf.readableBytes(), source);
+                    Varints.encodeUnsigned(source, packetBuf.readableBytes());
                     source.writeBytes(packetBuf);
                 } finally {
                     packetBuf.release();
@@ -91,7 +91,7 @@ public class McpeBatch implements NetworkPackage {
             // Compress the buffer
             ByteBuf deflated = CompressionUtil.deflate(source);
             try {
-                Varints.encodeUnsigned(deflated.readableBytes(), buffer);
+                Varints.encodeUnsigned(buffer, deflated.readableBytes());
                 buffer.writeBytes(deflated);
             } finally {
                 deflated.release();

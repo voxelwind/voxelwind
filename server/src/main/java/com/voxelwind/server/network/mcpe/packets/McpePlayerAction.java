@@ -24,10 +24,10 @@ public class McpePlayerAction implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(entityId, buffer);
-        Varints.encodeSigned(action.ordinal(), buffer);
+        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeSigned(buffer, action.ordinal());
         McpeUtil.writeBlockCoords(buffer, position);
-        Varints.encodeSigned(face, buffer);
+        Varints.encodeSigned(buffer, face);
     }
 
     public enum Action {

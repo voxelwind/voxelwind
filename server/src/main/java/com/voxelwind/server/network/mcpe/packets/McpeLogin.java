@@ -54,7 +54,7 @@ public class McpeLogin implements NetworkPackage {
 
             ByteBuf compressed = CompressionUtil.deflate(body);
 
-            Varints.encodeUnsigned(compressed.readableBytes(), buffer);
+            Varints.encodeUnsigned(buffer, compressed.readableBytes());
             buffer.writeBytes(compressed);
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to compress login data body", e);

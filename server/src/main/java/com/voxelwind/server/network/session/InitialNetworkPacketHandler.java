@@ -184,7 +184,12 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
     @Override
     public void handle(McpeDropItem packet) {
-        throw new IllegalStateException("Got unexpected McpeDropItem ");
+        throw new IllegalStateException("Got unexpected McpeDropItem");
+    }
+
+    @Override
+    public void handle(McpeResourcePackClientResponse packet) {
+        throw new IllegalStateException("Got unexpected McpeResourcePackClientResponse");
     }
 
     private void startEncryptionHandshake(PublicKey key) throws InvalidKeyException {
@@ -216,7 +221,9 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
         PlayerSession playerSession = session.initializePlayerSession(session.getServer().getDefaultLevel());
         session.setHandler(playerSession.getPacketHandler());
-        playerSession.doInitialSpawn();
+
+        McpeResourcePackInfo info = new McpeResourcePackInfo();
+        session.addToSendQueue(info);
     }
 
     private JwtPayload validateChainData(JsonNode data) throws Exception {

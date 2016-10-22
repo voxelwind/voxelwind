@@ -21,6 +21,7 @@ import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
 import com.voxelwind.server.game.item.VoxelwindNBTUtils;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
+import com.voxelwind.server.network.mcpe.util.ResourcePackInfo;
 import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
@@ -42,7 +43,7 @@ public class McpeUtil {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
         byte[] bytes = string.getBytes(CharsetUtil.UTF_8);
-        Varints.encodeUnsigned(bytes.length, buffer);
+        Varints.encodeUnsigned(buffer, bytes.length);
         buffer.writeBytes(bytes);
     }
 
@@ -71,9 +72,9 @@ public class McpeUtil {
     }
 
     public static void writeBlockCoords(ByteBuf buf, Vector3i vector3i) {
-        Varints.encodeSigned(vector3i.getX(), buf);
+        Varints.encodeSigned(buf, vector3i.getX());
         buf.writeByte(vector3i.getY());
-        Varints.encodeSigned(vector3i.getZ(), buf);
+        Varints.encodeSigned(buf, vector3i.getZ());
     }
 
     public static Vector3i readBlockCoords(ByteBuf buf) {
@@ -84,15 +85,17 @@ public class McpeUtil {
     }
 
     public static void writeVector3f(ByteBuf buf, Vector3f vector3f) {
-        buf.writeFloat(vector3f.getX());
-        buf.writeFloat(vector3f.getY());
-        buf.writeFloat(vector3f.getZ());
+        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
+        leBuf.writeFloat(vector3f.getX());
+        leBuf.writeFloat(vector3f.getY());
+        leBuf.writeFloat(vector3f.getZ());
     }
 
     public static Vector3f readVector3f(ByteBuf buf) {
-        double x = buf.readFloat();
-        double y = buf.readFloat();
-        double z = buf.readFloat();
+        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
+        double x = leBuf.readFloat();
+        double y = leBuf.readFloat();
+        double z = leBuf.readFloat();
         return new Vector3f(x, y, z);
     }
 
@@ -114,7 +117,7 @@ public class McpeUtil {
     }
 
     public static void writeAttributes(ByteBuf buf, Collection<Attribute> attributeList) {
-        Varints.encodeUnsigned(attributeList.size(), buf);
+        Varints.encodeUnsigned(buf, attributeList.size());
         for (Attribute attribute : attributeList) {
             buf.writeFloat(attribute.getMinimumValue());
             buf.writeFloat(attribute.getMaximumValue());
@@ -140,7 +143,7 @@ public class McpeUtil {
     public static void writeSkin(ByteBuf buf, Skin skin) {
         byte[] texture = skin.getTexture();
         writeVarintLengthString(buf, skin.getType());
-        Varints.encodeUnsigned(texture.length, buf);
+        Varints.encodeUnsigned(buf, texture.length);
         buf.writeBytes(texture);
     }
 
@@ -199,9 +202,9 @@ public class McpeUtil {
             return;
         }
 
-        Varints.encodeSigned(stack.getItemType().getId(), buf);
+        Varints.encodeSigned(buf, stack.getItemType().getId());
         short metadataValue = MetadataSerializer.serializeMetadata(stack);
-        Varints.encodeSigned((metadataValue << 8) | stack.getAmount(), buf);
+        Varints.encodeSigned(buf, (metadataValue << 8) | stack.getAmount());
 
         // Remember this position, since we'll be writing the true NBT size here later:
         int sizeIndex = buf.writerIndex();
@@ -262,5 +265,18 @@ public class McpeUtil {
 
     private static float rotationByteToAngle(byte angle) {
         return angle / 255f * 360f;
+    }
+
+    public static void writeResourcePackInfo(ByteBuf buf, ResourcePackInfo info) {
+        writeVarintLengthString(buf, info.getPackageId());
+        writeVarintLengthString(buf, info.getVersion());
+        buf.writeLong(info.getUnknown());
+    }
+
+    public static ResourcePackInfo readResourcePackInfo(ByteBuf buf) {
+        String pid = readVarintLengthString(buf);
+        String v = readVarintLengthString(buf);
+        long unknown = buf.readLong();
+        return new ResourcePackInfo(pid, v, unknown);
     }
 }

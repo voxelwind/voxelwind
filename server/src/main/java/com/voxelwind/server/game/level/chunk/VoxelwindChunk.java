@@ -24,16 +24,12 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.buffer.Unpooled;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 public class VoxelwindChunk implements Chunk {
@@ -243,7 +239,7 @@ public class VoxelwindChunk implements Chunk {
                 buf.writeBytes(blockLightData.getData());
                 buf.writeBytes(height);
                 for (int i : biomeColor) {
-                    Varints.encodeSigned(i, buf);
+                    Varints.encodeSigned(buf, i);
                 }
                 // extra data, we have none
                 buf.writeShort(0);

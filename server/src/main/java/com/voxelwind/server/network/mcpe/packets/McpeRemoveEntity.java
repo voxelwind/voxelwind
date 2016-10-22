@@ -16,6 +16,6 @@ public class McpeRemoveEntity implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(entityId, buffer);
+        Varints.encodeSignedLong(buffer, entityId);
     }
 }

@@ -22,7 +22,7 @@ public class McpeSetSpawnPosition implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(unknown1, buffer);
+        Varints.encodeSigned(buffer, unknown1);
         McpeUtil.writeBlockCoords(buffer, position);
         buffer.writeBoolean(unknown2);
     }
