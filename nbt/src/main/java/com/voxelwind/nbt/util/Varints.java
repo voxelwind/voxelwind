@@ -13,82 +13,106 @@ public class Varints {
 
     public static void encodeUnsigned(int num, DataOutput output) throws IOException {
         while ((num & MSBALL) != 0) {
-            output.writeByte((num & 0xFF) | MSB);
-            num >>>= 7;
+            output.writeByte((byte)((num & REST) | MSB));
+            num >>= 7;
         }
-        output.writeByte(num & REST);
+        output.writeByte((byte) num);
     }
 
     public static void encodeUnsigned(int num, ByteBuf output) {
         while ((num & MSBALL) != 0) {
-            output.writeByte((num & 0xFF) | MSB);
-            num >>>= 7;
+            output.writeByte((byte)((num & REST) | MSB));
+            num >>= 7;
         }
-        output.writeByte(num & REST);
+        output.writeByte((byte) num);
     }
 
     public static void encodeUnsignedLong(long num, DataOutput output) throws IOException {
         while ((num & MSBALL_LONG) != 0) {
-            output.writeByte((int) ((num & 0xFF) | MSB));
-            num >>>= 7;
+            output.writeByte((byte)((num & REST) | MSB));
+            num >>= 7;
         }
-        output.writeByte((int) (num & REST));
+        output.writeByte((byte) num);
     }
 
     public static void encodeUnsignedLong(long num, ByteBuf output) {
         while ((num & MSBALL_LONG) != 0) {
-            output.writeByte((int) ((num & 0xFF) | MSB));
+            output.writeByte((byte)((num & REST) | MSB));
             num >>>= 7;
         }
         output.writeByte((int) (num & REST));
     }
 
     public static int decodeUnsigned(DataInput input) throws IOException {
-        int res = 0, shift = 0, b;
-        while (((b = input.readByte()) & MSB) == 0) {
-            res += (b & REST) << shift;
-            shift += 7;
-            if (shift > 35) {
-                throw new IllegalArgumentException("Provided VarInt is not valid.");
+        int result = 0;
+        int j = 0;
+        int read;
+
+        do {
+            read = input.readByte();
+            result |= (read & 0x7f) << j++ * 7;
+
+            if (j > 5)
+            {
+                throw new IllegalArgumentException("VarInt too big");
             }
-        }
-        return res;
+        } while ((read & 0x80) == 0x80);
+
+        return result;
     }
 
-    public static int decodeUnsigned(ByteBuf input) throws IOException {
-        int res = 0, shift = 0, b;
-        while (((b = input.readByte()) & MSB) == 0) {
-            res += (b & REST) << shift;
-            shift += 7;
-            if (shift > 35) {
-                throw new IllegalArgumentException("Provided VarInt is not valid.");
+    public static int decodeUnsigned(ByteBuf input) {
+        int result = 0;
+        int j = 0;
+        int read;
+
+        do {
+            read = input.readByte();
+            result |= (read & 0x7f) << j++ * 7;
+
+            if (j > 5)
+            {
+                throw new IllegalArgumentException("VarInt too big");
             }
-        }
-        return res;
+        } while ((read & 0x80) == 0x80);
+
+        return result;
     }
 
     private static long decodeUnsignedLong(DataInput input) throws IOException {
-        long res = 0, shift = 0, b;
-        while (((b = input.readByte()) & MSB) == 0) {
-            res += (b & REST) << shift;
-            shift += 7;
-            if (shift > 35) {
-                throw new IllegalArgumentException("Provided VarLong is not valid.");
+        long result = 0;
+        int j = 0;
+        int read;
+
+        do {
+            read = input.readByte();
+            result |= (read & 0x7f) << j++ * 7;
+
+            if (j > 10)
+            {
+                throw new IllegalArgumentException("VarInt too big");
             }
-        }
-        return res;
+        } while ((read & 0x80) == 0x80);
+
+        return result;
     }
 
-    private static long decodeUnsignedLong(ByteBuf input) throws IOException {
-        long res = 0, shift = 0, b;
-        while (((b = input.readByte()) & MSB) == 0) {
-            res += (b & REST) << shift;
-            shift += 7;
-            if (shift > 35) {
-                throw new IllegalArgumentException("Provided VarLong is not valid.");
+    private static long decodeUnsignedLong(ByteBuf input) {
+        long result = 0;
+        int j = 0;
+        int read;
+
+        do {
+            read = input.readByte();
+            result |= (read & 0x7f) << j++ * 7;
+
+            if (j > 10)
+            {
+                throw new IllegalArgumentException("VarInt too big");
             }
-        }
-        return res;
+        } while ((read & 0x80) == 0x80);
+
+        return result;
     }
 
     public static void encodeSigned(int num, DataOutput output) throws IOException {
@@ -109,21 +133,21 @@ public class Varints {
 
     public static int decodeSigned(DataInput input) throws IOException {
         int n = decodeUnsigned(input);
-        return (n << 1) ^ (n >> 31);
+        return (n >> 1) ^ -(n & 1);
     }
 
     public static int decodeSigned(ByteBuf input) throws IOException {
         int n = decodeUnsigned(input);
-        return (n << 1) ^ (n >> 31);
+        return (n >> 1) ^ -(n & 1);
     }
 
     public static long decodeSignedLong(DataInput input) throws IOException {
         long n = decodeUnsigned(input);
-        return (n << 1) ^ (n >> 63);
+        return (n >> 1) ^ -(n & 1);
     }
 
     public static long decodeSignedLong(ByteBuf input) throws IOException {
         long n = decodeUnsigned(input);
-        return (n << 1) ^ (n >> 63);
+        return (n >> 1) ^ -(n & 1);
     }
 }

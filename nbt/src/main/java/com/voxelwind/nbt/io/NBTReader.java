@@ -79,7 +79,7 @@ public class NBTReader implements Closeable {
                 input.readFully(valueBytesBa);
                 return new ByteArrayTag(tagName, valueBytesBa);
             case STRING:
-                int length = encoding == MCPE_0_16_NETWORK ? input.readByte() & 0xFF : input.readUnsignedShort();
+                int length = encoding == MCPE_0_16_NETWORK ? input.readByte() : input.readUnsignedShort();
                 byte[] valueBytes = new byte[length];
                 input.readFully(valueBytes);
                 return new StringTag(tagName, new String(valueBytes, StandardCharsets.UTF_8));
