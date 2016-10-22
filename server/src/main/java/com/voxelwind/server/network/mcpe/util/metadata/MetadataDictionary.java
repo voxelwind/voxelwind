@@ -42,7 +42,6 @@ public final class MetadataDictionary {
             serialize(buf, i, o);
             return true;
         });
-        buf.writeByte(0x7F);
     }
 
     private static boolean isAcceptable(Object o) {
@@ -51,11 +50,11 @@ public final class MetadataDictionary {
     }
 
     public static MetadataDictionary deserialize(ByteBuf buf) {
-        byte read;
         MetadataDictionary dictionary = new MetadataDictionary();
-        while ((read = buf.readByte()) != 0x7F) {
-            int idx = read & 0x1f;
-            int type = read >> 5;
+        int sz = Varints.decodeUnsigned(buf);
+        for (int i = 0; i < sz; i++) {
+            int type = Varints.decodeUnsigned(buf);
+            int idx = Varints.decodeUnsigned(buf);
 
             switch (type) {
                 case EntityMetadataConstants.DATA_TYPE_BYTE:
@@ -74,16 +73,10 @@ public final class MetadataDictionary {
                     dictionary.put(idx, RakNetUtil.readString(buf));
                     break;
                 case EntityMetadataConstants.DATA_TYPE_POS:
-                    dictionary.put(idx, McpeUtil.readVector3i(buf, false));
+                    dictionary.put(idx, McpeUtil.readBlockCoords(buf));
                     break;
                 case EntityMetadataConstants.DATA_TYPE_SLOT:
-                    short id = buf.readShort();
-                    byte amount = buf.readByte();
-                    short data = buf.readShort();
-
-                    ItemType type1 = ItemTypes.forId(id);
-                    Optional<Metadata> data1 = Optional.ofNullable(MetadataSerializer.deserializeMetadata(type1, data));
-                    dictionary.put(idx, new VoxelwindItemStack(type1, amount, data1.orElse(null)));
+                    dictionary.put(idx, McpeUtil.readItemStack(buf));
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type + " is not recognized.");
@@ -130,7 +123,7 @@ public final class MetadataDictionary {
             Vector3i vector3i = (Vector3i) o;
             Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_POS, buf);
             Varints.encodeUnsigned(idx, buf);
-            McpeUtil.writeVector3i(buf, vector3i, false);
+            McpeUtil.writeBlockCoords(buf, vector3i);
         } else {
             throw new IllegalArgumentException("Unsupported type " + o.getClass().getName());
         }

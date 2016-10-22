@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -29,8 +30,10 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Optional;
 
 public class InitialNetworkPacketHandler implements NetworkPacketHandler {
+    public static final int MCPE_PROTOCOL_VERSION = 91;
     private static final boolean CAN_USE_ENCRYPTION = CryptoUtil.isJCEUnlimitedStrength() || NativeCodeFactory.cipher.isLoaded();
     private static final String MOJANG_PUBLIC_KEY_BASE64 =
             "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
@@ -58,6 +61,17 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
     @Override
     public void handle(McpeLogin packet) {
+        if (packet.getProtocolVersion() != MCPE_PROTOCOL_VERSION) {
+            Optional<InetSocketAddress> address = session.getRemoteAddress();
+            if (address.isPresent()) {
+                LOGGER.error("Client {} has protocol version {}, not {}", address.get(), packet.getProtocolVersion(), MCPE_PROTOCOL_VERSION);
+            } else {
+                LOGGER.error("Client has protocol version {}, not {}", packet.getProtocolVersion(), MCPE_PROTOCOL_VERSION);
+            }
+            session.close();
+            return;
+        }
+
         JsonNode certData;
         try {
             certData = VoxelwindServer.MAPPER.readTree(packet.getChainData());

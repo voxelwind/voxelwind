@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.util.CompressionUtil;
@@ -11,15 +12,20 @@ import java.util.zip.DataFormatException;
 
 @Data
 public class McpeLogin implements NetworkPackage {
-    private int protocolVersion; // = 90
+    private int protocolVersion; // = 91
+    private byte gameEdition;
     private String chainData;
     private String skinData;
 
     @Override
     public void decode(ByteBuf buffer) {
         protocolVersion = buffer.readInt();
-        int bodyLength = (buffer.readInt() & 0xFF); // TODO What's wrong with this?
-        ByteBuf body = buffer.slice();
+        if (protocolVersion != 91) {
+            return;
+        }
+        gameEdition = buffer.readByte();
+        int bodyLength = Varints.decodeUnsigned(buffer);
+        ByteBuf body = buffer.readSlice(bodyLength);
 
         // Decompress the body
         ByteBuf result = null;
@@ -39,6 +45,7 @@ public class McpeLogin implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeInt(protocolVersion);
+        buffer.writeByte(gameEdition);
 
         ByteBuf body = PooledByteBufAllocator.DEFAULT.directBuffer();
         try {
@@ -47,7 +54,7 @@ public class McpeLogin implements NetworkPackage {
 
             ByteBuf compressed = CompressionUtil.deflate(body);
 
-            buffer.writeInt(compressed.readableBytes() & 0xFF);
+            Varints.encodeUnsigned(compressed.readableBytes(), buffer);
             buffer.writeBytes(compressed);
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to compress login data body", e);
