@@ -12,8 +12,8 @@ public class EntityMetadataConstants {
     public static final int DATA_TYPE_STRING = 4;
     public static final int DATA_TYPE_SLOT = 5;
     public static final int DATA_TYPE_POS = 6;
-    public static final int DATA_TYPE_ROTATION = 7;
-    public static final int DATA_TYPE_LONG = 8;
+    public static final int DATA_TYPE_LONG = 7;
+    public static final int DATA_TYPE_VECTOR3F = 8;
 
     public static final int DATA_FLAGS = 0;
     public static final int DATA_AIR = 1;
@@ -23,8 +23,4 @@ public class EntityMetadataConstants {
     public static final int DATA_POTION_COLOR = 7;
     public static final int DATA_POTION_AMBIENT = 8;
     public static final int DATA_NO_AI = 15;
-
-    public static int idify(int id, int idx) {
-        return (byte) ((id << 5) | (idx & 0x1F));
-    }
 }

@@ -32,7 +32,7 @@ public class McpeAddPlayer implements NetworkPackage {
         entityId = buffer.readLong();
         position = McpeUtil.readVector3f(buffer);
         velocity = McpeUtil.readVector3f(buffer);
-        rotation = McpeUtil.readFloatRotation(buffer);
+        rotation = McpeUtil.readRotation(buffer);
         held = McpeUtil.readItemStack(buffer);
         metadata.putAll(MetadataDictionary.deserialize(buffer));
     }
@@ -44,7 +44,7 @@ public class McpeAddPlayer implements NetworkPackage {
         buffer.writeLong(entityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);
-        McpeUtil.writeFloatRotation(buffer, rotation);
+        McpeUtil.writeRotation(buffer, rotation);
         McpeUtil.writeItemStack(buffer, held);
         metadata.writeTo(buffer);
     }

@@ -3,7 +3,6 @@ package com.voxelwind.server.network.mcpe;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
-import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
@@ -16,6 +15,7 @@ import com.voxelwind.nbt.io.NBTReader;
 import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.Tag;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
 import com.voxelwind.server.game.item.VoxelwindNBTUtils;
@@ -26,6 +26,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -35,6 +36,22 @@ import java.util.*;
 public class McpeUtil {
     private McpeUtil() {
 
+    }
+
+    public static void writeVarintLengthString(ByteBuf buffer, String string) {
+        Preconditions.checkNotNull(buffer, "buffer");
+        Preconditions.checkNotNull(string, "string");
+        byte[] bytes = string.getBytes(CharsetUtil.UTF_8);
+        Varints.encodeUnsigned(bytes.length, buffer);
+        buffer.writeBytes(bytes);
+    }
+
+    public static String readVarintLengthString(ByteBuf buffer) {
+        Preconditions.checkNotNull(buffer, "buffer");
+        int length = Varints.decodeUnsigned(buffer);
+        byte[] readBytes = new byte[length];
+        buffer.readBytes(readBytes);
+        return new String(readBytes, StandardCharsets.UTF_8);
     }
 
     public static void writeLELengthString(ByteBuf buffer, String string) {
@@ -53,36 +70,16 @@ public class McpeUtil {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
-    public static void writeVector3i(ByteBuf buf, Vector3i vector3i) {
-        writeVector3i(buf, vector3i, true);
+    public static void writeBlockCoords(ByteBuf buf, Vector3i vector3i) {
+        Varints.encodeSigned(vector3i.getX(), buf);
+        buf.writeByte(vector3i.getY());
+        Varints.encodeSigned(vector3i.getZ(), buf);
     }
 
-    public static void writeVector3i(ByteBuf buf, Vector3i vector3i, boolean yIsByte) {
-        buf.writeInt(vector3i.getX());
-        if (yIsByte) {
-            buf.writeInt(vector3i.getZ());
-            buf.writeByte(vector3i.getY());
-        } else {
-            buf.writeInt(vector3i.getY());
-            buf.writeInt(vector3i.getZ());
-        }
-    }
-
-    public static Vector3i readVector3i(ByteBuf buf) {
-        return readVector3i(buf, false);
-    }
-
-    public static Vector3i readVector3i(ByteBuf buf, boolean yIsByte) {
-        int x = buf.readInt();
-        int y;
-        int z;
-        if (yIsByte) {
-            z = buf.readInt();
-            y = buf.readByte();
-        } else {
-            y = buf.readInt();
-            z = buf.readInt();
-        }
+    public static Vector3i readBlockCoords(ByteBuf buf) {
+        int x = Varints.decodeSigned(buf);
+        int y = buf.readByte();
+        int z = Varints.decodeSigned(buf);
         return new Vector3i(x, y, z);
     }
 
@@ -99,50 +96,31 @@ public class McpeUtil {
         return new Vector3f(x, y, z);
     }
 
-    public static Rotation readByteRotation(ByteBuf buf) {
-        byte pitchByte = buf.readByte();
-        byte yawByte = buf.readByte();
-        byte headYawByte = buf.readByte();
-        return new Rotation(rotationByteToAngle(pitchByte), rotationByteToAngle(yawByte), rotationByteToAngle(headYawByte));
-    }
-
-    public static void writeByteRotation(ByteBuf buf, Rotation rotation) {
-        buf.writeByte(rotationAngleToByte(rotation.getPitch()));
-        buf.writeByte(rotationAngleToByte(rotation.getYaw()));
-        buf.writeByte(rotationAngleToByte(rotation.getHeadYaw()));
-    }
-
-    private static byte rotationAngleToByte(float angle) {
-        return (byte) Math.ceil(angle / 360 * 255);
-    }
-
-    private static float rotationByteToAngle(byte angle) {
-        return angle / 255f * 360f;
-    }
-
     public static Collection<Attribute> readAttributes(ByteBuf buf) {
         List<Attribute> attributes = new ArrayList<>();
-        short size = buf.readShort();
+        int size = Varints.decodeUnsigned(buf);
 
         for (int i = 0; i < size; i++) {
-            String name = RakNetUtil.readString(buf);
             float min = buf.readFloat();
-            float val = buf.readFloat();
             float max = buf.readFloat();
+            float val = buf.readFloat();
+            float defaultVal = buf.readFloat();
+            String name = readVarintLengthString(buf);
 
-            attributes.add(new Attribute(name, min, max, val));
+            attributes.add(new Attribute(name, min, max, val, defaultVal));
         }
 
         return attributes;
     }
 
     public static void writeAttributes(ByteBuf buf, Collection<Attribute> attributeList) {
-        buf.writeInt(attributeList.size());
+        Varints.encodeUnsigned(attributeList.size(), buf);
         for (Attribute attribute : attributeList) {
-            RakNetUtil.writeString(buf, attribute.getName());
             buf.writeFloat(attribute.getMinimumValue());
-            buf.writeFloat(attribute.getValue());
             buf.writeFloat(attribute.getMaximumValue());
+            buf.writeFloat(attribute.getValue());
+            buf.writeFloat(attribute.getDefaultValue());
+            writeVarintLengthString(buf, attribute.getName());
         }
     }
 
@@ -161,44 +139,45 @@ public class McpeUtil {
 
     public static void writeSkin(ByteBuf buf, Skin skin) {
         byte[] texture = skin.getTexture();
-        RakNetUtil.writeString(buf, skin.getType());
-        buf.writeShort(texture.length);
+        writeVarintLengthString(buf, skin.getType());
+        Varints.encodeUnsigned(texture.length, buf);
         buf.writeBytes(texture);
     }
 
     public static TranslatedMessage readTranslatedMessage(ByteBuf buf) {
-        String message = RakNetUtil.readString(buf);
+        String message = readVarintLengthString(buf);
         int ln = buf.readByte();
         List<String> replacements = new ArrayList<>();
         for (int i = 0; i < ln; i++) {
-            replacements.add(RakNetUtil.readString(buf));
+            replacements.add(readVarintLengthString(buf));
         }
         return new TranslatedMessage(message, replacements);
     }
 
     public static void writeTranslatedMessage(ByteBuf buf, TranslatedMessage message) {
-        RakNetUtil.writeString(buf, message.getName());
+        writeVarintLengthString(buf, message.getName());
         buf.writeByte(message.getReplacements().size());
         for (String s : message.getReplacements()) {
-            RakNetUtil.writeString(buf, s);
+            writeVarintLengthString(buf, s);
         }
     }
 
     public static ItemStack readItemStack(ByteBuf buf) {
-        short id = buf.readShort();
+        int id = Varints.decodeSigned(buf);
         if (id == 0) {
             return new VoxelwindItemStack(BlockTypes.AIR, 1, null);
         }
 
-        int count = buf.readByte();
-        short damage = buf.readShort();
+        int aux = Varints.decodeSigned(buf);
+        int damage = aux >> 8;
+        int count = aux & 0xff;
         short nbtSize = buf.readShort();
 
         ItemType type = ItemTypes.forId(id);
 
         ItemStackBuilder builder = new VoxelwindItemStackBuilder()
                 .itemType(type)
-                .itemData(MetadataSerializer.deserializeMetadata(type, damage))
+                .itemData(MetadataSerializer.deserializeMetadata(type, (short) damage))
                 .amount(count);
 
         if (nbtSize > 0) {
@@ -216,18 +195,13 @@ public class McpeUtil {
 
     public static void writeItemStack(ByteBuf buf, ItemStack stack) {
         if (stack == null || stack.getItemType() == BlockTypes.AIR) {
-            buf.writeShort(0);
+            buf.writeByte(0); // 0 byte means 0 in varint
             return;
         }
 
-        buf.writeShort(stack.getItemType().getId());
-        buf.writeByte(stack.getAmount());
-        Optional<Metadata> dataOptional = stack.getItemData();
-        if (dataOptional.isPresent()) {
-            buf.writeShort(MetadataSerializer.serializeMetadata(stack));
-        } else {
-            buf.writeShort(0);
-        }
+        Varints.encodeSigned(stack.getItemType().getId(), buf);
+        short metadataValue = MetadataSerializer.serializeMetadata(stack);
+        Varints.encodeSigned((metadataValue << 8) | stack.getAmount(), buf);
 
         // Remember this position, since we'll be writing the true NBT size here later:
         int sizeIndex = buf.writerIndex();
@@ -256,14 +230,14 @@ public class McpeUtil {
         buf.writeLong(uuid.getLeastSignificantBits());
     }
 
-    public static Rotation readFloatRotation(ByteBuf buffer) {
+    public static Rotation readRotation(ByteBuf buffer) {
         float yaw = buffer.readFloat();
         float headYaw = buffer.readFloat();
         float pitch = buffer.readFloat();
         return new Rotation(pitch, yaw, headYaw);
     }
 
-    public static void writeFloatRotation(ByteBuf buffer, Rotation rotation) {
+    public static void writeRotation(ByteBuf buffer, Rotation rotation) {
         buffer.writeFloat(rotation.getYaw());
         buffer.writeFloat(rotation.getHeadYaw());
         buffer.writeFloat(rotation.getPitch());

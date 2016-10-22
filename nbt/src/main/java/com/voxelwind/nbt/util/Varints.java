@@ -131,7 +131,7 @@ public class Varints {
         return (n >> 1) ^ -(n & 1);
     }
 
-    public static int decodeSigned(ByteBuf input) throws IOException {
+    public static int decodeSigned(ByteBuf input) {
         int n = decodeUnsigned(input);
         return (n >> 1) ^ -(n & 1);
     }
@@ -141,7 +141,7 @@ public class Varints {
         return (n >> 1) ^ -(n & 1);
     }
 
-    public static long decodeSignedLong(ByteBuf input) throws IOException {
+    public static long decodeSignedLong(ByteBuf input) {
         long n = decodeUnsigned(input);
         return (n >> 1) ^ -(n & 1);
     }

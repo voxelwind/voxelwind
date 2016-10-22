@@ -6,6 +6,7 @@ import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.McpeUtil;
@@ -36,6 +37,7 @@ public final class MetadataDictionary {
     }
 
     public void writeTo(ByteBuf buf) {
+        Varints.encodeUnsigned(typeMap.size(), buf);
         typeMap.forEachEntry((i, o) -> {
             serialize(buf, i, o);
             return true;
@@ -96,38 +98,38 @@ public final class MetadataDictionary {
 
         if (o instanceof Byte) {
             Byte aByte = (Byte) o;
-            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_BYTE, idx));
+            Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_BYTE, buf);
+            Varints.encodeUnsigned(idx, buf);
             buf.writeByte(aByte);
         } else if (o instanceof Short) {
             Short aShort = (Short) o;
-            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_SHORT, idx));
+            Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_SHORT, buf);
+            Varints.encodeUnsigned(idx, buf);
             buf.writeShort(aShort);
         } else if (o instanceof Integer) {
             Integer integer = (Integer) o;
-            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_INT, idx));
-            buf.writeInt(integer);
+            Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_INT, buf);
+            Varints.encodeUnsigned(idx, buf);
+            Varints.encodeSigned(integer, buf);
         } else if (o instanceof Float) {
             Float aFloat = (Float) o;
-            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_FLOAT, idx));
+            Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_FLOAT, buf);
+            Varints.encodeUnsigned(idx, buf);
             buf.writeFloat(aFloat);
         } else if (o instanceof String) {
             String s = (String) o;
-            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_STRING, idx));
-            RakNetUtil.writeString(buf, s);
+            Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_STRING, buf);
+            Varints.encodeUnsigned(idx, buf);
+            McpeUtil.writeVarintLengthString(buf, s);
         } else if (o instanceof ItemStack) {
             ItemStack stack = (ItemStack) o;
-            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_SLOT, idx));
-            buf.writeShort(stack.getItemType().getId());
-            buf.writeByte(stack.getAmount());
-            Optional<Metadata> data = stack.getItemData();
-            if (data.isPresent()) {
-                buf.writeShort(MetadataSerializer.serializeMetadata(stack));
-            } else {
-                buf.writeShort(0);
-            }
+            Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_SLOT, buf);
+            Varints.encodeUnsigned(idx, buf);
+            McpeUtil.writeItemStack(buf, stack);
         } else if (o instanceof Vector3i) {
             Vector3i vector3i = (Vector3i) o;
-            buf.writeByte(EntityMetadataConstants.idify(EntityMetadataConstants.DATA_TYPE_POS, idx));
+            Varints.encodeUnsigned(EntityMetadataConstants.DATA_TYPE_POS, buf);
+            Varints.encodeUnsigned(idx, buf);
             McpeUtil.writeVector3i(buf, vector3i, false);
         } else {
             throw new IllegalArgumentException("Unsupported type " + o.getClass().getName());

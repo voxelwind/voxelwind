@@ -207,9 +207,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         // - player.experience
         // - generic.movementSpeed
         // - generic.absorption
-        Attribute health = new Attribute("generic.health", 0f, getMaximumHealth(), getHealth());
-        Attribute hunger = new Attribute("player.hunger", 0f, 20f, 20f); // TODO: Implement hunger
-        Attribute speed = new Attribute("generic.movementSpeed", 0, Float.MAX_VALUE, 0.1f);
+        Attribute health = new Attribute("generic.health", 0f, getMaximumHealth(), getHealth(), defaultValue);
+        Attribute hunger = new Attribute("player.hunger", 0f, 20f, 20f, defaultValue); // TODO: Implement hunger
+        Attribute speed = new Attribute("generic.movementSpeed", 0, Float.MAX_VALUE, 0.1f, defaultValue);
         // TODO: Implement levels, movement speed, and absorption.
 
         McpeUpdateAttributes packet = new McpeUpdateAttributes();

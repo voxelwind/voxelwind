@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 /**
@@ -81,9 +82,9 @@ public class AnvilRegionReader implements Closeable {
 
         switch (type) {
             case 1:
-                return new GZIPInputStream(new ByteBufferBackedInputStream(chunkData));
+                return new GZIPInputStream(new ByteBufferBackedInputStream(chunkData), 2048);
             case 2:
-                return new InflaterInputStream(new ByteBufferBackedInputStream(chunkData));
+                return new InflaterInputStream(new ByteBufferBackedInputStream(chunkData), new Inflater(), 2048);
             default:
                 throw new IllegalArgumentException("found illegal chunk compression type " + type);
         }

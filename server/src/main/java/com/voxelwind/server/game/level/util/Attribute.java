@@ -7,12 +7,14 @@ public class Attribute {
     private final float minimumValue;
     private final float maximumValue;
     private final float value;
+    private final float defaultValue;
 
-    public Attribute(String name, float minimumValue, float maximumValue, float value) {
+    public Attribute(String name, float minimumValue, float maximumValue, float value, float defaultValue) {
         this.name = name;
         this.minimumValue = minimumValue;
         this.maximumValue = maximumValue;
         this.value = value;
+        this.defaultValue = defaultValue;
     }
 
     public String getName() {
@@ -31,6 +33,10 @@ public class Attribute {
         return value;
     }
 
+    public float getDefaultValue() {
+        return defaultValue;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -39,12 +45,13 @@ public class Attribute {
         return Float.compare(attribute.minimumValue, minimumValue) == 0 &&
                 Float.compare(attribute.maximumValue, maximumValue) == 0 &&
                 Float.compare(attribute.value, value) == 0 &&
+                Float.compare(attribute.defaultValue, defaultValue) == 0 &&
                 Objects.equals(name, attribute.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, minimumValue, maximumValue, value);
+        return Objects.hash(name, minimumValue, maximumValue, value, defaultValue);
     }
 
     @Override
@@ -54,6 +61,7 @@ public class Attribute {
                 ", minimumValue=" + minimumValue +
                 ", maximumValue=" + maximumValue +
                 ", value=" + value +
+                ", defaultValue=" + defaultValue +
                 '}';
     }
 }
