@@ -44,7 +44,11 @@ public class ShortTag implements Tag<Short> {
 
     @Override
     public String toString() {
-        String append = name == null ? "" : "('" + name + "')";
+        String append = "";
+        if (name != null && !name.equals("")) {
+            append = "(\"" + this.getName() + "\")";
+        }
+
         return "TAG_Short" + append + ": " + value;
     }
 }

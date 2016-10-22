@@ -1,14 +1,15 @@
 package com.voxelwind.nbt.tags;
 
+import java.util.Arrays;
 import java.util.Objects;
 
-public class StringTag implements Tag<String> {
+public class IntArrayTag implements Tag<int[]> {
     private final String name;
-    private final String value;
+    private final int[] value;
 
-    public StringTag(String name, String value) {
+    public IntArrayTag(String name, int[] value) {
         this.name = name;
-        this.value = value;
+        this.value = Objects.requireNonNull(value, "value").clone();
     }
 
     @Override
@@ -17,17 +18,17 @@ public class StringTag implements Tag<String> {
     }
 
     @Override
-    public String getValue() {
-        return value;
+    public int[] getValue() {
+        return value.clone();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StringTag stringTag = (StringTag) o;
-        return Objects.equals(name, stringTag.name) &&
-                Objects.equals(value, stringTag.value);
+        IntArrayTag that = (IntArrayTag) o;
+        return Objects.equals(name, that.name) &&
+                Arrays.equals(value, that.value);
     }
 
     @Override
@@ -42,6 +43,6 @@ public class StringTag implements Tag<String> {
             append = "(\"" + this.getName() + "\")";
         }
 
-        return "TAG_String" + append + ": " + value;
+        return "TAG_Int_Array" + append + ": [" + value.length + " bytes]";
     }
 }

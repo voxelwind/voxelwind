@@ -2,11 +2,11 @@ package com.voxelwind.nbt.tags;
 
 import java.util.Objects;
 
-public class StringTag implements Tag<String> {
+public class FloatTag implements Tag<Float> {
     private final String name;
-    private final String value;
+    private final float value;
 
-    public StringTag(String name, String value) {
+    public FloatTag(String name, float value) {
         this.name = name;
         this.value = value;
     }
@@ -17,7 +17,11 @@ public class StringTag implements Tag<String> {
     }
 
     @Override
-    public String getValue() {
+    public Float getValue() {
+        return value;
+    }
+
+    public float getPrimitiveValue() {
         return value;
     }
 
@@ -25,9 +29,9 @@ public class StringTag implements Tag<String> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StringTag stringTag = (StringTag) o;
-        return Objects.equals(name, stringTag.name) &&
-                Objects.equals(value, stringTag.value);
+        FloatTag floatTag = (FloatTag) o;
+        return Float.compare(floatTag.value, value) == 0 &&
+                Objects.equals(name, floatTag.name);
     }
 
     @Override
@@ -42,6 +46,6 @@ public class StringTag implements Tag<String> {
             append = "(\"" + this.getName() + "\")";
         }
 
-        return "TAG_String" + append + ": " + value;
+        return "TAG_Float" + append + ": " + value;
     }
 }

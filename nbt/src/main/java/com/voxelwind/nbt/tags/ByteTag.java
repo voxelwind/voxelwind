@@ -42,7 +42,11 @@ public class ByteTag implements Tag<Byte> {
 
     @Override
     public String toString() {
-        String append = name == null ? "" : "('" + name + "')";
+        String append = "";
+        if (name != null && !name.equals("")) {
+            append = "(\"" + this.getName() + "\")";
+        }
+
         return "TAG_Byte" + append + ": " + value;
     }
 }

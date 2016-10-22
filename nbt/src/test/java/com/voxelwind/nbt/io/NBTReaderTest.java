@@ -9,6 +9,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.*;
 
@@ -43,6 +44,21 @@ public class NBTReaderTest {
         verifyHelloWorld(readTag);
     }
 
+    @Test
+    public void readNotchsBigTest() throws IOException {
+        String path = getClass().getClassLoader().getResource("bigtest.nbt").getFile();
+        if (isWindows()) {
+            path = path.substring(1);
+        }
+
+        Tag readTag;
+        try (NBTReader reader = NBTReaders.createBigEndianReader(new GZIPInputStream(Files.newInputStream(Paths.get(path))))) {
+            readTag = reader.readTag();
+        }
+
+        verifyBigTest(readTag);
+    }
+
     private void verifyHelloWorld(Tag<?> readTag) {
         assertTrue("Read tag is not an compound tag, violates NBT standard!", readTag instanceof CompoundTag);
         CompoundTag compoundTag = (CompoundTag) readTag;
@@ -51,6 +67,14 @@ public class NBTReaderTest {
         Tag<?> nameTagRaw = compoundTag.getValue().get("name");
         assertTrue("'name' tag inside read compound is not a TAG_String", nameTagRaw instanceof StringTag);
         assertEquals("Bananrama", nameTagRaw.getValue());
+    }
+
+    private void verifyBigTest(Tag<?> readTag) {
+        assertTrue("Read tag is not an compound tag, violates NBT standard!", readTag instanceof CompoundTag);
+        CompoundTag compoundTag = (CompoundTag) readTag;
+        assertEquals("Level", compoundTag.getName());
+
+        // TODO: Finish filling in
     }
 
     private static boolean isWindows() {

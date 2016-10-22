@@ -2,11 +2,11 @@ package com.voxelwind.nbt.tags;
 
 import java.util.Objects;
 
-public class StringTag implements Tag<String> {
+public class IntTag implements Tag<Integer> {
     private final String name;
-    private final String value;
+    private final int value;
 
-    public StringTag(String name, String value) {
+    public IntTag(String name, int value) {
         this.name = name;
         this.value = value;
     }
@@ -17,7 +17,11 @@ public class StringTag implements Tag<String> {
     }
 
     @Override
-    public String getValue() {
+    public Integer getValue() {
+        return value;
+    }
+
+    public int getPrimitiveValue() {
         return value;
     }
 
@@ -25,9 +29,9 @@ public class StringTag implements Tag<String> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StringTag stringTag = (StringTag) o;
-        return Objects.equals(name, stringTag.name) &&
-                Objects.equals(value, stringTag.value);
+        IntTag intTag = (IntTag) o;
+        return value == intTag.value &&
+                Objects.equals(name, intTag.name);
     }
 
     @Override
@@ -42,6 +46,6 @@ public class StringTag implements Tag<String> {
             append = "(\"" + this.getName() + "\")";
         }
 
-        return "TAG_String" + append + ": " + value;
+        return "TAG_Int" + append + ": " + value;
     }
 }

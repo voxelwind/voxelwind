@@ -2,11 +2,14 @@ package com.voxelwind.nbt.tags;
 
 import java.util.Objects;
 
-public class StringTag implements Tag<String> {
+/**
+ * Created by andrew on 10/21/16.
+ */
+public class LongTag implements Tag<Long> {
     private final String name;
-    private final String value;
+    private final long value;
 
-    public StringTag(String name, String value) {
+    public LongTag(String name, long value) {
         this.name = name;
         this.value = value;
     }
@@ -17,7 +20,11 @@ public class StringTag implements Tag<String> {
     }
 
     @Override
-    public String getValue() {
+    public Long getValue() {
+        return value;
+    }
+
+    public long getPrimitiveValue() {
         return value;
     }
 
@@ -25,9 +32,9 @@ public class StringTag implements Tag<String> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StringTag stringTag = (StringTag) o;
-        return Objects.equals(name, stringTag.name) &&
-                Objects.equals(value, stringTag.value);
+        LongTag longTag = (LongTag) o;
+        return value == longTag.value &&
+                Objects.equals(name, longTag.name);
     }
 
     @Override
@@ -42,6 +49,6 @@ public class StringTag implements Tag<String> {
             append = "(\"" + this.getName() + "\")";
         }
 
-        return "TAG_String" + append + ": " + value;
+        return "TAG_Long" + append + ": " + value;
     }
 }
