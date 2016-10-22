@@ -30,7 +30,7 @@ public class NBTWriterTest {
         allTags.add(new FloatTag("change", 1.83f));
         allTags.add(new DoubleTag("total", 18.72f));
         allTags.add(new LongTag("paid", 20));
-        allTags.add(new ShortTag("dogs", (short) 32768));
+        allTags.add(new ShortTag("dogs", (short) 32767));
         allTags.add(new ShortTag("bottles of beer", (byte) 99));
 
         // List and Compound
@@ -44,8 +44,12 @@ public class NBTWriterTest {
         Random random = new Random(1);
         byte[] bytes = new byte[100];
         random.nextBytes(bytes);
+        int[] ints = new int[100];
+        for (int i = 0; i < ints.length; i++) {
+            ints[i] = random.nextInt();
+        }
         allTags.add(new ByteArrayTag("byteArray", bytes));
-        allTags.add(new IntArrayTag("intArray", random.ints().limit(100).toArray()));
+        allTags.add(new IntArrayTag("intArray", ints));
 
         selfVerify(CompoundTag.createFromList("Cornucopia of magic", allTags));
     }
