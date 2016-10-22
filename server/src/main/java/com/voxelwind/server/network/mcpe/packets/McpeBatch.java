@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.PacketRegistry;
 import com.voxelwind.server.network.PacketType;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
@@ -21,12 +22,12 @@ public class McpeBatch implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         ByteBuf decompressed = null;
         try {
-            int compressedSize = buffer.readInt();
+            int compressedSize = Varints.decodeUnsigned(buffer);
             decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
 
             // Now process the decompressed result.
             while (decompressed.isReadable()) {
-                int length = Math.toIntExact(decompressed.readUnsignedInt()); // WTF
+                int length = Varints.decodeUnsigned(buffer);
                 ByteBuf data = decompressed.readSlice(length);
 
                 if (data.readableBytes() == 0) {
@@ -74,29 +75,27 @@ public class McpeBatch implements NetworkPackage {
                     throw new DataFormatException("Packet " + netPackage + " does not permit batching.");
                 }
 
-                // Write dummy size
-                int lengthPositionForPacket = source.writerIndex();
-                source.writeInt(0);
-                int afterLength = source.writerIndex();
+                ByteBuf packetBuf = PooledByteBufAllocator.DEFAULT.directBuffer();
+                try {
+                    // Encode the packet
+                    packetBuf.writeByte((PacketRegistry.getId(netPackage) & 0xFF));
+                    netPackage.encode(packetBuf);
 
-                // Encode the packet
-                source.writeByte((PacketRegistry.getId(netPackage) & 0xFF));
-                netPackage.encode(source);
-
-                // Replace the dummy length
-                source.setInt(lengthPositionForPacket, source.writerIndex() - afterLength);
+                    Varints.encodeUnsigned(packetBuf.readableBytes(), source);
+                    source.writeBytes(packetBuf);
+                } finally {
+                    packetBuf.release();
+                }
             }
 
-            // Write a temporary size here. We'll replace it later.
-            int lengthPosition = buffer.writerIndex();
-            buffer.writeInt(0);
-
             // Compress the buffer
-            int afterLength = buffer.writerIndex();
-            CompressionUtil.deflate(source, buffer);
-
-            // Replace the dummy length we wrote
-            buffer.setInt(lengthPosition, buffer.writerIndex() - afterLength);
+            ByteBuf deflated = CompressionUtil.deflate(source);
+            try {
+                Varints.encodeUnsigned(deflated.readableBytes(), buffer);
+                buffer.writeBytes(deflated);
+            } finally {
+                deflated.release();
+            }
         } catch (DataFormatException e) {
             throw new RuntimeException("Unable to deflate batch data", e);
         } finally {
