@@ -58,7 +58,8 @@ public class VoxelwindChunk implements Chunk {
     }
 
     private static int xyzIdx(int x, int y, int z) {
-        return x + 16 * (z + 16 * y);
+        //return x + 16 * (z + 16 * y);
+        return (x*2048) + (z*128) + y;
     }
 
     public int getX() {
@@ -227,7 +228,7 @@ public class VoxelwindChunk implements Chunk {
             McpeFullChunkData data = new McpeFullChunkData();
             data.setChunkX(x);
             data.setChunkZ(z);
-            data.setOrder((byte) 1);
+            data.setOrder((byte) 0);
 
             // Populate the actual chunk data to send. 96KB will be allocated, enough to fill chunk data plus a decent
             // number of block entities.

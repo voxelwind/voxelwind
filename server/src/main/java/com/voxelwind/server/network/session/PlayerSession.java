@@ -202,7 +202,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private void sendAttributes() {
         Attribute health = new Attribute("minecraft:health", 0f, getMaximumHealth(), getHealth(), getMaximumHealth());
         Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, 20f, 20f); // TODO: Implement hunger
-        Attribute speed = new Attribute("minecraft:movement", 0, Float.MAX_VALUE, 0.1f, 0.1f);
+        Attribute speed = new Attribute("minecraft:movement", 0, 0.5f, 0.1f, 0.1f);
         // TODO: Implement levels, movement speed, and absorption.
 
         McpeUpdateAttributes packet = new McpeUpdateAttributes();
@@ -254,7 +254,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         startGame.setGenerator(1);
         startGame.setGamemode(gameMode.ordinal());
         startGame.setEntityId(getEntityId());
-        startGame.setSpawn(getPosition());
+        startGame.setSpawn(getGamePosition());
+        startGame.setWorldSpawn(getLevel().getSpawnLocation().toInt());
         startGame.setWorldName(getLevel().getName());
         startGame.setSecret("SECRET");
         session.addToSendQueue(startGame);

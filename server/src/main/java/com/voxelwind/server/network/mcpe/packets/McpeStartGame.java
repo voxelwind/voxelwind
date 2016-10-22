@@ -2,6 +2,7 @@ package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
+import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
@@ -19,9 +20,7 @@ public class McpeStartGame implements NetworkPackage {
     private int generator; // = null;
     private int gamemode; // = null;
     private int difficulty; // = null;
-    private int x; // = null;
-    private int y; // = null;
-    private int z; // = null;
+    private Vector3i worldSpawn; // = null;
     private boolean hasAchievementsDisabled; // = null;
     private int dayCycleStopTime; // = null;
     private boolean eduMode; // = null;
@@ -50,7 +49,7 @@ public class McpeStartGame implements NetworkPackage {
         Varints.encodeSigned(buffer, generator);
         Varints.encodeSigned(buffer, gamemode);
         Varints.encodeSigned(buffer, dimension);
-        McpeUtil.writeBlockCoords(buffer, spawn.toInt());
+        McpeUtil.writeBlockCoords(buffer, worldSpawn);
         buffer.writeBoolean(hasAchievementsDisabled);
         Varints.encodeSigned(buffer, dayCycleStopTime);
         buffer.writeBoolean(eduMode);

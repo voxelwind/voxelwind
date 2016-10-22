@@ -66,12 +66,13 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
     }
 
     private static int xyzIdx(int x, int y, int z) {
-        return x + 16 * (z + 16 * y);
+        //return x + 16 * (z + 16 * y);
+        return (x*2048) + (z*128) + y;
     }
 
     private static void checkPosition(int x, int y, int z) {
         Preconditions.checkArgument(x >= 0 && x <= 15, "x value (%s) not in range (0 to 15)", x);
         Preconditions.checkArgument(z >= 0 && z <= 15, "z value (%s) not in range (0 to 15)", z);
-        Preconditions.checkArgument(y >= 0 && y <= 128, "y value (%s) not in range (0 to 128)", y);
+        Preconditions.checkArgument(y >= 0 && y < 128, "y value (%s) not in range (0 to 127)", y);
     }
 }

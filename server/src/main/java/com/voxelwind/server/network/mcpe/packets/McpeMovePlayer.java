@@ -20,7 +20,7 @@ public class McpeMovePlayer implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         entityId = Varints.decodeUnsignedLong(buffer);
         position = McpeUtil.readVector3f(buffer);
-        rotation = McpeUtil.readRotation(buffer);
+        rotation = McpeUtil.readByteRotation(buffer);
         mode = buffer.readByte();
         onGround = buffer.readBoolean();
     }
@@ -29,7 +29,7 @@ public class McpeMovePlayer implements NetworkPackage {
     public void encode(ByteBuf buffer) {
         Varints.encodeUnsignedLong(buffer, entityId);
         McpeUtil.writeVector3f(buffer, position);
-        McpeUtil.writeRotation(buffer, rotation);
+        McpeUtil.writeByteRotation(buffer, rotation);
         buffer.writeByte(mode);
         buffer.writeBoolean(onGround);
     }
