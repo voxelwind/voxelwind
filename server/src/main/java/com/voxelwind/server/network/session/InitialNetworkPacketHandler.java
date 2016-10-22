@@ -3,6 +3,7 @@ package com.voxelwind.server.network.session;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
@@ -114,7 +115,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                     startEncryptionHandshake(key);
                 } catch (Exception e1) {
                     // Disconnect the player.
-                    LOGGER.error("Unable to initialize player session", e);
+                    LOGGER.error("Unable to force-initialize player session", e1);
                     session.disconnect("Internal server error");
                 }
             } else {
@@ -235,7 +236,10 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                         throw new JOSEException("Unable to verify key in chain.");
                     }
                 }
-                lastKey = getKey((String) object.getPayload().toJSONObject().get("identityPublicKey"));
+                JsonNode payloadNode = VoxelwindServer.MAPPER.readTree(object.getPayload().toString());
+                JsonNode ipkNode = payloadNode.get("identityPublicKey");
+                Verify.verify(ipkNode != null && ipkNode.getNodeType() == JsonNodeType.STRING, "identityPublicKey node is missing in chain");
+                lastKey = getKey(ipkNode.asText());
             }
 
             if (!trustedChain) {

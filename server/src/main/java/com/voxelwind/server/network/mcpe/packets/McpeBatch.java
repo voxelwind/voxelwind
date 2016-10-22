@@ -27,7 +27,7 @@ public class McpeBatch implements NetworkPackage {
 
             // Now process the decompressed result.
             while (decompressed.isReadable()) {
-                int length = Varints.decodeUnsigned(buffer);
+                int length = Varints.decodeUnsigned(decompressed);
                 ByteBuf data = decompressed.readSlice(length);
 
                 if (data.readableBytes() == 0) {

@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -10,11 +11,11 @@ public class McpeChunkRadiusUpdated implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        radius = buffer.readInt();
+        radius = Varints.decodeSigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeInt(radius);
+        Varints.encodeSigned(radius, buffer);
     }
 }
