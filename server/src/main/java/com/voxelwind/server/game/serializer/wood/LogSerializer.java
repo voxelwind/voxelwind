@@ -15,8 +15,8 @@ import java.util.Map;
 
 public class LogSerializer extends SimpleWoodSerializer {
     private static final Map<BlockType, TreeSpecies[]> BLOCK_SPECIES_MAPPING = ImmutableMap.<BlockType, TreeSpecies[]>builder()
-            .put(BlockTypes.WOOD, new TreeSpecies[] { TreeSpecies.OAK, TreeSpecies.SPRUCE, TreeSpecies.BIRCH, TreeSpecies.JUNGLE })
-            .put(BlockTypes.ACACIA_WOOD, new TreeSpecies[] { TreeSpecies.ACACIA, TreeSpecies.DARK_OAK })
+            .put(BlockTypes.WOOD, new TreeSpecies[]{TreeSpecies.OAK, TreeSpecies.SPRUCE, TreeSpecies.BIRCH, TreeSpecies.JUNGLE})
+            .put(BlockTypes.ACACIA_WOOD, new TreeSpecies[]{TreeSpecies.ACACIA, TreeSpecies.DARK_OAK})
             .build();
     private static final LogDirection[] DIRECTIONS = LogDirection.values();
 

@@ -2,10 +2,6 @@ package com.voxelwind.server.network.mcpe;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.Tag;
-import com.flowpowered.nbt.stream.NBTInputStream;
-import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
@@ -16,6 +12,10 @@ import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.util.Rotation;
+import com.voxelwind.nbt.io.NBTReader;
+import com.voxelwind.nbt.io.NBTWriter;
+import com.voxelwind.nbt.tags.CompoundTag;
+import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
 import com.voxelwind.server.game.item.VoxelwindNBTUtils;
@@ -202,8 +202,8 @@ public class McpeUtil {
                 .amount(count);
 
         if (nbtSize > 0) {
-            try (NBTInputStream stream = new NBTInputStream(new ByteBufInputStream(buf.readSlice(nbtSize)), false, ByteOrder.LITTLE_ENDIAN)) {
-                Tag<?> tag = stream.readTag();
+            try (NBTReader reader = new NBTReader(new ByteBufInputStream(buf.readSlice(nbtSize).order(ByteOrder.LITTLE_ENDIAN)))) {
+                Tag<?> tag = reader.readTag();
                 if (tag instanceof CompoundTag) {
                     VoxelwindNBTUtils.applyItemData(builder, ((CompoundTag) tag).getValue());
                 }
@@ -235,8 +235,8 @@ public class McpeUtil {
         int afterSizeIndex = buf.writerIndex();
 
         if (stack instanceof VoxelwindItemStack) {
-            try (NBTOutputStream stream = new NBTOutputStream(new ByteBufOutputStream(buf), false, ByteOrder.LITTLE_ENDIAN)) {
-                stream.writeTag(((VoxelwindItemStack) stack).toSpecificNBT());
+            try (NBTWriter stream = new NBTWriter(new ByteBufOutputStream(buf.order(ByteOrder.LITTLE_ENDIAN)))) {
+                stream.write(((VoxelwindItemStack) stack).toSpecificNBT());
             } catch (IOException e) {
                 // This shouldn't happen (as this is backed by a Netty ByteBuf), but okay...
                 throw new IllegalStateException("Unable to save NBT data", e);

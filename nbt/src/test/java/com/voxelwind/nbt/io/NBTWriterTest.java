@@ -49,7 +49,8 @@ public class NBTWriterTest {
         allTags.add(new IntTag("answer to the life, the universe, and everything", 42));
         allTags.add(new FloatTag("change", 1.83f));
         allTags.add(new DoubleTag("total", 18.72f));
-        allTags.add(new LongTag("a yuge number", random.nextLong()));
+        allTags.add(new LongTag("a huge number", random.nextLong()));
+        allTags.add(new LongTag("a smaller but still huge number", random.nextInt()));
         allTags.add(new ShortTag("dogs", (short) 32767));
         allTags.add(new ByteTag("bottles of beer", (byte) 99));
 
@@ -57,7 +58,7 @@ public class NBTWriterTest {
         List<StringTag> stringTags = new ArrayList<>();
         stringTags.add(new StringTag(null, "world peace"));
         stringTags.add(new StringTag(null, "O(1) internet"));
-        stringTags.add(new StringTag(null, "interpid space explorers"));
+        stringTags.add(new StringTag(null, "intrepid space explorers"));
         allTags.add(new ListTag<>("pipe dreams", StringTag.class, stringTags));
 
         // Arrays

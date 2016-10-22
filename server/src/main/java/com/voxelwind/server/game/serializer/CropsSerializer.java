@@ -1,14 +1,12 @@
 package com.voxelwind.server.game.serializer;
 
-import com.flowpowered.nbt.CompoundTag;
-import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
-import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.data.Crops;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
+import com.voxelwind.nbt.tags.CompoundTag;
 
 public class CropsSerializer implements Serializer {
     @Override

@@ -2,34 +2,33 @@ package com.voxelwind.nbt.util;
 
 import io.netty.buffer.ByteBuf;
 
-import java.io.*;
-import java.nio.ByteBuffer;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 public class Varints {
-    private static final int MSB = 0x80
-            , REST = 0x7F
-            , MSBALL = ~REST;
+    private static final int MSB = 0x80, REST = 0x7F, MSBALL = ~REST;
     private static final long MSBALL_LONG = ~REST;
 
     public static void encodeUnsigned(int num, DataOutput output) throws IOException {
         while ((num & MSBALL) != 0) {
-            output.writeByte((byte)((num & REST) | MSB));
-            num >>= 7;
+            output.writeByte((byte) ((num & REST) | MSB));
+            num >>>= 7;
         }
         output.writeByte((byte) num);
     }
 
     public static void encodeUnsigned(int num, ByteBuf output) {
         while ((num & MSBALL) != 0) {
-            output.writeByte((byte)((num & REST) | MSB));
-            num >>= 7;
+            output.writeByte((byte) ((num & REST) | MSB));
+            num >>>= 7;
         }
         output.writeByte((byte) num);
     }
 
     public static void encodeUnsignedLong(long num, DataOutput output) throws IOException {
         while ((num & MSBALL_LONG) != 0) {
-            output.writeByte((byte)((num & REST) | MSB));
+            output.writeByte((byte) ((num & REST) | MSB));
             num >>= 7;
         }
         output.writeByte((byte) num);
@@ -37,7 +36,7 @@ public class Varints {
 
     public static void encodeUnsignedLong(long num, ByteBuf output) {
         while ((num & MSBALL_LONG) != 0) {
-            output.writeByte((byte)((num & REST) | MSB));
+            output.writeByte((byte) ((num & REST) | MSB));
             num >>>= 7;
         }
         output.writeByte((int) (num & REST));
@@ -52,8 +51,7 @@ public class Varints {
             read = input.readByte();
             result |= (read & 0x7f) << j++ * 7;
 
-            if (j > 5)
-            {
+            if (j > 5) {
                 throw new IllegalArgumentException("VarInt too big");
             }
         } while ((read & 0x80) == 0x80);
@@ -70,8 +68,7 @@ public class Varints {
             read = input.readByte();
             result |= (read & 0x7f) << j++ * 7;
 
-            if (j > 5)
-            {
+            if (j > 5) {
                 throw new IllegalArgumentException("VarInt too big");
             }
         } while ((read & 0x80) == 0x80);
@@ -88,8 +85,7 @@ public class Varints {
             read = input.readByte();
             result |= (read & 0x7f) << j++ * 7;
 
-            if (j > 10)
-            {
+            if (j > 10) {
                 throw new IllegalArgumentException("VarInt too big");
             }
         } while ((read & 0x80) == 0x80);
@@ -106,8 +102,7 @@ public class Varints {
             read = input.readByte();
             result |= (read & 0x7f) << j++ * 7;
 
-            if (j > 10)
-            {
+            if (j > 10) {
                 throw new IllegalArgumentException("VarInt too big");
             }
         } while ((read & 0x80) == 0x80);

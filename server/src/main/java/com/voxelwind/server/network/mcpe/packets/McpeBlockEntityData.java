@@ -1,8 +1,8 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.flowpowered.nbt.Tag;
-import com.flowpowered.nbt.stream.NBTOutputStream;
+import com.voxelwind.nbt.io.NBTWriter;
+import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import io.netty.buffer.ByteBuf;
@@ -25,8 +25,8 @@ public class McpeBlockEntityData implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         McpeUtil.writeVector3i(buffer, position, false);
-        try (NBTOutputStream stream = new NBTOutputStream(new ByteBufOutputStream(buffer), false, ByteOrder.LITTLE_ENDIAN)) {
-            stream.writeTag(blockEntityData);
+        try (NBTWriter writer = new NBTWriter(new ByteBufOutputStream(buffer.order(ByteOrder.LITTLE_ENDIAN)))) {
+            writer.write(blockEntityData);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

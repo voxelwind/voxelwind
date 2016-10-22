@@ -46,9 +46,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.flowpowered</groupId>
-            <artifactId>flow-nbt</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <groupId>com.voxelwind</groupId>
+            <artifactId>voxelwind-nbt</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

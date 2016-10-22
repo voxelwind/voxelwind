@@ -1,14 +1,13 @@
 package com.voxelwind.server.game.serializer;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
-import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
+import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.server.game.serializer.wood.LogSerializer;
 import com.voxelwind.server.game.serializer.wood.SimpleWoodSerializer;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -82,6 +81,26 @@ public class MetadataSerializer implements Serializer {
 
     }
 
+    public static Metadata deserializeMetadata(ItemType type, short metadata) {
+        return INSTANCE.writeMetadata(type, metadata);
+    }
+
+    public static BlockEntity deserializeNBT(ItemType type, CompoundTag tag) {
+        return INSTANCE.writeNBT(type, tag);
+    }
+
+    public static short serializeMetadata(BlockState block) {
+        return INSTANCE.readMetadata(block);
+    }
+
+    public static short serializeMetadata(ItemStack itemStack) {
+        return INSTANCE.readMetadata(itemStack);
+    }
+
+    public static CompoundTag serializeNBT(BlockState block) {
+        return INSTANCE.readNBT(block);
+    }
+
     @Override
     public CompoundTag readNBT(BlockState block) {
         Serializer dataSerializer = SERIALIZERS.get(block.getBlockType().getId());
@@ -140,25 +159,5 @@ public class MetadataSerializer implements Serializer {
         }
 
         return dataSerializer.writeNBT(item, nbtTag);
-    }
-
-    public static Metadata deserializeMetadata(ItemType type, short metadata) {
-        return INSTANCE.writeMetadata(type, metadata);
-    }
-
-    public static BlockEntity deserializeNBT(ItemType type, CompoundTag tag) {
-        return INSTANCE.writeNBT(type, tag);
-    }
-
-    public static short serializeMetadata(BlockState block) {
-        return INSTANCE.readMetadata(block);
-    }
-
-    public static short serializeMetadata(ItemStack itemStack) {
-        return INSTANCE.readMetadata(itemStack);
-    }
-
-    public static CompoundTag serializeNBT(BlockState block) {
-        return INSTANCE.readNBT(block);
     }
 }

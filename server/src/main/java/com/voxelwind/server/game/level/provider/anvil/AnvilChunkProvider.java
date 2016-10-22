@@ -1,17 +1,16 @@
 package com.voxelwind.server.game.level.provider.anvil;
 
-import com.flowpowered.nbt.CompoundMap;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.Tag;
-import com.flowpowered.nbt.stream.NBTInputStream;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
+import com.voxelwind.nbt.io.NBTReader;
+import com.voxelwind.nbt.io.NBTReaders;
+import com.voxelwind.nbt.tags.CompoundTag;
+import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.level.provider.ChunkProvider;
 import com.voxelwind.server.game.level.provider.anvil.util.AnvilRegionReader;
 import lombok.Value;
 
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -58,13 +57,13 @@ public class AnvilChunkProvider implements ChunkProvider {
                 // Now load the root tag from this chunk.
                 if (regionReader.hasChunk(irXZ.x, irXZ.z)) {
                     Tag<?> tag;
-                    try (NBTInputStream stream = new NBTInputStream(regionReader.readChunk(irXZ.x, irXZ.z), false)) {
+                    try (NBTReader stream = NBTReaders.createBigEndianReader(regionReader.readChunk(irXZ.x, irXZ.z))) {
                         tag = stream.readTag();
                     }
 
                     // Grab the sections.
-                    CompoundMap map = ((CompoundTag) tag).getValue();
-                    CompoundMap levelMap = ((CompoundMap) map.get("Level").getValue());
+                    Map<String, Tag<?>> compoundValue = ((CompoundTag) tag).getValue();
+                    Map<String, Tag<?>> levelMap = ((CompoundTag) compoundValue.get("Level")).getValue();
 
                     // Convert the Anvil chunk into a Voxelwind-friendly format.
                     chunkFuture.complete(AnvilConversion.convertChunkToVoxelwind(levelMap, level));

@@ -2,19 +2,18 @@ package com.voxelwind.server.game.level;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.IntTag;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.ClassPath;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
-import com.voxelwind.api.game.entities.monsters.Zombie;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.server.Server;
+import com.voxelwind.nbt.tags.CompoundTag;
+import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.server.game.entities.EntitySpawner;
@@ -26,7 +25,6 @@ import com.voxelwind.server.game.level.manager.LevelPacketManager;
 import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBlockEntityData;
-import com.voxelwind.server.network.mcpe.packets.McpeSetTime;
 import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -201,9 +199,9 @@ public class VoxelwindLevel implements Level {
         // Block entities may have changed too.
         if (state.getBlockEntity().isPresent()) {
             CompoundTag blockEntityTag = MetadataSerializer.serializeNBT(state);
-            blockEntityTag.getValue().put(new IntTag("x", position.getX()));
-            blockEntityTag.getValue().put(new IntTag("y", position.getY()));
-            blockEntityTag.getValue().put(new IntTag("z", position.getZ()));
+            blockEntityTag.getValue().put("x", new IntTag("x", position.getX()));
+            blockEntityTag.getValue().put("y", new IntTag("y", position.getY()));
+            blockEntityTag.getValue().put("z", new IntTag("z", position.getZ()));
 
             McpeBlockEntityData packet2 = new McpeBlockEntityData();
             packet2.setPosition(position);

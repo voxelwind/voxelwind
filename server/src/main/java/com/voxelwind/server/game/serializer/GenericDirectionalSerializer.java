@@ -1,6 +1,5 @@
 package com.voxelwind.server.game.serializer;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
@@ -8,6 +7,7 @@ import com.voxelwind.api.game.item.data.Directional;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.api.game.util.data.BlockFace;
+import com.voxelwind.nbt.tags.CompoundTag;
 import gnu.trove.map.TObjectShortMap;
 import gnu.trove.map.TShortObjectMap;
 import gnu.trove.map.hash.TObjectShortHashMap;

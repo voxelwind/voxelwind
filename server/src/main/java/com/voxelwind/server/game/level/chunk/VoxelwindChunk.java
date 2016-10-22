@@ -1,17 +1,17 @@
 package com.voxelwind.server.game.level.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.flowpowered.nbt.CompoundMap;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.IntTag;
-import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.ChunkSnapshot;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
+import com.voxelwind.nbt.io.NBTWriter;
+import com.voxelwind.nbt.tags.CompoundTag;
+import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.util.NibbleArray;
@@ -20,6 +20,10 @@ import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.DataOutputStream;
@@ -110,9 +114,9 @@ public class VoxelwindChunk implements Chunk {
         if (entity.isPresent()) {
             int pos = xyzIdx(x, y, z);
             CompoundTag blockEntityTag = MetadataSerializer.serializeNBT(state);
-            blockEntityTag.getValue().put(new IntTag("x", x + (this.x * 16)));
-            blockEntityTag.getValue().put(new IntTag("y", y));
-            blockEntityTag.getValue().put(new IntTag("z", z + (this.z * 16)));
+            blockEntityTag.getValue().put("x", new IntTag("x", x + (this.x * 16)));
+            blockEntityTag.getValue().put("y", new IntTag("y", y));
+            blockEntityTag.getValue().put("z", new IntTag("z", z + (this.z * 16)));
             serializedBlockEntities.put(pos, blockEntityTag);
             blockEntities.put(pos, entity.get());
         }
@@ -228,41 +232,42 @@ public class VoxelwindChunk implements Chunk {
             data.setChunkZ(z);
             data.setOrder((byte) 1);
 
-            // Populate the actual chunk data to send
-            ByteArrayOutputStream memoryStream = new ByteArrayOutputStream();
+            // Populate the actual chunk data to send. 96KB will be allocated, enough to fill chunk data plus a decent
+            // number of block entities.
+            ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer(96 * 1024);
             try {
-                memoryStream.write(blockData);
-                memoryStream.write(blockMetadata.getData());
-                memoryStream.write(skyLightData.getData());
-                memoryStream.write(blockLightData.getData());
-                memoryStream.write(height);
-
-                // Write some miscellaneous data
-                try (DataOutputStream dos = new DataOutputStream(memoryStream)) {
-                    for (int i : biomeColor) {
-                        dos.writeInt(i);
-                    }
-                    // extra data, we have none
-                    dos.writeInt(0);
+                buf.writeBytes(blockData);
+                buf.writeBytes(blockMetadata.getData());
+                buf.writeBytes(skyLightData.getData());
+                buf.writeBytes(blockLightData.getData());
+                buf.writeBytes(height);
+                for (int i : biomeColor) {
+                    buf.writeInt(i);
                 }
+                // extra data, we have none
+                buf.writeInt(0);
 
                 // Finally, write out block entity compounds for block entities;
-                try (NBTOutputStream stream = new NBTOutputStream(memoryStream, false, ByteOrder.LITTLE_ENDIAN)) {
+                try (NBTWriter writer = new NBTWriter(new ByteBufOutputStream(buf.order(ByteOrder.LITTLE_ENDIAN)))) {
                     if (serializedBlockEntities.isEmpty()) {
                         // Write out an empty root tag
-                        stream.writeTag(new CompoundTag("", new CompoundMap()));
+                        writer.write(new CompoundTag("", ImmutableMap.of()));
                     } else {
                         // Write out NBT compounds for all block entities.
                         for (CompoundTag entity : serializedBlockEntities.valueCollection()) {
-                            stream.writeTag(entity);
+                            writer.write(entity);
                         }
                     }
                 }
+
+                byte[] writtenData = new byte[buf.readableBytes()];
+                buf.readBytes(writtenData);
+                data.setData(writtenData);
             } catch (IOException e) {
                 throw new AssertionError(e);
+            } finally {
+                buf.release();
             }
-
-            data.setData(memoryStream.toByteArray());
 
             chunkDataPacket = new McpeBatch();
             chunkDataPacket.getPackages().add(data);

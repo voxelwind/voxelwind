@@ -1,11 +1,11 @@
 package com.voxelwind.server.game.item;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.Coal;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.data.DyeColor;
+import com.voxelwind.nbt.tags.CompoundTag;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

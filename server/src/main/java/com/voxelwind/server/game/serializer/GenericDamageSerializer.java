@@ -1,13 +1,12 @@
 package com.voxelwind.server.game.serializer;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.data.GenericDamageValue;
-import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
+import com.voxelwind.nbt.tags.CompoundTag;
 
 public class GenericDamageSerializer implements Serializer {
     @Override

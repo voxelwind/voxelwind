@@ -2,17 +2,22 @@ package com.voxelwind.server.game.level.provider.anvil;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
-import com.flowpowered.nbt.*;
-import com.flowpowered.nbt.stream.NBTInputStream;
+import com.voxelwind.nbt.io.NBTReader;
+import com.voxelwind.nbt.io.NBTReaders;
+import com.voxelwind.nbt.tags.CompoundTag;
+import com.voxelwind.nbt.tags.IntTag;
+import com.voxelwind.nbt.tags.LongTag;
+import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class AnvilLevelDataProvider implements LevelDataProvider {
@@ -22,12 +27,12 @@ public class AnvilLevelDataProvider implements LevelDataProvider {
     public static AnvilLevelDataProvider load(@NonNull Path levelDatPath) throws IOException {
         // level.dat is Notchian, so it's big-endian and GZIP compressed
         CompoundTag tag;
-        try (NBTInputStream stream = new NBTInputStream(new BufferedInputStream(Files.newInputStream(levelDatPath)), true)) {
-            tag = (CompoundTag) stream.readTag();
+        try (NBTReader reader = NBTReaders.createBigEndianReader(new GZIPInputStream(Files.newInputStream(levelDatPath)))) {
+            tag = (CompoundTag) reader.readTag();
         }
 
         CompoundTag dataTag = (CompoundTag) tag.getValue().get("Data");
-        CompoundMap map = dataTag.getValue();
+        Map<String, Tag<?>> map = dataTag.getValue();
 
         Vector3i out = new Vector3i(((IntTag) map.get("SpawnX")).getValue(), ((IntTag) map.get("SpawnY")).getValue(), ((IntTag) map.get("SpawnZ")).getValue());
         long dayTime = ((LongTag) map.get("DayTime")).getValue();

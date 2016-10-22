@@ -1,18 +1,17 @@
 package com.voxelwind.server.game.item;
 
-import com.flowpowered.nbt.*;
-import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
+import com.voxelwind.nbt.tags.*;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import lombok.Value;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -69,27 +68,27 @@ public class VoxelwindItemStack implements ItemStack {
     }
 
     public CompoundTag toFullNBT() {
-        CompoundMap map = new CompoundMap();
-        map.put(new ByteTag("Count", (byte) amount));
-        map.put(new ShortTag("Damage", MetadataSerializer.serializeMetadata(this)));
-        map.put(new ShortTag("id", (short) itemType.getId()));
-        map.put(new CompoundTag("tag", toSpecificNBT().getValue()));
-        return new CompoundTag("", map);
+        List<Tag<?>> tags = new ArrayList<>();
+        tags.add(new ByteTag("Count", (byte) amount));
+        tags.add(new ShortTag("Damage", MetadataSerializer.serializeMetadata(this)));
+        tags.add(new ShortTag("id", (short) itemType.getId()));
+        tags.add(new CompoundTag("tag", toSpecificNBT().getValue()));
+        return CompoundTag.createFromList("", tags);
     }
 
     public CompoundTag toSpecificNBT() {
-        CompoundMap map = new CompoundMap();
+        List<Tag<?>> tags = new ArrayList<>();
 
         // Display properties
         if (itemName != null) {
-            CompoundMap displayMap = new CompoundMap();
+            List<Tag<?>> displayTags = new ArrayList<>();
             if (itemName != null) {
-                displayMap.put(new StringTag("Name", itemName));
+                displayTags.add(new StringTag("Name", itemName));
             }
 
-            map.put(new CompoundTag("display", displayMap));
+            tags.add(CompoundTag.createFromList("display", displayTags));
         }
 
-        return new CompoundTag("", map);
+        return CompoundTag.createFromList("", tags);
     }
 }

@@ -1,6 +1,5 @@
 package com.voxelwind.server.game.serializer.wood;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemStack;
@@ -9,6 +8,7 @@ import com.voxelwind.api.game.item.data.wood.Wood;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.api.game.util.data.TreeSpecies;
+import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.server.game.serializer.Serializer;
 
 import java.util.Arrays;
