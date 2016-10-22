@@ -103,7 +103,7 @@ public class NBTReader implements Closeable {
                     list.add(deserialize(listType, true, true));
                 }
                 // Unchecked cast is expected
-                return new ListTag(tagName, list, listType.getTagClass());
+                return new ListTag(tagName, listType.getTagClass(), list);
             case INT_ARRAY:
                 int arraySz2 = encoding == MCPE_0_16_NETWORK ? Varints.decodeSigned(input) : input.readInt();
                 int[] valueBytesInt = new int[arraySz2];

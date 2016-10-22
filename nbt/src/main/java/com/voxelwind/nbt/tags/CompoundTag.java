@@ -50,4 +50,15 @@ public class CompoundTag implements Tag<Map<String, Tag<?>>> {
         bldr.append("}");
         return bldr.toString();
     }
+
+    public static CompoundTag createFromList(String name, List<Tag<?>> list) {
+        Map<String, Tag<?>> map = new HashMap<>();
+        for (Tag<?> tag : list) {
+            if (tag.getName() == null || tag.getName().isEmpty()) {
+                throw new IllegalArgumentException("Tag " + tag + " does not have a name.");
+            }
+            map.put(tag.getName(), tag);
+        }
+        return new CompoundTag(name, map);
+    }
 }

@@ -7,12 +7,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class ListTag<T extends Tag> implements Tag<List<Tag<T>>> {
+public class ListTag<T extends Tag> implements Tag<List<T>> {
     private final String name;
     private final Class<T> tagClass;
-    private final List<Tag<T>> value;
+    private final List<T> value;
 
-    public ListTag(String name, List<Tag<T>> value, Class<T> tagClass) {
+    public ListTag(String name, Class<T> tagClass, List<T> value) {
         this.name = name;
         this.value = Collections.unmodifiableList(new ArrayList<>(Objects.requireNonNull(value, "value")));
         this.tagClass = tagClass;
@@ -24,8 +24,12 @@ public class ListTag<T extends Tag> implements Tag<List<Tag<T>>> {
     }
 
     @Override
-    public List<Tag<T>> getValue() {
+    public List<T> getValue() {
         return value;
+    }
+
+    public Class<T> getTagClass() {
+        return tagClass;
     }
 
     @Override
