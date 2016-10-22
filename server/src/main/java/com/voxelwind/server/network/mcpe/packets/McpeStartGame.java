@@ -1,46 +1,64 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
-import com.flowpowered.math.vector.Vector3i;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
-import javax.xml.bind.DatatypeConverter;
-
 @Data
 public class McpeStartGame implements NetworkPackage {
-    private static final byte[] UNKNOWN = DatatypeConverter.parseHexBinary("01010000000000000000000000");
-    private int seed;
-    private byte dimension;
-    private int generator;
-    private int gamemode;
-    private long entityId;
-    private Vector3i spawnLocation;
-    private Vector3f position;
+    private long entityId; // = null;
+    private long runtimeEntityId; // = null;
+    private Vector3f spawn; // = null;
+    private Vector2i unknown1; // = null;
+    private int seed; // = null;
+    private int dimension; // = null;
+    private int generator; // = null;
+    private int gamemode; // = null;
+    private int difficulty; // = null;
+    private int x; // = null;
+    private int y; // = null;
+    private int z; // = null;
+    private boolean hasAchievementsDisabled; // = null;
+    private int dayCycleStopTime; // = null;
+    private boolean eduMode; // = null;
+    private float rainLevel; // = null;
+    private float lightingLevel; // = null;
+    private boolean enableCommands; // = null;
+    private boolean isTexturepacksRequired; // = null;
+    private String secret; // = null;
+    private String worldName; // = null;
 
     @Override
     public void decode(ByteBuf buffer) {
-        seed = buffer.readInt();
-        dimension = buffer.readByte();
-        generator = buffer.readInt();
-        gamemode = buffer.readInt();
-        entityId = buffer.readLong();
-        spawnLocation = McpeUtil.readVector3i(buffer);
-        position = McpeUtil.readVector3f(buffer);
-        buffer.skipBytes(UNKNOWN.length);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeInt(seed);
-        buffer.writeByte(dimension);
-        buffer.writeInt(generator);
-        buffer.writeInt(gamemode);
-        buffer.writeLong(entityId);
-        McpeUtil.writeVector3i(buffer, spawnLocation, false);
-        McpeUtil.writeVector3f(buffer, position);
-        buffer.writeBytes(UNKNOWN);
+        Varints.encodeSigned(entityId, buffer);
+        Varints.encodeSigned(runtimeEntityId, buffer);
+        McpeUtil.writeVector3f(buffer, spawn);
+        // TODO: what are these next two?
+        buffer.writeFloat(0);
+        buffer.writeFloat(0);
+        Varints.encodeSigned(seed, buffer);
+        Varints.encodeSigned(dimension, buffer);
+        Varints.encodeSigned(generator, buffer);
+        Varints.encodeSigned(gamemode, buffer);
+        Varints.encodeSigned(dimension, buffer);
+        McpeUtil.writeBlockCoords(buffer, spawn.toInt());
+        buffer.writeBoolean(hasAchievementsDisabled);
+        Varints.encodeSigned(dayCycleStopTime, buffer);
+        buffer.writeBoolean(eduMode);
+        buffer.writeFloat(rainLevel);
+        buffer.writeFloat(lightingLevel);
+        buffer.writeBoolean(enableCommands);
+        buffer.writeBoolean(isTexturepacksRequired);
+        McpeUtil.writeVarintLengthString(buffer, secret);
+        McpeUtil.writeVarintLengthString(buffer, worldName);
     }
 }

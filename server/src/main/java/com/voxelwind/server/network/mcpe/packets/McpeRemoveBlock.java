@@ -12,13 +12,13 @@ public class McpeRemoveBlock implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         entityId = buffer.readLong();
-        position = McpeUtil.readVector3i(buffer, true);
+        position = McpeUtil.readBlockCoords(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeLong(entityId);
-        McpeUtil.writeVector3i(buffer, position, true);
+        McpeUtil.writeBlockCoords(buffer, position);
     }
 
     public long getEntityId() {

@@ -12,6 +12,7 @@ import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.util.NibbleArray;
@@ -242,10 +243,10 @@ public class VoxelwindChunk implements Chunk {
                 buf.writeBytes(blockLightData.getData());
                 buf.writeBytes(height);
                 for (int i : biomeColor) {
-                    buf.writeInt(i);
+                    Varints.encodeSigned(i, buf);
                 }
                 // extra data, we have none
-                buf.writeInt(0);
+                buf.writeShort(0);
 
                 // Finally, write out block entity compounds for block entities;
                 try (NBTWriter writer = new NBTWriter(new ByteBufOutputStream(buf.order(ByteOrder.LITTLE_ENDIAN)))) {

@@ -21,21 +21,6 @@ public class McpeUtilTest {
     }
 
     @Test
-    public void readVector3i() throws Exception {
-        ByteBuf dest = Unpooled.buffer();
-        Vector3i test = new Vector3i(1, 2, 3);
-        McpeUtil.writeVector3i(dest, test, false); // y is an int
-        assertEquals(test, McpeUtil.readVector3i(dest, false));
-
-        ByteBuf dest2 = Unpooled.buffer();
-        McpeUtil.writeVector3i(dest2, test, true); // y is a byte
-        assertEquals(test, McpeUtil.readVector3i(dest2, true));
-
-        dest.release();
-        dest2.release();
-    }
-
-    @Test
     public void readVector3f() throws Exception {
         ByteBuf dest = Unpooled.buffer();
         Vector3f test = new Vector3f(1, 2, 3);

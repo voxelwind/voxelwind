@@ -14,14 +14,14 @@ public class McpeUpdateBlock implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        position = McpeUtil.readVector3i(buffer, true);
+        position = McpeUtil.readBlockCoords(buffer);
         blockId = buffer.readByte();
         metadata = buffer.readByte();
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        McpeUtil.writeVector3i(buffer, position, true);
+        McpeUtil.writeBlockCoords(buffer, position);
         buffer.writeByte(blockId);
         buffer.writeByte(metadata);
     }

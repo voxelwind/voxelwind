@@ -19,6 +19,7 @@ public class McpeAddPlayer implements NetworkPackage {
     private UUID uuid;
     private String username;
     private long entityId;
+    private long runtimeEntityId;
     private Vector3f position;
     private Vector3f velocity;
     private Rotation rotation;
@@ -27,21 +28,15 @@ public class McpeAddPlayer implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        uuid = McpeUtil.readUuid(buffer);
-        username = RakNetUtil.readString(buffer);
-        entityId = buffer.readLong();
-        position = McpeUtil.readVector3f(buffer);
-        velocity = McpeUtil.readVector3f(buffer);
-        rotation = McpeUtil.readRotation(buffer);
-        held = McpeUtil.readItemStack(buffer);
-        metadata.putAll(MetadataDictionary.deserialize(buffer));
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         McpeUtil.writeUuid(buffer, uuid);
-        RakNetUtil.writeString(buffer, username);
+        McpeUtil.writeVarintLengthString(buffer, username);
         buffer.writeLong(entityId);
+        buffer.writeLong(runtimeEntityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);
         McpeUtil.writeRotation(buffer, rotation);

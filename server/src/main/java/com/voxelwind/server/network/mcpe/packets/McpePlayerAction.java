@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
@@ -15,18 +16,18 @@ public class McpePlayerAction implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = buffer.readLong();
-        action = Action.values()[buffer.readInt()];
-        position = McpeUtil.readVector3i(buffer);
-        face = buffer.readInt();
+        entityId = Varints.decodeSignedLong(buffer);
+        action = Action.values()[Varints.decodeSigned(buffer)];
+        position = McpeUtil.readBlockCoords(buffer);
+        face = Varints.decodeSigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeLong(entityId);
-        buffer.writeInt(action.ordinal());
-        McpeUtil.writeVector3i(buffer, position);
-        buffer.writeInt(face);
+        Varints.encodeSigned(entityId, buffer);
+        Varints.encodeSigned(action.ordinal(), buffer);
+        McpeUtil.writeBlockCoords(buffer, position);
+        Varints.encodeSigned(face, buffer);
     }
 
     public enum Action {
