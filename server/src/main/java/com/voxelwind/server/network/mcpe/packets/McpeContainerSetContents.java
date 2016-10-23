@@ -25,7 +25,7 @@ public class McpeContainerSetContents implements NetworkPackage {
             int hotbarEntriesToRead = Varints.decodeUnsigned(buffer);
             hotbarData = new int[hotbarEntriesToRead];
             for (int i = 0; i < hotbarEntriesToRead; i++) {
-                hotbarData[i] = Varints.decodeUnsigned(buffer);
+                hotbarData[i] = Varints.decodeSigned(buffer);
             }
         }
     }
@@ -40,7 +40,7 @@ public class McpeContainerSetContents implements NetworkPackage {
         if (windowId == 0) {
             Varints.encodeUnsigned(buffer, hotbarData.length);
             for (int i : hotbarData) {
-                Varints.encodeUnsigned(buffer, i);
+                Varints.encodeSigned(buffer, i);
             }
         }
     }
