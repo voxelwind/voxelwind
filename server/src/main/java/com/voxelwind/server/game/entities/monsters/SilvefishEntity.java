@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class SilvefishEntity extends LivingEntity implements Silverfish {
     public SilvefishEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.SILVERFISH, level, position, server, 8f);
+        super(EntityTypeData.SILVERFISH, level, position, server, 8);
     }
 }

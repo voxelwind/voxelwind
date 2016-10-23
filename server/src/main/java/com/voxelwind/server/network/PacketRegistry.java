@@ -72,7 +72,7 @@ public class PacketRegistry {
         MCPE_PACKETS[0x26] = McpeSetEntityData.class;
         MCPE_PACKETS[0x27] = McpeSetEntityMotion.class;
         // SET_ENTITY_LINK_PACKET = 0x28;
-        // SET_HEALTH_PACKET = 0x29;
+        MCPE_PACKETS[0x29] = McpeSetHealth.class;
         MCPE_PACKETS[0x2a] = McpeSetSpawnPosition.class;
         MCPE_PACKETS[0x2b] = McpeAnimate.class;
         MCPE_PACKETS[0x2c] = McpeRespawn.class;

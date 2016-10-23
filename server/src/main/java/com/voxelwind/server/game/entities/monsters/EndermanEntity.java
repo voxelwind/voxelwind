@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class EndermanEntity extends LivingEntity implements Enderman {
     public EndermanEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.ENDERMAN, level, position, server, 40f);
+        super(EntityTypeData.ENDERMAN, level, position, server, 40);
     }
 }

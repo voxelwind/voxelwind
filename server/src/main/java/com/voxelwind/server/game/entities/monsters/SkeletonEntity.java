@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class SkeletonEntity extends LivingEntity implements Skeleton {
     public SkeletonEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.SKELETON, level, position, server, 20f);
+        super(EntityTypeData.SKELETON, level, position, server, 20);
     }
 }

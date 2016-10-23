@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class SpiderEntity extends LivingEntity implements Spider {
     public SpiderEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.SPIDER, level, position, server, 16f);
+        super(EntityTypeData.SPIDER, level, position, server, 16);
     }
 }

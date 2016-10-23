@@ -10,14 +10,14 @@ import lombok.Data;
 @Data
 public class McpePlayerAction implements NetworkPackage {
     private long entityId;
-    private Action action;
+    private int action;
     private Vector3i position;
     private int face;
 
     @Override
     public void decode(ByteBuf buffer) {
         entityId = Varints.decodeSignedLong(buffer);
-        action = Action.values()[Varints.decodeSigned(buffer)];
+        action = Varints.decodeSigned(buffer);
         position = McpeUtil.readBlockCoords(buffer);
         face = Varints.decodeSigned(buffer);
     }
@@ -25,24 +25,21 @@ public class McpePlayerAction implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         Varints.encodeSignedLong(buffer, entityId);
-        Varints.encodeSigned(buffer, action.ordinal());
+        Varints.encodeSigned(buffer, action);
         McpeUtil.writeBlockCoords(buffer, position);
         Varints.encodeSigned(buffer, face);
     }
 
-    public enum Action {
-        ACTION_START_BREAK,
-        ACTION_ABORT_BREAK,
-        ACTION_STOP_BREAK,
-        ACTION_RELEASE_ITEM,
-        ACTION_STOP_SLEEPING,
-        ACTION_SPAWN_SAME_DIMENSION,
-        ACTION_JUMP,
-        ACTION_START_SPRINT,
-        ACTION_STOP_SPRINT,
-        ACTION_START_SNEAK,
-        ACTION_STOP_SNEAK,
-        ACTION_SPAWN_OVERWORLD,
-        ACTION_SPAWN_NETHER
-    }
+	public static final int ACTION_START_BREAK = 0;
+	public static final int ACTION_ABORT_BREAK = 1;
+	public static final int ACTION_STOP_BREAK = 2;
+	public static final int ACTION_RELEASE_ITEM = 5;
+	public static final int ACTION_STOP_SLEEPING = 6;
+	public static final int ACTION_RESPAWN = 7;
+	public static final int ACTION_JUMP = 8;
+	public static final int ACTION_START_SPRINT = 9;
+	public static final int ACTION_STOP_SPRINT = 10;
+	public static final int ACTION_START_SNEAK = 11;
+	public static final int ACTION_STOP_SNEAK = 12;
+	public static final int ACTION_DIMENSION_CHANGE = 13; //TODO: correct these
 }

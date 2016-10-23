@@ -12,11 +12,11 @@ import com.voxelwind.server.network.mcpe.packets.McpeEntityEvent;
 public class LivingEntity extends BaseEntity implements Living {
     protected float drag = 0.02f;
     protected float gravity = 0.08f;
-    private float health;
-    private float maximumHealth;
+    private int health;
+    private int maximumHealth;
     private final ArmorEquipment equipment;
 
-    protected LivingEntity(EntityTypeData data, VoxelwindLevel level, Vector3f position, Server server, float maximumHealth) {
+    protected LivingEntity(EntityTypeData data, VoxelwindLevel level, Vector3f position, Server server, int maximumHealth) {
         super(data, position, level, server);
         this.maximumHealth = maximumHealth;
         this.health = maximumHealth;
@@ -33,30 +33,30 @@ public class LivingEntity extends BaseEntity implements Living {
     }
 
     @Override
-    public float getHealth() {
+    public int getHealth() {
         return health;
     }
 
     @Override
-    public void setHealth(float health) {
+    public void setHealth(int health) {
         checkIfAlive();
 
-        Preconditions.checkArgument(Float.compare(health, maximumHealth) <= 0, "New health %s exceeds maximum health %s", health, maximumHealth);
+        Preconditions.checkArgument(health <= maximumHealth, "New health %s exceeds maximum health %s", health, maximumHealth);
         this.health = health;
 
-        if (Double.compare(health, maximumHealth) <= 0) {
+        if (health <= 0) {
             doDeath();
         }
     }
 
     @Override
-    public float getMaximumHealth() {
+    public int getMaximumHealth() {
         return maximumHealth;
     }
 
     @Override
-    public void setMaximumHealth(float maximumHealth) {
-        Preconditions.checkArgument(Float.compare(maximumHealth, 0) <= 0, "New health %s is less than minimum allowed 0", maximumHealth);
+    public void setMaximumHealth(int maximumHealth) {
+        Preconditions.checkArgument(health > 0, "New health %s is less than minimum allowed 1", maximumHealth);
         this.maximumHealth = maximumHealth;
         this.health = Math.min(maximumHealth, health);
     }

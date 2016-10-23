@@ -3,13 +3,17 @@ package com.voxelwind.api.game.entities;
 import com.voxelwind.api.game.inventories.ArmorEquipment;
 
 public interface Living extends Entity {
-    float getHealth();
+    int getHealth();
 
-    void setHealth(float health);
+    void setHealth(int health);
 
-    float getMaximumHealth();
+    int getMaximumHealth();
 
-    void setMaximumHealth(float maximumHealth);
+    void setMaximumHealth(int maximumHealth);
 
     ArmorEquipment getEquipment();
+
+    default boolean isDead() {
+        return getHealth() <= 0;
+    }
 }

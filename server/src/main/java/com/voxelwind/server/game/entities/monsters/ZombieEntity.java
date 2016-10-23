@@ -11,6 +11,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class ZombieEntity extends LivingEntity implements Zombie {
     public ZombieEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.ZOMBIE, level, position, server, 20f);
+        super(EntityTypeData.ZOMBIE, level, position, server, 20);
     }
 }

@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class MagmaCubeEntity extends LivingEntity implements MagmaCube {
     public MagmaCubeEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.MAGMA_CUBE, level, position, server, 16f);
+        super(EntityTypeData.MAGMA_CUBE, level, position, server, 16);
     }
 }

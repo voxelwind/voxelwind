@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class BlazeEntity extends LivingEntity implements Blaze {
     public BlazeEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.BLAZE, level, position, server, 20f);
+        super(EntityTypeData.BLAZE, level, position, server, 20);
     }
 }

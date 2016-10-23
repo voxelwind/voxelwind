@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class WitchEntity extends LivingEntity implements Witch {
     public WitchEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.WITCH, level, position, server, 26f);
+        super(EntityTypeData.WITCH, level, position, server, 26);
     }
 }

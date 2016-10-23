@@ -12,6 +12,6 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 @Spawnable
 public class CaveSpiderEntity extends LivingEntity implements CaveSpider {
     public CaveSpiderEntity(VoxelwindLevel level, Vector3f position, Server server) {
-        super(EntityTypeData.CAVE_SPIDER, level, position, server, 12f);
+        super(EntityTypeData.CAVE_SPIDER, level, position, server, 12);
     }
 }

@@ -56,6 +56,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.voxelwind.server.network.mcpe.packets.McpePlayerAction.*;
+
 public class PlayerSession extends LivingEntity implements Player, InventoryObserver {
     private static final int REQUIRED_TO_SPAWN = 56;
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
@@ -75,14 +77,14 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private final Set<UUID> playersSentForList = new HashSet<>();
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
-        super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20f);
+        super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20);
         this.session = session;
         this.vwServer = session.getServer();
     }
 
     @Override
     public boolean onTick() {
-        if (!spawned) {
+        if (!spawned || isDead()) {
             // Don't tick until the player has truly been spawned into the world.
             return true;
         }
@@ -172,13 +174,18 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     @Override
-    public void setHealth(float health) {
+    public void setHealth(int health) {
         super.setHealth(health);
-        sendAttributes();
+
+        if (spawned) {
+            McpeSetHealth setHealthPacket = new McpeSetHealth();
+            setHealthPacket.setHealth(getHealth());
+            session.addToSendQueue(setHealthPacket);
+        }
     }
 
     @Override
-    public void setMaximumHealth(float maximumHealth) {
+    public void setMaximumHealth(int maximumHealth) {
         super.setMaximumHealth(maximumHealth);
         sendAttributes();
     }
@@ -691,9 +698,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     setTime.setRunning(true);
                     session.sendImmediatePackage(setTime);
 
-                    McpeRespawn respawn = new McpeRespawn();
-                    respawn.setPosition(getPosition());
-                    session.sendImmediatePackage(respawn);
+                    //McpeRespawn respawn = new McpeRespawn();
+                    //respawn.setPosition(getPosition());
+                    //session.sendImmediatePackage(respawn);
 
                     updateViewableEntities();
                     sendAttributes();
@@ -726,8 +733,21 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 case ACTION_STOP_SLEEPING:
                     // Stop sleeping
                     break;
-                case ACTION_SPAWN_SAME_DIMENSION:
+                case ACTION_RESPAWN:
                     // Clean up attributes?
+                    if (!(spawned && isDead())) {
+                        return;
+                    }
+
+                    setSprinting(false);
+                    setSneaking(false);
+                    setHealth(getMaximumHealth());
+                    sendPlayerInventory();
+                    teleport(getLevel(), getLevel().getSpawnLocation());
+
+                    McpeRespawn respawn = new McpeRespawn();
+                    respawn.setPosition(getLevel().getSpawnLocation());
+                    session.addToSendQueue(respawn);
                     break;
                 case ACTION_JUMP:
                     // No-op
@@ -747,12 +767,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 case ACTION_STOP_SNEAK:
                     sneaking = false;
                     sendAttributes();
-                    break;
-                case ACTION_SPAWN_OVERWORLD:
-                    // Clean up attributes?
-                    break;
-                case ACTION_SPAWN_NETHER:
-                    // Clean up attributes?
                     break;
             }
 
