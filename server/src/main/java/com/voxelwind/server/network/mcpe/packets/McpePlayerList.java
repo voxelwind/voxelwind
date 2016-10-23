@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.api.server.Skin;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.raknet.RakNetUtil;
@@ -24,13 +25,13 @@ public class McpePlayerList implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeByte(type);
-        buffer.writeInt(records.size());
+        Varints.encodeUnsigned(buffer, records.size());
         for (Record record : records) {
             McpeUtil.writeUuid(buffer, record.uuid);
             // 0 is ADD, 1 is REMOVE
             if (type == 0) {
-                buffer.writeLong(record.entityId);
-                RakNetUtil.writeString(buffer, record.name);
+                Varints.encodeUnsignedLong(buffer, record.entityId);
+                McpeUtil.writeVarintLengthString(buffer, record.name);
                 McpeUtil.writeSkin(buffer, record.skin);
             }
         }

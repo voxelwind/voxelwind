@@ -98,9 +98,7 @@ public class LevelEntityManager {
 
         // Perform a view check for all players.
         if (entitiesChanged.compareAndSet(true, false)) {
-            for (PlayerSession session : getPlayers()) {
-                session.updateViewableEntities();
-            }
+            getPlayers().forEach(PlayerSession::updateViewableEntities);
         }
     }
 
@@ -116,7 +114,7 @@ public class LevelEntityManager {
             if (entity instanceof PlayerSession) {
                 PlayerSession session = (PlayerSession) entity;
                 McpeSession mcpeSession = session.getMcpeSession();
-                if (mcpeSession != null && !mcpeSession.isClosed()) {
+                if (mcpeSession != null && !mcpeSession.isClosed() && session.isSpawned()) {
                     sessions.add((PlayerSession) entity);
                 }
             }

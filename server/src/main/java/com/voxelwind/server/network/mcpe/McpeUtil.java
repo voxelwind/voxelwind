@@ -127,19 +127,6 @@ public class McpeUtil {
         }
     }
 
-    public static Skin readSkin(ByteBuf buf) {
-        String type = RakNetUtil.readString(buf);
-        short length = buf.readShort();
-        if (length == 64*32*4 || length == 64*64*4) {
-            byte[] in = new byte[length];
-            buf.readBytes(in);
-
-            return new Skin(type, in);
-        }
-
-        return new Skin("Standard_Custom", new byte[0]);
-    }
-
     public static void writeSkin(ByteBuf buf, Skin skin) {
         byte[] texture = skin.getTexture();
         writeVarintLengthString(buf, skin.getType());

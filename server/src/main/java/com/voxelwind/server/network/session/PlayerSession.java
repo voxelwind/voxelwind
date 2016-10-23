@@ -651,7 +651,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             respawn.setPosition(getPosition());
             session.sendImmediatePackage(respawn);
             spawned = true;
+
+            updatePlayerList();
         });
+    }
+
+    public boolean isSpawned() {
+        return spawned;
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
@@ -692,6 +698,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     updateViewableEntities();
                     sendAttributes();
                     sendPlayerInventory();
+                    updatePlayerList();
 
                     spawned = true;
 
@@ -990,16 +997,19 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         synchronized (playersSentForList) {
             Set<Player> toAdd = new HashSet<>();
             Set<UUID> toRemove = new HashSet<>();
-            Collection<Player> players = getServer().getAllOnlinePlayers();
+            Map<UUID, PlayerSession> availableSessions = new HashMap<>();
+            for (PlayerSession session : getLevel().getEntityManager().getPlayers()) {
+                availableSessions.put(session.getUniqueId(), session);
+            }
 
-            for (Player player : players) {
+            for (Player player : availableSessions.values()) {
                 if (playersSentForList.add(player.getUniqueId())) {
                     toAdd.add(player);
                 }
             }
 
             for (UUID uuid : playersSentForList) {
-                if (!players.stream().anyMatch(p -> p.getUniqueId().equals(uuid))) {
+                if (!availableSessions.containsKey(uuid)) {
                     toRemove.add(uuid);
                 }
             }
