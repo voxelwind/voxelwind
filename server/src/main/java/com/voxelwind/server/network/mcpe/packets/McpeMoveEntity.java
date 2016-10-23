@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3f;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.api.util.Rotation;
@@ -15,14 +16,14 @@ public class McpeMoveEntity implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = buffer.readLong();
+        entityId = Varints.decodeSignedLong(buffer);
         position = McpeUtil.readVector3f(buffer);
         rotation = McpeUtil.readByteRotation(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeLong(entityId);
+        Varints.encodeSignedLong(buffer, entityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeByteRotation(buffer, rotation);
     }

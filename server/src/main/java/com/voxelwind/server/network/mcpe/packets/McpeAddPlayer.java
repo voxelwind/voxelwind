@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.util.Rotation;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
@@ -35,8 +36,8 @@ public class McpeAddPlayer implements NetworkPackage {
     public void encode(ByteBuf buffer) {
         McpeUtil.writeUuid(buffer, uuid);
         McpeUtil.writeVarintLengthString(buffer, username);
-        buffer.writeLong(entityId);
-        buffer.writeLong(runtimeEntityId);
+        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeSignedLong(buffer, runtimeEntityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);
         McpeUtil.writeRotation(buffer, rotation);

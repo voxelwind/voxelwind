@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
@@ -9,20 +10,20 @@ import lombok.Data;
 @Data
 public class McpeUpdateBlock implements NetworkPackage {
     private Vector3i position;
-    private byte blockId;
-    private byte metadata;
+    private int blockId;
+    private int metadata;
 
     @Override
     public void decode(ByteBuf buffer) {
         position = McpeUtil.readBlockCoords(buffer);
-        blockId = buffer.readByte();
-        metadata = buffer.readByte();
+        blockId = Varints.decodeUnsigned(buffer);
+        metadata = Varints.decodeUnsigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         McpeUtil.writeBlockCoords(buffer, position);
-        buffer.writeByte(blockId);
-        buffer.writeByte(metadata);
+        Varints.encodeUnsigned(buffer, blockId);
+        Varints.encodeUnsigned(buffer, metadata);
     }
 }

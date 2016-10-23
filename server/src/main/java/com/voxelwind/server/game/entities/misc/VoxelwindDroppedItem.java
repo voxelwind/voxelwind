@@ -6,10 +6,9 @@ import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.server.game.entities.EntityTypeData;
-import com.voxelwind.server.game.entities.Spawnable;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.NetworkPackage;
-import com.voxelwind.server.network.mcpe.packets.McpeAddItem;
+import com.voxelwind.server.network.mcpe.packets.McpeAddItemEntity;
 
 import javax.annotation.Nonnegative;
 
@@ -44,7 +43,7 @@ public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
 
     @Override
     public NetworkPackage createAddEntityPacket() {
-        McpeAddItem packet = new McpeAddItem();
+        McpeAddItemEntity packet = new McpeAddItemEntity();
         packet.setEntityId(getEntityId());
         packet.setPosition(getGamePosition());
         packet.setVelocity(getMotion());

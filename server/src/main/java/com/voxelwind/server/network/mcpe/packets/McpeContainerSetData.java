@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -7,20 +8,20 @@ import lombok.Data;
 @Data
 public class McpeContainerSetData implements NetworkPackage {
     public byte windowId;
-    public short property;
-    public short value;
+    public int property;
+    public int value;
 
     @Override
     public void decode(ByteBuf buffer) {
         windowId = buffer.readByte();
-        property = buffer.readShort();
-        value = buffer.readShort();
+        property = Varints.decodeSigned(buffer);
+        value = Varints.decodeSigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeByte(windowId);
-        buffer.writeShort(property);
-        buffer.writeShort(value);
+        Varints.encodeSigned(buffer, property);
+        Varints.encodeSigned(buffer, value);
     }
 }

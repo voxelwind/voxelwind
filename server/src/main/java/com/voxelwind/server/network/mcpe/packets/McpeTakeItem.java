@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -11,13 +12,13 @@ public class McpeTakeItem implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        itemEntityId = buffer.readLong();
-        playerEntityId = buffer.readLong();
+        itemEntityId = Varints.decodeSignedLong(buffer);
+        playerEntityId = Varints.decodeSignedLong(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeLong(itemEntityId);
-        buffer.writeLong(playerEntityId);
+        Varints.encodeSignedLong(buffer, itemEntityId);
+        Varints.encodeSignedLong(buffer, playerEntityId);
     }
 }

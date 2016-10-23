@@ -67,7 +67,8 @@ public class LevelEntityManager {
                     level.getPacketManager().queuePacketForViewers(entity, moveEntityPacket);
 
                     McpeSetEntityMotion motionPacket = new McpeSetEntityMotion();
-                    motionPacket.getMotionList().add(new McpeSetEntityMotion.EntityMotion(entity.getEntityId(), entity.getMotion()));
+                    motionPacket.setEntityId(entity.getEntityId());
+                    motionPacket.setMotion(entity.getMotion());
                     level.getPacketManager().queuePacketForViewers(entity, motionPacket);
 
                     entity.resetStale();

@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
@@ -15,7 +16,7 @@ public class McpeMobEquipment implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = buffer.readLong();
+        entityId = Varints.decodeSignedLong(buffer);
         stack = McpeUtil.readItemStack(buffer);
         inventorySlot = buffer.readByte();
         hotbarSlot = buffer.readByte();
@@ -23,7 +24,7 @@ public class McpeMobEquipment implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeLong(entityId);
+        Varints.encodeSignedLong(buffer, entityId);
         McpeUtil.writeItemStack(buffer, stack);
         buffer.writeInt(inventorySlot);
         buffer.writeInt(hotbarSlot);

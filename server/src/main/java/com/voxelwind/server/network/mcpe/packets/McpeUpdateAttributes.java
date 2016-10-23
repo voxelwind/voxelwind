@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.mcpe.packets;
 
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
@@ -16,13 +17,13 @@ public class McpeUpdateAttributes implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = buffer.readLong();
+        entityId = Varints.decodeSignedLong(buffer);
         attributes.addAll(McpeUtil.readAttributes(buffer));
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeLong(entityId);
+        Varints.encodeSignedLong(buffer, entityId);
         McpeUtil.writeAttributes(buffer, attributes);
     }
 }

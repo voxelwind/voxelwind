@@ -8,13 +8,13 @@ import lombok.Data;
 
 @Data
 public class McpeDropItem implements NetworkPackage {
-    private byte unknown;
-    private ItemStack unknown2;
+    private byte type;
+    private ItemStack item;
 
     @Override
     public void decode(ByteBuf buffer) {
-        unknown = buffer.readByte();
-        unknown2 = McpeUtil.readItemStack(buffer);
+        type = buffer.readByte();
+        item = McpeUtil.readItemStack(buffer);
     }
 
     @Override

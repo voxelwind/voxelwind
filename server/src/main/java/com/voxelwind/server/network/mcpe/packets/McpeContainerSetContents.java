@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.api.game.item.ItemStack;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
@@ -15,28 +16,32 @@ public class McpeContainerSetContents implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         windowId = buffer.readByte();
-        int stacksToRead = buffer.readShort();
+        int stacksToRead = Varints.decodeUnsigned(buffer);
         stacks = new ItemStack[stacksToRead];
         for (int i = 0; i < stacksToRead; i++) {
             stacks[i] = McpeUtil.readItemStack(buffer);
         }
-        int hotbarEntriesToRead = buffer.readShort();
-        hotbarData = new int[hotbarEntriesToRead];
-        for (int i = 0; i < hotbarEntriesToRead; i++) {
-            hotbarData[i] = buffer.readInt();
+        if (windowId == 0) {
+            int hotbarEntriesToRead = Varints.decodeUnsigned(buffer);
+            hotbarData = new int[hotbarEntriesToRead];
+            for (int i = 0; i < hotbarEntriesToRead; i++) {
+                hotbarData[i] = Varints.decodeUnsigned(buffer);
+            }
         }
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeByte(windowId);
-        buffer.writeShort(stacks.length);
+        Varints.encodeUnsigned(buffer, stacks.length);
         for (ItemStack stack : stacks) {
             McpeUtil.writeItemStack(buffer, stack);
         }
-        buffer.writeShort(hotbarData.length);
-        for (int i : hotbarData) {
-            buffer.writeInt(i);
+        if (windowId == 0) {
+            Varints.encodeUnsigned(buffer, hotbarData.length);
+            for (int i : hotbarData) {
+                Varints.encodeUnsigned(buffer, i);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.flowpowered.math.vector.Vector3f;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import io.netty.buffer.ByteBuf;
@@ -8,21 +9,21 @@ import lombok.Data;
 
 @Data
 public class McpeChangeDimension implements NetworkPackage {
-    private byte dimension;
+    private int dimension;
     private Vector3f position;
-    private byte unknown;
+    private boolean unknown;
 
     @Override
     public void decode(ByteBuf buffer) {
-        dimension = buffer.readByte();
+        dimension = Varints.decodeSigned(buffer);
         position = McpeUtil.readVector3f(buffer);
-        unknown = buffer.readByte();
+        unknown = buffer.readBoolean();
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeByte(dimension);
+        Varints.encodeSigned(buffer, dimension);
         McpeUtil.writeVector3f(buffer, position);
-        buffer.writeByte(unknown);
+        buffer.writeBoolean(unknown);
     }
 }

@@ -609,11 +609,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         // Create the packets we will send to do the dimension change
         McpeChangeDimension changeDim0 = new McpeChangeDimension();
         changeDim0.setPosition(getGamePosition());
-        changeDim0.setDimension((byte) 0);
+        changeDim0.setDimension(0);
 
         McpeChangeDimension changeDim1 = new McpeChangeDimension();
         changeDim1.setPosition(getGamePosition());
-        changeDim1.setDimension((byte) 1);
+        changeDim1.setDimension(1);
 
         McpePlayStatus doRespawnPacket = new McpePlayStatus();
         doRespawnPacket.setStatus(McpePlayStatus.Status.PLAYER_SPAWN);
@@ -970,7 +970,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeDropItem packet) {
-            if (packet.getUnknown2().getItemType() == BlockTypes.AIR) {
+            if (packet.getItem().getItemType() == BlockTypes.AIR) {
                 return;
             }
 
