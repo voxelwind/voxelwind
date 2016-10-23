@@ -197,17 +197,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         event.setEvent((byte) 3);
         getLevel().getPacketManager().queuePacketForViewers(this, event);
 
-        Vector3f respawnLocation = getLevel().getSpawnLocation();
-
-        McpeRespawn respawn = new McpeRespawn();
-        respawn.setPosition(respawnLocation);
-        session.addToSendQueue(respawn);
-
-        setPosition(respawnLocation);
+        sendAttributes(); // this will trigger client-side death
     }
 
     private void sendAttributes() {
-        Attribute health = new Attribute("minecraft:health", 0f, getMaximumHealth(), getHealth(), getMaximumHealth());
+        Attribute health = new Attribute("minecraft:health", 0f, getMaximumHealth(), Math.max(0, getHealth()), getMaximumHealth());
         Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, 20f, 20f); // TODO: Implement hunger
         Attribute speed = new Attribute("minecraft:movement", 0, 0.5f, 0.1f, 0.1f);
         // TODO: Implement levels, movement speed, and absorption.

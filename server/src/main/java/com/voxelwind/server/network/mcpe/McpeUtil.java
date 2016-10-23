@@ -103,11 +103,12 @@ public class McpeUtil {
         List<Attribute> attributes = new ArrayList<>();
         int size = Varints.decodeUnsigned(buf);
 
+        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
         for (int i = 0; i < size; i++) {
-            float min = buf.readFloat();
-            float max = buf.readFloat();
-            float val = buf.readFloat();
-            float defaultVal = buf.readFloat();
+            float min = leBuf.readFloat();
+            float max = leBuf.readFloat();
+            float val = leBuf.readFloat();
+            float defaultVal = leBuf.readFloat();
             String name = readVarintLengthString(buf);
 
             attributes.add(new Attribute(name, min, max, val, defaultVal));
@@ -118,11 +119,12 @@ public class McpeUtil {
 
     public static void writeAttributes(ByteBuf buf, Collection<Attribute> attributeList) {
         Varints.encodeUnsigned(buf, attributeList.size());
+        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
         for (Attribute attribute : attributeList) {
-            buf.writeFloat(attribute.getMinimumValue());
-            buf.writeFloat(attribute.getMaximumValue());
-            buf.writeFloat(attribute.getValue());
-            buf.writeFloat(attribute.getDefaultValue());
+            leBuf.writeFloat(attribute.getMinimumValue());
+            leBuf.writeFloat(attribute.getMaximumValue());
+            leBuf.writeFloat(attribute.getValue());
+            leBuf.writeFloat(attribute.getDefaultValue());
             writeVarintLengthString(buf, attribute.getName());
         }
     }
