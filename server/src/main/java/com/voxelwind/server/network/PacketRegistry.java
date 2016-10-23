@@ -89,8 +89,8 @@ public class PacketRegistry {
         MCPE_PACKETS[0x37] = McpeBlockEntityData.class;
         // PLAYER_INPUT_PACKET = 0x38;
         MCPE_PACKETS[0x39] = McpeFullChunkData.class;
-        // SET_COMMANDS_ENABLED_PACKET = 0x3a;
-	    // SET_DIFFICULTY_PACKET = 0x3b;
+        MCPE_PACKETS[0x3a] = McpeSetCommandsEnabled.class;
+        // SET_DIFFICULTY_PACKET = 0x3b;
         MCPE_PACKETS[0x3c] = McpeChangeDimension.class;
         MCPE_PACKETS[0x3d] = McpeSetPlayerGameMode.class;
         MCPE_PACKETS[0x3e] = McpePlayerList.class;
@@ -106,8 +106,8 @@ public class PacketRegistry {
         // CAMERA_PACKET = 0x48;
         // ADD_ITEM_PACKET = 0x49;
         // BOSS_EVENT_PACKET = 0x4a;
-        // AVAILABLE_COMMANDS_PACKET = 0x4b;
-        // COMMAND_STEP_PACKET = 0x4c;
+        MCPE_PACKETS[0x4b] = McpeAvailableCommands.class;
+        MCPE_PACKETS[0x4c] = McpeCommandStep.class;
         // RESOURCE_PACK_DATA_INFO_PACKET = 0x4d;
         // RESOURCE_PACK_CHUNK_DATA_PACKET = 0x4e;
         // RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x4f;

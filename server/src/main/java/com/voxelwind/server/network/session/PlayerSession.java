@@ -28,6 +28,7 @@ import com.voxelwind.api.server.player.PopupMessage;
 import com.voxelwind.api.server.player.TranslatedMessage;
 import com.voxelwind.api.game.util.data.BlockFace;
 import com.voxelwind.server.VoxelwindServer;
+import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.block.BlockBehavior;
@@ -259,6 +260,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         startGame.setWorldSpawn(getLevel().getSpawnLocation().toInt());
         startGame.setWorldName(getLevel().getName());
         startGame.setSecret("SECRET");
+        startGame.setEnableCommands(true);
         session.addToSendQueue(startGame);
 
         session.addToSendQueue(setTime);
@@ -700,6 +702,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     sendAttributes();
                     sendPlayerInventory();
                     updatePlayerList();
+
+                    McpeAvailableCommands availableCommands = ((VoxelwindCommandManager) vwServer.getCommandManager())
+                            .generateAvailableCommandsPacket();
+                    McpeBatch availableCommandsBatch = new McpeBatch();
+                    availableCommandsBatch.getPackages().add(availableCommands);
+                    session.sendImmediatePackage(availableCommandsBatch);
 
                     spawned = true;
 
