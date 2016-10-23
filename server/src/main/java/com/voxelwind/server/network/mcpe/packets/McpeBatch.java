@@ -20,14 +20,22 @@ public class McpeBatch implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
+        // We do some clever hacks here because we need to be able to understand McpeLogin packets sent by 0.15.x.
         ByteBuf decompressed = null;
+        boolean is015 = false;
         try {
+            buffer.markReaderIndex();
             int compressedSize = Varints.decodeUnsigned(buffer);
+            if (compressedSize == 0) {
+                buffer.resetReaderIndex();
+                compressedSize = buffer.readInt();
+                is015 = true;
+            }
             decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
 
             // Now process the decompressed result.
             while (decompressed.isReadable()) {
-                int length = Varints.decodeUnsigned(decompressed);
+                int length = Math.toIntExact(is015 ? decompressed.readUnsignedInt() : Varints.decodeUnsigned(decompressed));
                 ByteBuf data = decompressed.readSlice(length);
 
                 if (data.readableBytes() == 0) {

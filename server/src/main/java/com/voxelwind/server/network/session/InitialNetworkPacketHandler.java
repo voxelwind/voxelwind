@@ -2,6 +2,7 @@ package com.voxelwind.server.network.session;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.nimbusds.jose.JOSEException;
@@ -11,6 +12,7 @@ import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.voxelwind.api.server.event.session.SessionLoginEvent;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.jni.CryptoUtil;
+import com.voxelwind.server.network.mcpe.util.VersionUtil;
 import com.voxelwind.server.network.util.NativeCodeFactory;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
@@ -30,8 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.Optional;
+import java.util.*;
 
 public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     public static final int MCPE_PROTOCOL_VERSION = 91;
@@ -62,14 +63,28 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
     @Override
     public void handle(McpeLogin packet) {
-        if (packet.getProtocolVersion() != MCPE_PROTOCOL_VERSION) {
+        if (!VersionUtil.isCompatible(packet.getProtocolVersion())) {
             Optional<InetSocketAddress> address = session.getRemoteAddress();
+            int[] compatible = VersionUtil.getCompatibleProtocolVersions();
             if (address.isPresent()) {
-                LOGGER.error("Client {} has protocol version {}, not {}", address.get(), packet.getProtocolVersion(), MCPE_PROTOCOL_VERSION);
+                LOGGER.error("Client {} has protocol version {}, not one of {}", address.get(), packet.getProtocolVersion(),
+                        Arrays.toString(compatible));
             } else {
-                LOGGER.error("Client has protocol version {}, not {}", packet.getProtocolVersion(), MCPE_PROTOCOL_VERSION);
+                LOGGER.error("Client has protocol version {}, not {}", packet.getProtocolVersion(),
+                        Arrays.toString(compatible));
             }
-            session.close();
+
+            List<String> friendly = new ArrayList<>();
+            for (int i : compatible) {
+                String human = VersionUtil.getHumanVersionName(i);
+                if (human != null) {
+                    friendly.add(human);
+                }
+            }
+            String joined = Joiner.on(", ").join(friendly);
+            int lastComma = joined.lastIndexOf(',');
+            String fixed = lastComma == -1 ? joined : joined.substring(0, lastComma) + " or " + joined.substring(lastComma + 1);
+            session.disconnect("This server requires Minecraft: Pocket Edition " + fixed);
             return;
         }
 

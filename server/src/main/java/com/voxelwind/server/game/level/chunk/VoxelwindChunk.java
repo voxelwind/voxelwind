@@ -9,6 +9,7 @@ import com.voxelwind.api.game.level.ChunkSnapshot;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
+import com.voxelwind.nbt.io.NBTEncoding;
 import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
@@ -246,7 +247,7 @@ public class VoxelwindChunk implements Chunk {
                 buf.writeShort(0);
 
                 // Finally, write out block entity compounds for block entities;
-                try (NBTWriter writer = new NBTWriter(new ByteBufOutputStream(buf.order(ByteOrder.LITTLE_ENDIAN)))) {
+                try (NBTWriter writer = new NBTWriter(new ByteBufOutputStream(buf.order(ByteOrder.LITTLE_ENDIAN)), NBTEncoding.MCPE_0_16_NETWORK)) {
                     if (serializedBlockEntities.isEmpty()) {
                         // Write out an empty root tag
                         writer.write(new CompoundTag("", ImmutableMap.of()));

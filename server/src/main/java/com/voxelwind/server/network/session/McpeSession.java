@@ -295,7 +295,7 @@ public class McpeSession {
         packet.setMessage(reason);
         sendImmediatePackage(packet);
 
-        connection.close();
+        close();
     }
 
     public boolean isClosed() {

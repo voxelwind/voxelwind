@@ -50,6 +50,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class VoxelwindServer implements Server {
+    public static final String VOXELWIND_VERSION = "0.0.1 (Layer of Fog)";
     public static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
     private final SessionManager sessionManager = new SessionManager();
@@ -177,7 +178,7 @@ public class VoxelwindServer implements Server {
 
     @Override
     public String getVersion() {
-        return "0.0.1 (Layer of Fog)";
+        return VOXELWIND_VERSION;
     }
 
     @Override
