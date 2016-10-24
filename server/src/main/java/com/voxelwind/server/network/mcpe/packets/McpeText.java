@@ -18,25 +18,17 @@ public class McpeText implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         type = TextType.values()[buffer.readByte()];
         switch (type) {
-            case RAW:
-                message = McpeUtil.readVarintLengthString(buffer);
-                break;
             case SOURCE:
+            case POPUP:
                 source = McpeUtil.readVarintLengthString(buffer);
+                // Intentional fall-through.
+            case RAW:
+            case TIP:
+            case SYSTEM:
                 message = McpeUtil.readVarintLengthString(buffer);
                 break;
             case TRANSLATE:
                 translatedMessage = McpeUtil.readTranslatedMessage(buffer);
-                break;
-            case POPUP:
-                source = McpeUtil.readVarintLengthString(buffer);
-                message = McpeUtil.readVarintLengthString(buffer);
-                break;
-            case TIP:
-                message = McpeUtil.readVarintLengthString(buffer);
-                break;
-            case SYSTEM:
-                message = McpeUtil.readVarintLengthString(buffer);
                 break;
         }
     }
@@ -45,25 +37,17 @@ public class McpeText implements NetworkPackage {
     public void encode(ByteBuf buffer) {
         buffer.writeByte(type.ordinal());
         switch (type) {
-            case RAW:
-                McpeUtil.writeVarintLengthString(buffer, message);
-                break;
             case SOURCE:
+            case POPUP:
                 McpeUtil.writeVarintLengthString(buffer, source);
+                // Intentional fall-through.
+            case RAW:
+            case TIP:
+            case SYSTEM:
                 McpeUtil.writeVarintLengthString(buffer, message);
                 break;
             case TRANSLATE:
                 McpeUtil.writeTranslatedMessage(buffer, translatedMessage);
-                break;
-            case POPUP:
-                McpeUtil.writeVarintLengthString(buffer, source);
-                McpeUtil.writeVarintLengthString(buffer, message);
-                break;
-            case TIP:
-                McpeUtil.writeVarintLengthString(buffer, message);
-                break;
-            case SYSTEM:
-                McpeUtil.writeVarintLengthString(buffer, message);
                 break;
         }
     }

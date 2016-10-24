@@ -137,12 +137,12 @@ public class Varints {
     }
 
     public static long decodeSignedLong(DataInput input) throws IOException {
-        long n = decodeUnsigned(input);
+        long n = decodeUnsignedLong(input);
         return (n >> 1) ^ -(n & 1);
     }
 
     public static long decodeSignedLong(ByteBuf input) {
-        long n = decodeUnsigned(input);
+        long n = decodeUnsignedLong(input);
         return (n >> 1) ^ -(n & 1);
     }
 }

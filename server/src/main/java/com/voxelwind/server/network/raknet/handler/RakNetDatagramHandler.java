@@ -212,5 +212,8 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
         if (netPackage instanceof McpeResourcePackClientResponse) {
             session.getHandler().handle((McpeResourcePackClientResponse) netPackage);
         }
+        if (netPackage instanceof McpeCommandStep) {
+            session.getHandler().handle((McpeCommandStep) netPackage);
+        }
     }
 }

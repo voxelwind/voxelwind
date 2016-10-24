@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.raknet.handler;
 
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.packets.*;
 
 public interface NetworkPacketHandler {
@@ -30,4 +31,6 @@ public interface NetworkPacketHandler {
     void handle(McpeDropItem packet);
 
     void handle(McpeResourcePackClientResponse packet);
+
+    void handle(McpeCommandStep packet);
 }

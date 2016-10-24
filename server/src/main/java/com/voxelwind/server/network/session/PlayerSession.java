@@ -1,5 +1,8 @@
 package com.voxelwind.server.network.session;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
@@ -51,6 +54,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -1006,6 +1010,51 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         public void handle(McpeResourcePackClientResponse packet) {
             // TODO: Stack packet?
             doInitialSpawn();
+        }
+
+        @Override
+        public void handle(McpeCommandStep packet) {
+            // This is essentially a hack at the moment.
+            // TODO: Replace with nicer command API
+            JsonNode argsNode;
+            try {
+                argsNode = VoxelwindServer.MAPPER.readTree(packet.getArgs());
+            } catch (IOException e) {
+                LOGGER.error("Unable to decode command argument JSON", e);
+                return;
+            }
+
+            String command = null;
+            if (argsNode.getNodeType() == JsonNodeType.NULL) {
+                command = packet.getCommand();
+            } else if (argsNode.getNodeType() == JsonNodeType.OBJECT) {
+                JsonNode innerArgs = argsNode.get("args");
+                if (innerArgs.getNodeType() == JsonNodeType.STRING) {
+                    command = packet.getCommand() + innerArgs.asText();
+                } else if (innerArgs.getNodeType() == JsonNodeType.ARRAY) {
+                    StringBuilder reconstructedCommand = new StringBuilder(packet.getCommand());
+                    ArrayNode innerArgsArray = (ArrayNode) innerArgs;
+                    for (JsonNode node : innerArgsArray) {
+                        reconstructedCommand.append(' ').append(node.asText());
+                    }
+                    command = reconstructedCommand.toString();
+                }
+            }
+
+            if (command == null) {
+                LOGGER.debug("Unable to reconstruct command for packet {}", packet);
+                sendMessage(TextFormat.RED + "An error has occurred while running the command.");
+                return;
+            }
+
+            try {
+                session.getServer().getCommandManager().executeCommand(PlayerSession.this, command);
+            } catch (CommandNotFoundException e) {
+                sendMessage(TextFormat.RED + "No such command found.");
+            } catch (CommandException e) {
+                LOGGER.error("Error while running command '{}' for {}", command, getName(), e);
+                sendMessage(TextFormat.RED + "An error has occurred while running the command.");
+            }
         }
     }
 

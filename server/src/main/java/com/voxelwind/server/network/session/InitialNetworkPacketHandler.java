@@ -207,6 +207,11 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         throw new IllegalStateException("Got unexpected McpeResourcePackClientResponse");
     }
 
+    @Override
+    public void handle(McpeCommandStep packet) {
+        throw new IllegalStateException("Got unexpected McpeCommandStep");
+    }
+
     private void startEncryptionHandshake(PublicKey key) throws InvalidKeyException {
         if (!CAN_USE_ENCRYPTION) {
             // Can't use encryption.

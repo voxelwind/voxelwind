@@ -24,7 +24,7 @@ public class McpeCommandStep implements NetworkPackage {
         unknown1 = Varints.decodeUnsigned(buffer);
         unknown2 = Varints.decodeUnsigned(buffer);
         unknown3 = buffer.readBoolean();
-        unknown4 = Varints.decodeSignedLong(buffer);
+        unknown4 = Varints.decodeUnsignedLong(buffer);
         args = McpeUtil.readVarintLengthString(buffer);
         unknown5 = McpeUtil.readVarintLengthString(buffer);
         buffer.skipBytes(buffer.readableBytes());
