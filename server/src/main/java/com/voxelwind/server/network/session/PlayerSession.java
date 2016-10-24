@@ -1030,7 +1030,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             } else if (argsNode.getNodeType() == JsonNodeType.OBJECT) {
                 JsonNode innerArgs = argsNode.get("args");
                 if (innerArgs.getNodeType() == JsonNodeType.STRING) {
-                    command = packet.getCommand() + innerArgs.asText();
+                    command = packet.getCommand() + " " + innerArgs.asText();
                 } else if (innerArgs.getNodeType() == JsonNodeType.ARRAY) {
                     StringBuilder reconstructedCommand = new StringBuilder(packet.getCommand());
                     ArrayNode innerArgsArray = (ArrayNode) innerArgs;
