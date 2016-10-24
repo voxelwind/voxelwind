@@ -48,7 +48,7 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
     @Override
     public BlockSnapshot getBlock(int x, int y, int z) {
         checkPosition(x, y, z);
-        int index = xyzIdx(x, y, z);
+        int index = VoxelwindChunk.xyzIdx(x, y, z);
         byte data = blockData[index];
 
         Vector3i full = new Vector3i(x + (this.x * 16), y, z + (this.z * 16));
@@ -63,11 +63,6 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
 
         // TODO: Add level and chunk
         return new VoxelwindBlock(null, null, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null), blockEntities.get(index)));
-    }
-
-    private static int xyzIdx(int x, int y, int z) {
-        //return x + 16 * (z + 16 * y);
-        return (x*2048) + (z*128) + y;
     }
 
     private static void checkPosition(int x, int y, int z) {

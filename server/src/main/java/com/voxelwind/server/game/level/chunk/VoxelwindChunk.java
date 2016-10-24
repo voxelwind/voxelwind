@@ -58,9 +58,8 @@ public class VoxelwindChunk implements Chunk {
         Arrays.fill(biomeColor, 0x0185b24a);
     }
 
-    private static int xyzIdx(int x, int y, int z) {
-        //return x + 16 * (z + 16 * y);
-        return (x*2048) + (z*128) + y;
+    static int xyzIdx(int x, int y, int z) {
+        return x + 16 * (z + 16 * y);
     }
 
     public int getX() {
