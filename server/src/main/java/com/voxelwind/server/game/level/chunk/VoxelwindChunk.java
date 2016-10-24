@@ -228,7 +228,7 @@ public class VoxelwindChunk implements Chunk {
             McpeFullChunkData data = new McpeFullChunkData();
             data.setChunkX(x);
             data.setChunkZ(z);
-            data.setOrder((byte) 0);
+            data.setOrder((byte) 1);
 
             // Populate the actual chunk data to send. 96KB will be allocated, enough to fill chunk data plus a decent
             // number of block entities.
