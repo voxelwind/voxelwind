@@ -163,7 +163,7 @@ public class McpeUtil {
         int aux = Varints.decodeSigned(buf);
         int damage = aux >> 8;
         int count = aux & 0xff;
-        short nbtSize = buf.readShort();
+        short nbtSize = buf.order(ByteOrder.LITTLE_ENDIAN).readShort();
 
         ItemType type = ItemTypes.forId(id);
 
@@ -197,11 +197,12 @@ public class McpeUtil {
 
         // Remember this position, since we'll be writing the true NBT size here later:
         int sizeIndex = buf.writerIndex();
-        buf.writeShort(0);
+        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
+        leBuf.writeShort(0);
         int afterSizeIndex = buf.writerIndex();
 
         if (stack instanceof VoxelwindItemStack) {
-            try (NBTWriter stream = new NBTWriter(new ByteBufOutputStream(buf.order(ByteOrder.LITTLE_ENDIAN)))) {
+            try (NBTWriter stream = new NBTWriter(new ByteBufOutputStream(leBuf))) {
                 stream.write(((VoxelwindItemStack) stack).toSpecificNBT());
             } catch (IOException e) {
                 // This shouldn't happen (as this is backed by a Netty ByteBuf), but okay...
@@ -209,7 +210,7 @@ public class McpeUtil {
             }
 
             // Set to the written NBT size
-            buf.setShort(sizeIndex, buf.writerIndex() - afterSizeIndex);
+            leBuf.setShort(sizeIndex, buf.writerIndex() - afterSizeIndex);
         }
     }
 

@@ -9,6 +9,7 @@ import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -35,8 +36,8 @@ public class McpeAddEntity implements NetworkPackage {
         Varints.encodeUnsigned(buffer, entityType);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);
-        buffer.writeFloat(yaw);
-        buffer.writeFloat(pitch);
+        buffer.order(ByteOrder.LITTLE_ENDIAN).writeFloat(yaw);
+        buffer.order(ByteOrder.LITTLE_ENDIAN).writeFloat(pitch);
         Varints.encodeUnsigned(buffer, modifiers);
         metadata.writeTo(buffer);
         Varints.encodeUnsigned(buffer, 0); // links, todo
