@@ -764,6 +764,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     setHealth(getMaximumHealth());
                     sendPlayerInventory();
                     teleport(getLevel(), getLevel().getSpawnLocation());
+                    sendAttributes();
 
                     McpeRespawn respawn = new McpeRespawn();
                     respawn.setPosition(getLevel().getSpawnLocation());
@@ -802,6 +803,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeText packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             Preconditions.checkArgument(packet.getType() == McpeText.TextType.SOURCE, "Text packet type from client is not SOURCE");
             Preconditions.checkArgument(!packet.getMessage().contains("\0"), "Text packet from client contains a null byte");
             Preconditions.checkArgument(!packet.getMessage().trim().isEmpty(), "Text packet from client is effectively empty");
@@ -825,6 +830,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeMovePlayer packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             // TODO: We may do well to perform basic anti-cheat
             Vector3f originalPosition = getPosition();
             Vector3f newPosition = packet.getPosition().sub(0, 1.62, 0);
@@ -848,6 +857,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeContainerClose packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             if (openedInventory != null) {
                 ((VoxelwindBaseInventory) openedInventory).getObserverList().remove(PlayerSession.this);
                 openedInventory = null;
@@ -857,6 +870,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeContainerSetSlot packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             VoxelwindBaseInventory window = null;
             if (openInventoryId < 0 || openInventoryId != packet.getWindowId()) {
                 // There's no inventory open, so it's probably the player inventory.
@@ -893,6 +910,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeMobEquipment packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             // Basic sanity check:
             if (packet.getHotbarSlot() < 0 || packet.getHotbarSlot() >= 9) {
                 throw new IllegalArgumentException("Specified hotbar slot " + packet.getHotbarSlot() + " isn't valid.");
@@ -908,6 +929,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeRemoveBlock packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             // TODO: Perform sanity checks and drop items.
             int chunkX = packet.getPosition().getX() >> 4;
             int chunkZ = packet.getPosition().getZ() >> 4;
@@ -948,6 +973,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeUseItem packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             if (packet.getFace() == 0xff) {
                 // TODO: Snowballs.
             } else if (packet.getFace() >= 0 && packet.getFace() <= 5) {
@@ -1004,6 +1033,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeDropItem packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             if (packet.getItem().getItemType() == BlockTypes.AIR) {
                 return;
             }
@@ -1028,6 +1061,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeCommandStep packet) {
+            if (!spawned || isDead()) {
+                return;
+            }
+
             // This is essentially a hack at the moment.
             // TODO: Replace with nicer command API
             JsonNode argsNode;
