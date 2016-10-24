@@ -80,6 +80,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
     private final VoxelwindServer vwServer;
     private final Set<UUID> playersSentForList = new HashSet<>();
+    private float baseSpeed = 0.1f;
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20);
@@ -208,7 +209,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private void sendAttributes() {
         Attribute health = new Attribute("minecraft:health", 0f, getMaximumHealth(), Math.max(0, getHealth()), getMaximumHealth());
         Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, 20f, 20f); // TODO: Implement hunger
-        Attribute speed = new Attribute("minecraft:movement", 0, 0.5f, 0.1f, 0.1f);
+        float effectiveSpeed = sprinting ? (float) Math.min(0.5f, baseSpeed * 1.3) : baseSpeed;
+        Attribute speed = new Attribute("minecraft:movement", 0, 0.5f, effectiveSpeed, 0.1f);
         // TODO: Implement levels, movement speed, and absorption.
 
         McpeUpdateAttributes packet = new McpeUpdateAttributes();
@@ -665,6 +667,18 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     public boolean isSpawned() {
         return spawned;
+    }
+
+    @Override
+    public float getBaseSpeed() {
+        return baseSpeed;
+    }
+
+    @Override
+    public void setBaseSpeed(float baseSpeed) {
+        Preconditions.checkArgument(Float.compare(baseSpeed, 0) > 0 && Float.compare(0.5f, baseSpeed) <= 0, "speed must be between 0 and 0.5");
+        this.baseSpeed = baseSpeed;
+        sendAttributes();
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {

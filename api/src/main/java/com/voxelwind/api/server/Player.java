@@ -38,4 +38,8 @@ public interface Player extends Entity, CommandExecutorSource, MessageRecipient,
     void openInventory(Inventory inventory);
 
     void closeInventory();
+
+    float getBaseSpeed();
+
+    void setBaseSpeed(float baseSpeed);
 }

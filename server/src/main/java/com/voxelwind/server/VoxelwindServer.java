@@ -99,7 +99,7 @@ public class VoxelwindServer implements Server {
 
         // Basic initialization.
         commandManager.register("version", new VersionCommand(this));
-        commandManager.register("give", new GiveCommand());
+        commandManager.register("vwgive", new GiveCommand());
 
         // Load configuration.
         Path configFile = Paths.get("voxelwind.json");
