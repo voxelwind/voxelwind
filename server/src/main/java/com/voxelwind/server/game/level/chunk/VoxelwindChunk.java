@@ -46,6 +46,8 @@ public class VoxelwindChunk implements Chunk {
     private final Level level;
     private final int x;
     private final int z;
+
+    private final byte[] biomeId = new byte[256];
     private final int[] biomeColor = new int[256];
     private final byte[] height = new byte[256];
     private McpeBatch chunkDataPacket;
@@ -55,6 +57,7 @@ public class VoxelwindChunk implements Chunk {
         this.level = level;
         this.x = x;
         this.z = z;
+        Arrays.fill(biomeId, (byte) 1);
         Arrays.fill(biomeColor, 0x0185b24a);
     }
 
@@ -239,8 +242,10 @@ public class VoxelwindChunk implements Chunk {
                 buf.writeBytes(skyLightData.getData());
                 buf.writeBytes(blockLightData.getData());
                 buf.writeBytes(height);
-                for (int i : biomeColor) {
-                    Varints.encodeSigned(buf, i);
+                for (int i = 0; i < biomeColor.length; i++) {
+                    int color = biomeColor[i];
+                    byte biome = biomeId[i];
+                    Varints.encodeSigned(buf, (color & 0x00ffffff) | biome << 2);
                 }
                 // extra data, we have none
                 buf.writeShort(0);
