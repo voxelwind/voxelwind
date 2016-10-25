@@ -41,7 +41,7 @@ public final class MetadataDictionary {
 
     private static boolean isAcceptable(Object o) {
         return o instanceof Byte || o instanceof Short || o instanceof Integer || o instanceof Float || o
-                instanceof String || o instanceof Vector3i;
+                instanceof String || o instanceof Vector3i || o instanceof Long;
     }
 
     public static MetadataDictionary deserialize(ByteBuf buf) {
@@ -72,6 +72,9 @@ public final class MetadataDictionary {
                     break;
                 case EntityMetadataConstants.DATA_TYPE_SLOT:
                     dictionary.put(idx, McpeUtil.readItemStack(buf));
+                    break;
+                case EntityMetadataConstants.DATA_TYPE_LONG:
+                    dictionary.put(idx, Varints.decodeSignedLong(buf));
                     break;
                 default:
                     throw new IllegalArgumentException("Type " + type + " is not recognized.");
@@ -119,6 +122,11 @@ public final class MetadataDictionary {
             Varints.encodeUnsigned(buf, EntityMetadataConstants.DATA_TYPE_POS);
             Varints.encodeUnsigned(buf, idx);
             McpeUtil.writeBlockCoords(buf, vector3i);
+        } else if (o instanceof Long) {
+            Long l = (Long) o;
+            Varints.encodeUnsigned(buf, EntityMetadataConstants.DATA_TYPE_LONG);
+            Varints.encodeUnsigned(buf, idx);
+            Varints.encodeSignedLong(buf, l);
         } else {
             throw new IllegalArgumentException("Unsupported type " + o.getClass().getName());
         }

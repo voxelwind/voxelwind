@@ -166,16 +166,16 @@ public class BaseEntity implements Entity {
         boundingBox = new BoundingBox(getPosition(), getPosition()).grow(data.getWidth() / 2, data.getLength() / 2, data.getWidth() / 2);
     }
 
-    protected byte getFlagValue() {
-        BitSet set = new BitSet(8);
-        set.set(0, false); // On fire (not implemented)
-        set.set(1, sneaking); // Sneaking
-        set.set(2, false); // Riding (not implemented)
-        set.set(3, sprinting); // Sprinting
-        set.set(4, false); // In action(?)
-        set.set(5, invisible); // Invisible
+    protected long getFlagValue() {
+        BitSet set = new BitSet(64);
+        // Fill with values
+        set.set(EntityMetadataConstants.DATA_FLAGS_ON_FIRE, false); // Not implemented
+        set.set(EntityMetadataConstants.DATA_FLAGS_SNEAKING, sneaking); // Sneaking
+        set.set(EntityMetadataConstants.DATA_FLAGS_RIDING, false); // Riding (not implemented)
+        set.set(EntityMetadataConstants.DATA_FLAGS_SPRINTING, sprinting); // Sprinting
+        set.set(EntityMetadataConstants.DATA_FLAGS_INVISIBLE, invisible); // Invisible
 
-        byte[] array = set.toByteArray();
+        long[] array = set.toLongArray();
         return array.length == 0 ? 0 : array[0];
     }
 
