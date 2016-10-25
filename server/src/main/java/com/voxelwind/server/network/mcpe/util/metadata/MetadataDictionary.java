@@ -59,13 +59,13 @@ public final class MetadataDictionary {
                     dictionary.put(idx, buf.readShort());
                     break;
                 case EntityMetadataConstants.DATA_TYPE_INT:
-                    dictionary.put(idx, buf.readInt());
+                    dictionary.put(idx, Varints.decodeSigned(buf));
                     break;
                 case EntityMetadataConstants.DATA_TYPE_FLOAT:
                     dictionary.put(idx, buf.readFloat());
                     break;
                 case EntityMetadataConstants.DATA_TYPE_STRING:
-                    dictionary.put(idx, RakNetUtil.readString(buf));
+                    dictionary.put(idx, McpeUtil.readVarintLengthString(buf));
                     break;
                 case EntityMetadataConstants.DATA_TYPE_POS:
                     dictionary.put(idx, McpeUtil.readBlockCoords(buf));
