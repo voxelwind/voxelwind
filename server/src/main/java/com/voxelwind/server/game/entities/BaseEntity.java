@@ -184,16 +184,14 @@ public class BaseEntity implements Entity {
 
         // TODO: Implement more than this.
         MetadataDictionary dictionary = new MetadataDictionary();
-        dictionary.put(EntityMetadataConstants.DATA_FLAGS, getFlagValue());
+        dictionary.put(EntityMetadataConstants.DATA_ENTITY_FLAGS, getFlagValue());
         dictionary.put(EntityMetadataConstants.DATA_NAMETAG, ""); // Not implemented
-        dictionary.put(EntityMetadataConstants.DATA_SHOW_NAMETAG, 0); // Not implemented
-        dictionary.put(EntityMetadataConstants.DATA_SILENT, 0); // Not implemented
-        dictionary.put(EntityMetadataConstants.DATA_POTION_COLOR, 0); // Not implemented
-        dictionary.put(EntityMetadataConstants.DATA_POTION_AMBIENT, (byte) 0); // Not implemented
-        dictionary.put(EntityMetadataConstants.DATA_NO_AI, (byte) 0); // Not implemented
-        // Interesting flags:
-        // 16 - player flags?
-        // 23/24 - leads-related
+        dictionary.put(EntityMetadataConstants.DATA_HIDE_NAME_TAG, (byte) 0); // Not implemented
+        dictionary.put(EntityMetadataConstants.DATA_MAYBE_AGE, 0); // Scale (not implemented)
+        dictionary.put(EntityMetadataConstants.DATA_SCALE, 1f); // Scale (not implemented)
+        dictionary.put(EntityMetadataConstants.DATA_MAX_AIR, (short) 20);
+        dictionary.put(EntityMetadataConstants.DATA_COLLISION_BOX_HEIGHT, data.getHeight());
+        dictionary.put(EntityMetadataConstants.DATA_COLLISION_BOX_WIDTH, data.getWidth());
         return dictionary;
     }
 
