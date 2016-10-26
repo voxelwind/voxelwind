@@ -65,7 +65,7 @@ public class PacketRegistry {
         MCPE_PACKETS[0x1f] = McpeUpdateAttributes.class;
         MCPE_PACKETS[0x20] = McpeMobEquipment.class;
         // MOB_ARMOR_EQUIPMENT_PACKET = 0x21;
-        // INTERACT_PACKET = 0x22;
+        MCPE_PACKETS[0x22] = McpeInteract.class;
         MCPE_PACKETS[0x23] = McpeUseItem.class;
         MCPE_PACKETS[0x24] = McpePlayerAction.class;
         // HURT_ARMOR_PACKET = 0x25;
