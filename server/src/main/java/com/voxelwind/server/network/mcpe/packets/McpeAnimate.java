@@ -7,18 +7,18 @@ import lombok.Data;
 
 @Data
 public class McpeAnimate implements NetworkPackage {
-    private byte action;
+    private int action;
     private long entityId;
 
     @Override
     public void decode(ByteBuf buffer) {
-        action = buffer.readByte();
+        action = Varints.decodeSigned(buffer);
         entityId = Varints.decodeSignedLong(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeByte(action);
+        Varints.encodeSigned(buffer, action);
         Varints.encodeSignedLong(buffer, entityId);
     }
 }
