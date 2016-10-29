@@ -67,6 +67,7 @@ public class BlockBehaviors {
                 .put(BlockTypes.CAKE, DropNothingBlockBehavior.INSTANCE)
                 .put(BlockTypes.WOOD, new LogBlockBehavior())
                 .put(BlockTypes.ACACIA_WOOD, new LogBlockBehavior())
+                .put(BlockTypes.SEA_LANTERN, new DropOtherItemBlockBehavior(ItemTypes.PRISMARINE_CRYSTALS, 2, 3))
                 .build();
     }
 

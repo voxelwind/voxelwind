@@ -149,6 +149,7 @@ public class ItemTypes {
     public static final ItemType GOLDEN_CARROT = new IntItem(396, "golden_carrot", 64, null);
     public static final ItemType MOB_HEAD = new IntItem(397, "mob_head", 64, null);
     public static final ItemType CARROT_ON_A_STICK = new IntItem(398, "carrot_on_a_stick", 1, null);
+    public static final ItemType NETHER_STAR = new IntItem(399, "nether_star", 64, null);
     public static final ItemType PUMPKIN_PIE = new IntItem(400, "pumpkin_pie", 64, null);
     public static final ItemType ENCHANTED_BOOK = new IntItem(403, "enchanted_book", 1, null);
     public static final ItemType COMPARATOR = new IntItem(404, "comparator", 64, null);
@@ -156,7 +157,9 @@ public class ItemTypes {
     public static final ItemType NETHER_QUARTZ = new IntItem(406, "nether_quartz", 64, null);
     public static final ItemType MINECART_WITH_TNT = new IntItem(407, "minecart_with_tnt", 1, null);
     public static final ItemType MINECART_WITH_HOPPER = new IntItem(408, "minecart_with_hopper", 1, null);
-    public static final ItemType HOPPER = new IntItem(410, "hopper", 64, null);
+    public static final ItemType PRISMARINE_SHARD = new IntItem(409, "prismarine_shard", 64, null);
+    //public static final ItemType HOPPER = new IntItem(410, "hopper", 64, null);
+    public static final ItemType PRISMARINE_CRYSTALS = new IntItem(410, "prismarine_crystals", 64, null);
     public static final ItemType RAW_RABBIT = new IntItem(411, "raw_rabbit", 64, null);
     public static final ItemType COOKED_RABBIT = new IntItem(412, "cooked_rabbit", 64, null);
     public static final ItemType RABBIT_STEW = new IntItem(413, "rabbit_stew", 1, null);
