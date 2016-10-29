@@ -7,25 +7,14 @@ import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 
 public class EncryptionUtil {
-    private static final KeyPair serverKey;
     private static final SecureRandom secureRandom = new SecureRandom();
-
-    static {
-        try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
-            generator.initialize(new ECGenParameterSpec("secp384r1"));
-            serverKey = generator.generateKeyPair();
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
 
     private EncryptionUtil() {
 
     }
 
-    public static byte[] getServerKey(PublicKey key, byte[] token) throws InvalidKeyException {
-        byte[] sharedSecret = getSharedSecret(key);
+    public static byte[] getServerKey(KeyPair serverPair, PublicKey key, byte[] token) throws InvalidKeyException {
+        byte[] sharedSecret = getSharedSecret(serverPair, key);
 
         MessageDigest digest;
         try {
@@ -39,7 +28,7 @@ public class EncryptionUtil {
         return digest.digest();
     }
 
-    private static byte[] getSharedSecret(PublicKey clientKey) throws InvalidKeyException {
+    private static byte[] getSharedSecret(KeyPair serverPair, PublicKey clientKey) throws InvalidKeyException {
         KeyAgreement agreement;
         try {
             agreement = KeyAgreement.getInstance("ECDH");
@@ -47,18 +36,14 @@ public class EncryptionUtil {
             throw new AssertionError(e);
         }
 
-        agreement.init(serverKey.getPrivate());
+        agreement.init(serverPair.getPrivate());
         agreement.doPhase(clientKey, true);
         return agreement.generateSecret();
     }
 
-    public static KeyPair getServerKey() {
-        return serverKey;
-    }
-
-    public static McpeServerHandshake createHandshakePacket(byte[] token) {
+    public static McpeServerHandshake createHandshakePacket(KeyPair pair, byte[] token) {
         McpeServerHandshake handshake = new McpeServerHandshake();
-        handshake.setKey(serverKey.getPublic());
+        handshake.setKey(pair.getPublic());
         handshake.setToken(token);
         return handshake;
     }

@@ -26,10 +26,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
@@ -212,17 +210,24 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         throw new IllegalStateException("Got unexpected McpeCommandStep");
     }
 
-    private void startEncryptionHandshake(PublicKey key) throws InvalidKeyException {
+    private void startEncryptionHandshake(PublicKey key) throws Exception {
         if (!CAN_USE_ENCRYPTION) {
             // Can't use encryption.
             initializePlayerSession();
             return;
         }
 
+        // Generate a fresh key for each session
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+        generator.initialize(new ECGenParameterSpec("secp384r1"));
+        KeyPair serverKeyPair = generator.generateKeyPair();
+
+        // Enable encryption server-side
         byte[] token = EncryptionUtil.generateRandomToken();
-        byte[] serverKey = EncryptionUtil.getServerKey(key, token);
+        byte[] serverKey = EncryptionUtil.getServerKey(serverKeyPair, key, token);
         session.enableEncryption(serverKey);
-        session.sendImmediatePackage(EncryptionUtil.createHandshakePacket(token));
+        // Now send the packet to enable encryption on the client
+        session.sendImmediatePackage(EncryptionUtil.createHandshakePacket(serverKeyPair, token));
     }
 
     private void initializePlayerSession() {
