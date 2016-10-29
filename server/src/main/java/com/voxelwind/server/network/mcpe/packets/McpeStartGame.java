@@ -28,7 +28,7 @@ public class McpeStartGame implements NetworkPackage {
     private float lightingLevel; // = null;
     private boolean enableCommands; // = null;
     private boolean isTexturepacksRequired; // = null;
-    private String secret; // = null;
+    private String levelId; // = null;
     private String worldName; // = null;
 
     @Override
@@ -57,7 +57,7 @@ public class McpeStartGame implements NetworkPackage {
         buffer.writeFloat(lightingLevel);
         buffer.writeBoolean(enableCommands);
         buffer.writeBoolean(isTexturepacksRequired);
-        McpeUtil.writeVarintLengthString(buffer, secret);
+        McpeUtil.writeVarintLengthString(buffer, levelId);
         McpeUtil.writeVarintLengthString(buffer, worldName);
     }
 }

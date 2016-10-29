@@ -224,16 +224,18 @@ public class McpeUtil {
     }
 
     public static Rotation readRotation(ByteBuf buffer) {
-        float yaw = buffer.readFloat();
-        float headYaw = buffer.readFloat();
-        float pitch = buffer.readFloat();
+        ByteBuf leBuf = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        float yaw = leBuf.readFloat();
+        float headYaw = leBuf.readFloat();
+        float pitch = leBuf.readFloat();
         return new Rotation(pitch, yaw, headYaw);
     }
 
     public static void writeRotation(ByteBuf buffer, Rotation rotation) {
-        buffer.writeFloat(rotation.getYaw());
-        buffer.writeFloat(rotation.getHeadYaw());
-        buffer.writeFloat(rotation.getPitch());
+        ByteBuf leBuf = buffer.order(ByteOrder.LITTLE_ENDIAN);
+        leBuf.writeFloat(rotation.getYaw());
+        leBuf.writeFloat(rotation.getHeadYaw());
+        leBuf.writeFloat(rotation.getPitch());
     }
 
     public static Rotation readByteRotation(ByteBuf buf) {
