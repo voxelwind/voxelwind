@@ -12,7 +12,7 @@
     <artifactId>voxelwind-nbt</artifactId>
 
     <build>
-        <finalName>voxelwind-api-${project.version}</finalName>
+        <finalName>voxelwind-nbt-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
