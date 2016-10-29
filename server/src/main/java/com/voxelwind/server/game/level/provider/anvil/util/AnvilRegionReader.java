@@ -67,24 +67,24 @@ public class AnvilRegionReader implements Closeable {
         // Seek to the position in question.
         this.channel.position(sectorNumber * SECTOR_BYTES);
 
-        // Read some basic information about this sector.
-        ByteBuffer information = ByteBuffer.allocate(5);
+        // Read the whole sector.
+        ByteBuffer sector = ByteBuffer.allocate(SECTOR_BYTES);
+        this.channel.read(sector);
+        sector.flip();
+
+        // Read the sector:
         // 4 bytes: big-endian int is the size of this sector
         // 1 byte: compression type - 1 is gzip, 2 is deflate
-        this.channel.read(information);
-        information.flip();
-        int sectorLength = information.getInt();
-        byte type = information.get();
-
-        ByteBuffer chunkData = ByteBuffer.allocate(sectorLength);
-        this.channel.read(chunkData);
-        chunkData.flip();
+        // The rest is chunk data, and zeros at the end(?)
+        int sectorLength = sector.getInt();
+        byte type = sector.get();
+        sector.limit(sectorLength + 5);
 
         switch (type) {
             case 1:
-                return new GZIPInputStream(new ByteBufferBackedInputStream(chunkData), 2048);
+                return new GZIPInputStream(new ByteBufferBackedInputStream(sector), 2048);
             case 2:
-                return new InflaterInputStream(new ByteBufferBackedInputStream(chunkData), new Inflater(), 2048);
+                return new InflaterInputStream(new ByteBufferBackedInputStream(sector), new Inflater(), 2048);
             default:
                 throw new IllegalArgumentException("found illegal chunk compression type " + type);
         }
