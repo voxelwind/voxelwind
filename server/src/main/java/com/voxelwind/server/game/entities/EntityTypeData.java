@@ -39,6 +39,9 @@ public enum EntityTypeData {
     STRAY(46, 1.8f),
     HUSK(47, 1.8f),
     WITHER_SKELETON(48, 3.5f),
+    GUARDIAN(49, 1.5f),
+    ELDER_GUARDIAN(50, 1.5f),
+    WITHER(52, 3.5f),
 
     ITEM(63, 0.25f, 0.25f, 0.25f),
     PRIMED_TNT(65, 0.98f, 0.98f, 0.98f),
