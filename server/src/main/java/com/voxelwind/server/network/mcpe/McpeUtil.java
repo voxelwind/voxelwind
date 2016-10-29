@@ -58,17 +58,18 @@ public class McpeUtil {
     public static void writeLELengthString(ByteBuf buffer, String string) {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
-        buffer.order(ByteOrder.LITTLE_ENDIAN).writeInt(string.length());
-        ByteBufUtil.writeUtf8(buffer, string);
+        byte[] bytes = string.getBytes(CharsetUtil.US_ASCII);
+        buffer.order(ByteOrder.LITTLE_ENDIAN).writeInt(bytes.length);
+        buffer.writeBytes(bytes);
     }
 
     public static String readLELengthString(ByteBuf buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
 
-        int length = (buffer.order(ByteOrder.LITTLE_ENDIAN).readInt());
+        int length = buffer.order(ByteOrder.LITTLE_ENDIAN).readInt();
         byte[] bytes = new byte[length];
         buffer.readBytes(bytes);
-        return new String(bytes, StandardCharsets.UTF_8);
+        return new String(bytes, StandardCharsets.US_ASCII);
     }
 
     public static void writeBlockCoords(ByteBuf buf, Vector3i vector3i) {
