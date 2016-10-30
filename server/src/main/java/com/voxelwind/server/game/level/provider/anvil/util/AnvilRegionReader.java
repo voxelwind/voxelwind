@@ -75,9 +75,9 @@ public class AnvilRegionReader implements Closeable {
 
         switch (type) {
             case 1:
-                return new GZIPInputStream(new ByteBufferBackedInputStream(chunkData), 2048);
+                return new GZIPInputStream(new ByteBufferBackedInputStream(chunkData), 8192);
             case 2:
-                return new InflaterInputStream(new ByteBufferBackedInputStream(chunkData), new Inflater(), 2048);
+                return new InflaterInputStream(new ByteBufferBackedInputStream(chunkData), new Inflater(), 8192);
             default:
                 throw new IllegalArgumentException("found illegal chunk compression type " + type);
         }
