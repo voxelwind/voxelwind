@@ -8,7 +8,7 @@ import java.util.zip.Inflater;
 public class JavaZlib implements BungeeZlib
 {
 
-    private final byte[] buffer = new byte[ 8192 ];
+    private final byte[] buffer = new byte[ 1024 ];
     //
     private boolean compress;
     private Deflater deflater;

@@ -46,7 +46,7 @@ public class NativeZlib implements BungeeZlib
 
         while ( !nativeCompress.finished && ( compress || in.isReadable() ) )
         {
-            out.ensureWritable( 8192 );
+            out.ensureWritable( 1024 );
 
             int processed = nativeCompress.process( ctx, in.memoryAddress() + in.readerIndex(), in.readableBytes(), out.memoryAddress() + out.writerIndex(), out.writableBytes(), compress );
 
