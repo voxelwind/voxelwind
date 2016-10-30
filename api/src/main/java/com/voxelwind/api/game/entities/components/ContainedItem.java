@@ -5,7 +5,7 @@ import com.voxelwind.api.game.item.ItemStack;
 /**
  * A {@link Component} that holds a single {@link ItemStack}.
  */
-public interface ContainedItem {
+public interface ContainedItem extends Component {
     /**
      * Returns the contained item stack.
      * @return the item stack contained

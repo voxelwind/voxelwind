@@ -5,7 +5,7 @@ import javax.annotation.Nonnegative;
 /**
  * A {@link Component} representing a pick-up delay.
  */
-public interface PickupDelay {
+public interface PickupDelay extends Component {
     default boolean canPickup() {
         return getDelayPickupTicks() == 0;
     }

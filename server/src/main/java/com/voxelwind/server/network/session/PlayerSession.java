@@ -10,6 +10,8 @@ import com.google.common.base.Verify;
 import com.google.common.base.VerifyException;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.components.ArmorEquipment;
+import com.voxelwind.api.game.entities.components.Component;
 import com.voxelwind.api.game.entities.components.Health;
 import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.entities.components.system.SystemRunner;
@@ -39,6 +41,7 @@ import com.voxelwind.api.game.util.data.BlockFace;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
+import com.voxelwind.server.game.entities.systems.DeathSystem;
 import com.voxelwind.server.game.inventories.*;
 import com.voxelwind.server.game.level.block.BlockBehavior;
 import com.voxelwind.server.game.level.block.BlockBehaviors;
@@ -70,7 +73,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.voxelwind.server.network.mcpe.packets.McpePlayerAction.*;
 
 public class PlayerSession extends LivingEntity implements Player, InventoryObserver {
-    private static final int REQUIRED_TO_SPAWN = 56;
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
     private final McpeSession session;
@@ -92,6 +94,21 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20);
         this.session = session;
         this.vwServer = session.getServer();
+
+        this.registerSystem(PLAYER_SYSTEM);
+        this.deregisterSystem(DeathSystem.GENERIC);
+        this.registerSystem(System.builder()
+                .expectComponent(Health.class)
+                .runner(new DeathSystem((t) -> doDeath()))
+                .build());
+    }
+
+    private <C extends Component> C ensureAndGet(Class<C> componentClass) {
+        Optional<C> component = getComponent(componentClass);
+        if (component.isPresent()) {
+            return component.get();
+        }
+        throw new VerifyException("Component " + componentClass.getName() + " not found in entity.");
     }
 
     @Override
@@ -109,7 +126,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     private void pickupAdjacent() {
         BoundingBox box = getBoundingBox().grow(0.5f, 0.25f, 0.5f);
-        for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInBounds(box)) {
+        /*for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInBounds(box)) {
             if (entity instanceof DroppedItem) {
                 // TODO: Check pickup delay and fire events.
                 if (((DroppedItem) entity).canPickup() && getInventory().addItem(((VoxelwindDroppedItem) entity).getItemStack())) {
@@ -126,7 +143,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     entity.remove();
                 }
             }
-        }
+        }*/
     }
 
     @Override
@@ -150,25 +167,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         super.remove();
     }
 
-    @Override
-    public void setHealth(int health) {
-        super.setHealth(health);
-
-        if (spawned) {
-            McpeSetHealth setHealthPacket = new McpeSetHealth();
-            setHealthPacket.setHealth(getHealth());
-            session.addToSendQueue(setHealthPacket);
-        }
-    }
-
-    @Override
-    public void setMaximumHealth(int maximumHealth) {
-        super.setMaximumHealth(maximumHealth);
-        sendAttributes();
-    }
-
-    @Override
-    protected void doDeath() {
+    private void doDeath() {
         McpeEntityEvent event = new McpeEntityEvent();
         event.setEntityId(getEntityId());
         event.setEvent((byte) 3);
@@ -178,7 +177,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     private void sendAttributes() {
-        Attribute health = new Attribute("minecraft:health", 0f, getMaximumHealth(), Math.max(0, getHealth()), getMaximumHealth());
+        Health healthComponent = getComponent(Health.class).get();
+        Attribute health = new Attribute("minecraft:health", 0f, healthComponent.getMaximumHealth(),
+                Math.max(0, healthComponent.getHealth()), healthComponent.getMaximumHealth());
         Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, 20f, 20f); // TODO: Implement hunger
         float effectiveSpeed = sprinting ? (float) Math.min(0.5f, baseSpeed * 1.3) : baseSpeed;
         Attribute speed = new Attribute("minecraft:movement", 0, 0.5f, effectiveSpeed, 0.1f);
@@ -726,13 +727,15 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     break;
                 case ACTION_RESPAWN:
                     // Clean up attributes?
-                    if (!(spawned && isDead())) {
+                    Health health = ensureAndGet(Health.class);
+                    if (!(spawned && health.isDead())) {
                         return;
                     }
 
                     setSprinting(false);
                     setSneaking(false);
-                    setHealth(getMaximumHealth());
+                    health.setHealth(health.getMaximumHealth());
+                    sendHealthPacket();
                     sendPlayerInventory();
                     teleport(getLevel(), getLevel().getSpawnLocation());
                     sendAttributes();
@@ -774,7 +777,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeText packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -801,7 +805,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeMovePlayer packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -828,7 +833,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeContainerClose packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -841,7 +847,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeContainerSetSlot packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -852,18 +859,19 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     window = playerInventory;
                 } else if (packet.getWindowId() == 0x78) {
                     // It's the armor inventory. Handle it here.
+                    ArmorEquipment equipment = ensureAndGet(ArmorEquipment.class);
                     switch (packet.getSlot()) {
                         case 0:
-                            getEquipment().setHelmet(packet.getStack());
+                            equipment.setHelmet(packet.getStack());
                             break;
                         case 1:
-                            getEquipment().setChestplate(packet.getStack());
+                            equipment.setChestplate(packet.getStack());
                             break;
                         case 2:
-                            getEquipment().setLeggings(packet.getStack());
+                            equipment.setLeggings(packet.getStack());
                             break;
                         case 3:
-                            getEquipment().setBoots(packet.getStack());
+                            equipment.setBoots(packet.getStack());
                             break;
                     }
                     return;
@@ -881,7 +889,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeMobEquipment packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -900,7 +909,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeRemoveBlock packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -929,8 +939,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     if (!blockBehavior.handleBreak(getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null))) {
                         Collection<ItemStack> drops = blockBehavior.getDrops(getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null));
                         for (ItemStack drop : drops) {
-                            DroppedItem item = getLevel().dropItem(drop, block.getLevelLocation().toFloat().add(0.5, 0.5, 0.5));
-                            item.setDelayPickupTicks(5);
+                            getLevel().dropItem(drop, block.getLevelLocation().toFloat().add(0.5, 0.5, 0.5));
                         }
                         chunkOptional.get().setBlock(inChunkX, packet.getPosition().getY(), inChunkZ, new BasicBlockState(BlockTypes.AIR, null, null));
                     }
@@ -944,7 +953,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeUseItem packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -1004,7 +1014,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeDropItem packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -1032,7 +1043,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         @Override
         public void handle(McpeCommandStep packet) {
-            if (!spawned || isDead()) {
+            Health health = ensureAndGet(Health.class);
+            if (!spawned || health.isDead()) {
                 return;
             }
 
@@ -1078,6 +1090,13 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 sendMessage(TextFormat.RED + "An error has occurred while running the command.");
             }
         }
+    }
+
+    private void sendHealthPacket() {
+        Health health = ensureAndGet(Health.class);
+        McpeSetHealth packet = new McpeSetHealth();
+        packet.setHealth(health.getHealth());
+        session.addToSendQueue(packet);
     }
 
     private void updatePlayerList() {

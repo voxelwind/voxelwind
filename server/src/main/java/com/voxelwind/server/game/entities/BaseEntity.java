@@ -6,9 +6,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.Component;
+import com.voxelwind.api.game.entities.components.system.PhysicsSystem;
 import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.server.Server;
+import com.voxelwind.server.game.entities.components.PhysicsComponent;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.NetworkPackage;
@@ -38,6 +40,7 @@ public class BaseEntity implements Entity {
     protected long tickCreated;
     private BoundingBox boundingBox;
     private final List<System> systems = new CopyOnWriteArrayList<>();
+    private final Map<Class<? extends Component>, Component> componentMap = new HashMap<>();
 
     public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level, Server server) {
         this.data = data;
@@ -176,9 +179,14 @@ public class BaseEntity implements Entity {
         return ImmutableSet.of();
     }
 
+    protected <C extends Component> void registerComponent(Class<C> clazz, C component) {
+        componentMap.put(clazz, component);
+    }
+
     @Override
-    public <C extends Component> Optional<C> getComponent(Class<C> clazz) {
-        return Optional.empty();
+    public <C extends Component> Optional<C> getComponent(@Nonnull Class<C> clazz) {
+        Preconditions.checkNotNull(clazz, "clazz");
+        return Optional.ofNullable((C) componentMap.get(clazz));
     }
 
     @Override
