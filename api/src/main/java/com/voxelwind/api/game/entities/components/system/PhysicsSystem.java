@@ -28,7 +28,7 @@ public class PhysicsSystem implements SystemRunner {
         Physics physics = physicsOptional.get();
         if (entity.getMotion().lengthSquared() > 0) {
             boolean onGroundPreviously = entity.isOnGround();
-            entity.teleport(entity.getPosition().add(entity.getMotion()));
+            entity.setPositionFromSystem(entity.getPosition().add(entity.getMotion()));
             boolean onGroundNow = entity.isOnGround();
 
             if (!onGroundPreviously && onGroundNow) {

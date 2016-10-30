@@ -18,10 +18,8 @@ import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import com.voxelwind.api.util.Rotation;
 
 import javax.annotation.Nonnull;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BaseEntity implements Entity {
     private long entityId;
@@ -39,6 +37,7 @@ public class BaseEntity implements Entity {
     private boolean removed = false;
     protected long tickCreated;
     private BoundingBox boundingBox;
+    private final List<System> systems = new CopyOnWriteArrayList<>();
 
     public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level, Server server) {
         this.data = data;
@@ -184,17 +183,23 @@ public class BaseEntity implements Entity {
 
     @Override
     public List<System> registeredSystems() {
-        return ImmutableList.of();
+        // This is a "weakly" unmodifiable list. We do not expect systems to be modified as often as, say, entities
+        // are added into worlds, so using a copy-on-write list is an acceptable compromise.
+        return Collections.unmodifiableList(systems);
     }
 
     @Override
-    public void registerSystem(System system) {
-        throw new UnsupportedOperationException();
+    public void registerSystem(@Nonnull System system) {
+        Preconditions.checkNotNull(system, "system");
+        Preconditions.checkArgument(system.isSystemCompatible(this), "system is not compatible with this entity (wants %s, got %s)",
+                system.getExpectedComponents(), providedComponents());
+        systems.add(system);
     }
 
     @Override
-    public void deregisterSystem(System system) {
-        throw new UnsupportedOperationException();
+    public void deregisterSystem(@Nonnull System system) {
+        Preconditions.checkNotNull(system, "system");
+        systems.remove(system);
     }
 
     public BoundingBox getBoundingBox() {

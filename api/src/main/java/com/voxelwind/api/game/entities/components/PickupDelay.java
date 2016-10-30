@@ -3,7 +3,7 @@ package com.voxelwind.api.game.entities.components;
 import javax.annotation.Nonnegative;
 
 /**
- * A {@link Component} that has a pick-up delay.
+ * A {@link Component} representing a pick-up delay.
  */
 public interface PickupDelay {
     default boolean canPickup() {

@@ -6,7 +6,13 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
+import com.google.common.base.VerifyException;
 import com.spotify.futures.CompletableFutures;
+import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.components.Health;
+import com.voxelwind.api.game.entities.components.system.System;
+import com.voxelwind.api.game.entities.components.system.SystemRunner;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.inventories.Inventory;
 import com.voxelwind.api.game.inventories.OpenableInventory;
@@ -86,41 +92,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20);
         this.session = session;
         this.vwServer = session.getServer();
-    }
-
-    @Override
-    public boolean onTick() {
-        if (!spawned || isDead()) {
-            // Don't tick until the player has truly been spawned into the world.
-            return true;
-        }
-
-        if (!super.onTick()) {
-            return false;
-        }
-
-        // If the upstream session is closed, the player session should no longer be alive.
-        if (session.isClosed()) {
-            return false;
-        }
-
-        if (hasMoved) {
-            hasMoved = false;
-            if (isTeleported()) {
-                sendMovePlayerPacket();
-            }
-            updateViewableEntities();
-            sendNewChunks();
-        }
-
-        // Check for items on the ground.
-        pickupAdjacent();
-
-        // Update player list.
-        // TODO: Packet doesn't currently encode correctly.
-        //updatePlayerList();
-
-        return true;
     }
 
     @Override
@@ -1175,6 +1146,53 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             int dx = spawnX - x;
             int dz = spawnZ - z;
             return dx * dx + dz * dz;
+        }
+    }
+
+    private static final System PLAYER_SYSTEM = System.builder()
+            .expectComponent(Health.class)
+            .runner(new PlayerTickSystemRunner())
+            .build();
+
+    private static class PlayerTickSystemRunner implements SystemRunner {
+        @Override
+        public void run(Entity entity) {
+            Verify.verify(entity instanceof PlayerSession, "Invalid entity type (need PlayerSession)");
+            PlayerSession session = (PlayerSession) entity;
+
+            Optional<Health> healthOptional = session.getComponent(Health.class);
+            if (!healthOptional.isPresent()) {
+                throw new VerifyException("Health component is missing.");
+            }
+            Health health = healthOptional.get();
+
+            if (!session.isSpawned() || health.isDead()) {
+                // Don't tick until the player has truly been spawned into the world.
+                return;
+            }
+
+            // If the upstream session is closed, the player session should no longer be alive.
+            if (session.getMcpeSession().isClosed()) {
+                session.removeInternal();
+                return;
+            }
+
+            if (session.hasMoved) {
+                session.hasMoved = false;
+                if (session.isTeleported()) {
+                    session.sendMovePlayerPacket();
+                }
+                session.updateViewableEntities();
+                session.sendNewChunks();
+            }
+
+            // Check for items on the ground.
+            // TODO: This should be its own system
+            session.pickupAdjacent();
+
+            // Update player list.
+            // TODO: Packet doesn't currently encode correctly.
+            //updatePlayerList();
         }
     }
 
