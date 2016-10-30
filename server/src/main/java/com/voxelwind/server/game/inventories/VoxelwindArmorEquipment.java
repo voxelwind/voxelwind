@@ -1,6 +1,6 @@
 package com.voxelwind.server.game.inventories;
 
-import com.voxelwind.api.game.inventories.ArmorEquipment;
+import com.voxelwind.api.game.entities.components.ArmorEquipment;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.server.game.entities.LivingEntity;
 

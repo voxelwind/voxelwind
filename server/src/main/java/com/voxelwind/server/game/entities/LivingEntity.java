@@ -3,7 +3,7 @@ package com.voxelwind.server.game.entities;
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.Living;
-import com.voxelwind.api.game.inventories.ArmorEquipment;
+import com.voxelwind.api.game.entities.components.ArmorEquipment;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.inventories.VoxelwindArmorEquipment;
 import com.voxelwind.server.game.level.VoxelwindLevel;

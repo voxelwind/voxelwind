@@ -1,4 +1,4 @@
-package com.voxelwind.api.game.inventories;
+package com.voxelwind.api.game.entities.components;
 
 import com.voxelwind.api.game.item.ItemStack;
 
@@ -6,9 +6,9 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
- * Specifies an inventory that supports armor equipment.
+ * Specifies the armor that an {@link com.voxelwind.api.game.entities.Entity} wears. This is a {@link Component} that an entity can provide.
  */
-public interface ArmorEquipment {
+public interface ArmorEquipment extends Component {
     /**
      * Returns the helmet the player is wearing.
      * @return the helmet worn

@@ -1,8 +1,6 @@
-package com.voxelwind.api.game.entities;
+package com.voxelwind.api.game.entities.components;
 
-import com.voxelwind.api.game.entities.components.ArmorEquipment;
-
-public interface Living extends Entity {
+public interface Health extends Component {
     int getHealth();
 
     void setHealth(int health);
@@ -10,8 +8,6 @@ public interface Living extends Entity {
     int getMaximumHealth();
 
     void setMaximumHealth(int maximumHealth);
-
-    ArmorEquipment getEquipment();
 
     default boolean isDead() {
         return getHealth() <= 0;

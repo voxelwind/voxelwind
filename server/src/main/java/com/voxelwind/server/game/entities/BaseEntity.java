@@ -2,7 +2,11 @@ package com.voxelwind.server.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.components.Component;
+import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.level.VoxelwindLevel;
@@ -15,6 +19,9 @@ import com.voxelwind.api.util.Rotation;
 
 import javax.annotation.Nonnull;
 import java.util.BitSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class BaseEntity implements Entity {
     private long entityId;
@@ -156,6 +163,32 @@ public class BaseEntity implements Entity {
             this.invisible = invisible;
             stale = true;
         }
+    }
+
+    @Override
+    public Set<Class<? extends Component>> providedComponents() {
+        // By default, entities don't provide any components.
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public <C extends Component> Optional<C> getComponent(Class<C> clazz) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<System> registeredSystems() {
+        return ImmutableList.of();
+    }
+
+    @Override
+    public void registerSystem(System system) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deregisterSystem(System system) {
+        throw new UnsupportedOperationException();
     }
 
     public BoundingBox getBoundingBox() {

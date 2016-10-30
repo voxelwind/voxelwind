@@ -2,6 +2,8 @@ package com.voxelwind.api.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.voxelwind.api.game.entities.components.Component;
+import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.BlockTypes;
@@ -10,7 +12,10 @@ import com.voxelwind.api.util.Rotation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @ParametersAreNonnullByDefault
 public interface Entity {
@@ -46,7 +51,15 @@ public interface Entity {
 
     void setInvisible(boolean invisible);
 
-    boolean onTick();
+    Set<Class<? extends Component>> providedComponents();
+
+    <C extends Component> Optional<C> getComponent(Class<C> clazz);
+
+    List<System> registeredSystems();
+
+    void registerSystem(System system);
+
+    void deregisterSystem(System system);
 
     default boolean isOnGround() {
         Vector3i blockPosition = getPosition().sub(0f, 0.1f, 0f).toInt();
