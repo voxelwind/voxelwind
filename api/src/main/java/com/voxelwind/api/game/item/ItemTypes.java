@@ -158,8 +158,7 @@ public class ItemTypes {
     public static final ItemType MINECART_WITH_TNT = new IntItem(407, "minecart_with_tnt", 1, null);
     public static final ItemType MINECART_WITH_HOPPER = new IntItem(408, "minecart_with_hopper", 1, null);
     public static final ItemType PRISMARINE_SHARD = new IntItem(409, "prismarine_shard", 64, null);
-    //public static final ItemType HOPPER = new IntItem(410, "hopper", 64, null);
-    public static final ItemType PRISMARINE_CRYSTALS = new IntItem(410, "prismarine_crystals", 64, null);
+    public static final ItemType HOPPER = new IntItem(410, "hopper", 64, null);
     public static final ItemType RAW_RABBIT = new IntItem(411, "raw_rabbit", 64, null);
     public static final ItemType COOKED_RABBIT = new IntItem(412, "cooked_rabbit", 64, null);
     public static final ItemType RABBIT_STEW = new IntItem(413, "rabbit_stew", 1, null);
@@ -171,6 +170,7 @@ public class ItemTypes {
     public static final ItemType DIAMOND_HORSE_ARMOR = new IntItem(419, "diamond_horse_armor", 1, null);
     public static final ItemType LEAD = new IntItem(420, "lead", 64, null);
     public static final ItemType NAME_TAG = new IntItem(421, "name_tag", 64, null);
+    public static final ItemType PRISMARINE_CRYSTALS = new IntItem(422, "prismarine_crystals", 64, null);
     public static final ItemType MUTTON = new IntItem(423, "mutton", 64, null);
     public static final ItemType COOKED_MUTTON = new IntItem(424, "cooked_mutton", 64, null);
     public static final ItemType SPRUCE_DOOR = new IntItem(427, "spruce_door", 64, null);
