@@ -39,12 +39,8 @@ public class AnvilRegionReader implements Closeable {
         offsetsRead.flip();
 
         for (int i = 0; i < SECTOR_INTS; ++i) {
-            int offset = offsetsRead.getInt();
-            offsets[i] = offset;
+            offsets[i] = offsetsRead.getInt();
         }
-
-        // Skip the timestamps because Voxelwind doesn't care about them
-        channel.position(channel.position() + SECTOR_BYTES);
     }
 
     @Override
@@ -75,7 +71,7 @@ public class AnvilRegionReader implements Closeable {
         // 1 byte: compression type - 1 is gzip, 2 is deflate
         int sectorLength = chunkData.getInt();
         byte type = chunkData.get();
-        chunkData.limit(sectorLength + 5);
+        chunkData.limit(sectorLength + 4);
 
         switch (type) {
             case 1:
