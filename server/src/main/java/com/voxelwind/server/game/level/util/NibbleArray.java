@@ -24,8 +24,9 @@ public class NibbleArray {
         Preconditions.checkArgument(value >= 0 && value < 16, "Nibbles must have a value between 0 and 15.");
         Preconditions.checkElementIndex(index, data.length * 2);
         value &= 0xF;
-        data[index / 2] &= (byte) (0xF << ((index + 1) % 2 * 4));
-        data[index / 2] |= (byte) (value << (index % 2 * 4));
+        int nibbleIdx = index / 2;
+        data[nibbleIdx] &= (byte) (0xF << ((index + 1) % 2 * 4));
+        data[nibbleIdx] |= (byte) (value << (index % 2 * 4));
     }
 
     public byte[] getData() {
