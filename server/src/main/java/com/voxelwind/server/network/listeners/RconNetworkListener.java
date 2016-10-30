@@ -15,6 +15,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,8 +26,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 public class RconNetworkListener extends ChannelInitializer<SocketChannel> implements NetworkListener {
-    private static final Logger LOGGER = LogManager.getLogger(RconNetworkListener.class);
-
     private final VoxelwindServer server;
     private final EventLoopGroup group;
     private final ExecutorService commandExecutionService = Executors.newSingleThreadExecutor(
@@ -47,6 +46,7 @@ public class RconNetworkListener extends ChannelInitializer<SocketChannel> imple
         channel.pipeline().addLast("lengthDecoder", new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 0, 4, 0, 4, true));
         channel.pipeline().addLast("rconDecoder", new RconDecoder());
         channel.pipeline().addLast("rconHandler", new RconHandler(password, server, this));
+        channel.pipeline().addLast("lengthPrepender", new LengthFieldPrepender(ByteOrder.LITTLE_ENDIAN, 4, 0, false));
         channel.pipeline().addLast("rconEncoder", new RconEncoder());
     }
 

@@ -35,13 +35,13 @@ public class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
             Preconditions.checkArgument(message.getType() == RconMessage.SERVERDATA_AUTH, "Trying to handle unauthenticated RCON message!");
             byte[] providedPassword = message.getBody().getBytes(StandardCharsets.UTF_8);
             // Send an empty SERVERDATA_RESPONSE_VALUE to emulate SRCDS
-            ctx.writeAndFlush(new RconMessage(message.getId(), RconMessage.SERVERDATA_RESPONSE_VALUE, ""));
+            ctx.channel().writeAndFlush(new RconMessage(message.getId(), RconMessage.SERVERDATA_RESPONSE_VALUE, ""), ctx.voidPromise());
             // Check the password.
             if (MessageDigest.isEqual(password, providedPassword)) {
                 authenticated = true;
-                ctx.writeAndFlush(new RconMessage(message.getId(), RconMessage.SERVERDATA_AUTH_RESPONSE, ""));
+                ctx.channel().writeAndFlush(new RconMessage(message.getId(), RconMessage.SERVERDATA_AUTH_RESPONSE, ""), ctx.voidPromise());
             } else {
-                ctx.writeAndFlush(new RconMessage(-1, RconMessage.SERVERDATA_AUTH_RESPONSE, ""));
+                ctx.channel().writeAndFlush(new RconMessage(-1, RconMessage.SERVERDATA_AUTH_RESPONSE, ""), ctx.voidPromise());
             }
         } else {
             Preconditions.checkArgument(message.getType() == RconMessage.SERVERDATA_EXECCOMMAND, "Trying to handle non-execute command RCON message for authenticated connection!");
@@ -61,7 +61,7 @@ public class RconHandler extends SimpleChannelInboundHandler<RconMessage> {
                             e);
                     body = "An error has occurred. Information has been logged to the console.";
                 }
-                channel.writeAndFlush(new RconMessage(message.getId(), RconMessage.SERVERDATA_RESPONSE_VALUE, body));
+                channel.writeAndFlush(new RconMessage(message.getId(), RconMessage.SERVERDATA_RESPONSE_VALUE, body), ctx.voidPromise());
             });
         }
     }

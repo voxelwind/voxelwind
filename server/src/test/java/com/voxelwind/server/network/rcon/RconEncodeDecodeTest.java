@@ -16,10 +16,8 @@ public class RconEncodeDecodeTest {
         EmbeddedChannel channel = new EmbeddedChannel(new RconDecoder());
         try {
             channel.writeInbound(buf);
-
             RconMessage message = (RconMessage) channel.readInbound();
             RconMessage intended = new RconMessage(0, 3, "my voice is my passport");
-
             Assert.assertEquals("Read message is invalid.", intended, message);
         } finally {
             channel.close();
@@ -32,9 +30,7 @@ public class RconEncodeDecodeTest {
         ByteBuf expected = Unpooled.wrappedBuffer(DatatypeConverter.parseHexBinary("00000000030000006d7920766f696365206973206d792070617373706f72740000"));
         try {
             channel.writeOutbound(new RconMessage(0, 3, "my voice is my passport"));
-
             ByteBuf buf = (ByteBuf) channel.readOutbound();
-            buf.readerIndex(4); // skip length because Netty doesn't like it
             Assert.assertEquals("Read message is invalid.", expected, buf);
         } finally {
             expected.release();
