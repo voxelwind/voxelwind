@@ -37,7 +37,7 @@ public class BaseEntity implements Entity {
     protected boolean sneaking = false;
     private boolean invisible = false;
     private boolean removed = false;
-    protected int tickedFor;
+    protected long tickCreated;
     private BoundingBox boundingBox;
 
     public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level, Server server) {
@@ -49,6 +49,7 @@ public class BaseEntity implements Entity {
         this.rotation = Rotation.ZERO;
         this.motion = Vector3f.ZERO;
         this.level.getEntityManager().register(this);
+        this.tickCreated = level.getCurrentTick();
         refreshBoundingBox();
     }
 
@@ -85,6 +86,11 @@ public class BaseEntity implements Entity {
 
             refreshBoundingBox();
         }
+    }
+
+    @Override
+    public void setPositionFromSystem(Vector3f position) {
+        setPosition(position);
     }
 
     @Nonnull
@@ -246,19 +252,6 @@ public class BaseEntity implements Entity {
         return stale;
     }
 
-    @Override
-    public boolean onTick() {
-        if (removed) {
-            // Remove the entity.
-            return false;
-        }
-
-        tickedFor++;
-
-        // Continue ticking this entity
-        return true;
-    }
-
     protected boolean isTeleported() {
         return teleported;
     }
@@ -295,6 +288,7 @@ public class BaseEntity implements Entity {
             oldLevel.getEntityManager().unregister(this);
             ((VoxelwindLevel) level).getEntityManager().register(this);
             entityId = ((VoxelwindLevel) level).getEntityManager().allocateEntityId();
+            tickCreated = level.getCurrentTick();
 
             // Mark as stale so that the destination level's entity manager will send the appropriate packets.
             this.stale = true;

@@ -2,6 +2,7 @@ package com.voxelwind.server.game.level.manager;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.collect.ImmutableList;
+import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.api.game.entities.Entity;
@@ -52,8 +53,19 @@ public class LevelEntityManager {
         List<BaseEntity> toRemove = new ArrayList<>();
         for (BaseEntity entity : currentEntityList) {
             try {
-                if (!entity.onTick()) {
-                    // Entity should be despawned
+                // Check if the entity was removed.
+                if (entity.isRemoved()) {
+                    toRemove.add(entity);
+                    continue;
+                }
+
+                // Tick all entity systems.
+                for (System system : entity.registeredSystems()) {
+                    system.getRunner().run(entity);
+                }
+
+                // After ticking the systems, one of them may have removed the entity. Check it again.
+                if (entity.isRemoved()) {
                     toRemove.add(entity);
                     continue;
                 }
@@ -74,7 +86,7 @@ public class LevelEntityManager {
                     entity.resetStale();
                 }
             } catch (Exception e) {
-                LOGGER.error("Unable to tick entity", e);
+                LOGGER.error("Unable to tick entity {}. The entity will be removed.", entity, e);
                 toRemove.add(entity);
             }
         }

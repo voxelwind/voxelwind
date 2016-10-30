@@ -97,4 +97,10 @@ public interface Entity {
     }
 
     Server getServer();
+
+    /**
+     * Sets the raw position of this entity. Only valid while the entity's {@link System}s are being ticked.
+     * @param position the new position
+     */
+    void setPositionFromSystem(Vector3f position);
 }

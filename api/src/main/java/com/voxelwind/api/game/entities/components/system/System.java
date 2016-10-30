@@ -6,6 +6,7 @@ import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.Component;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -37,6 +38,28 @@ public final class System {
         return true;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        System system = (System) o;
+        return Objects.equals(expectedComponents, system.expectedComponents) &&
+                Objects.equals(runner, system.runner);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expectedComponents, runner);
+    }
+
+    @Override
+    public String toString() {
+        return "System{" +
+                "expectedComponents=" + expectedComponents +
+                ", runner=" + runner +
+                '}';
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -47,6 +70,11 @@ public final class System {
 
         private Builder() {
 
+        }
+
+        public final Builder expectComponent(Class<? extends Component> component) {
+            expectedComponents.add(component);
+            return this;
         }
 
         @SafeVarargs
