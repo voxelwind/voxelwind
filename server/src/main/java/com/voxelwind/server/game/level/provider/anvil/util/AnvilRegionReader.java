@@ -58,27 +58,24 @@ public class AnvilRegionReader implements Closeable {
         int offset = getOffset(x, z);
 
         int sectorNumber = offset >> 8;
-        int numSectors = offset & 0xFF;
+        int occupiedSectors = offset & 0xFF;
 
-        if (sectorNumber + numSectors > totalSectorsAvailable) {
+        if (sectorNumber + occupiedSectors > totalSectorsAvailable) {
             throw new IllegalArgumentException("sector size is invalid for this chunk");
         }
 
         // Seek to the position in question.
         this.channel.position(sectorNumber * SECTOR_BYTES);
 
-        // Read some basic information about this sector.
-        ByteBuffer information = ByteBuffer.allocate(5);
-        // 4 bytes: big-endian int is the size of this sector
-        // 1 byte: compression type - 1 is gzip, 2 is deflate
-        this.channel.read(information);
-        information.flip();
-        int sectorLength = information.getInt();
-        byte type = information.get();
-
-        ByteBuffer chunkData = ByteBuffer.allocate(sectorLength);
+        // Read the entire sector.
+        ByteBuffer chunkData = ByteBuffer.allocate(occupiedSectors * SECTOR_BYTES);
         this.channel.read(chunkData);
         chunkData.flip();
+        // 4 bytes: big-endian int is the size of this sector
+        // 1 byte: compression type - 1 is gzip, 2 is deflate
+        int sectorLength = chunkData.getInt();
+        byte type = chunkData.get();
+        chunkData.limit(sectorLength + 5);
 
         switch (type) {
             case 1:
