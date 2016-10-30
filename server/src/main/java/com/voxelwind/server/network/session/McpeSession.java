@@ -41,7 +41,6 @@ public class McpeSession {
     private UserAuthenticationProfile authenticationProfile;
     private ClientData clientData;
     private NetworkPacketHandler handler;
-    private volatile SessionState state = SessionState.INITIAL_CONNECTION;
     private BungeeCipher encryptionCipher;
     private BungeeCipher decryptionCipher;
     private PlayerSession playerSession;
@@ -54,14 +53,6 @@ public class McpeSession {
         this.server = server;
         this.handler = handler;
         this.connection = connection;
-    }
-
-    public SessionState getState() {
-        return state;
-    }
-
-    public void setState(SessionState state) {
-        this.state = state;
     }
 
     public UserAuthenticationProfile getAuthenticationProfile() {
@@ -274,7 +265,6 @@ public class McpeSession {
         checkForClosed();
         Preconditions.checkState(playerSession == null, "Player session already initialized");
 
-        state = SessionState.CONNECTED;
         playerSession = new PlayerSession(this, level);
         return playerSession;
     }

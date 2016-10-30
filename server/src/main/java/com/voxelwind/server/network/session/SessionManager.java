@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.voxelwind.api.server.Player;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
@@ -43,16 +44,23 @@ public class SessionManager {
     }
 
     public long countConnected() {
-        return sessions.values().stream()
-                .filter(p -> p.getState() == SessionState.CONNECTED)
-                .count();
+        long count = 0;
+        for (McpeSession session : sessions.values()) {
+            if (session.getPlayerSession() != null) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public List<Player> allPlayers() {
-        return sessions.values().stream()
-                .filter(p -> p.getPlayerSession() != null)
-                .map(McpeSession::getPlayerSession)
-                .collect(Collectors.toList());
+        List<Player> players = new ArrayList<>();
+        for (McpeSession session : sessions.values()) {
+            if (session.getPlayerSession() != null) {
+                players.add(session.getPlayerSession());
+            }
+        }
+        return players;
     }
 
     private void adjustPoolSize() {
