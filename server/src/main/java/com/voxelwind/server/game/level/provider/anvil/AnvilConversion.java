@@ -18,15 +18,7 @@ public class AnvilConversion {
         // Translate block data
         for (int ySec = 0; ySec < 8; ySec++) {
             Map<String, Tag<?>> map = sectionMap.get(ySec);
-            if (map == null) {
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        for (int y = 0; y < 16; y++) {
-                            destinationChunk.setBlockId(x, (ySec * 16) + y, z, 0, (short) 0, false);
-                        }
-                    }
-                }
-            } else {
+            if (map != null) {
                 byte[] blockIds = ((ByteArrayTag) map.get("Blocks")).getValue();
                 NibbleArray data = new NibbleArray(((ByteArrayTag) map.get("Data")).getValue());
                 for (int x = 0; x < 16; x++) {
