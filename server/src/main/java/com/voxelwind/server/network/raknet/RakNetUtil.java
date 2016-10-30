@@ -2,7 +2,6 @@ package com.voxelwind.server.network.raknet;
 
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
-import io.netty.util.CharsetUtil;
 import lombok.experimental.UtilityClass;
 
 import java.net.Inet4Address;
@@ -19,8 +18,9 @@ public class RakNetUtil {
     public static void writeString(ByteBuf buffer, String string) {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
-        buffer.writeShort((short) string.length());
-        buffer.writeBytes(string.getBytes(CharsetUtil.UTF_8));
+        byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+        buffer.writeShort(bytes.length);
+        buffer.writeBytes(bytes);
     }
 
     public static String readString(ByteBuf buffer) {
@@ -50,7 +50,7 @@ public class RakNetUtil {
                 return InetAddress.getByAddress(addr);
             } catch (UnknownHostException e) {
                 // ;_;
-                throw new RuntimeException(e);
+                throw new IllegalArgumentException(e);
             }
         } else {
             throw new UnsupportedOperationException("Can't deserialize an IPv6 address.");
