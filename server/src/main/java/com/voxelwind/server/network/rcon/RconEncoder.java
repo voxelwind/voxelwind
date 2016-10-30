@@ -17,6 +17,5 @@ public class RconEncoder extends MessageToByteEncoder<RconMessage> {
         // 2 null bytes
         buf.writeByte(0);
         buf.writeByte(0);
-        System.out.println(leBuf);
     }
 }
