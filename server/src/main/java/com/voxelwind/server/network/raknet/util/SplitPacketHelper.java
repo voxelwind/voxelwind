@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.server.network.raknet.datagrams.EncapsulatedRakNetPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.util.ReferenceCountUtil;
 
 import java.util.*;
 
@@ -51,10 +52,9 @@ public class SplitPacketHelper {
         Preconditions.checkState(!released, "packet has been released");
 
         released = true;
-        for (EncapsulatedRakNetPacket packet : packets) {
-            packet.release();
+        for (int i = 0; i < packets.length; i++) {
+            ReferenceCountUtil.release(packets[i]);
+            packets[i] = null;
         }
-
-        Arrays.fill(packets, null);
     }
 }
