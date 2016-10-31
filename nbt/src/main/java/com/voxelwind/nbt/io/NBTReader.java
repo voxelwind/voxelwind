@@ -26,10 +26,10 @@ public class NBTReader implements Closeable {
     }
 
     public Tag<?> readTag() throws IOException {
-        return readTag(false);
+        return readTag(0);
     }
 
-    private Tag<?> readTag(boolean isDeep) throws IOException {
+    private Tag<?> readTag(int depth) throws IOException {
         if (closed) {
             throw new IllegalStateException("Trying to read from a closed reader!");
         }
@@ -39,11 +39,15 @@ public class NBTReader implements Closeable {
             throw new IOException("Invalid encoding ID " + typeId);
         }
 
-        return deserialize(type, false, isDeep);
+        return deserialize(type, false, depth);
     }
 
     @SuppressWarnings("unchecked")
-    private Tag<?> deserialize(TagType type, boolean skipName, boolean deep) throws IOException {
+    private Tag<?> deserialize(TagType type, boolean skipName, int depth) throws IOException {
+        if (depth >= 16) {
+            throw new IllegalArgumentException("NBT compound is too deeply nested");
+        }
+
         String tagName = null;
         if (type != TagType.END && !skipName) {
             int length = encoding == MCPE_0_16_NETWORK ? input.readByte() & 0xFF : input.readShort();
@@ -54,7 +58,7 @@ public class NBTReader implements Closeable {
 
         switch (type) {
             case END:
-                if (!deep) {
+                if (depth != 0) {
                     throw new IllegalArgumentException("Found TAG_End but not in a compound or list.");
                 }
                 return EndTag.INSTANCE;
@@ -86,7 +90,7 @@ public class NBTReader implements Closeable {
             case COMPOUND:
                 Map<String, Tag<?>> map = new HashMap<>();
                 Tag<?> inTag1;
-                while ((inTag1 = readTag(true)) != EndTag.INSTANCE) {
+                while ((inTag1 = readTag(depth + 1)) != EndTag.INSTANCE) {
                     map.put(inTag1.getName(), inTag1);
                 }
                 return new CompoundTag(tagName, map);
@@ -100,7 +104,7 @@ public class NBTReader implements Closeable {
                 List<Tag<?>> list = new ArrayList<>();
                 int listLength = encoding == MCPE_0_16_NETWORK ? Varints.decodeSigned(input) : input.readInt();
                 for (int i = 0; i < listLength; i++) {
-                    list.add(deserialize(listType, true, true));
+                    list.add(deserialize(listType, true, depth + 1));
                 }
                 // Unchecked cast is expected
                 return new ListTag(tagName, listType.getTagClass(), list);
