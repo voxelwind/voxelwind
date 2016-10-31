@@ -39,13 +39,18 @@ public class AnvilRegionReader implements Closeable {
         this.totalSectorsAvailable = (int) (this.channel.size() / SECTOR_BYTES);
 
         // Read the next 4096 bytes.
-        ByteBuffer offsetsRead = ByteBuffer.allocate(SECTOR_BYTES);
-        this.channel.read(offsetsRead);
-        offsetsRead.flip();
-        IntBuffer offsetInts = offsetsRead.asIntBuffer();
+        ByteBuffer offsets = ByteBuffer.allocate(SECTOR_BYTES);
+        while (offsets.hasRemaining()) {
+            if (this.channel.read(offsets) == -1) {
+                throw new EOFException();
+            }
+        }
+        this.channel.read(offsets);
+        offsets.flip();
+        IntBuffer offsetInts = offsets.asIntBuffer();
 
         for (int i = 0; i < SECTOR_INTS; ++i) {
-            offsets[i] = offsetInts.get();
+            this.offsets[i] = offsetInts.get();
         }
     }
 
