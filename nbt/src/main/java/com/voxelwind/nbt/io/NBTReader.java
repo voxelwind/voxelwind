@@ -44,7 +44,7 @@ public class NBTReader implements Closeable {
 
     @SuppressWarnings("unchecked")
     private Tag<?> deserialize(TagType type, boolean skipName, int depth) throws IOException {
-        if (depth >= 16) {
+        if (depth > 16) {
             throw new IllegalArgumentException("NBT compound is too deeply nested");
         }
 
@@ -58,7 +58,7 @@ public class NBTReader implements Closeable {
 
         switch (type) {
             case END:
-                if (depth != 0) {
+                if (depth == 0) {
                     throw new IllegalArgumentException("Found TAG_End but not in a compound or list.");
                 }
                 return EndTag.INSTANCE;
