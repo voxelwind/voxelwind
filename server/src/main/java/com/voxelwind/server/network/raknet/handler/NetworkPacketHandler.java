@@ -1,6 +1,5 @@
 package com.voxelwind.server.network.raknet.handler;
 
-import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.packets.*;
 
 public interface NetworkPacketHandler {

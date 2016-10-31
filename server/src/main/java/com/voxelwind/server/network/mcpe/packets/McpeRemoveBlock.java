@@ -9,18 +9,15 @@ import lombok.Data;
 
 @Data
 public class McpeRemoveBlock implements NetworkPackage {
-    private long entityId;
     private Vector3i position;
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = Varints.decodeSignedLong(buffer);
         position = McpeUtil.readBlockCoords(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSignedLong(buffer, entityId);
         McpeUtil.writeBlockCoords(buffer, position);
     }
 }

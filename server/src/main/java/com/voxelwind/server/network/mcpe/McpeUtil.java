@@ -74,13 +74,13 @@ public class McpeUtil {
 
     public static void writeBlockCoords(ByteBuf buf, Vector3i vector3i) {
         Varints.encodeSigned(buf, vector3i.getX());
-        buf.writeByte(vector3i.getY());
+        Varints.encodeUnsigned(buf, vector3i.getY());
         Varints.encodeSigned(buf, vector3i.getZ());
     }
 
     public static Vector3i readBlockCoords(ByteBuf buf) {
         int x = Varints.decodeSigned(buf);
-        int y = buf.readByte();
+        int y = Varints.decodeUnsigned(buf);
         int z = Varints.decodeSigned(buf);
         return new Vector3i(x, y, z);
     }

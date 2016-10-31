@@ -176,7 +176,7 @@ public class BaseEntity implements Entity {
     @Override
     public Set<Class<? extends Component>> providedComponents() {
         // By default, entities don't provide any components.
-        return ImmutableSet.of();
+        return ImmutableSet.copyOf(componentMap.keySet());
     }
 
     protected <C extends Component> void registerComponent(Class<C> clazz, C component) {
