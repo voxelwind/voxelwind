@@ -5,9 +5,14 @@ import com.google.common.base.Preconditions;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.zip.DataFormatException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -34,12 +39,18 @@ public class AnvilRegionReader implements Closeable {
         this.totalSectorsAvailable = (int) (this.channel.size() / SECTOR_BYTES);
 
         // Read the next 4096 bytes.
-        ByteBuffer offsetsRead = ByteBuffer.allocate(SECTOR_BYTES);
-        this.channel.read(offsetsRead);
-        offsetsRead.flip();
+        ByteBuffer offsets = ByteBuffer.allocate(SECTOR_BYTES);
+        while (offsets.hasRemaining()) {
+            if (this.channel.read(offsets) == -1) {
+                throw new EOFException();
+            }
+        }
+        this.channel.read(offsets);
+        offsets.flip();
+        IntBuffer offsetInts = offsets.asIntBuffer();
 
         for (int i = 0; i < SECTOR_INTS; ++i) {
-            offsets[i] = offsetsRead.getInt();
+            this.offsets[i] = offsetInts.get();
         }
     }
 
@@ -64,20 +75,28 @@ public class AnvilRegionReader implements Closeable {
         this.channel.position(sectorNumber * SECTOR_BYTES);
 
         // Read the entire sector.
-        ByteBuffer chunkData = ByteBuffer.allocate(occupiedSectors * SECTOR_BYTES);
-        this.channel.read(chunkData);
-        chunkData.flip();
+        ByteBuffer sector = ByteBuffer.allocate(occupiedSectors * SECTOR_BYTES);
+        while (sector.hasRemaining()) {
+            if (this.channel.read(sector) == -1) {
+                throw new EOFException();
+            }
+        }
+        sector.clear();
         // 4 bytes: big-endian int is the size of this sector
         // 1 byte: compression type - 1 is gzip, 2 is deflate
-        int sectorLength = chunkData.getInt();
-        byte type = chunkData.get();
-        chunkData.limit(sectorLength + 4);
+        int sectorLength = sector.getInt();
+        if (sectorLength > sector.capacity()) {
+            throw new IOException("Mismatched sector length (read " + occupiedSectors + " sectors, but length is " + sectorLength + " bytes)");
+        }
+        byte type = sector.get();
 
         switch (type) {
             case 1:
-                return new GZIPInputStream(new ByteBufferBackedInputStream(chunkData), 8192);
+                return new BufferedInputStream(new GZIPInputStream(
+                        new ByteArrayInputStream(sector.array(), sector.arrayOffset() + sector.position(), sectorLength - 1)));
             case 2:
-                return new InflaterInputStream(new ByteBufferBackedInputStream(chunkData), new Inflater(), 8192);
+                return new BufferedInputStream(new InflaterInputStream(
+                        new ByteArrayInputStream(sector.array(), sector.arrayOffset() + sector.position(), sectorLength - 1)));
             default:
                 throw new IllegalArgumentException("found illegal chunk compression type " + type);
         }
