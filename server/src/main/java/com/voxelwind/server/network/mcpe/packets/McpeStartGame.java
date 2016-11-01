@@ -39,7 +39,7 @@ public class McpeStartGame implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         Varints.encodeSignedLong(buffer, entityId);
-        Varints.encodeSignedLong(buffer, runtimeEntityId);
+        Varints.encodeUnsignedLong(buffer, runtimeEntityId);
         McpeUtil.writeVector3f(buffer, spawn);
         // TODO: what are these next two?
         buffer.writeFloat(0);

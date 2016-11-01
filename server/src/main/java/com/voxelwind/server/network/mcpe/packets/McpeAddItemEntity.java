@@ -11,7 +11,6 @@ import lombok.Data;
 @Data
 public class McpeAddItemEntity implements NetworkPackage {
     private long entityId;
-    private long runtimeEntityId;
     private ItemStack stack;
     private Vector3f position;
     private Vector3f velocity;
@@ -24,7 +23,7 @@ public class McpeAddItemEntity implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         Varints.encodeSignedLong(buffer, entityId);
-        Varints.encodeSignedLong(buffer, runtimeEntityId);
+        Varints.encodeUnsignedLong(buffer, entityId);
         McpeUtil.writeItemStack(buffer, stack);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);

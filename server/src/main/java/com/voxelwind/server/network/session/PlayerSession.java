@@ -115,6 +115,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     public NetworkPackage createAddEntityPacket() {
         McpeAddPlayer addPlayer = new McpeAddPlayer();
         addPlayer.setEntityId(getEntityId());
+        addPlayer.setRuntimeEntityId(getEntityId());
         addPlayer.setVelocity(getMotion());
         addPlayer.setPosition(getPosition());
         addPlayer.setHeld(playerInventory.getStackInHand().orElse(null));
