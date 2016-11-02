@@ -181,12 +181,17 @@ public class BaseEntity implements Entity {
         return ImmutableSet.copyOf(componentMap.keySet());
     }
 
+    @Override
+    public <C extends Component> boolean provides(@Nonnull Class<C> clazz) {
+        return componentMap.containsKey(clazz);
+    }
+
     protected <C extends Component> void registerComponent(Class<C> clazz, C component) {
         componentMap.put(clazz, component);
     }
 
     @Override
-    public <C extends Component> Optional<C> getComponent(@Nonnull Class<C> clazz) {
+    public <C extends Component> Optional<C> get(@Nonnull Class<C> clazz) {
         Preconditions.checkNotNull(clazz, "clazz");
         return Optional.ofNullable((C) componentMap.get(clazz));
     }

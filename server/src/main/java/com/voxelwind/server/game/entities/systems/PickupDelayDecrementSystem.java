@@ -20,11 +20,7 @@ public class PickupDelayDecrementSystem implements SystemRunner {
 
     @Override
     public void run(Entity entity) {
-        Optional<PickupDelay> delayOptional = entity.getComponent(PickupDelay.class);
-        if (delayOptional.isPresent()) {
-            delayOptional.get().setDelayPickupTicks(Math.max(0, delayOptional.get().getDelayPickupTicks() - 1));
-        } else {
-            throw new VerifyException("PickupDelay not found");
-        }
+        PickupDelay delay = entity.ensureAndGet(PickupDelay.class);
+        delay.setDelayPickupTicks(Math.max(0, delay.getDelayPickupTicks() - 1));
     }
 }

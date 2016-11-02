@@ -2,6 +2,7 @@ package com.voxelwind.api.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.VerifyException;
 import com.voxelwind.api.game.entities.components.Component;
 import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.level.Chunk;
@@ -13,7 +14,6 @@ import com.voxelwind.api.util.Rotation;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -53,7 +53,17 @@ public interface Entity {
 
     Set<Class<? extends Component>> providedComponents();
 
-    <C extends Component> Optional<C> getComponent(Class<C> clazz);
+    <C extends Component> boolean provides(Class<C> clazz);
+
+    <C extends Component> Optional<C> get(Class<C> clazz);
+
+    default <C extends Component> C ensureAndGet(Class<C> clazz) {
+        Optional<C> component = get(clazz);
+        if (!component.isPresent()) {
+            throw new VerifyException("Component class " + clazz.getName() + " isn't provided by this entity.");
+        }
+        return component.get();
+    }
 
     List<System> registeredSystems();
 

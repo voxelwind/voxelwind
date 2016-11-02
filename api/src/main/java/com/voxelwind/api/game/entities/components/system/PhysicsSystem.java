@@ -22,10 +22,7 @@ public class PhysicsSystem implements SystemRunner {
 
     @Override
     public void run(Entity entity) {
-        Optional<Physics> physicsOptional = entity.getComponent(Physics.class);
-        Verify.verify(physicsOptional.isPresent(), "Physics component is missing");
-
-        Physics physics = physicsOptional.get();
+        Physics physics = entity.ensureAndGet(Physics.class);
         if (entity.getMotion().lengthSquared() > 0) {
             boolean onGroundPreviously = entity.isOnGround();
             entity.setPositionFromSystem(entity.getPosition().add(entity.getMotion()));

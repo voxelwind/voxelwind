@@ -39,9 +39,7 @@ public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
         packet.setEntityId(getEntityId());
         packet.setPosition(getGamePosition());
         packet.setVelocity(getMotion());
-        Optional<ContainedItem> containedItemOptional = getComponent(ContainedItem.class);
-        Verify.verify(containedItemOptional.isPresent(), "ContainedItem is not present in DroppedItem entity");
-        packet.setStack(containedItemOptional.get().getItemStack());
+        packet.setStack(ensureAndGet(ContainedItem.class).getItemStack());
         return packet;
     }
 }

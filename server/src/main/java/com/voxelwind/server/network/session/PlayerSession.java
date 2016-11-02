@@ -11,8 +11,9 @@ import com.google.common.base.VerifyException;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.ArmorEquipment;
-import com.voxelwind.api.game.entities.components.Component;
+import com.voxelwind.api.game.entities.components.ContainedItem;
 import com.voxelwind.api.game.entities.components.Health;
+import com.voxelwind.api.game.entities.components.PickupDelay;
 import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.entities.components.system.SystemRunner;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
@@ -103,14 +104,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 .build());
     }
 
-    private <C extends Component> C ensureAndGet(Class<C> componentClass) {
-        Optional<C> component = getComponent(componentClass);
-        if (component.isPresent()) {
-            return component.get();
-        }
-        throw new VerifyException("Component " + componentClass.getName() + " not found in entity.");
-    }
-
     @Override
     public NetworkPackage createAddEntityPacket() {
         McpeAddPlayer addPlayer = new McpeAddPlayer();
@@ -127,24 +120,29 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     private void pickupAdjacent() {
         BoundingBox box = getBoundingBox().grow(0.5f, 0.25f, 0.5f);
-        /*for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInBounds(box)) {
-            if (entity instanceof DroppedItem) {
-                // TODO: Check pickup delay and fire events.
-                if (((DroppedItem) entity).canPickup() && getInventory().addItem(((VoxelwindDroppedItem) entity).getItemStack())) {
-                    McpeTakeItem packetBroadcast = new McpeTakeItem();
-                    packetBroadcast.setItemEntityId(entity.getEntityId());
-                    packetBroadcast.setPlayerEntityId(getEntityId());
-                    getLevel().getPacketManager().queuePacketForViewers(this, packetBroadcast);
+        for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInBounds(box)) {
+            Optional<PickupDelay> delay = entity.get(PickupDelay.class);
+            if (delay.isPresent()) {
+                if (delay.get().canPickup()) {
+                    if (entity instanceof DroppedItem) {
+                        ContainedItem item = entity.ensureAndGet(ContainedItem.class);
+                        if (playerInventory.addItem(item.getItemStack())) {
+                            McpeTakeItem packetBroadcast = new McpeTakeItem();
+                            packetBroadcast.setItemEntityId(entity.getEntityId());
+                            packetBroadcast.setPlayerEntityId(getEntityId());
+                            getLevel().getPacketManager().queuePacketForViewers(this, packetBroadcast);
 
-                    McpeTakeItem packetSelf = new McpeTakeItem();
-                    packetSelf.setItemEntityId(entity.getEntityId());
-                    packetSelf.setPlayerEntityId(0);
-                    session.addToSendQueue(packetSelf);
+                            McpeTakeItem packetSelf = new McpeTakeItem();
+                            packetSelf.setItemEntityId(entity.getEntityId());
+                            packetSelf.setPlayerEntityId(0);
+                            session.addToSendQueue(packetSelf);
 
-                    entity.remove();
+                            entity.remove();
+                        }
+                    }
                 }
             }
-        }*/
+        }
     }
 
     @Override
@@ -178,7 +176,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     private void sendAttributes() {
-        Health healthComponent = getComponent(Health.class).get();
+        Health healthComponent = ensureAndGet(Health.class);
         Attribute health = new Attribute("minecraft:health", 0f, healthComponent.getMaximumHealth(),
                 Math.max(0, healthComponent.getHealth()), healthComponent.getMaximumHealth());
         Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, 20f, 20f); // TODO: Implement hunger
@@ -1180,11 +1178,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Verify.verify(entity instanceof PlayerSession, "Invalid entity type (need PlayerSession)");
             PlayerSession session = (PlayerSession) entity;
 
-            Optional<Health> healthOptional = session.getComponent(Health.class);
-            if (!healthOptional.isPresent()) {
-                throw new VerifyException("Health component is missing.");
-            }
-            Health health = healthOptional.get();
+            Health health = entity.ensureAndGet(Health.class);
 
             if (!session.isSpawned() || health.isDead()) {
                 // Don't tick until the player has truly been spawned into the world.

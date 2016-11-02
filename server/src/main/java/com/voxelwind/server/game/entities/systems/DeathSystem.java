@@ -33,13 +33,9 @@ public class DeathSystem implements SystemRunner {
 
     @Override
     public void run(Entity entity) {
-        Optional<Health> healthOptional = entity.getComponent(Health.class);
-        if (healthOptional.isPresent()) {
-            if (healthOptional.get().isDead()) {
-                onDeath.accept(entity);
-            }
-        } else {
-            throw new VerifyException("Entity has DeathSystem but no Health component");
+        Health health = entity.ensureAndGet(Health.class);
+        if (health.isDead()) {
+            onDeath.accept(entity);
         }
     }
 }
