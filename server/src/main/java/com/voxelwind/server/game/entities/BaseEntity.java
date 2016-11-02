@@ -23,6 +23,8 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants.*;
+
 public class BaseEntity implements Entity {
     private long entityId;
     private final Server server;
@@ -221,11 +223,11 @@ public class BaseEntity implements Entity {
     protected long getFlagValue() {
         BitSet set = new BitSet(64);
         // Fill with values
-        set.set(EntityMetadataConstants.DATA_FLAGS_ON_FIRE, false); // Not implemented
-        set.set(EntityMetadataConstants.DATA_FLAGS_SNEAKING, sneaking); // Sneaking
-        set.set(EntityMetadataConstants.DATA_FLAGS_RIDING, false); // Riding (not implemented)
-        set.set(EntityMetadataConstants.DATA_FLAGS_SPRINTING, sprinting); // Sprinting
-        set.set(EntityMetadataConstants.DATA_FLAGS_INVISIBLE, invisible); // Invisible
+        set.set(DATA_FLAGS_ON_FIRE, false); // Not implemented
+        set.set(DATA_FLAGS_SNEAKING, sneaking); // Sneaking
+        set.set(DATA_FLAGS_RIDING, false); // Riding (not implemented)
+        set.set(DATA_FLAGS_SPRINTING, sprinting); // Sprinting
+        set.set(DATA_FLAGS_INVISIBLE, invisible); // Invisible
 
         long[] array = set.toLongArray();
         return array.length == 0 ? 0 : array[0];
@@ -236,14 +238,15 @@ public class BaseEntity implements Entity {
 
         // TODO: Implement more than this.
         MetadataDictionary dictionary = new MetadataDictionary();
-        dictionary.put(EntityMetadataConstants.DATA_ENTITY_FLAGS, getFlagValue());
-        dictionary.put(EntityMetadataConstants.DATA_NAMETAG, ""); // Not implemented
-        dictionary.put(EntityMetadataConstants.DATA_HIDE_NAME_TAG, (byte) 0); // Not implemented
-        dictionary.put(EntityMetadataConstants.DATA_MAYBE_AGE, 0); // Scale (not implemented)
-        dictionary.put(EntityMetadataConstants.DATA_SCALE, 1f); // Scale (not implemented)
-        dictionary.put(EntityMetadataConstants.DATA_MAX_AIR, (short) 20);
-        dictionary.put(EntityMetadataConstants.DATA_COLLISION_BOX_HEIGHT, data.getHeight());
-        dictionary.put(EntityMetadataConstants.DATA_COLLISION_BOX_WIDTH, data.getWidth());
+        dictionary.put(DATA_ENTITY_FLAGS, getFlagValue());
+        dictionary.put(DATA_NAMETAG, ""); // Not implemented
+        dictionary.put(DATA_HIDE_NAME_TAG, (byte) 0); // Not implemented
+        dictionary.put(DATA_MAYBE_AGE, 0); // Scale (not implemented)
+        dictionary.put(DATA_SCALE, 1f); // Scale (not implemented)
+        dictionary.put(DATA_MAX_AIR, (short) 20);
+        dictionary.put(DATA_AIR, (short) 20);
+        dictionary.put(DATA_COLLISION_BOX_HEIGHT, data.getHeight());
+        dictionary.put(DATA_COLLISION_BOX_WIDTH, data.getWidth());
         return dictionary;
     }
 
