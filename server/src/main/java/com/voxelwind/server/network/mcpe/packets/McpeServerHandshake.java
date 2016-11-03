@@ -1,10 +1,10 @@
 package com.voxelwind.server.network.mcpe.packets;
 
 import com.voxelwind.nbt.util.Varints;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
-import com.voxelwind.server.network.NetworkPackage;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 

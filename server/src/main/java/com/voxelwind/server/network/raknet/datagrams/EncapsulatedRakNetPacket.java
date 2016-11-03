@@ -1,7 +1,6 @@
 package com.voxelwind.server.network.raknet.datagrams;
 
 import com.voxelwind.server.network.raknet.RakNetSession;
-import com.voxelwind.server.network.session.McpeSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCounted;
 import lombok.Data;

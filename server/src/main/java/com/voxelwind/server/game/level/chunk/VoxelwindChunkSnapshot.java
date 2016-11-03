@@ -4,15 +4,16 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.level.ChunkSnapshot;
-import com.voxelwind.api.game.level.block.*;
+import com.voxelwind.api.game.level.block.BlockSnapshot;
+import com.voxelwind.api.game.level.block.BlockType;
+import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
-import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.game.level.util.NibbleArray;
+import com.voxelwind.server.game.serializer.MetadataSerializer;
 import gnu.trove.map.TIntObjectMap;
 
-import java.util.Map;
 import java.util.Optional;
 
 class VoxelwindChunkSnapshot implements ChunkSnapshot {

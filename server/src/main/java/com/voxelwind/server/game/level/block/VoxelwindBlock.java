@@ -5,9 +5,6 @@ import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
-import com.voxelwind.api.game.level.blockentities.BlockEntity;
-
-import java.util.Optional;
 
 public class VoxelwindBlock implements Block {
     private final Level level;

@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.ReferenceCountUtil;
 
-import java.util.*;
+import java.util.Optional;
 
 public class SplitPacketHelper {
     private final EncapsulatedRakNetPacket[] packets;

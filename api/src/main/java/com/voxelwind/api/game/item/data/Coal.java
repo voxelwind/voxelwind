@@ -2,8 +2,6 @@ package com.voxelwind.api.game.item.data;
 
 import com.voxelwind.api.game.Metadata;
 
-import java.util.Objects;
-
 /**
  * This {@link Metadata} represents coal. In Minecraft, coal can either be regular or be charcoal. They are the same,
  * regardless.

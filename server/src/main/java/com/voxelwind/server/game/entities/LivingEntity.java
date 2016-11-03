@@ -1,7 +1,6 @@
 package com.voxelwind.server.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.ArmorEquipment;
 import com.voxelwind.api.game.entities.components.Health;
 import com.voxelwind.api.game.entities.components.Physics;

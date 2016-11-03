@@ -22,17 +22,18 @@ import com.voxelwind.server.game.item.VoxelwindNBTUtils;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.util.ResourcePackInfo;
-import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 public class McpeUtil {
     private McpeUtil() {

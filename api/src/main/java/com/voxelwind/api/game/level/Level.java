@@ -7,7 +7,6 @@ import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.Block;
-import com.voxelwind.api.server.Server;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;

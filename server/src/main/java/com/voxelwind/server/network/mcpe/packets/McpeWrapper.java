@@ -1,7 +1,7 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.NetworkPackage;
+import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import io.netty.buffer.ByteBuf;
 
 @DisallowWrapping // this is the wrapper!

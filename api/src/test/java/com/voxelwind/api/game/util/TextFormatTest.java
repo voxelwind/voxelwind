@@ -2,7 +2,7 @@ package com.voxelwind.api.game.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class TextFormatTest {
     private static final String NON_FORMATTED = "Voxelwind";

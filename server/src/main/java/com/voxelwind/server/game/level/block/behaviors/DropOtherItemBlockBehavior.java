@@ -4,10 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.level.block.Block;
-import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
-import com.voxelwind.server.game.item.VoxelwindItemStack;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

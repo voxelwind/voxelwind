@@ -4,7 +4,6 @@ import com.voxelwind.api.server.Skin;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 

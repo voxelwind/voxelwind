@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.raknet.RakNetUtil;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import io.netty.buffer.ByteBuf;

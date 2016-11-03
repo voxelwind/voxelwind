@@ -2,22 +2,18 @@ package com.voxelwind.server.game.entities;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.Component;
-import com.voxelwind.api.game.entities.components.system.PhysicsSystem;
 import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.server.Server;
-import com.voxelwind.server.game.entities.components.PhysicsComponent;
+import com.voxelwind.api.util.Rotation;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.packets.McpeAddEntity;
-import com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
-import com.voxelwind.api.util.Rotation;
 
 import javax.annotation.Nonnull;
 import java.util.*;

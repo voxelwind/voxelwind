@@ -3,7 +3,6 @@ package com.voxelwind.server.command.builtin;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.api.game.item.ItemTypes;
-import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.command.CommandExecutor;

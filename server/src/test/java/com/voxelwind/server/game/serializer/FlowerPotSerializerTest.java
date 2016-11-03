@@ -1,6 +1,7 @@
 package com.voxelwind.server.game.serializer;
 
-import com.voxelwind.api.game.level.block.*;
+import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.level.block.FlowerType;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.server.game.level.blockentities.VoxelwindFlowerpotBlockEntity;
 import org.junit.Test;

@@ -1,7 +1,6 @@
 package com.voxelwind.server.network.mcpe;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.api.server.player.TranslatedMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -9,7 +8,7 @@ import org.junit.Test;
 
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class McpeUtilTest {
     @Test

@@ -2,8 +2,9 @@ package net.md_5.bungee.jni.zlib;
 
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
-import java.util.zip.DataFormatException;
 import lombok.Getter;
+
+import java.util.zip.DataFormatException;
 
 public class NativeZlib implements BungeeZlib
 {

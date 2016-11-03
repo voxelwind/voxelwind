@@ -8,7 +8,7 @@ import com.voxelwind.api.game.util.data.DyeColor;
 import com.voxelwind.nbt.tags.CompoundTag;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class VoxelwindNBTUtilsTest {
     @Test

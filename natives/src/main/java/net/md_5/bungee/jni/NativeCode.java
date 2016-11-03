@@ -1,14 +1,10 @@
 package net.md_5.bungee.jni;
 
 import com.google.common.io.ByteStreams;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import lombok.Getter;
 import net.md_5.bungee.jni.cipher.BungeeCipher;
+
+import java.io.*;
 
 public final class NativeCode<T>
 {

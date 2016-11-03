@@ -1,14 +1,17 @@
 package com.voxelwind.server.game.level.manager;
 
-import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.server.game.entities.BaseEntity;
+import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.session.PlayerSession;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 
 public class LevelPacketManager {
     private static final int ENTITY_VIEW_DISTANCE_SQ = 64 * 64;

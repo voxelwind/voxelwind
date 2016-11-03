@@ -4,7 +4,6 @@ import com.voxelwind.server.network.mcpe.packets.McpeServerHandshake;
 
 import javax.crypto.KeyAgreement;
 import java.security.*;
-import java.security.spec.ECGenParameterSpec;
 
 public class EncryptionUtil {
     private static final SecureRandom secureRandom = new SecureRandom();

@@ -3,7 +3,6 @@ package com.voxelwind.api.game.inventories;
 import com.voxelwind.api.game.item.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Map;
 import java.util.Optional;
 
 /**

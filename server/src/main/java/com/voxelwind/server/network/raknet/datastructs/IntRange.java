@@ -3,8 +3,6 @@ package com.voxelwind.server.network.raknet.datastructs;
 import com.google.common.base.Preconditions;
 import lombok.Value;
 
-import java.util.function.IntConsumer;
-
 @Value
 public final class IntRange {
     private final int start;

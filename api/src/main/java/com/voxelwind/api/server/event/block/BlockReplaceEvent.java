@@ -1,7 +1,6 @@
 package com.voxelwind.api.server.event.block;
 
 import com.google.common.base.Preconditions;
-import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockState;
 import com.voxelwind.api.server.event.block.iface.BlockReplacer;

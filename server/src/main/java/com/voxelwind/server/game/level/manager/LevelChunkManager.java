@@ -2,7 +2,6 @@ package com.voxelwind.server.game.level.manager;
 
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Chunk;
-import com.voxelwind.api.game.level.Level;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.provider.ChunkProvider;

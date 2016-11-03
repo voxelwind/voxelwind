@@ -1,7 +1,6 @@
 package com.voxelwind.server.game.entities.misc;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.google.common.base.Verify;
 import com.voxelwind.api.game.entities.components.ContainedItem;
 import com.voxelwind.api.game.entities.components.Physics;
 import com.voxelwind.api.game.entities.components.PickupDelay;
@@ -18,9 +17,6 @@ import com.voxelwind.server.game.entities.systems.PickupDelayDecrementSystem;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.packets.McpeAddItemEntity;
-
-import javax.annotation.Nonnegative;
-import java.util.Optional;
 
 public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
     public VoxelwindDroppedItem(VoxelwindLevel level, Vector3f position, Server server, ItemStack dropped) {

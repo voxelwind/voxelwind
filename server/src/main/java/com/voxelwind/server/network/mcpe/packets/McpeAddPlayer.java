@@ -6,10 +6,9 @@ import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.util.Rotation;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.item.VoxelwindItemStack;
+import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
-import com.voxelwind.server.network.NetworkPackage;
-import com.voxelwind.server.network.raknet.RakNetUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 

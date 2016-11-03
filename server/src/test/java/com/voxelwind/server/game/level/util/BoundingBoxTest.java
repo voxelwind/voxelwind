@@ -1,7 +1,6 @@
 package com.voxelwind.server.game.level.util;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.flowpowered.math.vector.Vector3i;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

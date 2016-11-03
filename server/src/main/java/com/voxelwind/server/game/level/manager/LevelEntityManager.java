@@ -2,10 +2,10 @@ package com.voxelwind.server.game.level.manager;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.google.common.collect.ImmutableList;
-import com.voxelwind.api.game.entities.components.system.System;
-import com.voxelwind.server.game.level.VoxelwindLevel;
-import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.components.system.System;
+import com.voxelwind.server.game.entities.BaseEntity;
+import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;
@@ -18,7 +18,10 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 

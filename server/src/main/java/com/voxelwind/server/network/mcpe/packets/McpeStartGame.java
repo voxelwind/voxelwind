@@ -4,8 +4,8 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.nbt.util.Varints;
-import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.NetworkPackage;
+import com.voxelwind.server.network.mcpe.McpeUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 

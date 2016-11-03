@@ -1,11 +1,8 @@
 package com.voxelwind.api.game.entities.components.system;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.google.common.base.Verify;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.Physics;
-
-import java.util.Optional;
 
 /**
  * Provides a {@link System} for handling a {@link Physics} component.

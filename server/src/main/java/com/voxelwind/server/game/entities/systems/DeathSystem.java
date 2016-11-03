@@ -1,6 +1,5 @@
 package com.voxelwind.server.game.entities.systems;
 
-import com.google.common.base.VerifyException;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.Health;
 import com.voxelwind.api.game.entities.components.system.System;
@@ -8,7 +7,6 @@ import com.voxelwind.api.game.entities.components.system.SystemRunner;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.network.mcpe.packets.McpeEntityEvent;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class DeathSystem implements SystemRunner {

@@ -4,7 +4,6 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 
 import javax.annotation.Nullable;
-
 import java.util.Optional;
 
 import static org.objectweb.asm.Opcodes.ASM5;

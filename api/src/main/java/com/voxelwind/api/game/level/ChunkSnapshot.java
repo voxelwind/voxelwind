@@ -1,6 +1,5 @@
 package com.voxelwind.api.game.level;
 
-import com.voxelwind.api.game.level.block.Block;
 import com.voxelwind.api.game.level.block.BlockSnapshot;
 
 import javax.annotation.concurrent.Immutable;

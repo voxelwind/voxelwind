@@ -1,12 +1,12 @@
 package com.voxelwind.server.plugin.loader.java;
 
-import static org.objectweb.asm.Opcodes.ASM5;
-
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+
+import static org.objectweb.asm.Opcodes.ASM5;
 
 public class PluginClassVisitor extends ClassVisitor {
     private static final String PLUGIN_DESCRIPTOR = "Lcom/voxelwind/api/plugin/Plugin;";

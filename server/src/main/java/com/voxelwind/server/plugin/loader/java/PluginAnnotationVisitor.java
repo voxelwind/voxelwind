@@ -1,8 +1,8 @@
 package com.voxelwind.server.plugin.loader.java;
 
-import static org.objectweb.asm.Opcodes.ASM5;
-
 import org.objectweb.asm.AnnotationVisitor;
+
+import static org.objectweb.asm.Opcodes.ASM5;
 
 public class PluginAnnotationVisitor extends AnnotationVisitor {
     private final String className;

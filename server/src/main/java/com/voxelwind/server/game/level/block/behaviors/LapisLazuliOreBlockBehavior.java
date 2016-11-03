@@ -6,9 +6,9 @@ import com.voxelwind.api.game.item.ItemTypes;
 import com.voxelwind.api.game.item.data.Dyed;
 import com.voxelwind.api.game.item.util.ItemTypeUtil;
 import com.voxelwind.api.game.level.block.Block;
+import com.voxelwind.api.game.util.data.DyeColor;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
-import com.voxelwind.api.game.util.data.DyeColor;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

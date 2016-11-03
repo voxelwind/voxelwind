@@ -2,6 +2,7 @@ package net.md_5.bungee.jni.cipher;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+
 import javax.crypto.SecretKey;
 import java.security.GeneralSecurityException;
 

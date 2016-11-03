@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 public class SessionManager {
     // Voxelwind ticks each session in a thread pool. This thread pool is automatically adjusted depending on player count.

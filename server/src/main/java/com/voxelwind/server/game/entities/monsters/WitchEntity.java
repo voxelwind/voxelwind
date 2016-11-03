@@ -1,7 +1,6 @@
 package com.voxelwind.server.game.entities.monsters;
 
 import com.flowpowered.math.vector.Vector3f;
-import com.voxelwind.api.game.entities.monsters.Slime;
 import com.voxelwind.api.game.entities.monsters.Witch;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.entities.EntityTypeData;
