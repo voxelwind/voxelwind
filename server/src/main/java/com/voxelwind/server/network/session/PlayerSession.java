@@ -1187,7 +1187,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             // If the upstream session is closed, the player session should no longer be alive.
             if (session.getMcpeSession().isClosed()) {
-                session.removeInternal();
+                // We don't remove the entity, McpeSession handles this for us.
+                //session.removeInternal();
                 return;
             }
 
