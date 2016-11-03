@@ -5,6 +5,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.ClassPath;
 import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.components.PickupDelay;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
@@ -140,15 +141,12 @@ public class VoxelwindLevel implements Level {
 
         CompletableFuture<T> future = new CompletableFuture<>();
         Vector3i vector3i = position.toInt();
-        getChunk(vector3i.getX() >> 4, vector3i.getZ() >> 4).whenComplete(new BiConsumer<Chunk, Throwable>() {
-            @Override
-            public void accept(Chunk chunk, Throwable throwable) {
-                if (throwable != null) {
-                    return;
-                }
-
-                future.complete(entitySpawner.spawnEntity(VoxelwindLevel.this, position, server));
+        getChunk(vector3i.getX() >> 4, vector3i.getZ() >> 4).whenComplete((chunk, throwable) -> {
+            if (throwable != null) {
+                return;
             }
+
+            future.complete(entitySpawner.spawnEntity(VoxelwindLevel.this, position, server));
         });
 
         return future;
@@ -159,7 +157,9 @@ public class VoxelwindLevel implements Level {
         Preconditions.checkNotNull(stack, "stack");
         Preconditions.checkNotNull(position, "position");
         Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
-        return new VoxelwindDroppedItem(this, position, server, stack);
+        DroppedItem item = new VoxelwindDroppedItem(this, position, server, stack);
+        item.ensureAndGet(PickupDelay.class).setDelayPickupTicks(3);
+        return item;
     }
 
     public void onTick() {
