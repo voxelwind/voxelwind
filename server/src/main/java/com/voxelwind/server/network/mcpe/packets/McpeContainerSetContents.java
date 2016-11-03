@@ -21,6 +21,7 @@ public class McpeContainerSetContents implements NetworkPackage {
         for (int i = 0; i < stacksToRead; i++) {
             stacks[i] = McpeUtil.readItemStack(buffer);
         }
+
         if (windowId == 0) {
             int hotbarEntriesToRead = Varints.decodeUnsigned(buffer);
             hotbarData = new int[hotbarEntriesToRead];

@@ -21,6 +21,8 @@ public class PickupDelayDecrementSystem implements SystemRunner {
     @Override
     public void run(Entity entity) {
         PickupDelay delay = entity.ensureAndGet(PickupDelay.class);
-        delay.setDelayPickupTicks(Math.max(0, delay.getDelayPickupTicks() - 1));
+        if (delay.getDelayPickupTicks() > 0) {
+            delay.setDelayPickupTicks(delay.getDelayPickupTicks() - 1);
+        }
     }
 }

@@ -7,7 +7,7 @@ import javax.annotation.Nonnegative;
  */
 public interface PickupDelay extends Component {
     default boolean canPickup() {
-        return getDelayPickupTicks() == 0;
+        return getDelayPickupTicks() <= 0;
     }
 
     @Nonnegative
