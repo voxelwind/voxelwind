@@ -123,11 +123,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         for (BaseEntity entity : getLevel().getEntityManager().getEntitiesInBounds(box)) {
             Optional<PickupDelay> delay = entity.get(PickupDelay.class);
             if (delay.isPresent()) {
-                LOGGER.info("I found an entity I may be able pick up: {}", entity);
                 if (delay.get().canPickup()) {
-                    LOGGER.info("I found an entity I can pick up: {}", entity);
                     if (entity instanceof DroppedItem) {
-                        LOGGER.info("It's a dropped item! {}", entity);
                         ContainedItem item = entity.ensureAndGet(ContainedItem.class);
                         if (playerInventory.addItem(item.getItemStack())) {
                             McpeTakeItem packetBroadcast = new McpeTakeItem();
