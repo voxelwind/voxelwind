@@ -102,28 +102,10 @@ public class VoxelwindServer implements Server {
         commandManager.register("vwtest", new TestCommand());
 
         // Load configuration.
-        Path configFile = Paths.get("voxelwind.json");
-        try {
-            configuration = VoxelwindConfiguration.load(configFile);
-            if (configuration.addMissingFields()) {
-                VoxelwindConfiguration.save(configFile, configuration);
-            }
-        } catch (NoSuchFileException e) {
-            configuration = VoxelwindConfiguration.defaultConfiguration();
-            VoxelwindConfiguration.save(configFile, configuration);
-        }
+        loadConfiguration();
 
-        // Load plugins.
-        try {
-            Path pluginPath = Paths.get("plugins");
-            if (Files.notExists(pluginPath)) {
-                Files.createDirectory(pluginPath);
-            }
-            pluginManager.loadPlugins(pluginPath);
-            pluginManager.getAllPlugins().forEach(p -> eventManager.register(p.getPlugin(), p.getPlugin()));
-        } catch (Exception e) {
-            LOGGER.error("Can't load plugins", e);
-        }
+        // Load all plugins.
+        loadPlugins();
 
         // Fire the initialize event
         eventManager.fire(ServerInitializeEvent.INSTANCE);
@@ -188,6 +170,32 @@ public class VoxelwindServer implements Server {
         // Sleep forever for now until we have a console reader.
         while (true) {
             Thread.sleep(1000);
+        }
+    }
+
+    private void loadConfiguration() throws Exception {
+        Path configFile = Paths.get("voxelwind.json");
+        try {
+            configuration = VoxelwindConfiguration.load(configFile);
+            if (configuration.addMissingFields()) {
+                VoxelwindConfiguration.save(configFile, configuration);
+            }
+        } catch (NoSuchFileException e) {
+            configuration = VoxelwindConfiguration.defaultConfiguration();
+            VoxelwindConfiguration.save(configFile, configuration);
+        }
+    }
+
+    private void loadPlugins() throws Exception {
+        try {
+            Path pluginPath = Paths.get("plugins");
+            if (Files.notExists(pluginPath)) {
+                Files.createDirectory(pluginPath);
+            }
+            pluginManager.loadPlugins(pluginPath);
+            pluginManager.getAllPlugins().forEach(p -> eventManager.register(p.getPlugin(), p.getPlugin()));
+        } catch (Exception e) {
+            LOGGER.error("Can't load plugins", e);
         }
     }
 
