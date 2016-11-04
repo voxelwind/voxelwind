@@ -127,6 +127,7 @@ public class VoxelwindConfiguration {
         private String generator;
         @JsonProperty("default")
         private boolean isDefault;
+        private boolean loadSpawnChunks;
     }
 
     public XboxAuthenticationConfiguration getXboxAuthentication() {
@@ -178,6 +179,7 @@ public class VoxelwindConfiguration {
             wc.generator = "flatworld";
             wc.isDefault = true;
             wc.storage = "null";
+            wc.loadSpawnChunks = true;
             levels = new HashMap<>();
             levels.put("world", wc);
             needToSave = true;

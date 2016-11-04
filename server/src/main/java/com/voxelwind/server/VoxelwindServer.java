@@ -42,13 +42,11 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class VoxelwindServer implements Server {
     public static final String VOXELWIND_VERSION = "0.0.1 (Layer of Fog)";
@@ -139,6 +137,26 @@ public class VoxelwindServer implements Server {
 
             if (entry.getValue().isDefault()) {
                 defaultLevel = level;
+            }
+
+            if (entry.getValue().isLoadSpawnChunks()) {
+                LOGGER.info("Loading spawn chunks for level '{}'...", level.getName());
+                int spawnChunkX = level.getSpawnLocation().getFloorX() >> 4;
+                int spawnChunkZ = level.getSpawnLocation().getFloorZ() >> 4;
+                List<CompletableFuture<?>> loadChunkFutures = new ArrayList<>();
+                for (int x = -3; x <= 3; x++) {
+                    for (int z = -3; z <= 3; z++) {
+                        loadChunkFutures.add(level.getChunk(spawnChunkX + x, spawnChunkZ + z));
+                    }
+                }
+                CompletableFuture<?> loadingFuture = CompletableFuture.allOf(
+                        loadChunkFutures.toArray(new CompletableFuture[loadChunkFutures.size()]));
+                try {
+                    loadingFuture.get();
+                    LOGGER.info("Spawn chunks for level '{}' loaded successfully.", level.getName());
+                } catch (ExecutionException e) {
+                    LOGGER.error("Unable to load spawn chunks for level '{}'. Continuing anyway...", level.getName(), e);
+                }
             }
         }
 

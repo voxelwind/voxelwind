@@ -32,6 +32,6 @@ public class NibbleArray {
     }
 
     public NibbleArray copy() {
-        return new NibbleArray(getData());
+        return new NibbleArray(getData().clone());
     }
 }
