@@ -157,9 +157,7 @@ public class VoxelwindLevel implements Level {
         Preconditions.checkNotNull(stack, "stack");
         Preconditions.checkNotNull(position, "position");
         Preconditions.checkArgument(getBlockIfChunkLoaded(position.toInt()).isPresent(), "entities can not be spawned in unloaded chunks");
-        DroppedItem item = new VoxelwindDroppedItem(this, position, server, stack);
-        item.ensureAndGet(PickupDelay.class).setDelayPickupTicks(3);
-        return item;
+        return new VoxelwindDroppedItem(this, position, server, stack);
     }
 
     public void onTick() {
