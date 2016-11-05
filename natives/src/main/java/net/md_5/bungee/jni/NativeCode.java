@@ -1,6 +1,7 @@
 package net.md_5.bungee.jni;
 
 import com.google.common.io.ByteStreams;
+import io.netty.util.internal.PlatformDependent;
 import lombok.Getter;
 import net.md_5.bungee.jni.cipher.BungeeCipher;
 
@@ -79,6 +80,7 @@ public final class NativeCode<T>
 
     public static boolean isSupported()
     {
-        return "Linux".equals( System.getProperty( "os.name" ) ) && "amd64".equals( System.getProperty( "os.arch" ) );
+        return PlatformDependent.hasUnsafe() && "Linux".equals( System.getProperty( "os.name" ) )
+                && "amd64".equals( System.getProperty( "os.arch" ) );
     }
 }
