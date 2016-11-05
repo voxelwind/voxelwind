@@ -167,9 +167,7 @@ public class AnvilRegionFile implements Closeable {
             // If we have enough sectors, then use it.
             if (runLength >= sectorsNeeded) {
                 setOffset(x, z, runStart, sectorsNeeded);
-                for (int i = 0; i < sectorsNeeded; ++i) {
-                    usedSectors.set(sectorNumber + i);
-                }
+                usedSectors.set(sectorNumber, sectorNumber + sectorsNeeded + 1);
                 writeChunkInternal(runStart, buffer);
             } else {
                 // Need to allocate new sectors.
