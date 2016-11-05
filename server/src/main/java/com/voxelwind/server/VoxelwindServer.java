@@ -323,7 +323,13 @@ public class VoxelwindServer implements Server {
 
         // Stage 3: load chunks (if needed)
         if (creator.isLoadSpawnChunks()) {
-            return stage2.thenApplyAsync(level -> {
+            CompletableFuture<Level> stage3 = new CompletableFuture<>();
+            stage2.whenComplete((level, throwable) -> {
+                if (throwable != null) {
+                    stage3.completeExceptionally(throwable);
+                    return;
+                }
+
                 LOGGER.info("Loading spawn chunks for level '{}'...", level.getName());
                 int spawnChunkX = level.getSpawnLocation().getFloorX() >> 4;
                 int spawnChunkZ = level.getSpawnLocation().getFloorZ() >> 4;
@@ -335,14 +341,17 @@ public class VoxelwindServer implements Server {
                 }
                 CompletableFuture<?> loadingFuture = CompletableFuture.allOf(
                         loadChunkFutures.toArray(new CompletableFuture[loadChunkFutures.size()]));
-                try {
-                    loadingFuture.get();
-                    LOGGER.info("Spawn chunks for level '{}' loaded successfully.", level.getName());
-                } catch (ExecutionException | InterruptedException e) {
-                    LOGGER.error("Unable to load spawn chunks for level '{}'. Continuing anyway...", level.getName(), e);
-                }
-                return level;
+                loadingFuture.whenComplete((o, throwable2) -> {
+                    if (throwable2 != null) {
+                        LOGGER.error("Unable to load spawn chunks for level '{}'.", level.getName(), throwable2);
+                        stage3.completeExceptionally(throwable2);
+                    } else {
+                        LOGGER.info("Successfully loaded spawn chunks for level '{}'.", level.getName());
+                        stage3.complete(level);
+                    }
+                });
             });
+            return stage3;
         } else {
             return stage2;
         }
