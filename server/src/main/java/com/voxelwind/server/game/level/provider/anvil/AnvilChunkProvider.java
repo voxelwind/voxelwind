@@ -8,7 +8,7 @@ import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.level.provider.ChunkProvider;
-import com.voxelwind.server.game.level.provider.anvil.util.AnvilRegionReader;
+import com.voxelwind.server.game.level.provider.anvil.util.AnvilRegionFile;
 import lombok.Value;
 
 import java.nio.file.NoSuchFileException;
@@ -20,7 +20,7 @@ import java.util.concurrent.ForkJoinPool;
 
 public class AnvilChunkProvider implements ChunkProvider {
     private final Path basePath;
-    private final Map<RegionXZ, AnvilRegionReader> regionReaders = new HashMap<>();
+    private final Map<RegionXZ, AnvilRegionFile> regionReaders = new HashMap<>();
 
     public AnvilChunkProvider(Path basePath) {
         this.basePath = basePath;
@@ -38,13 +38,13 @@ public class AnvilChunkProvider implements ChunkProvider {
             try {
                 // Loading regions is not thread-safe. However, afterwards we can load chunks in a thread-safe matter (the
                 // chunk loading methods are synchronized).
-                AnvilRegionReader regionReader;
+                AnvilRegionFile regionReader;
                 synchronized (regionReaders) {
                     regionReader = regionReaders.get(rXZ);
                     if (regionReader == null) {
                         Path regionPath = basePath.resolve("region").resolve("r." + rXZ.x + "." + rXZ.z + ".mca");
                         try {
-                            regionReader = new AnvilRegionReader(regionPath);
+                            regionReader = new AnvilRegionFile(regionPath);
                             regionReaders.put(rXZ, regionReader);
                         } catch (NoSuchFileException e) {
                             // Doesn't exist, return empty chunk.
