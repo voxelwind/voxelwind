@@ -35,6 +35,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class McpeSession {
+    private static final ThreadLocal<VoxelwindHash> hashLocal = new ThreadLocal<VoxelwindHash>() {
+        @Override
+        protected VoxelwindHash initialValue() {
+            return NativeCodeFactory.hash.newInstance();
+        }
+    };
     private static final Logger LOGGER = LogManager.getLogger(McpeSession.class);
     private static final int TIMEOUT_MS = 30000;
     private final AtomicLong encryptedSentPacketGenerator = new AtomicLong();
@@ -44,7 +50,6 @@ public class McpeSession {
     private NetworkPacketHandler handler;
     private BungeeCipher encryptionCipher;
     private BungeeCipher decryptionCipher;
-    private final VoxelwindHash hash = NativeCodeFactory.hash.newInstance();
     private PlayerSession playerSession;
     private byte[] serverKey;
     private final SessionConnection connection;
@@ -240,6 +245,7 @@ public class McpeSession {
     }
 
     private byte[] generateTrailer(ByteBuf buf) {
+        VoxelwindHash hash = hashLocal.get();
         ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer(8);
         ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer(serverKey.length);
         try {
