@@ -1,11 +1,14 @@
 package com.voxelwind.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.BlockStateBuilder;
 import com.voxelwind.api.plugin.PluginManager;
+import com.voxelwind.api.server.LevelCreator;
 import com.voxelwind.api.server.Player;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.server.command.CommandManager;
@@ -20,12 +23,15 @@ import com.voxelwind.server.command.builtin.TestCommand;
 import com.voxelwind.server.command.builtin.VersionCommand;
 import com.voxelwind.server.event.VoxelwindEventManager;
 import com.voxelwind.server.game.item.VoxelwindItemStackBuilder;
-import com.voxelwind.server.game.level.LevelCreator;
 import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.VoxelwindBlockStateBuilder;
+import com.voxelwind.server.game.level.provider.ChunkProvider;
 import com.voxelwind.server.game.level.provider.FlatworldChunkProvider;
+import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import com.voxelwind.server.game.level.provider.MemoryLevelDataProvider;
+import com.voxelwind.server.game.level.provider.anvil.AnvilChunkProvider;
+import com.voxelwind.server.game.level.provider.anvil.AnvilLevelDataProvider;
 import com.voxelwind.server.network.listeners.McpeOverRakNetNetworkListener;
 import com.voxelwind.server.network.listeners.NetworkListener;
 import com.voxelwind.server.network.listeners.RconNetworkListener;
@@ -37,6 +43,7 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -110,35 +117,42 @@ public class VoxelwindServer implements Server {
         // Fire the initialize event
         eventManager.fire(ServerInitializeEvent.INSTANCE);
 
+        LOGGER.info("Loading worlds...");
+
         // Start the levels.
+        List<CompletableFuture<Level>> loadingLevels = new ArrayList<>();
+        String defaultLevelName = null;
         for (Map.Entry<String, VoxelwindConfiguration.LevelConfiguration> entry : configuration.getLevels().entrySet()) {
-            // TODO: Implement...
-            VoxelwindLevel level = new VoxelwindLevel(this, new LevelCreator(entry.getKey(), FlatworldChunkProvider.INSTANCE, new MemoryLevelDataProvider()));
-            levelManager.register(level);
-            levelManager.start(level);
+            LevelCreator creator = LevelCreator.builder()
+                    .enableWrite(false)
+                    .loadSpawnChunks(entry.getValue().isLoadSpawnChunks())
+                    .name(entry.getKey())
+                    .type(entry.getValue().getStorage())
+                    .worldPath(Paths.get(entry.getValue().getDirectory()))
+                    .build();
+
+            loadingLevels.add(createLevel(creator));
 
             if (entry.getValue().isDefault()) {
-                defaultLevel = level;
+                defaultLevelName = entry.getKey();
             }
+        }
 
-            if (entry.getValue().isLoadSpawnChunks()) {
-                LOGGER.info("Loading spawn chunks for level '{}'...", level.getName());
-                int spawnChunkX = level.getSpawnLocation().getFloorX() >> 4;
-                int spawnChunkZ = level.getSpawnLocation().getFloorZ() >> 4;
-                List<CompletableFuture<?>> loadChunkFutures = new ArrayList<>();
-                for (int x = -3; x <= 3; x++) {
-                    for (int z = -3; z <= 3; z++) {
-                        loadChunkFutures.add(level.getChunk(spawnChunkX + x, spawnChunkZ + z));
-                    }
-                }
-                CompletableFuture<?> loadingFuture = CompletableFuture.allOf(
-                        loadChunkFutures.toArray(new CompletableFuture[loadChunkFutures.size()]));
-                try {
-                    loadingFuture.get();
-                    LOGGER.info("Spawn chunks for level '{}' loaded successfully.", level.getName());
-                } catch (ExecutionException e) {
-                    LOGGER.error("Unable to load spawn chunks for level '{}'. Continuing anyway...", level.getName(), e);
-                }
+        if (defaultLevelName == null) {
+            LOGGER.fatal("No default level specified. Stopping!");
+            System.exit(1);
+        }
+
+        for (CompletableFuture<Level> levelFuture : loadingLevels) {
+            Level loadedLevel = null;
+            try {
+                loadedLevel = levelFuture.join();
+            } catch (Throwable e) {
+                LOGGER.fatal("Unable to load a level, we are halting.", e);
+                System.exit(1);
+            }
+            if (loadedLevel.getName().equals(defaultLevelName)) {
+                defaultLevel = (VoxelwindLevel) loadedLevel;
             }
         }
 
@@ -259,6 +273,84 @@ public class VoxelwindServer implements Server {
     @Override
     public Collection<Player> getAllOnlinePlayers() {
         return sessionManager.allPlayers();
+    }
+
+    @Override
+    public Collection<Level> getLoadedLevels() {
+        return levelManager.all();
+    }
+
+    @Override
+    public CompletableFuture<Level> createLevel(LevelCreator creator) {
+        Preconditions.checkNotNull(creator, "creator");
+        LOGGER.info("Creating level '{}'...", creator.getName());
+
+        CompletableFuture<LevelDataProvider> stage1 = new CompletableFuture<>();
+
+        ChunkProvider provider;
+        switch (creator.getType()) {
+            case ANVIL:
+                provider = new AnvilChunkProvider(creator.getWorldPath());
+                break;
+            case FLATWORLD:
+                provider = FlatworldChunkProvider.INSTANCE;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid type");
+        }
+
+        // Stage 1: load level data
+        if (creator.getType() == LevelCreator.WorldType.ANVIL) {
+            ForkJoinPool.commonPool().execute(() -> {
+                try {
+                    AnvilLevelDataProvider levelDataProvider = AnvilLevelDataProvider.load(creator.getWorldPath().resolve("level.dat"));
+                    stage1.complete(levelDataProvider);
+                } catch (IOException e) {
+                    stage1.completeExceptionally(e);
+                }
+            });
+        } else if (creator.getType() == LevelCreator.WorldType.FLATWORLD) {
+            stage1.complete(new MemoryLevelDataProvider());
+        }
+
+        // Stage 2: create level
+        CompletableFuture<Level> stage2 = stage1.thenApplyAsync(levelDataProvider -> {
+            Level level = new VoxelwindLevel(this, creator.getName(), provider, levelDataProvider);
+            levelManager.register(level);
+            levelManager.start((VoxelwindLevel) level);
+            return level;
+        });
+
+        // Stage 3: load chunks (if needed)
+        if (creator.isLoadSpawnChunks()) {
+            return stage2.thenApplyAsync(level -> {
+                LOGGER.info("Loading spawn chunks for level '{}'...", level.getName());
+                int spawnChunkX = level.getSpawnLocation().getFloorX() >> 4;
+                int spawnChunkZ = level.getSpawnLocation().getFloorZ() >> 4;
+                List<CompletableFuture<?>> loadChunkFutures = new ArrayList<>();
+                for (int x = -3; x <= 3; x++) {
+                    for (int z = -3; z <= 3; z++) {
+                        loadChunkFutures.add(level.getChunk(spawnChunkX + x, spawnChunkZ + z));
+                    }
+                }
+                CompletableFuture<?> loadingFuture = CompletableFuture.allOf(
+                        loadChunkFutures.toArray(new CompletableFuture[loadChunkFutures.size()]));
+                try {
+                    loadingFuture.get();
+                    LOGGER.info("Spawn chunks for level '{}' loaded successfully.", level.getName());
+                } catch (ExecutionException | InterruptedException e) {
+                    LOGGER.error("Unable to load spawn chunks for level '{}'. Continuing anyway...", level.getName(), e);
+                }
+                return level;
+            });
+        } else {
+            return stage2;
+        }
+    }
+
+    @Override
+    public boolean unloadLevel(String name) {
+        throw new UnsupportedOperationException();
     }
 
     public VoxelwindConfiguration getConfiguration() {

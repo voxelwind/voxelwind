@@ -23,6 +23,7 @@ import com.voxelwind.server.game.entities.visitor.EntityClassVisitor;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
+import com.voxelwind.server.game.level.provider.ChunkProvider;
 import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBlockEntityData;
@@ -77,14 +78,14 @@ public class VoxelwindLevel implements Level {
     private long currentTick;
     private final Server server;
 
-    public VoxelwindLevel(VoxelwindServer server, LevelCreator creator) {
+    public VoxelwindLevel(VoxelwindServer server, String name, ChunkProvider chunkProvider, LevelDataProvider dataProvider) {
         this.server = server;
-        chunkManager = new LevelChunkManager(server, this, creator.getChunkProvider());
-        name = creator.getName();
-        uuid = UUID.randomUUID();
-        entityManager = new LevelEntityManager(this);
-        packetManager = new LevelPacketManager(this);
-        dataProvider = creator.getDataProvider();
+        this.chunkManager = new LevelChunkManager(server, this, chunkProvider);
+        this.name = name;
+        this.uuid = UUID.randomUUID();
+        this.entityManager = new LevelEntityManager(this);
+        this.packetManager = new LevelPacketManager(this);
+        this.dataProvider = dataProvider;
     }
 
     @Override

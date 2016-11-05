@@ -10,6 +10,7 @@ import com.voxelwind.api.server.event.EventManager;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class refers to the currently running Voxelwind instance.
@@ -61,4 +62,10 @@ public interface Server {
     BlockStateBuilder createBlockStateBuilder();
 
     Collection<Player> getAllOnlinePlayers();
+
+    Collection<Level> getLoadedLevels();
+
+    CompletableFuture<Level> createLevel(LevelCreator creator);
+
+    boolean unloadLevel(String name);
 }

@@ -1,6 +1,7 @@
 package com.voxelwind.server;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.voxelwind.api.server.LevelCreator;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -123,8 +124,7 @@ public class VoxelwindConfiguration {
     @ToString
     public static class LevelConfiguration {
         private String directory;
-        private String storage;
-        private String generator;
+        private LevelCreator.WorldType storage;
         @JsonProperty("default")
         private boolean isDefault;
         private boolean loadSpawnChunks;
@@ -175,10 +175,9 @@ public class VoxelwindConfiguration {
 
         if (levels == null || levels.isEmpty()) {
             LevelConfiguration wc = new LevelConfiguration();
-            wc.directory = null;
-            wc.generator = "flatworld";
+            wc.directory = "test-world";
             wc.isDefault = true;
-            wc.storage = "null";
+            wc.storage = LevelCreator.WorldType.FLATWORLD;
             wc.loadSpawnChunks = true;
             levels = new HashMap<>();
             levels.put("world", wc);
@@ -222,10 +221,10 @@ public class VoxelwindConfiguration {
         configuration.maximumViewDistance = 8;
         configuration.levels = new HashMap<>();
         LevelConfiguration wc = new LevelConfiguration();
-        wc.directory = null;
-        wc.generator = "flatworld";
+        wc.directory = "test-world";
         wc.isDefault = true;
-        wc.storage = "null";
+        wc.storage = LevelCreator.WorldType.FLATWORLD;
+        wc.loadSpawnChunks = true;
         configuration.levels.put("world", wc);
         return configuration;
     }
