@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -95,6 +96,39 @@ public class AnvilRegionFileTest {
             assertArrayEquals("Written data doesn't match the original", randomData2, reread1);
             byte[] reread2 = IOUtils.toByteArray(file.readChunk(0, 1));
             assertArrayEquals("Written data doesn't match the original", randomData3, reread2);
+        }
+    }
+
+    @Test
+    public void manipulateExistingFile() throws Exception {
+        String originalPath = getClass().getClassLoader().getResource("example_region.mca").getFile();
+        if (isWindows()) {
+            originalPath = originalPath.substring(1);
+        }
+        Path temporaryFile = Files.createTempFile("voxelwind-test-anvil-", ".mca");
+        Files.copy(Paths.get(originalPath), temporaryFile, StandardCopyOption.REPLACE_EXISTING);
+        try (AnvilRegionFile file = new AnvilRegionFile(temporaryFile)) {
+            // Generate 8KB of random data
+            byte[] randomData1 = new byte[4096];
+            new Random(1).nextBytes(randomData1);
+            byte[] randomData2 = new byte[2048];
+            new Random(2).nextBytes(randomData2);
+            byte[] randomData3 = new byte[2048];
+            new Random(3).nextBytes(randomData3);
+
+            ByteBuffer compressed1 = compress(randomData1);
+            ByteBuffer compressed2 = compress(randomData2);
+            ByteBuffer compressed3 = compress(randomData3);
+            file.writeChunk(14, 2, compressed1); // 14,2 exists in the region and its sectors will be cleared
+            file.writeChunk(0, 7, compressed2); // 0,7 doesn't exist in the region and will be created
+            file.writeChunk(5, 24, compressed3); // 5,24 exists in the region and its single sector will be overwritten
+
+            byte[] reread1 = IOUtils.toByteArray(file.readChunk(14, 2));
+            assertArrayEquals("Written data doesn't match the original", randomData1, reread1);
+            byte[] reread2 = IOUtils.toByteArray(file.readChunk(0, 7));
+            assertArrayEquals("Written data doesn't match the original", randomData2, reread2);
+            byte[] reread3 = IOUtils.toByteArray(file.readChunk(5, 24));
+            assertArrayEquals("Written data doesn't match the original", randomData3, reread3);
         }
     }
 

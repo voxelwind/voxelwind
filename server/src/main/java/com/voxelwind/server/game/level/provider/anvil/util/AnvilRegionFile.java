@@ -169,6 +169,7 @@ public class AnvilRegionFile implements Closeable {
                 setOffset(x, z, runStart, sectorsNeeded);
                 usedSectors.set(sectorNumber, sectorNumber + sectorsNeeded + 1);
                 writeChunkInternal(runStart, buffer);
+                setTimestamp(x, z, (int) (System.currentTimeMillis() / 1000));
             } else {
                 // Need to allocate new sectors.
                 int startSector = totalSectorsAvailable;
@@ -179,11 +180,19 @@ public class AnvilRegionFile implements Closeable {
                 for (int i = 0; i < buffers.length; i++) {
                     buffers[i] = EMPTY_SECTOR.duplicate();
                 }
+                int bytesToWrite = SECTOR_BYTES * sectorsNeeded;
+                while (bytesToWrite > 0) {
+                    long written = channel.write(buffers);
+                    bytesToWrite -= written;
+                    if (written == 0) {
+                        throw new IOException("Can't write any more filler");
+                    }
+                }
 
-                channel.write(buffers);
                 totalSectorsAvailable += sectorsNeeded;
                 setOffset(x, z, startSector, sectorsNeeded);
                 writeChunkInternal(startSector, buffer);
+                setTimestamp(x, z, (int) (System.currentTimeMillis() / 1000));
             }
         }
     }
