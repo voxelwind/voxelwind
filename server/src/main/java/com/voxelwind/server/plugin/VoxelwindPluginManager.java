@@ -45,7 +45,7 @@ public class VoxelwindPluginManager implements PluginManager {
 
         List<PluginDescription> found = new ArrayList<>();
         JavaPluginLoader loader = new JavaPluginLoader(server);
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, p -> p.toString().endsWith(".jar"))) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, p -> Files.isRegularFile(p) && p.toString().endsWith(".jar"))) {
             for (Path path : stream) {
                 try {
                     found.add(loader.loadPlugin(path));
@@ -53,6 +53,11 @@ public class VoxelwindPluginManager implements PluginManager {
                     LOGGER.error("Unable to enumerate plugin {}", path, e);
                 }
             }
+        }
+
+        if (found.isEmpty()) {
+            // No plugins found.
+            return;
         }
 
         List<PluginDescription> sortedPlugins = sortDescriptions(found);

@@ -187,16 +187,23 @@ public class VoxelwindServer implements Server {
     }
 
     private void loadPlugins() throws Exception {
+        LOGGER.info("Loading plugins...");
         try {
             Path pluginPath = Paths.get("plugins");
             if (Files.notExists(pluginPath)) {
                 Files.createDirectory(pluginPath);
+            } else {
+                if (!Files.isDirectory(pluginPath)) {
+                    LOGGER.info("Plugin location {} is not a directory, continuing without loading plugins.", pluginPath);
+                    return;
+                }
             }
             pluginManager.loadPlugins(pluginPath);
             pluginManager.getAllPlugins().forEach(p -> eventManager.register(p.getPlugin(), p.getPlugin()));
         } catch (Exception e) {
             LOGGER.error("Can't load plugins", e);
         }
+        LOGGER.info("Loaded {} plugins.", pluginManager.getAllPlugins().size());
     }
 
     @Override
