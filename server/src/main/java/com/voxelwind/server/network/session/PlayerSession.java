@@ -1106,6 +1106,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             Set<UUID> toRemove = new HashSet<>();
             Map<UUID, PlayerSession> availableSessions = new HashMap<>();
             for (PlayerSession session : getLevel().getEntityManager().getPlayers()) {
+                if (session == this) continue;
                 availableSessions.put(session.getUniqueId(), session);
             }
 
@@ -1208,8 +1209,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             session.pickupAdjacent();
 
             // Update player list.
-            // TODO: Packet doesn't currently encode correctly.
-            //session.updatePlayerList();
+            session.updatePlayerList();
         }
     }
 
