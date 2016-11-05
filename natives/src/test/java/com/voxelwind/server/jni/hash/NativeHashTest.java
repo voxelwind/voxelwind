@@ -11,8 +11,10 @@ import javax.xml.bind.DatatypeConverter;
 public class NativeHashTest
 {
 
-    private static final byte[] INPUT = "Hello, world".getBytes();
-    private static final byte[] EXPECTED_HASH = DatatypeConverter.parseHexBinary("4ae7c3b6ac0beff671efa8cf57386151c06e58ca53a78d83f36107316cec125f");
+    private static final byte[] INPUT_1 = "Hello, world".getBytes();
+    private static final byte[] INPUT_2 = "Voxelwind".getBytes();
+    private static final byte[] EXPECTED_HASH_1 = DatatypeConverter.parseHexBinary("4ae7c3b6ac0beff671efa8cf57386151c06e58ca53a78d83f36107316cec125f");
+    private static final byte[] EXPECTED_HASH_2 = DatatypeConverter.parseHexBinary("212521264f1636c6765e39e05541972c402c5e0a5a922024fed83adddcf1d51d");
 
     private final NativeCode<VoxelwindHash> factory = new NativeCode( "native-hash", JavaHash.class, NativeHash.class );
 
@@ -31,14 +33,22 @@ public class NativeHashTest
     {
         System.out.println( "Testing: " + hash );
 
-        ByteBuf buf = Unpooled.directBuffer();
-        buf.writeBytes( INPUT );
-
-        hash.update( buf );
+        ByteBuf buf1 = Unpooled.directBuffer();
+        buf1.writeBytes(INPUT_1);
+        hash.update( buf1 );
         byte[] out = hash.digest();
 
-        Assert.assertArrayEquals( "Hashes do not match", EXPECTED_HASH, out );
+        Assert.assertArrayEquals( "First hash does not match", EXPECTED_HASH_1, out );
 
-        buf.release();
+        // Test multiple hashes with same instance
+        ByteBuf buf2 = Unpooled.directBuffer();
+        buf2.writeBytes(INPUT_2);
+        hash.update( buf2 );
+        byte[] out2 = hash.digest();
+
+        Assert.assertArrayEquals( "Second hash does not match", EXPECTED_HASH_2, out2 );
+
+        buf1.release();
+        buf2.release();
     }
 }

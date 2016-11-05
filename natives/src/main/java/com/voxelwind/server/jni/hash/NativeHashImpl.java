@@ -8,4 +8,6 @@ public class NativeHashImpl
     native void update(long ctx, long in, int length);
 
     native byte[] digest(long ctx);
+
+    native void free(long ctx);
 }

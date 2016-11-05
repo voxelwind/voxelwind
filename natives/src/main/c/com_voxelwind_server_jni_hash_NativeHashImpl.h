@@ -31,6 +31,14 @@ JNIEXPORT void JNICALL Java_com_voxelwind_server_jni_hash_NativeHashImpl_update
 JNIEXPORT jbyteArray JNICALL Java_com_voxelwind_server_jni_hash_NativeHashImpl_digest
   (JNIEnv *, jobject, jlong);
 
+/*
+ * Class:     com_voxelwind_server_jni_hash_NativeHashImpl
+ * Method:    free
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_com_voxelwind_server_jni_hash_NativeHashImpl_free
+  (JNIEnv *, jobject, jlong);
+
 #ifdef __cplusplus
 }
 #endif

@@ -35,4 +35,10 @@ public class JavaHash implements VoxelwindHash
     {
         return digest.digest();
     }
+
+    @Override
+    public void free()
+    {
+        // No-op.
+    }
 }

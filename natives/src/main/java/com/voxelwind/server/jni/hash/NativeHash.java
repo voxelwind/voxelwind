@@ -8,7 +8,7 @@ public class NativeHash implements VoxelwindHash
 
     private static final NativeHashImpl impl = new NativeHashImpl();
     private final long ctx;
-    private boolean completed = false;
+    private boolean freed = false;
 
     public NativeHash()
     {
@@ -33,13 +33,19 @@ public class NativeHash implements VoxelwindHash
     public byte[] digest()
     {
         checkState();
-        byte[] digest = impl.digest(ctx);
-        completed = true;
-        return digest;
+        return impl.digest(ctx);
+    }
+
+    @Override
+    public void free()
+    {
+        checkState();
+        impl.free(ctx);
+        freed = true;
     }
 
     private void checkState()
     {
-        Preconditions.checkState( !completed, "Already used" );
+        Preconditions.checkState( !freed, "Already freed" );
     }
 }

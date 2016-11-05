@@ -8,4 +8,6 @@ public interface VoxelwindHash
     void update(ByteBuf buf);
 
     byte[] digest();
+
+    void free();
 }

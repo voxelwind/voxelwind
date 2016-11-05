@@ -44,6 +44,7 @@ public class McpeSession {
     private NetworkPacketHandler handler;
     private BungeeCipher encryptionCipher;
     private BungeeCipher decryptionCipher;
+    private final VoxelwindHash hash = NativeCodeFactory.hash.newInstance();
     private PlayerSession playerSession;
     private byte[] serverKey;
     private final SessionConnection connection;
@@ -239,8 +240,6 @@ public class McpeSession {
     }
 
     private byte[] generateTrailer(ByteBuf buf) {
-        VoxelwindHash hash = NativeCodeFactory.hash.newInstance();
-
         ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer(8);
         ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer(serverKey.length);
         try {
