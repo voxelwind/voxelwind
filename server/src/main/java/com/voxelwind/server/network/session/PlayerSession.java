@@ -1209,7 +1209,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             // Update player list.
             // TODO: Packet doesn't currently encode correctly.
-            //updatePlayerList();
+            //session.updatePlayerList();
         }
     }
 

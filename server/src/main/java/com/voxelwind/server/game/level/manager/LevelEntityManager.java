@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class LevelEntityManager {
     private static final Logger LOGGER = LogManager.getLogger(LevelEntityManager.class);
 
-    private final TLongObjectMap<BaseEntity> entities = TCollections.synchronizedMap(new TLongObjectHashMap<>());
+    private final TLongObjectMap<BaseEntity> entities = new TLongObjectHashMap<>();
     private final AtomicLong entityIdAllocator = new AtomicLong();
     private final AtomicBoolean entitiesChanged = new AtomicBoolean(false);
     private final VoxelwindLevel level;
@@ -46,65 +46,74 @@ public class LevelEntityManager {
     }
 
     public void onTick() {
+        TLongObjectMap<BaseEntity> copy;
         synchronized (entities) {
-            for (TLongObjectIterator<BaseEntity> it = entities.iterator(); it.hasNext(); ) {
-                it.advance();
-                BaseEntity entity = it.value();
-                boolean isPlayer = entity instanceof PlayerSession;
-                try {
-                    // Check if the entity was removed.
-                    if (entity.isRemoved()) {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("{} was removed, discarding.", entity);
-                        }
-                        entitiesChanged.set(true);
-                        it.remove();
-                        continue;
+            copy = new TLongObjectHashMap<>(entities);
+        }
+
+        for (TLongObjectIterator<BaseEntity> it = copy.iterator(); it.hasNext(); ) {
+            it.advance();
+            BaseEntity entity = it.value();
+            boolean isPlayer = entity instanceof PlayerSession;
+            try {
+                // Check if the entity was removed.
+                if (entity.isRemoved()) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("{} was removed, discarding.", entity);
                     }
-
-                    // Tick all entity systems.
-                    for (System system : entity.registeredSystems()) {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("Running entity system {} on {}", system, entity);
-                        }
-                        system.getRunner().run(entity);
-                    }
-
-                    // After ticking the systems, one of them may have removed the entity. Check it again.
-                    if (entity.isRemoved()) {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("{} was removed after systems ticked, discarding.", entity);
-                        }
-                        entitiesChanged.set(true);
-                        it.remove();
-                        continue;
-                    }
-
-                    if (entity.isStale()) {
-                        // Need to send packets.
-                        McpeMoveEntity moveEntityPacket = new McpeMoveEntity();
-                        moveEntityPacket.setEntityId(entity.getEntityId());
-                        moveEntityPacket.setPosition(entity.getGamePosition());
-                        moveEntityPacket.setRotation(entity.getRotation());
-                        level.getPacketManager().queuePacketForViewers(entity, moveEntityPacket);
-
-                        McpeSetEntityMotion motionPacket = new McpeSetEntityMotion();
-                        motionPacket.setEntityId(entity.getEntityId());
-                        motionPacket.setMotion(entity.getMotion());
-                        level.getPacketManager().queuePacketForViewers(entity, motionPacket);
-
-                        entity.resetStale();
-                    }
-                } catch (Exception e) {
                     entitiesChanged.set(true);
-                    it.remove();
-                    if (!isPlayer) {
-                        LOGGER.error("Unable to tick entity {}. The entity will be removed.", entity, e);
-                        entity.remove();
-                    } else {
-                        LOGGER.error("Unable to tick player {}. The player will be disconnected.", entity, e);
-                        ((PlayerSession) entity).disconnect("Internal server error during tick");
+                    synchronized (entities) {
+                        entities.remove(entity.getEntityId());
                     }
+                    continue;
+                }
+
+                // Tick all entity systems.
+                for (System system : entity.registeredSystems()) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Running entity system {} on {}", system, entity);
+                    }
+                    system.getRunner().run(entity);
+                }
+
+                // After ticking the systems, one of them may have removed the entity. Check it again.
+                if (entity.isRemoved()) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("{} was removed after systems ticked, discarding.", entity);
+                    }
+                    entitiesChanged.set(true);
+                    synchronized (entities) {
+                        entities.remove(entity.getEntityId());
+                    }
+                    continue;
+                }
+
+                if (entity.isStale()) {
+                    // Need to send packets.
+                    McpeMoveEntity moveEntityPacket = new McpeMoveEntity();
+                    moveEntityPacket.setEntityId(entity.getEntityId());
+                    moveEntityPacket.setPosition(entity.getGamePosition());
+                    moveEntityPacket.setRotation(entity.getRotation());
+                    level.getPacketManager().queuePacketForViewers(entity, moveEntityPacket);
+
+                    McpeSetEntityMotion motionPacket = new McpeSetEntityMotion();
+                    motionPacket.setEntityId(entity.getEntityId());
+                    motionPacket.setMotion(entity.getMotion());
+                    level.getPacketManager().queuePacketForViewers(entity, motionPacket);
+
+                    entity.resetStale();
+                }
+            } catch (Exception e) {
+                entitiesChanged.set(true);
+                synchronized (entities) {
+                    entities.remove(entity.getEntityId());
+                }
+                if (!isPlayer) {
+                    LOGGER.error("Unable to tick entity {}. The entity will be removed.", entity, e);
+                    entity.remove();
+                } else {
+                    LOGGER.error("Unable to tick player {}. The player will be disconnected.", entity, e);
+                    ((PlayerSession) entity).disconnect("Internal server error during tick");
                 }
             }
         }
@@ -116,32 +125,36 @@ public class LevelEntityManager {
     }
 
     public List<PlayerSession> getPlayers() {
-        List<PlayerSession> sessions = new ArrayList<>();
-        entities.forEachValue(entity -> {
-            if (entity instanceof PlayerSession) {
-                PlayerSession session = (PlayerSession) entity;
-                McpeSession mcpeSession = session.getMcpeSession();
-                if (mcpeSession != null && !mcpeSession.isClosed() && session.isSpawned()) {
-                    sessions.add((PlayerSession) entity);
+        synchronized (entities) {
+            List<PlayerSession> sessions = new ArrayList<>();
+            entities.forEachValue(entity -> {
+                if (entity instanceof PlayerSession) {
+                    PlayerSession session = (PlayerSession) entity;
+                    McpeSession mcpeSession = session.getMcpeSession();
+                    if (mcpeSession != null && !mcpeSession.isClosed() && session.isSpawned()) {
+                        sessions.add((PlayerSession) entity);
+                    }
                 }
-            }
-            return true;
-        });
-        return sessions;
+                return true;
+            });
+            return sessions;
+        }
     }
 
     public List<Entity> getEntitiesInChunk(int x, int z) {
-        List<Entity> foundEntities = new ArrayList<>();
-        entities.forEachValue(entity -> {
-            int entityChunkX = entity.getPosition().getFloorX() >> 4;
-            int entityChunkZ = entity.getPosition().getFloorZ() >> 4;
+        synchronized (entities) {
+            List<Entity> foundEntities = new ArrayList<>();
+            entities.forEachValue(entity -> {
+                int entityChunkX = entity.getPosition().getFloorX() >> 4;
+                int entityChunkZ = entity.getPosition().getFloorZ() >> 4;
 
-            if (!entity.isRemoved() && entityChunkX == x && entityChunkZ == z) {
-                foundEntities.add(entity);
-            }
-            return true;
-        });
-        return foundEntities;
+                if (!entity.isRemoved() && entityChunkX == x && entityChunkZ == z) {
+                    foundEntities.add(entity);
+                }
+                return true;
+            });
+            return foundEntities;
+        }
     }
 
     public long allocateEntityId() {
@@ -155,33 +168,41 @@ public class LevelEntityManager {
     }
 
     public Optional<BaseEntity> findEntityById(long id) {
-        return Optional.ofNullable(entities.get(id));
+        synchronized (entities) {
+            return Optional.ofNullable(entities.get(id));
+        }
     }
 
     public void unregister(BaseEntity entity) {
-        entities.remove(entity.getEntityId());
-        entitiesChanged.set(true);
+        synchronized (entities) {
+            entities.remove(entity.getEntityId());
+            entitiesChanged.set(true);
+        }
     }
 
     public Collection<BaseEntity> getEntitiesInDistance(Vector3f origin, double distance) {
-        Collection<BaseEntity> inDistance = new ArrayList<>();
-        entities.forEachValue(entity -> {
-            if (!entity.isRemoved() && entity.getPosition().distance(origin) <= distance) {
-                inDistance.add(entity);
-            }
-            return true;
-        });
-        return inDistance;
+        synchronized (entities) {
+            Collection<BaseEntity> inDistance = new ArrayList<>();
+            entities.forEachValue(entity -> {
+                if (!entity.isRemoved() && entity.getPosition().distance(origin) <= distance) {
+                    inDistance.add(entity);
+                }
+                return true;
+            });
+            return inDistance;
+        }
     }
 
     public Collection<BaseEntity> getEntitiesInBounds(BoundingBox boundingBox) {
-        Collection<BaseEntity> inDistance = new ArrayList<>();
-        entities.forEachValue(entity -> {
-            if (!entity.isRemoved() && boundingBox.isWithin(entity.getPosition())) {
-                inDistance.add(entity);
-            }
-            return true;
-        });
-        return inDistance;
+        synchronized (entities) {
+            Collection<BaseEntity> inDistance = new ArrayList<>();
+            entities.forEachValue(entity -> {
+                if (!entity.isRemoved() && boundingBox.isWithin(entity.getPosition())) {
+                    inDistance.add(entity);
+                }
+                return true;
+            });
+            return inDistance;
+        }
     }
 }
