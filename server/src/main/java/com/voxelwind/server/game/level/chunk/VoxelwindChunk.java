@@ -215,7 +215,7 @@ public class VoxelwindChunk implements Chunk {
     }
 
     @Override
-    public ChunkSnapshot toSnapshot() {
+    public synchronized ChunkSnapshot toSnapshot() {
         // TODO: Do a better job of this
         return new VoxelwindChunkSnapshot(
                 blockData.clone(),
@@ -224,8 +224,10 @@ public class VoxelwindChunk implements Chunk {
                 blockLightData.copy(),
                 new TIntObjectHashMap<>(blockEntities),
                 x,
-                z
-        );
+                z,
+                biomeId.clone(),
+                biomeColor.clone(),
+                height.clone());
     }
 
     public synchronized McpeBatch getChunkDataPacket() {

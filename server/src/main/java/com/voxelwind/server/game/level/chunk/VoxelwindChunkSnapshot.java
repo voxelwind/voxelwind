@@ -26,7 +26,11 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
     private final int x;
     private final int z;
 
-    VoxelwindChunkSnapshot(byte[] blockData, NibbleArray blockMetadata, NibbleArray skyLightData, NibbleArray blockLightData, TIntObjectMap<BlockEntity> blockEntities, int x, int z) {
+    private final byte[] biomeId;
+    private final int[] biomeColor;
+    private final byte[] height;
+
+    VoxelwindChunkSnapshot(byte[] blockData, NibbleArray blockMetadata, NibbleArray skyLightData, NibbleArray blockLightData, TIntObjectMap<BlockEntity> blockEntities, int x, int z, byte[] biomeId, int[] biomeColor, byte[] height) {
         this.blockData = blockData;
         this.blockMetadata = blockMetadata;
         this.skyLightData = skyLightData;
@@ -34,6 +38,9 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
         this.blockEntities = blockEntities;
         this.x = x;
         this.z = z;
+        this.biomeId = biomeId;
+        this.biomeColor = biomeColor;
+        this.height = height;
     }
 
     @Override
@@ -64,6 +71,38 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
 
         // TODO: Add level and chunk
         return new VoxelwindBlock(null, null, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null), blockEntities.get(index)));
+    }
+
+    public byte[] getBlockData() {
+        return blockData;
+    }
+
+    public NibbleArray getBlockMetadata() {
+        return blockMetadata;
+    }
+
+    public NibbleArray getSkyLightData() {
+        return skyLightData;
+    }
+
+    public NibbleArray getBlockLightData() {
+        return blockLightData;
+    }
+
+    public TIntObjectMap<BlockEntity> getBlockEntities() {
+        return blockEntities;
+    }
+
+    public byte[] getBiomeId() {
+        return biomeId;
+    }
+
+    public int[] getBiomeColor() {
+        return biomeColor;
+    }
+
+    public byte[] getHeight() {
+        return height;
     }
 
     private static void checkPosition(int x, int y, int z) {
