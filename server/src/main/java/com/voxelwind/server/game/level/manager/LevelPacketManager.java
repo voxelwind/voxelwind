@@ -7,16 +7,18 @@ import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.session.PlayerSession;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import lombok.Synchronized;
 
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class LevelPacketManager {
     private static final int ENTITY_VIEW_DISTANCE_SQ = 64 * 64;
 
-    private final Queue<NetworkPackage> broadcastQueue = new ArrayDeque<>();
+    private final Queue<NetworkPackage> broadcastQueue = new ConcurrentLinkedQueue<>();
     private final TLongObjectMap<Queue<NetworkPackage>> specificEntityViewerQueue = new TLongObjectHashMap<>();
     private final VoxelwindLevel level;
 
@@ -24,38 +26,40 @@ public class LevelPacketManager {
         this.level = level;
     }
 
-    public synchronized void onTick() {
+    public void onTick() {
         List<PlayerSession> playersInWorld = level.getEntityManager().getPlayers();
-        for (NetworkPackage aPackage : broadcastQueue) {
+        NetworkPackage np;
+        while ((np = broadcastQueue.poll()) != null) {
             for (PlayerSession session : playersInWorld) {
                 if (!session.isRemoved()) {
-                    session.getMcpeSession().addToSendQueue(aPackage);
+                    session.getMcpeSession().addToSendQueue(np);
                 }
             }
         }
 
-        specificEntityViewerQueue.forEachEntry((eid, queue) -> {
-            Optional<BaseEntity> entityById = level.getEntityManager().findEntityById(eid);
-            if (entityById.isPresent()) {
-                Entity entity = entityById.get();
-                for (PlayerSession session : playersInWorld) {
-                    if (session == entity) continue; // Don't move ourselves
+        synchronized (specificEntityViewerQueue) {
+            specificEntityViewerQueue.forEachEntry((eid, queue) -> {
+                Optional<BaseEntity> entityById = level.getEntityManager().findEntityById(eid);
+                if (entityById.isPresent()) {
+                    Entity entity = entityById.get();
+                    for (PlayerSession session : playersInWorld) {
+                        if (session == entity) continue; // Don't move ourselves
 
-                    if (session.getPosition().distanceSquared(entity.getPosition()) <= ENTITY_VIEW_DISTANCE_SQ && !session.isRemoved()) {
-                        for (NetworkPackage aPackage : queue) {
-                            session.getMcpeSession().addToSendQueue(aPackage);
+                        if (session.getPosition().distanceSquared(entity.getPosition()) <= ENTITY_VIEW_DISTANCE_SQ && !session.isRemoved()) {
+                            for (NetworkPackage aPackage : queue) {
+                                session.getMcpeSession().addToSendQueue(aPackage);
+                            }
                         }
                     }
                 }
-            }
-            return true;
-        });
-
-        broadcastQueue.clear();
-        specificEntityViewerQueue.clear();
+                return true;
+            });
+            specificEntityViewerQueue.clear();
+        }
     }
 
-    public synchronized void queuePacketForViewers(Entity entity, NetworkPackage netPackage) {
+    @Synchronized("specificEntityViewerQueue")
+    public void queuePacketForViewers(Entity entity, NetworkPackage netPackage) {
         Queue<NetworkPackage> packageQueue = specificEntityViewerQueue.get(entity.getEntityId());
         if (packageQueue == null) {
             specificEntityViewerQueue.put(entity.getEntityId(), packageQueue = new ArrayDeque<>());
@@ -63,7 +67,7 @@ public class LevelPacketManager {
         packageQueue.add(netPackage);
     }
 
-    public synchronized void queuePacketForPlayers(NetworkPackage netPackage) {
+    public void queuePacketForPlayers(NetworkPackage netPackage) {
         broadcastQueue.add(netPackage);
     }
 }
