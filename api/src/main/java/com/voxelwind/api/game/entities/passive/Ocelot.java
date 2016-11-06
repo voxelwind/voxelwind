@@ -1,7 +1,6 @@
 package com.voxelwind.api.game.entities.passive;
 
-import com.voxelwind.api.game.entities.Animal;
-import com.voxelwind.api.game.entities.Tameable;
+import com.voxelwind.api.game.entities.Entity;
 
-public interface Ocelot extends Animal, Tameable {
+public interface Ocelot extends Entity {
 }

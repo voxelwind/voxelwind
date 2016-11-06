@@ -1,6 +1,6 @@
 package com.voxelwind.api.game.entities.projectiles;
 
-import com.voxelwind.api.game.entities.Projectile;
+import com.voxelwind.api.game.entities.Entity;
 
-public interface Snowball extends Projectile {
+public interface Snowball extends Entity {
 }

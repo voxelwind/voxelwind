@@ -1,6 +1,6 @@
 package com.voxelwind.api.game.entities.passive;
 
-import com.voxelwind.api.game.entities.Animal;
+import com.voxelwind.api.game.entities.Entity;
 
-public interface Bat extends Animal {
+public interface Bat extends Entity {
 }

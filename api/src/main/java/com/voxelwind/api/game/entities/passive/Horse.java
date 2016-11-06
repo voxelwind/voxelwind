@@ -1,8 +1,6 @@
 package com.voxelwind.api.game.entities.passive;
 
-import com.voxelwind.api.game.entities.Ageable;
-import com.voxelwind.api.game.entities.Animal;
-import com.voxelwind.api.game.entities.Tameable;
+import com.voxelwind.api.game.entities.Entity;
 
-public interface Horse extends Animal, Tameable, Ageable {
+public interface Horse extends Entity {
 }
