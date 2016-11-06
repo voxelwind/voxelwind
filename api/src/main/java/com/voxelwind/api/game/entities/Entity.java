@@ -65,12 +65,6 @@ public interface Entity {
         return component.get();
     }
 
-    List<System> registeredSystems();
-
-    void registerSystem(System system);
-
-    void deregisterSystem(System system);
-
     default boolean isOnGround() {
         Vector3i blockPosition = getPosition().sub(0f, 0.1f, 0f).toInt();
 

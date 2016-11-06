@@ -19,7 +19,11 @@ public class DeathSystem implements SystemRunner {
                 ((VoxelwindLevel) entity.getLevel()).getPacketManager().queuePacketForViewers(entity, event);
 
                 // Technically, the entity will live for one extra tick, but that shouldn't matter.
-                entity.remove();
+                if (entity instanceof CustomDeath) {
+                    ((CustomDeath) entity).doDeath();
+                } else {
+                    entity.remove();
+                }
             }))
             .build();
 
@@ -35,5 +39,9 @@ public class DeathSystem implements SystemRunner {
         if (health.isDead()) {
             onDeath.accept(entity);
         }
+    }
+
+    public interface CustomDeath {
+        void doDeath();
     }
 }

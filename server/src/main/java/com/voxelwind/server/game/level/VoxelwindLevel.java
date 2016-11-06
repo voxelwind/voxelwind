@@ -6,6 +6,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.reflect.ClassPath;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.PickupDelay;
+import com.voxelwind.api.game.entities.components.system.PhysicsSystem;
+import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.Chunk;
@@ -19,6 +21,8 @@ import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.server.game.entities.EntitySpawner;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
+import com.voxelwind.server.game.entities.systems.DeathSystem;
+import com.voxelwind.server.game.entities.systems.PickupDelayDecrementSystem;
 import com.voxelwind.server.game.entities.visitor.EntityClassVisitor;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
@@ -28,6 +32,7 @@ import com.voxelwind.server.game.level.provider.LevelDataProvider;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBlockEntityData;
 import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
+import com.voxelwind.server.network.session.PlayerSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
@@ -86,6 +91,11 @@ public class VoxelwindLevel implements Level {
         this.entityManager = new LevelEntityManager(this);
         this.packetManager = new LevelPacketManager(this);
         this.dataProvider = dataProvider;
+
+        entityManager.registerSystem(DeathSystem.GENERIC);
+        entityManager.registerSystem(PlayerSession.PLAYER_SYSTEM);
+        entityManager.registerSystem(PhysicsSystem.SYSTEM);
+        entityManager.registerSystem(PickupDelayDecrementSystem.SYSTEM);
     }
 
     @Override
@@ -161,16 +171,20 @@ public class VoxelwindLevel implements Level {
         return new VoxelwindDroppedItem(this, position, server, stack);
     }
 
+    @Override
+    public void registerSystem(@Nonnull System system) {
+        Preconditions.checkNotNull(system, "system");
+        entityManager.registerSystem(system);
+    }
+
+    @Override
+    public void deregisterSystem(@Nonnull System system) {
+        Preconditions.checkNotNull(system, "system");
+        entityManager.deregisterSystem(system);
+    }
+
     public void onTick() {
         currentTick++;
-
-        /*if (currentTick % 200 == 0) {
-            // Broadcast a time update
-            McpeSetTime time = new McpeSetTime();
-            time.setRunning(true);
-            time.setTime(getTime());
-            packetManager.queuePacketForPlayers(time);
-        }*/
 
         entityManager.onTick();
         packetManager.onTick();

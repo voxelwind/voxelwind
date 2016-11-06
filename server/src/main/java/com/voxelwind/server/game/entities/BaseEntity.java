@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.entities.components.Component;
-import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.api.util.Rotation;
@@ -17,7 +16,6 @@ import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.voxelwind.server.network.mcpe.util.metadata.EntityMetadataConstants.*;
 
@@ -37,7 +35,6 @@ public class BaseEntity implements Entity {
     private boolean removed = false;
     protected long tickCreated;
     private BoundingBox boundingBox;
-    private final List<System> systems = new CopyOnWriteArrayList<>();
     private final Map<Class<? extends Component>, Component> componentMap = new HashMap<>();
 
     public BaseEntity(EntityTypeData data, Vector3f position, VoxelwindLevel level, Server server) {
@@ -190,27 +187,6 @@ public class BaseEntity implements Entity {
     public <C extends Component> Optional<C> get(@Nonnull Class<C> clazz) {
         Preconditions.checkNotNull(clazz, "clazz");
         return Optional.ofNullable((C) componentMap.get(clazz));
-    }
-
-    @Override
-    public List<System> registeredSystems() {
-        // This is a "weakly" unmodifiable list. We do not expect systems to be modified as often as, say, entities
-        // are added into worlds, so using a copy-on-write list is an acceptable compromise.
-        return Collections.unmodifiableList(systems);
-    }
-
-    @Override
-    public void registerSystem(@Nonnull System system) {
-        Preconditions.checkNotNull(system, "system");
-        Preconditions.checkArgument(system.isSystemCompatible(this), "system is not compatible with this entity (wants %s, got %s)",
-                system.getExpectedComponents(), providedComponents());
-        systems.add(system);
-    }
-
-    @Override
-    public void deregisterSystem(@Nonnull System system) {
-        Preconditions.checkNotNull(system, "system");
-        systems.remove(system);
     }
 
     public BoundingBox getBoundingBox() {

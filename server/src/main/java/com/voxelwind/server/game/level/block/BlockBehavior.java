@@ -28,4 +28,7 @@ public interface BlockBehavior {
     default Optional<BlockState> overrideBlockPlacement(Vector3i against, BlockFace face, ItemStack itemStack) {
         return Optional.empty();
     }
+
+    default void handleBlockTick(Block block) {
+    }
 }

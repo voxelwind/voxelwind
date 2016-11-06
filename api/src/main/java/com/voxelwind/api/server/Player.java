@@ -17,13 +17,6 @@ import java.util.Optional;
 public interface Player extends Entity, CommandExecutorSource, MessageRecipient, Session, InventoryHolder, BlockReplacer {
     void disconnect(@Nonnull String reason);
 
-    Skin getSkin();
-
-    @Nonnull
-    GameMode getGameMode();
-
-    void setGameMode(@Nonnull GameMode mode);
-
     void sendMessage(@Nonnull String message, @Nonnull PlayerMessageDisplayType type);
 
     void sendTranslatedMessage(@Nonnull TranslatedMessage message);
@@ -38,8 +31,4 @@ public interface Player extends Entity, CommandExecutorSource, MessageRecipient,
     void openInventory(Inventory inventory);
 
     void closeInventory();
-
-    float getBaseSpeed();
-
-    void setBaseSpeed(float baseSpeed);
 }

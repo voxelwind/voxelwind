@@ -25,8 +25,6 @@ public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
         this.registerComponent(PickupDelay.class, new PickupDelayComponent());
         this.registerComponent(Physics.class, new PhysicsComponent());
         this.registerComponent(ContainedItem.class, new ContainedItemComponent(dropped));
-        this.registerSystem(PickupDelayDecrementSystem.SYSTEM);
-        this.registerSystem(PhysicsSystem.SYSTEM);
     }
 
     @Override

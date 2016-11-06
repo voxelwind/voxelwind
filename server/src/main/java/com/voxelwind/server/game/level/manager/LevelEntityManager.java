@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -32,6 +33,7 @@ public class LevelEntityManager {
     private static final Logger LOGGER = LogManager.getLogger(LevelEntityManager.class);
 
     private final TLongObjectMap<BaseEntity> entities = new TLongObjectHashMap<>();
+    private final List<System> systems = new CopyOnWriteArrayList<>();
     private final AtomicLong entityIdAllocator = new AtomicLong();
     private final AtomicBoolean entitiesChanged = new AtomicBoolean(false);
     private final VoxelwindLevel level;
@@ -43,6 +45,14 @@ public class LevelEntityManager {
     public void register(BaseEntity entity) {
         entities.put(entity.getEntityId(), entity);
         entitiesChanged.set(true);
+    }
+
+    public void registerSystem(System system) {
+        systems.add(system);
+    }
+
+    public void deregisterSystem(System system) {
+        systems.remove(system);
     }
 
     public void onTick() {
@@ -69,7 +79,10 @@ public class LevelEntityManager {
                 }
 
                 // Tick all entity systems.
-                for (System system : entity.registeredSystems()) {
+                for (System system : systems) {
+                    if (!system.isSystemCompatible(entity)) {
+                        continue;
+                    }
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Running entity system {} on {}", system, entity);
                     }

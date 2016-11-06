@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.Entity;
+import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
 import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.level.block.Block;
@@ -142,4 +143,9 @@ public interface Level {
      * @return a {@link DroppedItem} instance
      */
     DroppedItem dropItem(ItemStack stack, Vector3f position);
+
+    void registerSystem(System system);
+
+    void deregisterSystem(System system);
+
 }

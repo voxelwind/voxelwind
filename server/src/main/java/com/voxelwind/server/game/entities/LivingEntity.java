@@ -19,7 +19,5 @@ public class LivingEntity extends BaseEntity {
         this.registerComponent(Health.class, new HealthComponent(maximumHealth));
         this.registerComponent(ArmorEquipment.class, new VoxelwindArmorEquipment());
         this.registerComponent(Physics.class, new PhysicsComponent());
-        this.registerSystem(PhysicsSystem.SYSTEM);
-        this.registerSystem(DeathSystem.GENERIC);
     }
 }

@@ -9,10 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.Entity;
-import com.voxelwind.api.game.entities.components.ArmorEquipment;
-import com.voxelwind.api.game.entities.components.ContainedItem;
-import com.voxelwind.api.game.entities.components.Health;
-import com.voxelwind.api.game.entities.components.PickupDelay;
+import com.voxelwind.api.game.entities.components.*;
 import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.entities.components.system.SystemRunner;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
@@ -28,7 +25,6 @@ import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.util.TextFormat;
 import com.voxelwind.api.game.util.data.BlockFace;
 import com.voxelwind.api.server.Player;
-import com.voxelwind.api.server.Skin;
 import com.voxelwind.api.server.command.CommandException;
 import com.voxelwind.api.server.command.CommandNotFoundException;
 import com.voxelwind.api.server.event.block.BlockReplaceEvent;
@@ -44,6 +40,7 @@ import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.server.game.entities.EntityTypeData;
 import com.voxelwind.server.game.entities.LivingEntity;
+import com.voxelwind.server.game.entities.components.PlayerDataComponent;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.systems.DeathSystem;
 import com.voxelwind.server.game.inventories.*;
@@ -74,35 +71,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.voxelwind.server.network.mcpe.packets.McpePlayerAction.*;
 
-public class PlayerSession extends LivingEntity implements Player, InventoryObserver {
+public class PlayerSession extends LivingEntity implements Player, InventoryObserver, DeathSystem.CustomDeath {
     private static final Logger LOGGER = LogManager.getLogger(PlayerSession.class);
 
     private final McpeSession session;
     private final Set<Vector2i> sentChunks = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final TLongSet isViewing = new TLongHashSet();
-    private GameMode gameMode = GameMode.SURVIVAL;
     private boolean spawned = false;
     private int viewDistance = 5;
     private final AtomicInteger windowIdGenerator = new AtomicInteger();
-    private Inventory openedInventory;
     private byte openInventoryId = -1;
     private boolean hasMoved = false;
-    private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
     private final VoxelwindServer vwServer;
+    private final VoxelwindBasePlayerInventory playerInventory = new VoxelwindBasePlayerInventory(this);
     private final Set<UUID> playersSentForList = new HashSet<>();
-    private float baseSpeed = 0.1f;
+    private Inventory openedInventory;
 
     public PlayerSession(McpeSession session, VoxelwindLevel level) {
         super(EntityTypeData.PLAYER, level, level.getSpawnLocation(), session.getServer(), 20);
         this.session = session;
         this.vwServer = session.getServer();
 
-        this.registerSystem(PLAYER_SYSTEM);
-        this.deregisterSystem(DeathSystem.GENERIC);
-        this.registerSystem(System.builder()
-                .expectComponent(Health.class)
-                .runner(new DeathSystem((t) -> doDeath()))
-                .build());
+        this.registerComponent(PlayerData.class, new PlayerDataComponent(this));
     }
 
     @Override
@@ -167,21 +157,18 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         super.remove();
     }
 
-    private void doDeath() {
-        McpeEntityEvent event = new McpeEntityEvent();
-        event.setEntityId(getEntityId());
-        event.setEvent((byte) 3);
-        getLevel().getPacketManager().queuePacketForViewers(this, event);
-
+    @Override
+    public void doDeath() {
         sendAttributes(); // this will trigger client-side death
     }
 
     private void sendAttributes() {
         Health healthComponent = ensureAndGet(Health.class);
+        PlayerData playerDataComponent = ensureAndGet(PlayerData.class);
         Attribute health = new Attribute("minecraft:health", 0f, healthComponent.getMaximumHealth(),
                 Math.max(0, healthComponent.getHealth()), healthComponent.getMaximumHealth());
         Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, 20f, 20f); // TODO: Implement hunger
-        float effectiveSpeed = sprinting ? (float) Math.min(0.5f, baseSpeed * 1.3) : baseSpeed;
+        float effectiveSpeed = sprinting ? (float) Math.min(0.5f, playerDataComponent.getBaseSpeed() * 1.3) : playerDataComponent.getBaseSpeed();
         Attribute speed = new Attribute("minecraft:movement", 0, 0.5f, effectiveSpeed, 0.1f);
         // TODO: Implement levels, movement speed, and absorption.
 
@@ -217,10 +204,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         setRotation(event.getRotation());
         hasMoved = false; // don't send duplicated packets
 
-        // TODO: Proper inventory links
-        for (int i = 0; i < 9; i++) {
-            playerInventory.setHotbarLink(i, i);
-        }
+        PlayerData playerDataComponent = ensureAndGet(PlayerData.class);
 
         McpeSetTime setTime = new McpeSetTime();
         setTime.setTime(getLevel().getTime());
@@ -232,7 +216,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         startGame.setSeed(-1);
         startGame.setDimension((byte) 0);
         startGame.setGenerator(1);
-        startGame.setGamemode(gameMode.ordinal());
+        startGame.setGamemode(playerDataComponent.getGameMode().ordinal());
         startGame.setEntityId(getEntityId());
         startGame.setSpawn(getGamePosition());
         startGame.setWorldSpawn(getLevel().getSpawnLocation().toInt());
@@ -401,29 +385,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     @Override
-    public Skin getSkin() {
-        return new Skin(session.getClientData().getSkinId(), session.getClientData().getSkinData());
-    }
-
-    @Nonnull
-    @Override
-    public GameMode getGameMode() {
-        return gameMode;
-    }
-
-    @Override
-    public void setGameMode(@Nonnull GameMode mode) {
-        GameMode oldGameMode = gameMode;
-        gameMode = Preconditions.checkNotNull(mode, "mode");
-
-        if (oldGameMode != gameMode && spawned) {
-            McpeSetPlayerGameMode packet = new McpeSetPlayerGameMode();
-            packet.setGamemode(mode.ordinal());
-            session.addToSendQueue(packet);
-        }
-    }
-
-    @Override
     public void sendMessage(@Nonnull String message, @Nonnull PlayerMessageDisplayType type) {
         Preconditions.checkNotNull(message, "message");
         Preconditions.checkNotNull(type, "type");
@@ -472,6 +433,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     public Optional<Inventory> getOpenedInventory() {
         return Optional.ofNullable(openedInventory);
     }
+
 
     @Override
     public void openInventory(Inventory inventory) {
@@ -639,18 +601,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
     public boolean isSpawned() {
         return spawned;
-    }
-
-    @Override
-    public float getBaseSpeed() {
-        return baseSpeed;
-    }
-
-    @Override
-    public void setBaseSpeed(float baseSpeed) {
-        Preconditions.checkArgument(Float.compare(baseSpeed, 0) > 0 && Float.compare(0.5f, baseSpeed) <= 0, "speed must be between 0 and 0.5");
-        this.baseSpeed = baseSpeed;
-        sendAttributes();
     }
 
     private class PlayerSessionNetworkPacketHandler implements NetworkPacketHandler {
@@ -910,6 +860,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         @Override
         public void handle(McpeRemoveBlock packet) {
             Health health = ensureAndGet(Health.class);
+            PlayerData playerData = ensureAndGet(PlayerData.class);
             if (!spawned || health.isDead()) {
                 return;
             }
@@ -934,7 +885,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     PlayerSession.this, BlockReplaceEvent.ReplaceReason.PLAYER_BREAK);
             getServer().getEventManager().fire(event);
             if (event.getResult() == BlockReplaceEvent.Result.CONTINUE) {
-                if (gameMode != GameMode.CREATIVE) {
+                if (playerData.getGameMode() != GameMode.CREATIVE) {
                     BlockBehavior blockBehavior = BlockBehaviors.getBlockBehavior(block.getBlockState().getBlockType());
                     if (!blockBehavior.handleBreak(getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null))) {
                         Collection<ItemStack> drops = blockBehavior.getDrops(getServer(), PlayerSession.this, block, playerInventory.getStackInHand().orElse(null));
@@ -1126,9 +1077,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                 McpePlayerList list = new McpePlayerList();
                 list.setType((byte) 0);
                 for (Player player : toAdd) {
+                    PlayerData data = ensureAndGet(PlayerData.class);
                     McpePlayerList.Record record = new McpePlayerList.Record(player.getUniqueId());
                     record.setEntityId(player.getEntityId());
-                    record.setSkin(player.getSkin());
+                    record.setSkin(data.getSkin());
                     record.setName(player.getName());
                     list.getRecords().add(record);
                 }
@@ -1170,8 +1122,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         }
     }
 
-    private static final System PLAYER_SYSTEM = System.builder()
-            .expectComponent(Health.class)
+    public static final System PLAYER_SYSTEM = System.builder()
+            .expectComponents(Health.class, PlayerData.class)
             .runner(new PlayerTickSystemRunner())
             .build();
 
@@ -1182,6 +1134,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             PlayerSession session = (PlayerSession) entity;
 
             Health health = entity.ensureAndGet(Health.class);
+            PlayerData playerData = entity.ensureAndGet(PlayerData.class);
 
             if (!session.isSpawned() || health.isDead()) {
                 // Don't tick until the player has truly been spawned into the world.
@@ -1210,6 +1163,16 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
             // Update player list.
             session.updatePlayerList();
+
+            if (((PlayerDataComponent) playerData).speedTouched()) {
+                session.sendAttributes();
+            }
+
+            if (((PlayerDataComponent) playerData).gamemodeTouched()) {
+                McpeSetPlayerGameMode gameMode = new McpeSetPlayerGameMode();
+                gameMode.setGamemode(playerData.getGameMode().ordinal());
+                session.getMcpeSession().addToSendQueue(gameMode);
+            }
         }
     }
 
