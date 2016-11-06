@@ -40,6 +40,7 @@ import com.voxelwind.server.command.VoxelwindCommandManager;
 import com.voxelwind.server.game.entities.BaseEntity;
 import com.voxelwind.server.game.entities.EntityTypeData;
 import com.voxelwind.server.game.entities.LivingEntity;
+import com.voxelwind.server.game.entities.components.HealthComponent;
 import com.voxelwind.server.game.entities.components.PlayerDataComponent;
 import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.systems.DeathSystem;
@@ -167,7 +168,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         PlayerData playerDataComponent = ensureAndGet(PlayerData.class);
         Attribute health = new Attribute("minecraft:health", 0f, healthComponent.getMaximumHealth(),
                 Math.max(0, healthComponent.getHealth()), healthComponent.getMaximumHealth());
-        Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, 20f, 20f); // TODO: Implement hunger
+        Attribute hunger = new Attribute("minecraft:player.hunger", 0f, 20f, playerDataComponent.getHunger(), 20f); // TODO: Implement hunger
         float effectiveSpeed = sprinting ? (float) Math.min(0.5f, playerDataComponent.getBaseSpeed() * 1.3) : playerDataComponent.getBaseSpeed();
         Attribute speed = new Attribute("minecraft:movement", 0, 0.5f, effectiveSpeed, 0.1f);
         // TODO: Implement levels, movement speed, and absorption.
@@ -1044,10 +1045,39 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         }
     }
 
+    private void handleHunger(boolean sendAttributes) {
+        // TODO: Not finished yet.
+        /*Health health = ensureAndGet(Health.class);
+        PlayerData playerData = ensureAndGet(PlayerData.class);
+
+        // http://minecraft.gamepedia.com/Hunger#Effects
+        if (playerData.getHunger() >= 18) {
+            if (health.getHealth() < health.getMaximumHealth()) {
+                if (playerData.getHunger() == 20 && Float.compare(playerData.getSaturation(), 0) >= 0) {
+                    if (tickCreated % 10 == 0) {
+                        playerData.setExhaustion(playerData.getExhaustion() + 4);
+                        health.setHealth(Math.min(health.getHealth() + 1, health.getMaximumHealth()));
+                    }
+                } else {
+                    if (tickCreated % 80 == 0) {
+                        playerData.setExhaustion(playerData.getExhaustion() + 4);
+                        health.setHealth(Math.min(health.getHealth() + 1, health.getMaximumHealth()));
+                    }
+                }
+            }
+        } else if (playerData.getHunger() == 0) {
+
+        }
+
+        if (sendAttributes) {
+            sendAttributes();
+        }*/
+    }
+
     private void sendHealthPacket() {
         Health health = ensureAndGet(Health.class);
         McpeSetHealth packet = new McpeSetHealth();
-        packet.setHealth(health.getHealth());
+        packet.setHealth((int) Math.floor(health.getHealth()));
         session.addToSendQueue(packet);
     }
 
@@ -1164,7 +1194,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             // Update player list.
             session.updatePlayerList();
 
-            if (((PlayerDataComponent) playerData).speedTouched()) {
+            boolean hungerTouched = ((PlayerDataComponent) playerData).hungerTouched();
+            boolean attributesTouched = ((PlayerDataComponent) playerData).attributesTouched();
+            boolean healthTouched = ((HealthComponent) health).needsUpdate();
+            boolean sendAttributes = hungerTouched || attributesTouched || healthTouched;
+
+            if (sendAttributes) {
                 session.sendAttributes();
             }
 
