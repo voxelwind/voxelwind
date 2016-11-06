@@ -1077,7 +1077,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     private void sendHealthPacket() {
         Health health = ensureAndGet(Health.class);
         McpeSetHealth packet = new McpeSetHealth();
-        packet.setHealth((int) Math.floor(health.getHealth()));
+        packet.setHealth(health.getHealth());
         session.addToSendQueue(packet);
     }
 

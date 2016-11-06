@@ -1,15 +1,13 @@
 package com.voxelwind.api.game.entities.components;
 
 public interface Health extends Component {
-    float getHealth();
+    int getHealth();
 
-    void setHealth(float health);
+    void setHealth(int health);
 
-    void damage(float health);
+    int getMaximumHealth();
 
-    float getMaximumHealth();
-
-    void setMaximumHealth(float maximumHealth);
+    void setMaximumHealth(int maximumHealth);
 
     default boolean isDead() {
         return getHealth() <= 0;

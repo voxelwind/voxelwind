@@ -4,44 +4,39 @@ import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.entities.components.Health;
 
 public class HealthComponent implements Health {
-    private float health;
-    private float maximumHealth;
+    private int health;
+    private int maximumHealth;
     private boolean needsUpdate = false;
 
-    public HealthComponent(float maximumHealth) {
+    public HealthComponent(int maximumHealth) {
         this(maximumHealth, maximumHealth);
     }
 
-    public HealthComponent(float health, float maximumHealth) {
+    public HealthComponent(int health, int maximumHealth) {
         Preconditions.checkArgument(health <= maximumHealth, "Health %s exceeds maximum health %s", health, maximumHealth);
         this.health = health;
         this.maximumHealth = maximumHealth;
     }
 
     @Override
-    public float getHealth() {
+    public int getHealth() {
         return health;
     }
 
     @Override
-    public void setHealth(float health) {
+    public void setHealth(int health) {
         Preconditions.checkArgument(health <= maximumHealth, "New health %s exceeds maximum health %s", health, maximumHealth);
         this.health = health;
         this.needsUpdate = true;
     }
 
     @Override
-    public void damage(float health) {
-        setHealth(this.health - health);
-    }
-
-    @Override
-    public float getMaximumHealth() {
+    public int getMaximumHealth() {
         return maximumHealth;
     }
 
     @Override
-    public void setMaximumHealth(float maximumHealth) {
+    public void setMaximumHealth(int maximumHealth) {
         Preconditions.checkArgument(health > 0, "New health %s is less than minimum allowed 1", maximumHealth);
         this.maximumHealth = maximumHealth;
         this.health = Math.min(maximumHealth, health);
