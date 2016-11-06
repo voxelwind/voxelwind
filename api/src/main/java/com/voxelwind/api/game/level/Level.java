@@ -147,5 +147,4 @@ public interface Level {
     void registerSystem(System system);
 
     void deregisterSystem(System system);
-
 }

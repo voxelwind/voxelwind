@@ -64,6 +64,10 @@ public class VoxelwindChunk implements Chunk {
         Arrays.fill(biomeColor, 0x0185b24a);
     }
 
+    private Vector3i getLevelLocation(int chunkX, int y, int chunkZ) {
+        return new Vector3i(chunkX + (this.x * 16), y, chunkZ + (this.z * 16));
+    }
+
     static int xyzIdx(int x, int y, int z) {
         return x + 16 * (z + 16 * y);
     }
@@ -87,7 +91,7 @@ public class VoxelwindChunk implements Chunk {
         int index = xyzIdx(x, y, z);
         byte data = blockData[index];
 
-        Vector3i full = new Vector3i(x + (this.x * 16), y, z + (this.z * 16));
+        Vector3i full = getLevelLocation(x, y, z);
 
         BlockType type = BlockTypes.forId(data);
         Optional<Metadata> createdData;

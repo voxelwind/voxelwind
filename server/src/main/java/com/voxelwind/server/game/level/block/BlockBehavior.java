@@ -29,6 +29,7 @@ public interface BlockBehavior {
         return Optional.empty();
     }
 
-    default void handleBlockTick(Block block) {
+    default boolean handleBlockTick(Server server, Block block) {
+        return true;
     }
 }

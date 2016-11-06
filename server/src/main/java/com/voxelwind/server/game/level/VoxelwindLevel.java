@@ -24,6 +24,7 @@ import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.systems.DeathSystem;
 import com.voxelwind.server.game.entities.systems.PickupDelayDecrementSystem;
 import com.voxelwind.server.game.entities.visitor.EntityClassVisitor;
+import com.voxelwind.server.game.level.manager.LevelBlockManager;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
@@ -80,6 +81,7 @@ public class VoxelwindLevel implements Level {
     private final UUID uuid;
     private final LevelEntityManager entityManager;
     private final LevelPacketManager packetManager;
+    private final LevelBlockManager blockManager;
     private long currentTick;
     private final Server server;
 
@@ -90,6 +92,7 @@ public class VoxelwindLevel implements Level {
         this.uuid = UUID.randomUUID();
         this.entityManager = new LevelEntityManager(this);
         this.packetManager = new LevelPacketManager(this);
+        this.blockManager = new LevelBlockManager(this);
         this.dataProvider = dataProvider;
 
         entityManager.registerSystem(DeathSystem.GENERIC);
@@ -114,6 +117,14 @@ public class VoxelwindLevel implements Level {
 
     public LevelPacketManager getPacketManager() {
         return packetManager;
+    }
+
+    public LevelBlockManager getBlockManager() {
+        return blockManager;
+    }
+
+    public Server getServer() {
+        return server;
     }
 
     @Override
