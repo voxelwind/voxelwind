@@ -2,7 +2,6 @@ package com.voxelwind.server.game.level.chunk.provider.anvil;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.ChunkSnapshot;
@@ -16,22 +15,21 @@ import com.voxelwind.nbt.io.NBTEncoding;
 import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
+import com.voxelwind.nbt.util.SwappedDataOutputStream;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.PooledByteBufAllocator;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 import java.util.Optional;
 
 public class AnvilChunk implements Chunk, FullChunkPacketCreator {
-    private static final byte[] EMPTY_2048 = new byte[2048];
+    private static final byte[] EMPTY_BYTES = new byte[0];
 
     private final ChunkSection[] sections;
     private final int x;
@@ -202,50 +200,66 @@ public class AnvilChunk implements Chunk, FullChunkPacketCreator {
 
     @Override
     public byte[] toFullChunkData() {
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer(96 * 1024); // Start at 96KB, more than enough to write the data out
-        try {
-            // Write the block IDs.
-            for (int i = 0; i < sections.length; i++) {
-                if (sections[i] != null) {
-                    buf.writerIndex(5 * 2048 * i);
-                    ChunkSection section = sections[i];
-                    buf.writeBytes(section.getIds());
-                    buf.writeBytes(section.getData().getData());
-                    buf.writeBytes(section.getBlockLight().getData());
-                    buf.writeBytes(section.getSkyLight().getData());
-                }
-            }
-
-            buf.writerIndex(5 * 2048 * 8);
-            buf.writeBytes(height);
-            for (int i = 0; i < biomeColor.length; i++) {
-                //int color = biomeColor[i];
-                //byte biome = biomeId[i];
-                //Varints.encodeSigned(buf, (color & 0x00ffffff) | biome << 2);
-                buf.writeInt(biomeColor[i]);
-            }
-            // extra data, we have none
-            buf.writeShort(0);
-
-            try (NBTWriter writer = new NBTWriter(new ByteBufOutputStream(buf.order(ByteOrder.LITTLE_ENDIAN)), NBTEncoding.MCPE_0_16_NETWORK)) {
-                if (serializedBlockEntities.isEmpty()) {
-                    // Write out an empty root tag
-                    writer.write(new CompoundTag("", ImmutableMap.of()));
-                } else {
-                    // Write out NBT compounds for all block entities.
-                    for (CompoundTag entity : serializedBlockEntities.valueCollection()) {
-                        writer.write(entity);
-                    }
+        // Write out block entities first.
+        CanWriteToBB blockEntities = null;
+        int nbtSize = 0;
+        if (!serializedBlockEntities.isEmpty()) {
+            blockEntities = new CanWriteToBB(8192);
+            try (NBTWriter writer = new NBTWriter(new SwappedDataOutputStream(blockEntities), NBTEncoding.MCPE_0_16_NETWORK)) {
+                // Write out NBT compounds for all block entities.
+                for (CompoundTag entity : serializedBlockEntities.valueCollection()) {
+                    writer.write(entity);
                 }
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
+            nbtSize = blockEntities.size();
+        }
 
-            byte[] chunkData = new byte[buf.readableBytes()];
-            buf.readBytes(chunkData);
-            return chunkData;
-        } finally {
-            buf.release();
+        ByteBuffer buffer = ByteBuffer.allocate(83202 + nbtSize);
+        // Write the block IDs.
+        for (int i = 0; i < sections.length; i++) {
+            ChunkSection section = sections[i];
+            if (section != null) {
+                buffer.position(10240 * i);
+                buffer.put(section.getIds());
+                buffer.put(section.getData().getData());
+                buffer.put(section.getBlockLight().getData());
+                buffer.put(section.getSkyLight().getData());
+            }
+        }
+
+        buffer.position(81920);
+        buffer.put(height);
+        for (int i = 0; i < biomeColor.length; i++) {
+            //int color = biomeColor[i];
+            //byte biome = biomeId[i];
+            //Varints.encodeSigned(buf, (color & 0x00ffffff) | biome << 2);
+            buffer.putInt(biomeColor[i]);
+        }
+        // extra data, we have none
+        buffer.putShort((short) 0);
+
+        if (blockEntities != null) {
+            blockEntities.writeTo(buffer);
+        }
+
+        return buffer.array();
+    }
+
+    /**
+     * Special version of {@link ByteArrayOutputStream} that can directly write its output to a {@link ByteBuffer}.
+     */
+    private static class CanWriteToBB extends ByteArrayOutputStream {
+        public CanWriteToBB() {
+        }
+
+        public CanWriteToBB(int size) {
+            super(size);
+        }
+
+        public void writeTo(ByteBuffer byteBuffer) {
+            byteBuffer.put(buf, 0, count);
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.voxelwind.nbt.io;
 
-import org.apache.commons.io.input.SwappedDataInputStream;
+import com.voxelwind.nbt.util.SwappedDataInputStream;
 
 import java.io.DataInputStream;
 import java.io.InputStream;
