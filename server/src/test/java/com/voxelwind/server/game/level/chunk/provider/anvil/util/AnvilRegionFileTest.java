@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.provider.anvil.util;
+package com.voxelwind.server.game.level.chunk.provider.anvil.util;
 
 import com.voxelwind.nbt.io.NBTReader;
 import com.voxelwind.nbt.io.NBTReaders;
@@ -7,7 +7,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

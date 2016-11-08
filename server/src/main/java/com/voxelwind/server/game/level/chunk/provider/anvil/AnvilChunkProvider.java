@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.provider.anvil;
+package com.voxelwind.server.game.level.chunk.provider.anvil;
 
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
@@ -7,8 +7,8 @@ import com.voxelwind.nbt.io.NBTReaders;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
-import com.voxelwind.server.game.level.provider.ChunkProvider;
-import com.voxelwind.server.game.level.provider.anvil.util.AnvilRegionFile;
+import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
+import com.voxelwind.server.game.level.chunk.provider.anvil.util.AnvilRegionFile;
 import lombok.Value;
 
 import java.nio.file.NoSuchFileException;

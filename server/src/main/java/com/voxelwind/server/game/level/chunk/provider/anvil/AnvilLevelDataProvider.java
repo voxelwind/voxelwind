@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.provider.anvil;
+package com.voxelwind.server.game.level.chunk.provider.anvil;
 
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
@@ -8,7 +8,7 @@ import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.nbt.tags.LongTag;
 import com.voxelwind.nbt.tags.Tag;
-import com.voxelwind.server.game.level.provider.LevelDataProvider;
+import com.voxelwind.server.game.level.chunk.provider.LevelDataProvider;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

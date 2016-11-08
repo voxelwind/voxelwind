@@ -18,5 +18,9 @@ public interface Chunk {
 
     int getHighestLayer(int x, int z);
 
+    byte getSkyLight(int x, int y, int z);
+
+    byte getBlockLight(int x, int y, int z);
+
     ChunkSnapshot toSnapshot();
 }

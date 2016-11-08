@@ -101,7 +101,7 @@ public class VoxelwindChunk implements Chunk {
             createdData = Optional.empty();
         }
 
-        return new VoxelwindBlock(level, this, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null), blockEntities.get(index)));
+        return new VoxelwindBlock(level, this, full, new BasicBlockState(type, createdData.orElse(null), blockEntities.get(index)));
     }
 
     @Override
@@ -290,19 +290,6 @@ public class VoxelwindChunk implements Chunk {
         }
 
         return chunkDataPacket;
-    }
-
-    public void writeTo(OutputStream stream) throws IOException {
-        try (DataOutputStream dos = new DataOutputStream(stream)) {
-            dos.write(blockData);
-            dos.write(blockMetadata.getData());
-            dos.write(skyLightData.getData());
-            dos.write(blockLightData.getData());
-            dos.write(height);
-            for (int i : biomeColor) {
-                dos.writeInt(i);
-            }
-        }
     }
 
     private static void checkPosition(int x, int y, int z) {

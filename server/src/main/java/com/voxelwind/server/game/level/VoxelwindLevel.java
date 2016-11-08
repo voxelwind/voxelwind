@@ -5,7 +5,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.ClassPath;
 import com.voxelwind.api.game.entities.Entity;
-import com.voxelwind.api.game.entities.components.PickupDelay;
 import com.voxelwind.api.game.entities.components.system.PhysicsSystem;
 import com.voxelwind.api.game.entities.components.system.System;
 import com.voxelwind.api.game.entities.misc.DroppedItem;
@@ -28,8 +27,8 @@ import com.voxelwind.server.game.level.manager.LevelBlockManager;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
-import com.voxelwind.server.game.level.provider.ChunkProvider;
-import com.voxelwind.server.game.level.provider.LevelDataProvider;
+import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
+import com.voxelwind.server.game.level.chunk.provider.LevelDataProvider;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBlockEntityData;
 import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
@@ -45,7 +44,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 public class VoxelwindLevel implements Level {
     private static final int FULL_TIME = 24000;

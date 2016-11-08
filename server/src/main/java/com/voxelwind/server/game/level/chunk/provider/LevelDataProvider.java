@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.provider;
+package com.voxelwind.server.game.level.chunk.provider;
 
 import com.flowpowered.math.vector.Vector3f;
 

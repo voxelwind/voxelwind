@@ -4,7 +4,7 @@ import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.level.VoxelwindLevel;
-import com.voxelwind.server.game.level.provider.ChunkProvider;
+import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
 import com.voxelwind.server.network.session.PlayerSession;
 import gnu.trove.TCollections;
 import gnu.trove.map.TLongLongMap;

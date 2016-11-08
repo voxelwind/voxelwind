@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.provider.anvil;
+package com.voxelwind.server.game.level.chunk.provider.anvil;
 
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.nbt.tags.*;
@@ -44,9 +44,5 @@ public class AnvilConversion {
             map.put(y, tag.getValue());
         }
         return map;
-    }
-
-    private static int anvilBlockPosition(int x, int y, int z) {
-        return y * 16 * 16 + z * 16 + x;
     }
 }

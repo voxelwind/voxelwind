@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.provider.anvil.util;
+package com.voxelwind.server.game.level.chunk.provider.anvil.util;
 
 import com.google.common.base.Preconditions;
 
@@ -8,7 +8,6 @@ import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;

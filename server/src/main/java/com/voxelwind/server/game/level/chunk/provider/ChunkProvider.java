@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.provider;
+package com.voxelwind.server.game.level.chunk.provider;
 
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
