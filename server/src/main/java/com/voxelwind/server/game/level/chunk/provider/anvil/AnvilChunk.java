@@ -1,23 +1,16 @@
 package com.voxelwind.server.game.level.chunk.provider.anvil;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
-import com.voxelwind.api.game.Metadata;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.ChunkSnapshot;
 import com.voxelwind.api.game.level.Level;
-import com.voxelwind.api.game.level.block.Block;
-import com.voxelwind.api.game.level.block.BlockState;
-import com.voxelwind.api.game.level.block.BlockType;
-import com.voxelwind.api.game.level.block.BlockTypes;
+import com.voxelwind.api.game.level.block.*;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.nbt.io.NBTEncoding;
 import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.nbt.util.SwappedDataOutputStream;
-import com.voxelwind.server.game.level.block.BasicBlockState;
-import com.voxelwind.server.game.level.block.VoxelwindBlock;
 import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import gnu.trove.map.TIntObjectMap;
@@ -28,41 +21,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-public class AnvilChunk implements Chunk, FullChunkPacketCreator {
-    private static final byte[] EMPTY_BYTES = new byte[0];
-
-    private final ChunkSection[] sections;
-    private final int x;
-    private final int z;
+public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPacketCreator {
     private final Level level;
-    private final int[] biomeColor = new int[256];
-    private final byte[] height = new byte[256];
     private final TIntObjectMap<CompoundTag> serializedBlockEntities = new TIntObjectHashMap<>();
-    private final TIntObjectMap<BlockEntity> blockEntities = new TIntObjectHashMap<>();
 
     public AnvilChunk(ChunkSection[] sections, int x, int z, Level level) {
-        this.sections = sections;
-        this.x = x;
-        this.z = z;
+        super(sections, x, z);
         this.level = level;
-    }
-
-    static int xyzIdx(int x, int y, int z) {
-        return x + 16 * (z + 16 * y);
-    }
-
-    private Vector3i getLevelLocation(int chunkX, int y, int chunkZ) {
-        return new Vector3i(chunkX + (this.x * 16), y, chunkZ + (this.z * 16));
-    }
-
-    @Override
-    public int getX() {
-        return x;
-    }
-
-    @Override
-    public int getZ() {
-        return z;
     }
 
     @Override
@@ -72,23 +37,7 @@ public class AnvilChunk implements Chunk, FullChunkPacketCreator {
 
     @Override
     public Block getBlock(int x, int y, int z) {
-        checkPosition(x, y, z);
-        ChunkSection section = sections[y / 16];
-        Vector3i full = getLevelLocation(x, y, z);
-
-        if (section == null) {
-            return new VoxelwindBlock(level, this, full, new BasicBlockState(BlockTypes.AIR, null, null));
-        }
-
-        BlockType type = BlockTypes.forId(section.getBlockId(x, y % 16, z));
-        Optional<Metadata> createdData;
-        if (type.getMetadataClass() != null) {
-            createdData = Optional.of(MetadataSerializer.deserializeMetadata(type, section.getBlockData(x, y % 16, z)));
-        } else {
-            createdData = Optional.empty();
-        }
-
-        return new VoxelwindBlock(level, this, full, new BasicBlockState(type, createdData.orElse(null), blockEntities.get(xyzIdx(x, y, z))));
+        return (Block) super.getBlock(level, this, x, y, z);
     }
 
     @Override
@@ -172,30 +121,16 @@ public class AnvilChunk implements Chunk, FullChunkPacketCreator {
     }
 
     @Override
-    public int getHighestLayer(int x, int z) {
-        return height[(z << 4) + x];
-    }
-
-    @Override
-    public byte getSkyLight(int x, int y, int z) {
-        return sections[y / 16].getSkyLight(x, y % 16, z);
-    }
-
-    @Override
-    public byte getBlockLight(int x, int y, int z) {
-        return sections[y / 16].getBlockLight(x, y % 16, z);
-    }
-
-    @Override
     public ChunkSnapshot toSnapshot() {
-        // TODO: Implement
-        return null;
-    }
-
-    private static void checkPosition(int x, int y, int z) {
-        Preconditions.checkArgument(x >= 0 && x <= 15, "x value (%s) not in range (0 to 15)", x);
-        Preconditions.checkArgument(z >= 0 && z <= 15, "z value (%s) not in range (0 to 15)", z);
-        Preconditions.checkArgument(y >= 0 && y < 128, "y value (%s) not in range (0 to 127)", y);
+        ChunkSection[] sections = this.sections.clone();
+        for (int i = 0; i < sections.length; i++) {
+            sections[i] = sections[i].copy();
+        }
+        AnvilChunkSnapshot snapshot = new AnvilChunkSnapshot(sections, x, z);
+        System.arraycopy(biomeColor, 0, snapshot.biomeColor, 0, biomeColor.length);
+        System.arraycopy(height, 0, snapshot.height, 0, height.length);
+        snapshot.blockEntities.putAll(blockEntities); // TODO: This needs to be better
+        return snapshot;
     }
 
     @Override

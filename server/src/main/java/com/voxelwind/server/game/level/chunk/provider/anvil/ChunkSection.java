@@ -83,6 +83,15 @@ public class ChunkSection {
         return blockLight;
     }
 
+    public ChunkSection copy() {
+        return new ChunkSection(
+                ids.clone(),
+                data.copy(),
+                skyLight.copy(),
+                blockLight.copy()
+        );
+    }
+
     private static void checkBounds(int x, int y, int z) {
         Preconditions.checkArgument(x >= 0 && x < 16, "x (%s) is not between 0 and 15", x);
         Preconditions.checkArgument(y >= 0 && y < 16, "y (%s) is not between 0 and 15", x);
