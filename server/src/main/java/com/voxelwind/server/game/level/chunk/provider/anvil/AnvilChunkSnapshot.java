@@ -18,9 +18,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.Optional;
 
-/**
- * Created by andrew on 11/10/16.
- */
 public class AnvilChunkSnapshot implements ChunkSnapshot {
     protected final ChunkSection[] sections;
     protected final int x;

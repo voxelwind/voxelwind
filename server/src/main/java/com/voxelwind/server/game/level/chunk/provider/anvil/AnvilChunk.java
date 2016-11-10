@@ -15,6 +15,7 @@ import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import lombok.Synchronized;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
     }
 
     @Override
+    @Synchronized
     public Block getBlock(int x, int y, int z) {
         return (Block) super.getBlock(level, this, x, y, z);
     }
@@ -46,6 +48,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
     }
 
     @Override
+    @Synchronized
     public Block setBlock(int x, int y, int z, BlockState state, boolean shouldRecalculateLight) {
         Preconditions.checkNotNull(state, "state");
         checkPosition(x, y, z);
@@ -94,7 +97,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         return getBlock(x, y, z);
     }
 
-    private synchronized void populateSkyLightAt(int x, int z) {
+    private void populateSkyLightAt(int x, int z) {
         int maxHeight = height[(z << 4) + x];
 
         // There's no blocks above this block, so it's always 15.
@@ -121,6 +124,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
     }
 
     @Override
+    @Synchronized
     public ChunkSnapshot toSnapshot() {
         ChunkSection[] sections = this.sections.clone();
         for (int i = 0; i < sections.length; i++) {
@@ -134,6 +138,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
     }
 
     @Override
+    @Synchronized
     public byte[] toFullChunkData() {
         // Write out block entities first.
         CanWriteToBB blockEntities = null;
@@ -152,7 +157,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         }
 
         ByteBuffer buffer = ByteBuffer.allocate(83202 + nbtSize);
-        // Write the block IDs.
+        // Write the chunk sections.
         for (int i = 0; i < sections.length; i++) {
             ChunkSection section = sections[i];
             if (section != null) {

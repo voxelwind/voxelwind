@@ -1,5 +1,6 @@
 package com.voxelwind.server.game.level.chunk.provider.anvil;
 
+import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.nbt.tags.*;
 import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
@@ -11,29 +12,25 @@ import java.util.Map;
 
 @UtilityClass
 public class AnvilConversion {
-    public static VoxelwindChunk convertChunkToVoxelwind(Map<String, Tag<?>> levelData, Level level) {
-        VoxelwindChunk destinationChunk = new VoxelwindChunk(level, ((IntTag) levelData.get("xPos")).getValue(), ((IntTag) levelData.get("zPos")).getValue());
+    public static Chunk convertChunkToVoxelwind(Map<String, Tag<?>> levelData, Level level) {
         TIntObjectHashMap<Map<String, Tag<?>>> sectionMap = generateSectionsMap(levelData);
 
-        // Translate block data
+        // Translate section data
+        ChunkSection[] sections = new ChunkSection[8];
         for (int ySec = 0; ySec < 8; ySec++) {
             Map<String, Tag<?>> map = sectionMap.get(ySec);
             if (map != null) {
                 byte[] blockIds = ((ByteArrayTag) map.get("Blocks")).getValue();
                 NibbleArray data = new NibbleArray(((ByteArrayTag) map.get("Data")).getValue());
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        for (int y = 0; y < 16; y++) {
-                            int pos = anvilBlockPosition(x, (ySec * 16) + y, z);
-                            destinationChunk.setBlockId(x, (ySec * 16) + y, z, blockIds[pos], data.get(pos), false);
-                        }
-                    }
-                }
+                NibbleArray skyLight = new NibbleArray(((ByteArrayTag) map.get("SkyLight")).getValue());
+                NibbleArray blockLight = new NibbleArray(((ByteArrayTag) map.get("BlockLight")).getValue());
+                sections[ySec] = new ChunkSection(blockIds, data, skyLight, blockLight);
             }
         }
 
-        destinationChunk.recalculateLight();
-        return destinationChunk;
+        int x = ((IntTag) levelData.get("xPos")).getValue();
+        int z = ((IntTag) levelData.get("zPos")).getValue();
+        return new AnvilChunk(sections, x, z, level);
     }
 
     private static TIntObjectHashMap<Map<String, Tag<?>>> generateSectionsMap(Map<String, Tag<?>> levelData) {
