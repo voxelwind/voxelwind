@@ -3,7 +3,6 @@ package com.voxelwind.server.game.level.chunk.provider.anvil;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.nbt.tags.*;
-import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
 import com.voxelwind.server.game.level.util.NibbleArray;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.experimental.UtilityClass;

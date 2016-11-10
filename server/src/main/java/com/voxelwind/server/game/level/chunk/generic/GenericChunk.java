@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.chunk;
+package com.voxelwind.server.game.level.chunk.generic;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
@@ -19,6 +19,7 @@ import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
+import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.level.util.NibbleArray;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
@@ -29,14 +30,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.PooledByteBufAllocator;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class VoxelwindChunk implements Chunk {
+public class GenericChunk implements Chunk, FullChunkPacketCreator {
     private static final int FULL_CHUNK_SIZE = 16 * 16 * 128; // 32768
 
     private final byte[] blockData = new byte[FULL_CHUNK_SIZE];
@@ -56,7 +55,7 @@ public class VoxelwindChunk implements Chunk {
     private McpeBatch chunkDataPacket;
     private boolean stale = true;
 
-    public VoxelwindChunk(Level level, int x, int z) {
+    public GenericChunk(Level level, int x, int z) {
         this.level = level;
         this.x = x;
         this.z = z;
@@ -219,9 +218,19 @@ public class VoxelwindChunk implements Chunk {
     }
 
     @Override
+    public byte getSkyLight(int x, int y, int z) {
+        return skyLightData.get(xyzIdx(x, y, z));
+    }
+
+    @Override
+    public byte getBlockLight(int x, int y, int z) {
+        return blockLightData.get(xyzIdx(x, y, z));
+    }
+
+    @Override
     public synchronized ChunkSnapshot toSnapshot() {
         // TODO: Do a better job of this
-        return new VoxelwindChunkSnapshot(
+        return new GenericChunkSnapshot(
                 blockData.clone(),
                 blockMetadata.copy(),
                 skyLightData.copy(),
@@ -234,7 +243,8 @@ public class VoxelwindChunk implements Chunk {
                 height.clone());
     }
 
-    public synchronized McpeBatch getChunkDataPacket() {
+    @Override
+    public synchronized McpeBatch toFullChunkData() {
         if (stale) {
             // Populate the initial packet data
             McpeFullChunkData data = new McpeFullChunkData();

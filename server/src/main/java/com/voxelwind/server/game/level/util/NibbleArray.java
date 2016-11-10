@@ -15,16 +15,25 @@ public class NibbleArray {
 
     public byte get(int index) {
         Preconditions.checkElementIndex(index, data.length * 2);
-        return (byte) (data[index / 2] >> ((index) % 2 * 4) & 0xF);
+        byte val = data[index / 2];
+        if (index % 2 == 0) {
+            return (byte) (val & 0x0f);
+        } else {
+            return (byte) ((val & 0xf0) >> 4);
+        }
     }
 
     public void set(int index, byte value) {
         Preconditions.checkArgument(value >= 0 && value < 16, "Nibbles must have a value between 0 and 15.");
         Preconditions.checkElementIndex(index, data.length * 2);
-        value &= 0xF;
-        int nibbleIdx = index / 2;
-        data[nibbleIdx] &= (byte) (0xF << ((index + 1) % 2 * 4));
-        data[nibbleIdx] |= (byte) (value << (index % 2 * 4));
+        value &= 0xf;
+        int half = index / 2;
+        byte previous = data[half];
+        if (index % 2 == 0) {
+            data[half] = (byte) (previous & 0xf0 | value);
+        } else {
+            data[half] = (byte) (previous & 0x0f | value << 4);
+        }
     }
 
     public byte[] getData() {

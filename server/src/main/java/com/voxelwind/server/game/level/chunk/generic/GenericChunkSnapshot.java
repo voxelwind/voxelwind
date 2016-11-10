@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.chunk;
+package com.voxelwind.server.game.level.chunk.generic;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
@@ -16,7 +16,7 @@ import gnu.trove.map.TIntObjectMap;
 
 import java.util.Optional;
 
-class VoxelwindChunkSnapshot implements ChunkSnapshot {
+class GenericChunkSnapshot implements ChunkSnapshot {
     private final byte[] blockData;
     private final NibbleArray blockMetadata;
     private final NibbleArray skyLightData;
@@ -30,7 +30,7 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
     private final int[] biomeColor;
     private final byte[] height;
 
-    VoxelwindChunkSnapshot(byte[] blockData, NibbleArray blockMetadata, NibbleArray skyLightData, NibbleArray blockLightData, TIntObjectMap<BlockEntity> blockEntities, int x, int z, byte[] biomeId, int[] biomeColor, byte[] height) {
+    GenericChunkSnapshot(byte[] blockData, NibbleArray blockMetadata, NibbleArray skyLightData, NibbleArray blockLightData, TIntObjectMap<BlockEntity> blockEntities, int x, int z, byte[] biomeId, int[] biomeColor, byte[] height) {
         this.blockData = blockData;
         this.blockMetadata = blockMetadata;
         this.skyLightData = skyLightData;
@@ -56,7 +56,7 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
     @Override
     public BlockSnapshot getBlock(int x, int y, int z) {
         checkPosition(x, y, z);
-        int index = VoxelwindChunk.xyzIdx(x, y, z);
+        int index = GenericChunk.xyzIdx(x, y, z);
         byte data = blockData[index];
 
         Vector3i full = new Vector3i(x + (this.x * 16), y, z + (this.z * 16));
@@ -71,6 +71,21 @@ class VoxelwindChunkSnapshot implements ChunkSnapshot {
 
         // TODO: Add level and chunk
         return new VoxelwindBlock(null, null, full, new BasicBlockState(BlockTypes.forId(data), createdData.orElse(null), blockEntities.get(index)));
+    }
+
+    @Override
+    public int getHighestLayer(int x, int z) {
+        return height[(z << 4) + x];
+    }
+
+    @Override
+    public byte getSkyLight(int x, int y, int z) {
+        return skyLightData.get(GenericChunk.xyzIdx(x, y, z));
+    }
+
+    @Override
+    public byte getBlockLight(int x, int y, int z) {
+        return blockLightData.get(GenericChunk.xyzIdx(x, y, z));
     }
 
     public byte[] getBlockData() {

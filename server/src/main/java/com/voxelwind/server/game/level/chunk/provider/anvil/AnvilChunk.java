@@ -13,6 +13,8 @@ import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.nbt.util.SwappedDataOutputStream;
 import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
+import com.voxelwind.server.network.mcpe.packets.McpeBatch;
+import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import lombok.Synchronized;
@@ -25,6 +27,7 @@ import java.util.Optional;
 public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPacketCreator {
     private final Level level;
     private final TIntObjectMap<CompoundTag> serializedBlockEntities = new TIntObjectHashMap<>();
+    private McpeBatch precompressed;
 
     public AnvilChunk(ChunkSection[] sections, int x, int z, Level level) {
         super(sections, x, z);
@@ -94,6 +97,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
             blockEntities.remove(pos);
         }
 
+        precompressed = null;
         return getBlock(x, y, z);
     }
 
@@ -139,7 +143,16 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
 
     @Override
     @Synchronized
-    public byte[] toFullChunkData() {
+    public McpeBatch toFullChunkData() {
+        if (precompressed != null) {
+            return precompressed;
+        }
+
+        McpeFullChunkData data = new McpeFullChunkData();
+        data.setChunkX(x);
+        data.setChunkZ(z);
+        data.setOrder((byte) 1);
+
         // Write out block entities first.
         CanWriteToBB blockEntities = null;
         int nbtSize = 0;
@@ -184,7 +197,13 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
             blockEntities.writeTo(buffer);
         }
 
-        return buffer.array();
+        data.setData(buffer.array());
+        McpeBatch precompressed = new McpeBatch();
+        precompressed.getPackages().add(data);
+        precompressed.precompress();
+        precompressed.getPackages().clear();
+        this.precompressed = precompressed;
+        return precompressed;
     }
 
     /**

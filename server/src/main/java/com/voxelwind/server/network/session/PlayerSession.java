@@ -50,7 +50,7 @@ import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.BlockBehavior;
 import com.voxelwind.server.game.level.block.BlockBehaviors;
 import com.voxelwind.server.game.level.block.behaviors.BehaviorUtils;
-import com.voxelwind.server.game.level.chunk.VoxelwindChunk;
+import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.game.level.util.BoundingBox;
 import com.voxelwind.server.network.NetworkPackage;
@@ -380,7 +380,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             chunks.sort(new AroundPointComparator(currentChunkX, currentChunkZ));
 
             for (Chunk chunk : chunks) {
-                session.sendImmediatePackage(((VoxelwindChunk) chunk).getChunkDataPacket());
+                session.sendImmediatePackage(((FullChunkPacketCreator) chunk).toFullChunkData());
             }
         });
     }
