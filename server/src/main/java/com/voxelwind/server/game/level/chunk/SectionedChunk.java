@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.chunk.provider.anvil;
+package com.voxelwind.server.game.level.chunk;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.level.Chunk;
@@ -12,6 +12,7 @@ import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.nbt.util.SwappedDataOutputStream;
+import com.voxelwind.server.game.level.chunk.provider.anvil.ChunkSection;
 import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
@@ -28,12 +29,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPacketCreator {
+/**
+ * This class stores chunk data in sections of 16x16x16 sections, with each section eventually representing a 16x128x16
+ * chunk.
+ */
+public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, FullChunkPacketCreator {
     private final Level level;
     private final TIntObjectMap<CompoundTag> serializedBlockEntities = new TIntObjectHashMap<>();
     private McpeBatch precompressed;
 
-    public AnvilChunk(ChunkSection[] sections, int x, int z, Level level) {
+    public SectionedChunk(int x, int z, Level level) {
+        this(new ChunkSection[8], x, z, level);
+    }
+
+    public SectionedChunk(ChunkSection[] sections, int x, int z, Level level) {
         super(sections, x, z);
         this.level = level;
         Arrays.fill(biomeColor, 0x0185b24a);
@@ -155,7 +164,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         for (int i = 0; i < sections.length; i++) {
             sections[i] = sections[i].copy();
         }
-        AnvilChunkSnapshot snapshot = new AnvilChunkSnapshot(sections, x, z);
+        SectionedChunkSnapshot snapshot = new SectionedChunkSnapshot(sections, x, z);
         System.arraycopy(biomeColor, 0, snapshot.biomeColor, 0, biomeColor.length);
         System.arraycopy(height, 0, snapshot.height, 0, height.length);
         snapshot.blockEntities.putAll(blockEntities); // TODO: This needs to be better

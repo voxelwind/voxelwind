@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.chunk.provider.anvil;
+package com.voxelwind.server.game.level.chunk;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
@@ -12,13 +12,14 @@ import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
+import com.voxelwind.server.game.level.chunk.provider.anvil.ChunkSection;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.Optional;
 
-public class AnvilChunkSnapshot implements ChunkSnapshot {
+public class SectionedChunkSnapshot implements ChunkSnapshot {
     protected final ChunkSection[] sections;
     protected final int x;
     protected final int z;
@@ -26,7 +27,7 @@ public class AnvilChunkSnapshot implements ChunkSnapshot {
     protected final byte[] height = new byte[256];
     protected final TIntObjectMap<BlockEntity> blockEntities = new TIntObjectHashMap<>();
 
-    public AnvilChunkSnapshot(ChunkSection[] sections, int x, int z) {
+    public SectionedChunkSnapshot(ChunkSection[] sections, int x, int z) {
         this.sections = sections;
         this.x = x;
         this.z = z;
