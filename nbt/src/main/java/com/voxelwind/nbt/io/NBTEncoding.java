@@ -5,7 +5,7 @@ package com.voxelwind.nbt.io;
  */
 public enum NBTEncoding {
     /**
-     * Plain, uncompressed Notchian compression.
+     * Plain, uncompressed Notchian encoding.
      */
     NOTCHIAN,
     /**
