@@ -162,7 +162,9 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
     public ChunkSnapshot toSnapshot() {
         ChunkSection[] sections = this.sections.clone();
         for (int i = 0; i < sections.length; i++) {
-            sections[i] = sections[i].copy();
+            if (sections[i] != null) {
+                sections[i] = sections[i].copy();
+            }
         }
         SectionedChunkSnapshot snapshot = new SectionedChunkSnapshot(sections, x, z);
         System.arraycopy(biomeColor, 0, snapshot.biomeColor, 0, biomeColor.length);
