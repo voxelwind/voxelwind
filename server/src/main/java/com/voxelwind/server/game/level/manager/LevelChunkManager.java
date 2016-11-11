@@ -1,9 +1,12 @@
 package com.voxelwind.server.game.level.manager;
 
+import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.game.level.VoxelwindLevel;
+import com.voxelwind.server.game.level.chunk.SectionedChunk;
+import com.voxelwind.server.game.level.chunk.generator.ChunkGenerator;
 import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
 import com.voxelwind.server.network.session.PlayerSession;
 import gnu.trove.TCollections;
@@ -17,10 +20,12 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Handles chunk management, including loading and unloading chunks.
@@ -38,12 +43,16 @@ public class LevelChunkManager {
 
     private final VoxelwindLevel level;
     private final ChunkProvider backingChunkProvider;
+    private final ChunkGenerator backingChunkGenerator;
     private final VoxelwindServer server;
+    private final Random random;
 
-    public LevelChunkManager(@Nonnull VoxelwindServer server, @Nonnull VoxelwindLevel level, @Nonnull ChunkProvider backingChunkProvider) {
+    public LevelChunkManager(@Nonnull VoxelwindServer server, @Nonnull VoxelwindLevel level, @Nonnull ChunkProvider backingChunkProvider, @Nonnull ChunkGenerator backingChunkGenerator) {
         this.server = server;
         this.level = level;
         this.backingChunkProvider = backingChunkProvider;
+        this.backingChunkGenerator = backingChunkGenerator;
+        this.random = new Random(level.getSeed());
     }
 
     public CompletableFuture<Chunk> getChunk(int x, int z) {
@@ -134,8 +143,9 @@ public class LevelChunkManager {
         private final int x;
         private final int z;
         private final List<CompletableFuture<Chunk>> futuresToComplete = new CopyOnWriteArrayList<>();
-        private final AtomicBoolean initiated = new AtomicBoolean(false);
-        private final AtomicBoolean done = new AtomicBoolean(false);
+        private final AtomicReference<LoadState> state = new AtomicReference<>();
+        private final AtomicReference<Chunk> loaded = new AtomicReference<>();
+        private final AtomicReference<Throwable> loadException = new AtomicReference<>();
 
         private LoadingTask(int x, int z) {
             this.x = x;
@@ -143,27 +153,34 @@ public class LevelChunkManager {
         }
 
         boolean isInitiated() {
-            return initiated.get();
+            return state.get() != null;
         }
 
         void execute() {
             // Don't run more than once!
-            if (!initiated.compareAndSet(false, true)) return;
+            if (!state.compareAndSet(null, LoadState.INITIATED)) return;
 
             // Load the chunk.
             backingChunkProvider.createChunk(level, x, z).whenComplete((chunk, throwable) -> {
                 long chunkKey = toLong(x, z);
-                if (chunk != null) {
-                    chunksLoaded.put(chunkKey, chunk);
+                if (chunk == null && throwable == null) {
+                    SectionedChunk generated = new SectionedChunk(x, z, level);
+                    backingChunkGenerator.generate(level, generated, random); // TODO: Improve this!
+                    generated.recalculateLight();
+                    chunk = generated;
                 }
-
-                done.set(true);
+                chunksLoaded.put(chunkKey, chunk);
                 chunksToLoad.remove(chunkKey);
 
                 if (throwable == null) {
                     long current = System.currentTimeMillis();
                     loadedTimes.put(chunkKey, current);
                     lastAccessTimes.put(chunkKey, current);
+                    state.set(LoadState.COMPLETED);
+                    loaded.set(chunk);
+                } else {
+                    state.set(LoadState.EXCEPTIONAL);
+                    loadException.set(throwable);
                 }
 
                 for (CompletableFuture<Chunk> future : futuresToComplete) {
@@ -177,21 +194,23 @@ public class LevelChunkManager {
         }
 
         CompletableFuture<Chunk> createCompletableFuture() {
-            if (done.get()) {
-                Optional<Chunk> alreadyLoaded = getChunkIfLoaded(x, z);
-                if (alreadyLoaded.isPresent()) {
-                    return CompletableFuture.completedFuture(alreadyLoaded.get());
-                }
-
-                CompletableFuture<Chunk> exceptionalCompleted = new CompletableFuture<>();
-                exceptionalCompleted.completeExceptionally(new IllegalStateException("Failed to load chunk."));
-                return exceptionalCompleted;
+            LoadState currentState = state.get();
+            if (currentState == LoadState.COMPLETED) {
+                return CompletableFuture.completedFuture(loaded.get());
+            } else if (currentState == LoadState.EXCEPTIONAL) {
+                return CompletableFutures.exceptionallyCompletedFuture(loadException.get());
             }
 
             CompletableFuture<Chunk> completableFuture = new CompletableFuture<>();
             futuresToComplete.add(completableFuture);
             return completableFuture;
         }
+    }
+
+    private enum LoadState {
+        INITIATED,
+        COMPLETED,
+        EXCEPTIONAL
     }
 
     /**

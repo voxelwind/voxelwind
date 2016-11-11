@@ -12,14 +12,14 @@ public class LevelCreator {
     @NonNull
     private final String name;
     @NonNull
-    private final WorldType type;
+    private final WorldStorage storage;
     private final boolean enableWrite;
     @NonNull
     private final Path worldPath;
     private final boolean loadSpawnChunks;
 
-    public enum WorldType {
+    public enum WorldStorage {
         ANVIL,
-        FLATWORLD
+        NULL
     }
 }

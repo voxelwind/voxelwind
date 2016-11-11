@@ -26,4 +26,9 @@ public class MemoryLevelDataProvider implements LevelDataProvider {
     public void setSavedTime(int time) {
         this.time = time;
     }
+
+    @Override
+    public long getSeed() {
+        return 42;
+    }
 }

@@ -7,4 +7,5 @@ public interface LevelDataProvider {
     void setSpawnLocation(Vector3f spawn);
     int getSavedTime();
     void setSavedTime(int time);
+    long getSeed();
 }

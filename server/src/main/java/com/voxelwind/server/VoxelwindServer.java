@@ -26,11 +26,11 @@ import com.voxelwind.server.game.level.LevelManager;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.game.level.block.VoxelwindBlockStateBuilder;
 import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
-import com.voxelwind.server.game.level.chunk.provider.FlatworldChunkProvider;
 import com.voxelwind.server.game.level.chunk.provider.LevelDataProvider;
 import com.voxelwind.server.game.level.chunk.provider.MemoryLevelDataProvider;
 import com.voxelwind.server.game.level.chunk.provider.anvil.AnvilChunkProvider;
 import com.voxelwind.server.game.level.chunk.provider.anvil.AnvilLevelDataProvider;
+import com.voxelwind.server.game.level.chunk.provider.nil.NullChunkProvider;
 import com.voxelwind.server.network.listeners.McpeOverRakNetNetworkListener;
 import com.voxelwind.server.network.listeners.NetworkListener;
 import com.voxelwind.server.network.listeners.RconNetworkListener;
@@ -126,7 +126,7 @@ public class VoxelwindServer implements Server {
                     .enableWrite(false)
                     .loadSpawnChunks(entry.getValue().isLoadSpawnChunks())
                     .name(entry.getKey())
-                    .type(entry.getValue().getStorage())
+                    .storage(entry.getValue().getStorage())
                     .worldPath(Paths.get(entry.getValue().getDirectory()))
                     .build();
 
@@ -287,19 +287,19 @@ public class VoxelwindServer implements Server {
         CompletableFuture<LevelDataProvider> stage1 = new CompletableFuture<>();
 
         ChunkProvider provider;
-        switch (creator.getType()) {
+        switch (creator.getStorage()) {
             case ANVIL:
                 provider = new AnvilChunkProvider(creator.getWorldPath());
                 break;
-            case FLATWORLD:
-                provider = FlatworldChunkProvider.INSTANCE;
+            case NULL:
+                provider = new NullChunkProvider();
                 break;
             default:
                 throw new IllegalArgumentException("Invalid type");
         }
 
         // Stage 1: load level data
-        if (creator.getType() == LevelCreator.WorldType.ANVIL) {
+        if (creator.getStorage() == LevelCreator.WorldStorage.ANVIL) {
             ForkJoinPool.commonPool().execute(() -> {
                 try {
                     AnvilLevelDataProvider levelDataProvider = AnvilLevelDataProvider.load(creator.getWorldPath().resolve("level.dat"));
@@ -308,7 +308,8 @@ public class VoxelwindServer implements Server {
                     stage1.completeExceptionally(e);
                 }
             });
-        } else if (creator.getType() == LevelCreator.WorldType.FLATWORLD) {
+        } else if (creator.getStorage() == LevelCreator.WorldStorage.NULL) {
+            // TODO: ?!?
             stage1.complete(new MemoryLevelDataProvider());
         }
 

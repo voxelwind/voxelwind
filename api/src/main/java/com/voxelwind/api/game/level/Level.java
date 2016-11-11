@@ -50,6 +50,8 @@ public interface Level {
      */
     int getTime();
 
+    long getSeed();
+
     /**
      * Gets a chunk if it is currently loaded.
      * @param x the chunk's X value

@@ -23,6 +23,7 @@ import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.systems.DeathSystem;
 import com.voxelwind.server.game.entities.systems.PickupDelayDecrementSystem;
 import com.voxelwind.server.game.entities.visitor.EntityClassVisitor;
+import com.voxelwind.server.game.level.chunk.generator.SimpleFlatworldChunkGenerator;
 import com.voxelwind.server.game.level.manager.LevelBlockManager;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
@@ -77,6 +78,7 @@ public class VoxelwindLevel implements Level {
     private final LevelDataProvider dataProvider;
     private final String name;
     private final UUID uuid;
+    private final long seed;
     private final LevelEntityManager entityManager;
     private final LevelPacketManager packetManager;
     private final LevelBlockManager blockManager;
@@ -85,9 +87,10 @@ public class VoxelwindLevel implements Level {
 
     public VoxelwindLevel(VoxelwindServer server, String name, ChunkProvider chunkProvider, LevelDataProvider dataProvider) {
         this.server = server;
-        this.chunkManager = new LevelChunkManager(server, this, chunkProvider);
+        this.chunkManager = new LevelChunkManager(server, this, chunkProvider, new SimpleFlatworldChunkGenerator());
         this.name = name;
         this.uuid = UUID.randomUUID();
+        this.seed = dataProvider.getSeed();
         this.entityManager = new LevelEntityManager(this);
         this.packetManager = new LevelPacketManager(this);
         this.blockManager = new LevelBlockManager(this);
@@ -138,6 +141,11 @@ public class VoxelwindLevel implements Level {
     @Override
     public int getTime() {
         return (int) ((currentTick + dataProvider.getSavedTime()) % FULL_TIME);
+    }
+
+    @Override
+    public long getSeed() {
+        return seed;
     }
 
     @Override

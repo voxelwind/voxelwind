@@ -6,7 +6,6 @@ import com.voxelwind.nbt.io.NBTReader;
 import com.voxelwind.nbt.io.NBTReaders;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.Tag;
-import com.voxelwind.server.game.level.chunk.SectionedChunk;
 import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
 import com.voxelwind.server.game.level.chunk.provider.anvil.util.AnvilRegionFile;
 import lombok.Value;
@@ -47,8 +46,8 @@ public class AnvilChunkProvider implements ChunkProvider {
                             regionReader = new AnvilRegionFile(regionPath);
                             regionReaders.put(rXZ, regionReader);
                         } catch (NoSuchFileException e) {
-                            // Doesn't exist, return empty chunk.
-                            chunkFuture.complete(new SectionedChunk(x, z, level));
+                            // Doesn't exist.
+                            chunkFuture.complete(null);
                             return;
                         }
                     }
@@ -69,7 +68,7 @@ public class AnvilChunkProvider implements ChunkProvider {
                     chunkFuture.complete(AnvilConversion.convertChunkToVoxelwind(levelMap, level));
                 } else {
                     // Doesn't exist, return empty chunk.
-                    chunkFuture.complete(new SectionedChunk(x, z, level));
+                    chunkFuture.complete(null);
                 }
             } catch (Exception e) {
                 chunkFuture.completeExceptionally(e);

@@ -124,7 +124,7 @@ public class VoxelwindConfiguration {
     @ToString
     public static class LevelConfiguration {
         private String directory;
-        private LevelCreator.WorldType storage;
+        private LevelCreator.WorldStorage storage;
         @JsonProperty("default")
         private boolean isDefault;
         private boolean loadSpawnChunks;
@@ -177,7 +177,7 @@ public class VoxelwindConfiguration {
             LevelConfiguration wc = new LevelConfiguration();
             wc.directory = "test-world";
             wc.isDefault = true;
-            wc.storage = LevelCreator.WorldType.FLATWORLD;
+            wc.storage = LevelCreator.WorldStorage.NULL;
             wc.loadSpawnChunks = true;
             levels = new HashMap<>();
             levels.put("world", wc);
@@ -223,7 +223,7 @@ public class VoxelwindConfiguration {
         LevelConfiguration wc = new LevelConfiguration();
         wc.directory = "test-world";
         wc.isDefault = true;
-        wc.storage = LevelCreator.WorldType.FLATWORLD;
+        wc.storage = LevelCreator.WorldStorage.NULL;
         wc.loadSpawnChunks = true;
         configuration.levels.put("world", wc);
         return configuration;

@@ -23,6 +23,7 @@ import java.util.zip.GZIPInputStream;
 public class AnvilLevelDataProvider implements LevelDataProvider {
     private final Vector3f spawnLocation;
     private final int savedTime;
+    private final long seed;
 
     public static AnvilLevelDataProvider load(@NonNull Path levelDatPath) throws IOException {
         // level.dat is Notchian, so it's big-endian and GZIP compressed
@@ -34,9 +35,11 @@ public class AnvilLevelDataProvider implements LevelDataProvider {
         CompoundTag dataTag = (CompoundTag) tag.getValue().get("Data");
         Map<String, Tag<?>> map = dataTag.getValue();
 
-        Vector3i out = new Vector3i(((IntTag) map.get("SpawnX")).getValue(), ((IntTag) map.get("SpawnY")).getValue(), ((IntTag) map.get("SpawnZ")).getValue());
-        long dayTime = ((LongTag) map.get("DayTime")).getValue();
-        return new AnvilLevelDataProvider(out.toFloat(), (int) dayTime);
+        Vector3i out = new Vector3i(((IntTag) map.get("SpawnX")).getPrimitiveValue(), ((IntTag) map.get("SpawnY")).getPrimitiveValue(),
+                ((IntTag) map.get("SpawnZ")).getPrimitiveValue());
+        long dayTime = ((LongTag) map.get("DayTime")).getPrimitiveValue();
+        long seed = ((LongTag) map.get("RandomSeed")).getPrimitiveValue();
+        return new AnvilLevelDataProvider(out.toFloat(), (int) dayTime, seed);
     }
 
     @Override
@@ -57,5 +60,10 @@ public class AnvilLevelDataProvider implements LevelDataProvider {
     @Override
     public void setSavedTime(int time) {
 
+    }
+
+    @Override
+    public long getSeed() {
+        return seed;
     }
 }
