@@ -16,6 +16,7 @@ import com.voxelwind.nbt.io.NBTEncoding;
 import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
+import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
@@ -33,6 +34,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class GenericChunk implements Chunk, FullChunkPacketCreator {
@@ -121,10 +124,11 @@ public class GenericChunk implements Chunk, FullChunkPacketCreator {
         if (entity.isPresent()) {
             int pos = xyzIdx(x, y, z);
             CompoundTag blockEntityTag = MetadataSerializer.serializeNBT(state);
-            blockEntityTag.getValue().put("x", new IntTag("x", x + (this.x * 16)));
-            blockEntityTag.getValue().put("y", new IntTag("y", y));
-            blockEntityTag.getValue().put("z", new IntTag("z", z + (this.z * 16)));
-            serializedBlockEntities.put(pos, blockEntityTag);
+            Map<String, Tag<?>> beModifiedMap = new HashMap<>(blockEntityTag.getValue());
+            beModifiedMap.put("x", new IntTag("x", x + (this.x * 16)));
+            beModifiedMap.put("y", new IntTag("y", y));
+            beModifiedMap.put("z", new IntTag("z", z + (this.z * 16)));
+            serializedBlockEntities.put(pos, new CompoundTag("", beModifiedMap));
             blockEntities.put(pos, entity.get());
         }
 

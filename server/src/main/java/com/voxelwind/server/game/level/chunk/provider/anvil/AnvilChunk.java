@@ -10,6 +10,7 @@ import com.voxelwind.nbt.io.NBTEncoding;
 import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
+import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.nbt.util.SwappedDataOutputStream;
 import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
@@ -22,6 +23,9 @@ import lombok.Synchronized;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPacketCreator {
@@ -32,6 +36,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
     public AnvilChunk(ChunkSection[] sections, int x, int z, Level level) {
         super(sections, x, z);
         this.level = level;
+        Arrays.fill(biomeColor, 0x0185b24a);
     }
 
     @Override
@@ -75,11 +80,6 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
             }
 
             populateSkyLightAt(x, z);
-        } else {
-            // If this is the quick case, then always update the height map.
-            if (height[(z << 4) + x] <= y && state.getBlockType() != BlockTypes.AIR) {
-                height[(z << 4) + x] = (byte) y;
-            }
         }
 
         // now set the block entity, if any
@@ -87,10 +87,11 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         Optional<BlockEntity> entity = state.getBlockEntity();
         if (entity.isPresent()) {
             CompoundTag blockEntityTag = MetadataSerializer.serializeNBT(state);
-            blockEntityTag.getValue().put("x", new IntTag("x", x + (this.x * 16)));
-            blockEntityTag.getValue().put("y", new IntTag("y", y));
-            blockEntityTag.getValue().put("z", new IntTag("z", z + (this.z * 16)));
-            serializedBlockEntities.put(pos, blockEntityTag);
+            Map<String, Tag<?>> beModifiedMap = new HashMap<>(blockEntityTag.getValue());
+            beModifiedMap.put("x", new IntTag("x", x + (this.x * 16)));
+            beModifiedMap.put("y", new IntTag("y", y));
+            beModifiedMap.put("z", new IntTag("z", z + (this.z * 16)));
+            serializedBlockEntities.put(pos, new CompoundTag("", beModifiedMap));
             blockEntities.put(pos, entity.get());
         } else {
             serializedBlockEntities.remove(pos);
@@ -120,7 +121,10 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
 
         // There's no blocks above this block, so it's always 15.
         for (int y = 127; y > maxHeight; y--) {
-            sections[y / 16].setSkyLight(x, y % 16, z, (byte) 15);
+            ChunkSection section = sections[y / 16];
+            if (section != null) {
+                section.setSkyLight(x, y % 16, z, (byte) 15);
+            }
         }
 
         // From the top, however...
@@ -137,7 +141,10 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
                 light = 0;
             }
 
-            sections[y / 16].setSkyLight(x, y % 16, z, light);
+            ChunkSection section = sections[y / 16];
+            if (section != null) {
+                section.setSkyLight(x, y % 16, z, light);
+            }
         }
     }
 
@@ -188,22 +195,26 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         for (int i = 0; i < sections.length; i++) {
             ChunkSection section = sections[i];
             if (section != null) {
-                buffer.position(10240 * i);
+                buffer.position(4096 * i);
                 buffer.put(section.getIds());
+                buffer.position(32768 + 2048 * i);
                 buffer.put(section.getData().getData());
-                buffer.put(section.getBlockLight().getData());
+                buffer.position(49152 + 2048 * i);
                 buffer.put(section.getSkyLight().getData());
+                buffer.position(65536 + 2048 * i);
+                buffer.put(section.getBlockLight().getData());
             }
         }
 
         buffer.position(81920);
         buffer.put(height);
-        for (int i = 0; i < biomeColor.length; i++) {
+        buffer.asIntBuffer().put(biomeColor);
+        /*for (int i = 0; i < biomeColor.length; i++) {
             //int color = biomeColor[i];
             //byte biome = biomeId[i];
             //Varints.encodeSigned(buf, (color & 0x00ffffff) | biome << 2);
             buffer.putInt(biomeColor[i]);
-        }
+        }*/
         // extra data, we have none
         buffer.putShort((short) 0);
 
@@ -218,6 +229,30 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         precompressed.getPackages().clear();
         this.precompressed = precompressed;
         return precompressed;
+    }
+
+    @Synchronized
+    public void recalculateLight() {
+        recalculateHeightMap();
+        populateSkyLight();
+        precompressed = null;
+    }
+
+    private void recalculateHeightMap() {
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                int highest = calculateHighestLayer(x, z);
+                height[(z << 4) + x] = (byte) highest;
+            }
+        }
+    }
+
+    private void populateSkyLight() {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                populateSkyLightAt(x, z);
+            }
+        }
     }
 
     /**

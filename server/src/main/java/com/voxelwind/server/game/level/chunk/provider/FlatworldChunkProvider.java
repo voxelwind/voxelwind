@@ -5,6 +5,8 @@ import com.voxelwind.api.game.level.Level;
 import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.chunk.generic.GenericChunk;
+import com.voxelwind.server.game.level.chunk.provider.anvil.AnvilChunk;
+import com.voxelwind.server.game.level.chunk.provider.anvil.ChunkSection;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -18,7 +20,7 @@ public class FlatworldChunkProvider implements ChunkProvider {
     @Override
     public CompletableFuture<Chunk> createChunk(Level level, int x, int z) {
         return CompletableFuture.supplyAsync(() -> {
-            GenericChunk chunk = new GenericChunk(level, x, z);
+            AnvilChunk chunk = new AnvilChunk(new ChunkSection[8], x, z, level);
             for (int x1 = 0; x1 < 16; x1++) {
                 for (int z1 = 0; z1 < 16; z1++) {
                     chunk.setBlock(x1, 0, z1, new BasicBlockState(BlockTypes.BEDROCK, null, null), false);
