@@ -65,21 +65,21 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         section.setBlockData(x, y % 16, z, (byte) MetadataSerializer.serializeMetadata(state));
         //section.setBlockLight(x, y % 16, z, (byte) state.getBlockType().emitsLight());
 
-        // If this is the quick case, then always update the height map.
-        if (height[(z << 4) + x] <= y && state.getBlockType() != BlockTypes.AIR) {
-            height[(z << 4) + x] = (byte) y;
-        }
-
         if (shouldRecalculateLight) {
             // Recalculate the height map and lighting for this chunk section.
             if (height[(z << 4) + x] <= y && state.getBlockType() != BlockTypes.AIR) {
                 // Slight optimization
                 height[(z << 4) + x] = (byte) y;
             } else {
-                height[(z << 4) + x] = (byte) getHighestLayer(x, z);
+                height[(z << 4) + x] = (byte) calculateHighestLayer(x, z);
             }
 
             populateSkyLightAt(x, z);
+        } else {
+            // If this is the quick case, then always update the height map.
+            if (height[(z << 4) + x] <= y && state.getBlockType() != BlockTypes.AIR) {
+                height[(z << 4) + x] = (byte) y;
+            }
         }
 
         // now set the block entity, if any
@@ -99,6 +99,20 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
 
         precompressed = null;
         return getBlock(x, y, z);
+    }
+
+    private int calculateHighestLayer(int x, int z) {
+        for (int i = sections.length - 1; i >= 0; i--) {
+            ChunkSection section = sections[i];
+            if (section != null) {
+                for (int j = 15; j >= 0; j--) {
+                    if (section.getBlockId(x, j, z) != 0) {
+                        return j + (i * 16);
+                    }
+                }
+            }
+        }
+        return 0;
     }
 
     private void populateSkyLightAt(int x, int z) {
@@ -157,7 +171,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
         CanWriteToBB blockEntities = null;
         int nbtSize = 0;
         if (!serializedBlockEntities.isEmpty()) {
-            blockEntities = new CanWriteToBB(8192);
+            blockEntities = new CanWriteToBB();
             try (NBTWriter writer = new NBTWriter(new SwappedDataOutputStream(blockEntities), NBTEncoding.MCPE_0_16_NETWORK)) {
                 // Write out NBT compounds for all block entities.
                 for (CompoundTag entity : serializedBlockEntities.valueCollection()) {
@@ -211,10 +225,7 @@ public class AnvilChunk extends AnvilChunkSnapshot implements Chunk, FullChunkPa
      */
     private static class CanWriteToBB extends ByteArrayOutputStream {
         public CanWriteToBB() {
-        }
-
-        public CanWriteToBB(int size) {
-            super(size);
+            super(8192);
         }
 
         public void writeTo(ByteBuffer byteBuffer) {
