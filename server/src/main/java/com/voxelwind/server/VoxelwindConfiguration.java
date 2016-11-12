@@ -33,11 +33,6 @@ public class VoxelwindConfiguration {
      */
     private int maximumPlayerLimit;
     /**
-     * Whether or not Voxelwind should try to use SO_REUSEPORT. This is only supported under Linux 3.9+. This increases
-     * the potential throughput of the server.
-     */
-    private boolean useSoReuseport;
-    /**
      * Configuration for the RCON service.
      */
     private RconConfiguration rcon;
@@ -45,6 +40,10 @@ public class VoxelwindConfiguration {
      * Configuration for the Chunk GC.
      */
     private ChunkGCConfiguration chunkGC;
+    /**
+     * Allows the user to configure some performance-related settings.
+     */
+    private FineTuning fineTuning;
     /**
      * The maximum view distance permitted. This has an upper limit of 16. By default, it is 8.
      */
@@ -123,11 +122,38 @@ public class VoxelwindConfiguration {
     @Getter
     @ToString
     public static class LevelConfiguration {
+        /**
+         * Directory of the world.
+         */
+        @JsonProperty(required = false)
         private String directory;
+        /**
+         * Storage to use.
+         */
         private LevelCreator.WorldStorage storage;
+        /**
+         * Whether or not this is the default world.
+         */
         @JsonProperty("default")
         private boolean isDefault;
+        /**
+         * Whether or not to load spawn chunks. A 5x5 radius around the spawn will be loaded.
+         */
         private boolean loadSpawnChunks;
+    }
+
+    @Getter
+    @ToString
+    public static class FineTuning {
+        /**
+         * Specifies how many threads should be used to load chunks. By default, two threads are used.
+         */
+        private int chunkLoadThreads;
+        /**
+         * Whether or not Voxelwind should try to use SO_REUSEPORT. This is only supported under Linux 3.9+. This increases
+         * the potential throughput of the server.
+         */
+        private boolean useSoReuseport;
     }
 
     public XboxAuthenticationConfiguration getXboxAuthentication() {
@@ -184,6 +210,13 @@ public class VoxelwindConfiguration {
             needToSave = true;
         }
 
+        if (fineTuning == null) {
+            fineTuning = new FineTuning();
+            fineTuning.chunkLoadThreads = 2;
+            fineTuning.useSoReuseport = false;
+            needToSave = true;
+        }
+
         return needToSave;
     }
 
@@ -201,31 +234,7 @@ public class VoxelwindConfiguration {
 
     public static VoxelwindConfiguration defaultConfiguration() {
         VoxelwindConfiguration configuration = new VoxelwindConfiguration();
-        configuration.useSoReuseport = false;
-        configuration.xboxAuthentication = new XboxAuthenticationConfiguration();
-        configuration.xboxAuthentication.forceAuthentication = false;
-        configuration.mcpeListener = new McpeListenerConfiguration();
-        configuration.mcpeListener.host = "0.0.0.0";
-        configuration.mcpeListener.port = 19132;
-        configuration.rcon = new RconConfiguration();
-        configuration.rcon.enabled = false;
-        configuration.rcon.host = "127.0.0.1";
-        configuration.rcon.port = 27015;
-        configuration.rcon.password = generateRandomPassword();
-        configuration.maximumPlayerLimit = -1;
-        configuration.chunkGC = new ChunkGCConfiguration();
-        configuration.chunkGC.enabled = true;
-        configuration.chunkGC.releaseAfterLastAccess = 30;
-        configuration.chunkGC.releaseAfterLoadSeconds = 120;
-        configuration.chunkGC.spawnRadiusToKeep = 6;
-        configuration.maximumViewDistance = 8;
-        configuration.levels = new HashMap<>();
-        LevelConfiguration wc = new LevelConfiguration();
-        wc.directory = "test-world";
-        wc.isDefault = true;
-        wc.storage = LevelCreator.WorldStorage.NULL;
-        wc.loadSpawnChunks = true;
-        configuration.levels.put("world", wc);
+        configuration.addMissingFields();
         return configuration;
     }
 

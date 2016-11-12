@@ -88,8 +88,8 @@ public class VoxelwindLevel implements Level {
 
     public VoxelwindLevel(VoxelwindServer server, String name, ChunkProvider chunkProvider, LevelDataProvider dataProvider) {
         this.server = server;
-        this.chunkManager = new LevelChunkManager(server, this, chunkProvider, new DiscoFloorChunkGenerator());
         this.name = name;
+        this.chunkManager = new LevelChunkManager(server, this, chunkProvider, new DiscoFloorChunkGenerator());
         this.uuid = UUID.randomUUID();
         this.seed = dataProvider.getSeed();
         this.entityManager = new LevelEntityManager(this);

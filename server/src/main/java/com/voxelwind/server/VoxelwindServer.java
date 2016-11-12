@@ -162,7 +162,7 @@ public class VoxelwindServer implements Server {
 
         // Bind to a port.
         McpeOverRakNetNetworkListener listener = new McpeOverRakNetNetworkListener(this, configuration.getMcpeListener().getHost(), configuration.getMcpeListener().getPort(),
-                configuration.isUseSoReuseport());
+                configuration.getFineTuning().isUseSoReuseport());
         listener.bind();
         listeners.add(listener);
 
@@ -334,8 +334,8 @@ public class VoxelwindServer implements Server {
                 int spawnChunkX = level.getSpawnLocation().getFloorX() >> 4;
                 int spawnChunkZ = level.getSpawnLocation().getFloorZ() >> 4;
                 List<CompletableFuture<?>> loadChunkFutures = new ArrayList<>();
-                for (int x = -3; x <= 3; x++) {
-                    for (int z = -3; z <= 3; z++) {
+                for (int x = -5; x <= 5; x++) {
+                    for (int z = -5; z <= 5; z++) {
                         loadChunkFutures.add(level.getChunk(spawnChunkX + x, spawnChunkZ + z));
                     }
                 }

@@ -51,7 +51,7 @@ public class LevelChunkManager {
         this.level = level;
         this.backingChunkProvider = backingChunkProvider;
         this.backingChunkGenerator = backingChunkGenerator;
-        this.loadService = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder()
+        this.loadService = Executors.newFixedThreadPool(server.getConfiguration().getFineTuning().getChunkLoadThreads(), new ThreadFactoryBuilder()
                 .setNameFormat("Voxelwind Chunk Load Handler for " + level.getName() + " - #%d")
                 .setDaemon(true)
                 .build());
