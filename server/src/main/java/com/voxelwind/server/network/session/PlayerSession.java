@@ -855,7 +855,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     -1 : correctedInventorySlot;
 
             playerInventory.setHotbarLink(packet.getHotbarSlot(), finalSlot);
-            playerInventory.setHeldHotbarSlot(packet.getHotbarSlot(), true);
+            playerInventory.setHeldHotbarSlot(packet.getHotbarSlot(), false);
         }
 
         @Override
