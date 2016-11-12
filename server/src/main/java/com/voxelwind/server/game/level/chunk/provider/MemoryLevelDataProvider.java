@@ -29,6 +29,6 @@ public class MemoryLevelDataProvider implements LevelDataProvider {
 
     @Override
     public long getSeed() {
-        return 42;
+        return 759229690324L;
     }
 }

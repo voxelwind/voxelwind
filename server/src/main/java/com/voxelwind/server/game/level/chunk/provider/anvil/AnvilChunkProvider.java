@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
 public class AnvilChunkProvider implements ChunkProvider {
@@ -26,13 +27,13 @@ public class AnvilChunkProvider implements ChunkProvider {
     }
 
     @Override
-    public CompletableFuture<Chunk> createChunk(Level level, int x, int z) {
+    public CompletableFuture<Chunk> createChunk(Level level, int x, int z, Executor executor) {
         // We will need to load chunks.
         RegionXZ rXZ = RegionXZ.fromChunkXZ(x, z);
         InRegionXZ irXZ = new InRegionXZ(x - rXZ.getX() * 32, z - rXZ.getZ() * 32);
 
         CompletableFuture<Chunk> chunkFuture = new CompletableFuture<>();
-        ForkJoinPool.commonPool().execute(() -> {
+        executor.execute(() -> {
             // Need to do a wide try-catch thanks to CompletableFuture.supplyAsync limitations.
             try {
                 // Loading regions is not thread-safe. However, afterwards we can load chunks in a thread-safe matter (the

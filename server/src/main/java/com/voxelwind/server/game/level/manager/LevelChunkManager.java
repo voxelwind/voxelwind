@@ -1,5 +1,6 @@
 package com.voxelwind.server.game.level.manager;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.spotify.futures.CompletableFutures;
 import com.voxelwind.api.game.entities.Entity;
 import com.voxelwind.api.game.level.Chunk;
@@ -21,9 +22,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,19 +39,22 @@ public class LevelChunkManager {
     private final TLongObjectMap<LoadingTask> chunksToLoad = TCollections.synchronizedMap(new TLongObjectHashMap<LoadingTask>());
     private final TLongLongMap loadedTimes = TCollections.synchronizedMap(new TLongLongHashMap());
     private final TLongLongMap lastAccessTimes = TCollections.synchronizedMap(new TLongLongHashMap());
+    private final ExecutorService loadService;
 
     private final VoxelwindLevel level;
     private final ChunkProvider backingChunkProvider;
     private final ChunkGenerator backingChunkGenerator;
     private final VoxelwindServer server;
-    private final Random random;
 
     public LevelChunkManager(@Nonnull VoxelwindServer server, @Nonnull VoxelwindLevel level, @Nonnull ChunkProvider backingChunkProvider, @Nonnull ChunkGenerator backingChunkGenerator) {
         this.server = server;
         this.level = level;
         this.backingChunkProvider = backingChunkProvider;
         this.backingChunkGenerator = backingChunkGenerator;
-        this.random = new Random(level.getSeed());
+        this.loadService = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder()
+                .setNameFormat("Voxelwind Chunk Load Handler for " + level.getName() + " - #%d")
+                .setDaemon(true)
+                .build());
     }
 
     public CompletableFuture<Chunk> getChunk(int x, int z) {
@@ -161,36 +163,52 @@ public class LevelChunkManager {
             if (!state.compareAndSet(null, LoadState.INITIATED)) return;
 
             // Load the chunk.
-            backingChunkProvider.createChunk(level, x, z).whenComplete((chunk, throwable) -> {
+            backingChunkProvider.createChunk(level, x, z, loadService).whenCompleteAsync((chunk, throwable) -> {
                 long chunkKey = toLong(x, z);
-                if (chunk == null && throwable == null) {
+                if (throwable != null) {
+                    state.set(LoadState.EXCEPTIONAL);
+                    loadException.set(throwable);
+                    chunksToLoad.remove(chunkKey);
+                    for (CompletableFuture<Chunk> future : futuresToComplete) {
+                        future.completeExceptionally(throwable);
+                    }
+                    return;
+                }
+
+                if (chunk == null) {
+                    long seed = chunkSeed(x, z);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Generating chunk ({},{}) using {} and seed {}", x, z, backingChunkGenerator.getClass().getName(), seed);
+                    }
                     SectionedChunk generated = new SectionedChunk(x, z, level);
-                    backingChunkGenerator.generate(level, generated, random); // TODO: Improve this!
+                    try {
+                        backingChunkGenerator.generate(level, generated, new Random(seed));
+                    } catch (Exception e) {
+                        LOGGER.error("Exception while generating chunk ({},{})", x, z, e);
+
+                        state.set(LoadState.EXCEPTIONAL);
+                        loadException.set(e);
+                        chunksToLoad.remove(chunkKey);
+                        for (CompletableFuture<Chunk> future : futuresToComplete) {
+                            future.completeExceptionally(e);
+                        }
+                        return;
+                    }
                     generated.recalculateLight();
                     chunk = generated;
                 }
-                chunksLoaded.put(chunkKey, chunk);
-                chunksToLoad.remove(chunkKey);
 
-                if (throwable == null) {
-                    long current = System.currentTimeMillis();
-                    loadedTimes.put(chunkKey, current);
-                    lastAccessTimes.put(chunkKey, current);
-                    state.set(LoadState.COMPLETED);
-                    loaded.set(chunk);
-                } else {
-                    state.set(LoadState.EXCEPTIONAL);
-                    loadException.set(throwable);
-                }
+                chunksLoaded.put(chunkKey, chunk);
+                long current = System.currentTimeMillis();
+                loadedTimes.put(chunkKey, current);
+                lastAccessTimes.put(chunkKey, current);
+                state.set(LoadState.COMPLETED);
+                loaded.set(chunk);
 
                 for (CompletableFuture<Chunk> future : futuresToComplete) {
-                    if (throwable != null) {
-                        future.completeExceptionally(throwable);
-                    } else {
-                        future.complete(chunk);
-                    }
+                    future.complete(chunk);
                 }
-            });
+            }, loadService);
         }
 
         CompletableFuture<Chunk> createCompletableFuture() {
@@ -222,5 +240,16 @@ public class LevelChunkManager {
      */
     private static long toLong(int x, int z) {
         return ((long) x << 32) + z - Integer.MIN_VALUE;
+    }
+
+    /**
+     * Creates a chunk and level-specific random seed.
+     * @param x chunk X value
+     * @param z chunk Z value
+     * @return random seed
+     */
+    private long chunkSeed(int x, int z) {
+        // simple XOR of toLong() and the level seed
+        return toLong(x, z) ^ level.getSeed();
     }
 }

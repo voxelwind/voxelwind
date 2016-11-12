@@ -27,9 +27,9 @@ public class ChunkSection {
         this.blockLight = blockLight;
     }
 
-    public byte getBlockId(int x, int y, int z) {
+    public int getBlockId(int x, int y, int z) {
         checkBounds(x, y, z);
-        return ids[anvilBlockPosition(x, y, z)];
+        return ids[anvilBlockPosition(x, y, z)] & 0xff;
     }
 
     public byte getBlockData(int x, int y, int z) {

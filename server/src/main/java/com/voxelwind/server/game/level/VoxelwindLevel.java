@@ -23,6 +23,7 @@ import com.voxelwind.server.game.entities.misc.VoxelwindDroppedItem;
 import com.voxelwind.server.game.entities.systems.DeathSystem;
 import com.voxelwind.server.game.entities.systems.PickupDelayDecrementSystem;
 import com.voxelwind.server.game.entities.visitor.EntityClassVisitor;
+import com.voxelwind.server.game.level.chunk.generator.DiscoFloorChunkGenerator;
 import com.voxelwind.server.game.level.chunk.generator.SimpleFlatworldChunkGenerator;
 import com.voxelwind.server.game.level.manager.LevelBlockManager;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
@@ -87,7 +88,7 @@ public class VoxelwindLevel implements Level {
 
     public VoxelwindLevel(VoxelwindServer server, String name, ChunkProvider chunkProvider, LevelDataProvider dataProvider) {
         this.server = server;
-        this.chunkManager = new LevelChunkManager(server, this, chunkProvider, new SimpleFlatworldChunkGenerator());
+        this.chunkManager = new LevelChunkManager(server, this, chunkProvider, new DiscoFloorChunkGenerator());
         this.name = name;
         this.uuid = UUID.randomUUID();
         this.seed = dataProvider.getSeed();
