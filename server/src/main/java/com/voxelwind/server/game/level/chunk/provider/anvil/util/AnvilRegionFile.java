@@ -140,7 +140,9 @@ public class AnvilRegionFile implements Closeable {
             writeChunkInternal(sectorNumber, buffer);
         } else {
             // We must find new sectors to use. Clear currently allocated sectors.
-            usedSectors.clear(sectorNumber + sectorsAllocated + 1);
+            for (int i = 0; i < sectorsAllocated; ++i) {
+                usedSectors.clear(sectorNumber + i);
+            }
 
             // Now search for the required number of sectors.
             int runStart = 2;
