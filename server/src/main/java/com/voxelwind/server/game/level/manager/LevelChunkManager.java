@@ -163,17 +163,8 @@ public class LevelChunkManager {
             if (!state.compareAndSet(null, LoadState.INITIATED)) return;
 
             // Load the chunk.
-            backingChunkProvider.createChunk(level, x, z, loadService).whenCompleteAsync((chunk, throwable) -> {
+            backingChunkProvider.createChunk(level, x, z, loadService).thenAcceptAsync(chunk -> {
                 long chunkKey = toLong(x, z);
-                if (throwable != null) {
-                    state.set(LoadState.EXCEPTIONAL);
-                    loadException.set(throwable);
-                    chunksToLoad.remove(chunkKey);
-                    for (CompletableFuture<Chunk> future : futuresToComplete) {
-                        future.completeExceptionally(throwable);
-                    }
-                    return;
-                }
 
                 if (chunk == null) {
                     long seed = chunkSeed(x, z);
@@ -181,19 +172,7 @@ public class LevelChunkManager {
                         LOGGER.debug("Generating chunk ({},{}) using {} and seed {}", x, z, backingChunkGenerator.getClass().getName(), seed);
                     }
                     SectionedChunk generated = new SectionedChunk(x, z, level);
-                    try {
-                        backingChunkGenerator.generate(level, generated, new Random(seed));
-                    } catch (Exception e) {
-                        LOGGER.error("Exception while generating chunk ({},{})", x, z, e);
-
-                        state.set(LoadState.EXCEPTIONAL);
-                        loadException.set(e);
-                        chunksToLoad.remove(chunkKey);
-                        for (CompletableFuture<Chunk> future : futuresToComplete) {
-                            future.completeExceptionally(e);
-                        }
-                        return;
-                    }
+                    backingChunkGenerator.generate(level, generated, new Random(seed));
                     generated.recalculateLight();
                     chunk = generated;
                 }
@@ -202,13 +181,22 @@ public class LevelChunkManager {
                 long current = System.currentTimeMillis();
                 loadedTimes.put(chunkKey, current);
                 lastAccessTimes.put(chunkKey, current);
-                state.set(LoadState.COMPLETED);
                 loaded.set(chunk);
+                state.set(LoadState.COMPLETED);
 
                 for (CompletableFuture<Chunk> future : futuresToComplete) {
                     future.complete(chunk);
                 }
-            }, loadService);
+            }, loadService).exceptionally(throwable -> {
+                long chunkKey = toLong(x, z);
+                loadException.set(throwable);
+                state.set(LoadState.EXCEPTIONAL);
+                chunksToLoad.remove(chunkKey);
+                for (CompletableFuture<Chunk> future : futuresToComplete) {
+                    future.completeExceptionally(throwable);
+                }
+                return null;
+            });
         }
 
         CompletableFuture<Chunk> createCompletableFuture() {
