@@ -39,7 +39,7 @@ public class SectionedChunkSnapshot implements ChunkSnapshot {
     static void checkPosition(int x, int y, int z) {
         Preconditions.checkArgument(x >= 0 && x <= 15, "x value (%s) not in range (0 to 15)", x);
         Preconditions.checkArgument(z >= 0 && z <= 15, "z value (%s) not in range (0 to 15)", z);
-        Preconditions.checkArgument(y >= 0 && y < 128, "y value (%s) not in range (0 to 127)", y);
+        Preconditions.checkArgument(y >= 0 && y < 256, "y value (%s) not in range (0 to 255)", y);
     }
 
     Vector3i getLevelLocation(int chunkX, int y, int chunkZ) {
