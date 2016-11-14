@@ -109,6 +109,37 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         return getBlock(x, y, z);
     }
 
+    @Synchronized
+    public void setBlock(int x, int y, int z, byte id, byte data, boolean shouldRecalculateLight) {
+        checkPosition(x, y, z);
+
+        ChunkSection section = sections[y / 16];
+        if (section == null) {
+            section = new ChunkSection();
+            sections[y / 16] = section;
+        }
+        section.setBlockId(x, y % 16, z, id);
+        section.setBlockData(x, y % 16, z, data);
+        //section.setBlockLight(x, y % 16, z, (byte) state.getBlockType().emitsLight());
+
+        if (shouldRecalculateLight) {
+            // Recalculate the height map and lighting for this chunk section.
+            if (height[(z << 4) + x] <= y && id != 0) {
+                // Slight optimization
+                height[(z << 4) + x] = (byte) y;
+            } else {
+                height[(z << 4) + x] = (byte) calculateHighestLayer(x, z);
+            }
+
+            populateSkyLightAt(x, z);
+        }
+
+        int pos = xyzIdx(x, y, z);
+        serializedBlockEntities.remove(pos);
+        blockEntities.remove(pos);
+        precompressed = null;
+    }
+
     private int calculateHighestLayer(int x, int z) {
         for (int i = sections.length - 1; i >= 0; i--) {
             ChunkSection section = sections[i];

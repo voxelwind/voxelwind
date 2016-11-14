@@ -16,22 +16,27 @@ public class AnvilConversion {
     public static Chunk convertChunkToVoxelwind(Map<String, Tag<?>> levelData, Level level) {
         TIntObjectHashMap<Map<String, Tag<?>>> sectionMap = generateSectionsMap(levelData);
 
-        // Translate section data
-        ChunkSection[] sections = new ChunkSection[16];
-        for (int ySec = 0; ySec < 16; ySec++) {
+        // Translate block data
+        int cx = ((IntTag) levelData.get("xPos")).getValue();
+        int cz = ((IntTag) levelData.get("zPos")).getValue();
+        SectionedChunk chunk = new SectionedChunk(cx, cz, level);
+        for (int ySec = 0; ySec < 8; ySec++) {
             Map<String, Tag<?>> map = sectionMap.get(ySec);
             if (map != null) {
                 byte[] blockIds = ((ByteArrayTag) map.get("Blocks")).getValue();
                 NibbleArray data = new NibbleArray(((ByteArrayTag) map.get("Data")).getValue());
-                NibbleArray skyLight = new NibbleArray(((ByteArrayTag) map.get("SkyLight")).getValue());
-                NibbleArray blockLight = new NibbleArray(((ByteArrayTag) map.get("BlockLight")).getValue());
-                sections[ySec] = new ChunkSection(blockIds, data, skyLight, blockLight);
+                for (int x = 0; x < 16; x++) {
+                    for (int z = 0; z < 16; z++) {
+                        for (int y = 0; y < 16; y++) {
+                            int pos = anvilBlockPosition(x, (ySec * 16) + y, z);
+                            chunk.setBlock(x, (ySec * 16) + y, z, blockIds[pos], data.get(pos), false);
+                        }
+                    }
+                }
             }
         }
 
-        int x = ((IntTag) levelData.get("xPos")).getValue();
-        int z = ((IntTag) levelData.get("zPos")).getValue();
-        return new SectionedChunk(sections, x, z, level);
+        return chunk;
     }
 
     private static TIntObjectHashMap<Map<String, Tag<?>>> generateSectionsMap(Map<String, Tag<?>> levelData) {
@@ -42,5 +47,9 @@ public class AnvilConversion {
             map.put(y, tag.getValue());
         }
         return map;
+    }
+
+    private static int anvilBlockPosition(int x, int y, int z) {
+        return y * 16 * 16 + z * 16 + x;
     }
 }
