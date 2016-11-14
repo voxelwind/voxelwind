@@ -1,7 +1,9 @@
-package com.voxelwind.server.game.level.chunk.provider.anvil;
+package com.voxelwind.server.game.level.chunk;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.game.level.util.NibbleArray;
+
+import java.util.Arrays;
 
 /**
  * Represents a 16x16x16 section of a chunk (which is 16x256x16).
@@ -90,6 +92,15 @@ public class ChunkSection {
                 skyLight.copy(),
                 blockLight.copy()
         );
+    }
+
+    public boolean isEmpty() {
+        for (byte id : ids) {
+            if (id != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static void checkBounds(int x, int y, int z) {

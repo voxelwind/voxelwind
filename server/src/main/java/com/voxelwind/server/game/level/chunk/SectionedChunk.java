@@ -12,7 +12,6 @@ import com.voxelwind.nbt.tags.CompoundTag;
 import com.voxelwind.nbt.tags.IntTag;
 import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.nbt.util.SwappedDataOutputStream;
-import com.voxelwind.server.game.level.chunk.provider.anvil.ChunkSection;
 import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBatch;
@@ -39,13 +38,12 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
     private McpeBatch precompressed;
 
     public SectionedChunk(int x, int z, Level level) {
-        this(new ChunkSection[8], x, z, level);
+        this(new ChunkSection[16], x, z, level);
     }
 
     public SectionedChunk(ChunkSection[] sections, int x, int z, Level level) {
         super(sections, x, z);
         this.level = level;
-        Arrays.fill(biomeColor, 0x0185b24a);
     }
 
     @Override
@@ -167,7 +165,7 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
             }
         }
         SectionedChunkSnapshot snapshot = new SectionedChunkSnapshot(sections, x, z);
-        System.arraycopy(biomeColor, 0, snapshot.biomeColor, 0, biomeColor.length);
+        System.arraycopy(biomeId, 0, snapshot.biomeId, 0, biomeId.length);
         System.arraycopy(height, 0, snapshot.height, 0, height.length);
         snapshot.blockEntities.putAll(blockEntities); // TODO: This needs to be better
         return snapshot;
@@ -183,7 +181,6 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         McpeFullChunkData data = new McpeFullChunkData();
         data.setChunkX(x);
         data.setChunkZ(z);
-        data.setOrder((byte) 1);
 
         // Write out block entities first.
         CanWriteToBB blockEntities = null;
@@ -201,25 +198,36 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
             nbtSize = blockEntities.size();
         }
 
-        ByteBuffer buffer = ByteBuffer.allocate(83202 + nbtSize);
-        // Write the chunk sections.
-        for (int i = 0; i < sections.length; i++) {
+        int topBlank = 0;
+        for (int i = sections.length - 1; i >= 0; i--) {
             ChunkSection section = sections[i];
-            if (section != null) {
-                buffer.position(4096 * i);
-                buffer.put(section.getIds());
-                buffer.position(32768 + 2048 * i);
-                buffer.put(section.getData().getData());
-                buffer.position(49152 + 2048 * i);
-                buffer.put(section.getSkyLight().getData());
-                buffer.position(65536 + 2048 * i);
-                buffer.put(section.getBlockLight().getData());
+            if (section == null || section.isEmpty()) {
+                topBlank = i + 1;
+            } else {
+                break;
             }
         }
 
-        buffer.position(81920);
+        int bufferSize = 10241 * topBlank + 769;
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize + nbtSize);
+        buffer.put((byte) topBlank);
+
+        // Write the chunk sections.
+        for (int i = 0; i < topBlank; i++) {
+            ChunkSection section = sections[i];
+            if (section != null) {
+                buffer.put((byte) 0);
+                buffer.put(section.getIds());
+                buffer.put(section.getData().getData());
+                buffer.put(section.getSkyLight().getData());
+                buffer.put(section.getBlockLight().getData());
+            } else {
+                buffer.position(buffer.position() + 10241);
+            }
+        }
+
         buffer.put(height);
-        buffer.asIntBuffer().put(biomeColor);
+        buffer.put(biomeId);
         /*for (int i = 0; i < biomeColor.length; i++) {
             //int color = biomeColor[i];
             //byte biome = biomeId[i];

@@ -106,8 +106,8 @@ public class PacketRegistry {
         // CAMERA_PACKET = 0x48;
         // ADD_ITEM_PACKET = 0x49;
         // BOSS_EVENT_PACKET = 0x4a;
-        MCPE_PACKETS[0x4b] = McpeAvailableCommands.class;
-        MCPE_PACKETS[0x4c] = McpeCommandStep.class;
+        MCPE_PACKETS[0x4c] = McpeAvailableCommands.class;
+        MCPE_PACKETS[0x4d] = McpeCommandStep.class;
         // RESOURCE_PACK_DATA_INFO_PACKET = 0x4d;
         // RESOURCE_PACK_CHUNK_DATA_PACKET = 0x4e;
         // RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x4f;

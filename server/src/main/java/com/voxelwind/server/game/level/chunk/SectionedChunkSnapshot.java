@@ -12,7 +12,6 @@ import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
-import com.voxelwind.server.game.level.chunk.provider.anvil.ChunkSection;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -23,8 +22,8 @@ public class SectionedChunkSnapshot implements ChunkSnapshot {
     protected final ChunkSection[] sections;
     protected final int x;
     protected final int z;
-    protected final int[] biomeColor = new int[256];
-    protected final byte[] height = new byte[256];
+    protected final byte[] biomeId = new byte[256];
+    protected final byte[] height = new byte[512];
     protected final TIntObjectMap<BlockEntity> blockEntities = new TIntObjectHashMap<>();
 
     public SectionedChunkSnapshot(ChunkSection[] sections, int x, int z) {

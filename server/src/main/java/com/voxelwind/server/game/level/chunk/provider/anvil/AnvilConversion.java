@@ -3,6 +3,7 @@ package com.voxelwind.server.game.level.chunk.provider.anvil;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.Level;
 import com.voxelwind.nbt.tags.*;
+import com.voxelwind.server.game.level.chunk.ChunkSection;
 import com.voxelwind.server.game.level.chunk.SectionedChunk;
 import com.voxelwind.server.game.level.util.NibbleArray;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -16,8 +17,8 @@ public class AnvilConversion {
         TIntObjectHashMap<Map<String, Tag<?>>> sectionMap = generateSectionsMap(levelData);
 
         // Translate section data
-        ChunkSection[] sections = new ChunkSection[8];
-        for (int ySec = 0; ySec < 8; ySec++) {
+        ChunkSection[] sections = new ChunkSection[16];
+        for (int ySec = 0; ySec < 16; ySec++) {
             Map<String, Tag<?>> map = sectionMap.get(ySec);
             if (map != null) {
                 byte[] blockIds = ((ByteArrayTag) map.get("Blocks")).getValue();

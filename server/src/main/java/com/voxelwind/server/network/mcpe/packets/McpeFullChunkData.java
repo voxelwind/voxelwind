@@ -13,7 +13,6 @@ import lombok.ToString;
 public class McpeFullChunkData implements NetworkPackage {
     private int chunkX;
     private int chunkZ;
-    private byte order;
     private byte[] data;
 
     @Override
@@ -25,7 +24,6 @@ public class McpeFullChunkData implements NetworkPackage {
     public void encode(ByteBuf buffer) {
         Varints.encodeSigned(buffer, chunkX);
         Varints.encodeSigned(buffer, chunkZ);
-        buffer.writeByte(order);
         Varints.encodeUnsigned(buffer, data.length);
         buffer.writeBytes(data);
     }
