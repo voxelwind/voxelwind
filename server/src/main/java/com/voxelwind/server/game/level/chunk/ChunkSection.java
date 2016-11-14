@@ -110,6 +110,6 @@ public class ChunkSection {
     }
 
     private static int anvilBlockPosition(int x, int y, int z) {
-        return y * 16 * 16 + z * 16 + x;
+        return (x * 256) + (z * 16) + y;
     }
 }

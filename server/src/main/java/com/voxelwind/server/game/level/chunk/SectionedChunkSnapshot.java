@@ -33,7 +33,7 @@ public class SectionedChunkSnapshot implements ChunkSnapshot {
     }
 
     static int xyzIdx(int x, int y, int z) {
-        return x + 16 * (z + 16 * y);
+        return (x * 256) + (z * 16) + y;
     }
 
     static void checkPosition(int x, int y, int z) {

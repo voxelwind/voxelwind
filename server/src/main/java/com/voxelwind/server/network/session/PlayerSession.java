@@ -384,6 +384,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             for (Chunk chunk : chunks) {
                 session.sendImmediatePackage(((FullChunkPacketCreator) chunk).toFullChunkData());
             }
+        }).exceptionally(throwable -> {
+            LOGGER.error("Unable to send chunks", throwable);
+            disconnect("Internal server error");
+            return null;
         });
     }
 

@@ -208,38 +208,36 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
             }
         }
 
-        int bufferSize = 10241 * topBlank + 769;
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize + nbtSize);
+        System.out.println("Found " + topBlank + " to send...");
+        int bufferSize = 1 + 10241 * topBlank + 768 + 2 + nbtSize;
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
         buffer.put((byte) topBlank);
 
         // Write the chunk sections.
         for (int i = 0; i < topBlank; i++) {
             ChunkSection section = sections[i];
+            buffer.put((byte) 0);
             if (section != null) {
-                buffer.put((byte) 0);
                 buffer.put(section.getIds());
                 buffer.put(section.getData().getData());
                 buffer.put(section.getSkyLight().getData());
                 buffer.put(section.getBlockLight().getData());
             } else {
-                buffer.position(buffer.position() + 10241);
+                buffer.position(buffer.position() + 10240);
             }
         }
 
         buffer.put(height);
         buffer.put(biomeId);
-        /*for (int i = 0; i < biomeColor.length; i++) {
-            //int color = biomeColor[i];
-            //byte biome = biomeId[i];
-            //Varints.encodeSigned(buf, (color & 0x00ffffff) | biome << 2);
-            buffer.putInt(biomeColor[i]);
-        }*/
+
         // extra data, we have none
         buffer.putShort((short) 0);
 
         if (blockEntities != null) {
             blockEntities.writeTo(buffer);
         }
+
+        System.out.println(buffer);
 
         data.setData(buffer.array());
         McpeBatch precompressed = new McpeBatch();
