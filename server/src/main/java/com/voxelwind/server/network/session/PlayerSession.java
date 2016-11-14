@@ -191,6 +191,8 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     public void doInitialSpawn() {
+        LOGGER.info("{} ({}) has logged in.", getName(), getRemoteAddress().map(Object::toString).orElse("UNKNOWN"));
+
         // Fire PlayerSpawnEvent.
         // TODO: Fill this in of known player data.
         PlayerSpawnEvent event = new PlayerSpawnEvent(this, getLevel().getSpawnLocation(), getLevel(), Rotation.ZERO);
@@ -651,6 +653,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     session.sendImmediatePackage(availableCommandsBatch);
 
                     spawned = true;
+
+                    LOGGER.info("{} ({}) has been spawned at {} ({})", getName(), getRemoteAddress().map(Object::toString).orElse("UNKNOWN"),
+                            getPosition(), getLevel().getName());
 
                     PlayerJoinEvent event = new PlayerJoinEvent(PlayerSession.this, TextFormat.YELLOW + getName() + " joined the game.");
                     session.getServer().getEventManager().fire(event);

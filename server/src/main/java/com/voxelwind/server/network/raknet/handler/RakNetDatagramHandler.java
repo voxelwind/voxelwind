@@ -148,7 +148,7 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
         }
         // Disconnection
         if (netPackage instanceof DisconnectNotificationPacket) {
-            session.close();
+            session.disconnect("User disconnected from server", false);
             return;
         }
 

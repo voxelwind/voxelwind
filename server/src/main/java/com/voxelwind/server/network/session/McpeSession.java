@@ -152,7 +152,7 @@ public class McpeSession {
         }
 
         if (isTimedOut()) {
-            close();
+            disconnect("User timed out after " + TIMEOUT_MS + "ms of no new packets being sent.");
             return;
         }
 
@@ -284,12 +284,26 @@ public class McpeSession {
     }
 
     public void disconnect(@Nonnull String reason) {
+        disconnect(reason, true);
+    }
+
+    public void disconnect(@Nonnull String reason, boolean sendReason) {
         Preconditions.checkNotNull(reason, "reason");
         checkForClosed();
 
-        McpeDisconnect packet = new McpeDisconnect();
-        packet.setMessage(reason);
-        sendImmediatePackage(packet);
+        if (sendReason) {
+            McpeDisconnect packet = new McpeDisconnect();
+            packet.setMessage(reason);
+            sendImmediatePackage(packet);
+        }
+
+        if (authenticationProfile != null) {
+            LOGGER.info("{} ({}) has been disconnected from the server: {}", authenticationProfile.getDisplayName(),
+                    getRemoteAddress().map(Object::toString).orElse("UNKNOWN"), reason);
+        } else {
+            LOGGER.info("{} has lost connection to the server: ", getRemoteAddress().map(Object::toString).orElse("UNKNOWN"),
+                    reason);
+        }
 
         close();
     }
