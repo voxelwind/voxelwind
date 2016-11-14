@@ -208,7 +208,6 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
             }
         }
 
-        System.out.println("Found " + topBlank + " to send...");
         int bufferSize = 1 + 10241 * topBlank + 768 + 2 + nbtSize;
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
         buffer.put((byte) topBlank);
@@ -236,8 +235,6 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         if (blockEntities != null) {
             blockEntities.writeTo(buffer);
         }
-
-        System.out.println(buffer);
 
         data.setData(buffer.array());
         McpeBatch precompressed = new McpeBatch();
