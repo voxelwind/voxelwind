@@ -68,11 +68,7 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         Preconditions.checkNotNull(state, "state");
         checkPosition(x, y, z);
 
-        ChunkSection section = sections[y / 16];
-        if (section == null) {
-            section = new ChunkSection();
-            sections[y / 16] = section;
-        }
+        ChunkSection section = getOrCreateSection(y / 16);
         section.setBlockId(x, y % 16, z, (byte) state.getBlockType().getId());
         section.setBlockData(x, y % 16, z, (byte) MetadataSerializer.serializeMetadata(state));
         //section.setBlockLight(x, y % 16, z, (byte) state.getBlockType().emitsLight());
@@ -113,11 +109,7 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
     public void setBlock(int x, int y, int z, byte id, byte data, boolean shouldRecalculateLight) {
         checkPosition(x, y, z);
 
-        ChunkSection section = sections[y / 16];
-        if (section == null) {
-            section = new ChunkSection();
-            sections[y / 16] = section;
-        }
+        ChunkSection section = getOrCreateSection(y / 16);
         section.setBlockId(x, y % 16, z, id);
         section.setBlockData(x, y % 16, z, data);
         //section.setBlockLight(x, y % 16, z, (byte) state.getBlockType().emitsLight());
@@ -138,6 +130,15 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         serializedBlockEntities.remove(pos);
         blockEntities.remove(pos);
         precompressed = null;
+    }
+
+    @Synchronized
+    public ChunkSection getOrCreateSection(int y) {
+        ChunkSection section = sections[y];
+        if (section == null) {
+            sections[y] = section = new ChunkSection();
+        }
+        return section;
     }
 
     private int calculateHighestLayer(int x, int z) {
@@ -283,7 +284,8 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         precompressed = null;
     }
 
-    private void recalculateHeightMap() {
+    @Synchronized
+    public void recalculateHeightMap() {
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
                 int highest = calculateHighestLayer(x, z);

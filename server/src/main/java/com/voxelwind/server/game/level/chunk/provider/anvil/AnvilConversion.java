@@ -20,22 +20,33 @@ public class AnvilConversion {
         int cx = ((IntTag) levelData.get("xPos")).getValue();
         int cz = ((IntTag) levelData.get("zPos")).getValue();
         SectionedChunk chunk = new SectionedChunk(cx, cz, level);
-        for (int ySec = 0; ySec < 8; ySec++) {
+        for (int ySec = 0; ySec < 16; ySec++) {
             Map<String, Tag<?>> map = sectionMap.get(ySec);
             if (map != null) {
                 byte[] blockIds = ((ByteArrayTag) map.get("Blocks")).getValue();
                 NibbleArray data = new NibbleArray(((ByteArrayTag) map.get("Data")).getValue());
+                NibbleArray skyLight = new NibbleArray(((ByteArrayTag) map.get("SkyLight")).getValue());
+                NibbleArray blockLight = new NibbleArray(((ByteArrayTag) map.get("BlockLight")).getValue());
+
+                // Copy all the data we can directly.
+                ChunkSection section = chunk.getOrCreateSection(ySec);
+                section.getBlockLight().copyFrom(blockLight);
+                section.getSkyLight().copyFrom(skyLight);
+
+                // Block IDs and data require remapping.
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
                         for (int y = 0; y < 16; y++) {
                             int pos = anvilBlockPosition(x, (ySec * 16) + y, z);
-                            chunk.setBlock(x, (ySec * 16) + y, z, blockIds[pos], data.get(pos), false);
+                            section.setBlockId(x, y, z, blockIds[pos]);
+                            section.setBlockData(x, y, z, data.get(pos));
                         }
                     }
                 }
             }
         }
 
+        chunk.recalculateHeightMap();
         return chunk;
     }
 

@@ -36,6 +36,18 @@ public class NibbleArray {
         }
     }
 
+    public void copyFrom(byte[] bytes) {
+        Preconditions.checkNotNull(bytes, "bytes");
+        Preconditions.checkArgument(bytes.length == data.length, "length of provided byte array is %s but expected %s", bytes.length,
+                data.length);
+        System.arraycopy(bytes, 0, data, 0, data.length);
+    }
+
+    public void copyFrom(NibbleArray array) {
+        Preconditions.checkNotNull(array, "array");
+        copyFrom(array.data);
+    }
+
     public byte[] getData() {
         return data;
     }
