@@ -106,33 +106,6 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
     }
 
     @Synchronized
-    public void setBlock(int x, int y, int z, byte id, byte data, boolean shouldRecalculateLight) {
-        checkPosition(x, y, z);
-
-        ChunkSection section = getOrCreateSection(y / 16);
-        section.setBlockId(x, y % 16, z, id);
-        section.setBlockData(x, y % 16, z, data);
-        //section.setBlockLight(x, y % 16, z, (byte) state.getBlockType().emitsLight());
-
-        if (shouldRecalculateLight) {
-            // Recalculate the height map and lighting for this chunk section.
-            if (height[(z << 4) + x] <= y && id != 0) {
-                // Slight optimization
-                height[(z << 4) + x] = (byte) y;
-            } else {
-                height[(z << 4) + x] = (byte) calculateHighestLayer(x, z);
-            }
-
-            populateSkyLightAt(x, z);
-        }
-
-        int pos = xyzIdx(x, y, z);
-        serializedBlockEntities.remove(pos);
-        blockEntities.remove(pos);
-        precompressed = null;
-    }
-
-    @Synchronized
     public ChunkSection getOrCreateSection(int y) {
         ChunkSection section = sections[y];
         if (section == null) {
