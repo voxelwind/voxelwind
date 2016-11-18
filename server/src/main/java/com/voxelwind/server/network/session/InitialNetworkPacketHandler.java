@@ -21,6 +21,7 @@ import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.session.auth.TemporarySession;
 import com.voxelwind.server.network.util.EncryptionUtil;
 import com.voxelwind.server.network.util.NativeCodeFactory;
+import io.netty.util.AsciiString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,7 +34,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 public class InitialNetworkPacketHandler implements NetworkPacketHandler {
-    public static final int MCPE_PROTOCOL_VERSION = 91;
     private static final boolean CAN_USE_ENCRYPTION = CryptoUtil.isJCEUnlimitedStrength() || NativeCodeFactory.cipher.isLoaded();
     private static final String MOJANG_PUBLIC_KEY_BASE64 =
             "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
@@ -88,7 +88,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
         JsonNode certData;
         try {
-            certData = VoxelwindServer.MAPPER.readTree(packet.getChainData());
+            certData = VoxelwindServer.MAPPER.readTree(packet.getChainData().toByteArray());
         } catch (IOException e) {
             throw new RuntimeException("Certificate JSON can not be read.");
         }
@@ -107,7 +107,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
             PublicKey key = getKey(payload.getIdentityPublicKey());
 
             // Set the client data.
-            ClientData clientData = getClientData(key, packet.getSkinData());
+            ClientData clientData = getClientData(key, packet.getSkinData().toString());
             session.setClientData(clientData);
 
             startEncryptionHandshake(key);
@@ -121,7 +121,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
                     JwtPayload payload = VoxelwindServer.MAPPER.convertValue(authProfilePayload, JwtPayload.class);
                     payload.getExtraData().setXuid(null);
                     session.setAuthenticationProfile(payload.getExtraData());
-                    session.setClientData(VoxelwindServer.MAPPER.convertValue(getPayload(packet.getSkinData()), ClientData.class));
+                    session.setClientData(VoxelwindServer.MAPPER.convertValue(getPayloadFromAsciiString(packet.getSkinData()), ClientData.class));
 
                     // Start encrypting the connection.
                     PublicKey key = getKey(payload.getIdentityPublicKey());
@@ -308,6 +308,11 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     private JsonNode getPayload(String token) throws IOException {
         String payload = token.split("\\.")[1];
         return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload));
+    }
+
+    private JsonNode getPayloadFromAsciiString(AsciiString token) throws IOException {
+        AsciiString payload = token.split('.')[1];
+        return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload.toByteArray()));
     }
 
     private boolean verify(PublicKey key, JWSObject object) throws JOSEException {

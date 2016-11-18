@@ -4,6 +4,7 @@ import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.api.server.player.TranslatedMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.util.AsciiString;
 import org.junit.Test;
 
 import java.util.UUID;
@@ -14,8 +15,9 @@ public class McpeUtilTest {
     @Test
     public void leLengthString() throws Exception {
         ByteBuf dest = Unpooled.buffer();
-        McpeUtil.writeLELengthString(dest, "test");
-        assertEquals("test", McpeUtil.readLELengthString(dest));
+        AsciiString string = AsciiString.of("test");
+        McpeUtil.writeLELengthAsciiString(dest, string);
+        assertEquals(string, McpeUtil.readLELengthAsciiString(dest));
         dest.release();
     }
 

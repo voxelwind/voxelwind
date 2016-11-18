@@ -25,6 +25,8 @@ import com.voxelwind.server.network.mcpe.util.ResourcePackInfo;
 import com.voxelwind.server.network.util.LittleEndianByteBufInputStream;
 import com.voxelwind.server.network.util.LittleEndianByteBufOutputStream;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
@@ -55,21 +57,20 @@ public class McpeUtil {
         return new String(readBytes, StandardCharsets.UTF_8);
     }
 
-    public static void writeLELengthString(ByteBuf buffer, String string) {
+    public static void writeLELengthAsciiString(ByteBuf buffer, AsciiString string) {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
-        byte[] bytes = string.getBytes(CharsetUtil.US_ASCII);
-        buffer.writeIntLE(bytes.length);
-        buffer.writeBytes(bytes);
+        buffer.writeIntLE(string.length());
+        buffer.writeBytes(string.toByteArray());
     }
 
-    public static String readLELengthString(ByteBuf buffer) {
+    public static AsciiString readLELengthAsciiString(ByteBuf buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
 
         int length = buffer.readIntLE();
         byte[] bytes = new byte[length];
         buffer.readBytes(bytes);
-        return new String(bytes, StandardCharsets.US_ASCII);
+        return new AsciiString(bytes);
     }
 
     public static void writeBlockCoords(ByteBuf buf, Vector3i vector3i) {
