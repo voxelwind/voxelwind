@@ -15,8 +15,4 @@ public class ClientData {
     private final byte[] skinData; // Jackson conveniently deserializes from Base64
     @JsonProperty("SkinId")
     private final String skinId;
-    @JsonProperty("ADRole")
-    private final long adRole;
-    @JsonProperty("TenantId")
-    private final String tenantId;
 }

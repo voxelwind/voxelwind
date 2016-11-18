@@ -1,5 +1,6 @@
 package com.voxelwind.server;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -56,7 +57,7 @@ import java.util.concurrent.*;
 
 public class VoxelwindServer implements Server {
     public static final String VOXELWIND_VERSION = "0.0.1 (Layer of Fog)";
-    public static final ObjectMapper MAPPER = new ObjectMapper();
+    public static final ObjectMapper MAPPER = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     private static final Logger LOGGER = LogManager.getLogger(VoxelwindServer.class);
     private final SessionManager sessionManager = new SessionManager();
     private final LevelManager levelManager = new LevelManager();

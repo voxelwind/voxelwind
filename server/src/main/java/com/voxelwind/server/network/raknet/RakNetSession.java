@@ -89,6 +89,8 @@ public class RakNetSession implements SessionConnection {
 
             // Retain the packet so it can be reassembled later.
             packet.retain();
+
+            // Try reassembling the packet.
             Optional<ByteBuf> result = helper.add(packet);
             if (result.isPresent()) {
                 splitPackets.remove(packet.getPartId());
