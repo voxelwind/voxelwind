@@ -8,11 +8,9 @@ import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.util.LittleEndianByteBufOutputStream;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufOutputStream;
 import lombok.Data;
 
 import java.io.IOException;
-import java.nio.ByteOrder;
 
 @Data
 public class McpeBlockEntityData implements NetworkPackage {

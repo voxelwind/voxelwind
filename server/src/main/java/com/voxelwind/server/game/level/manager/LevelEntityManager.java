@@ -11,7 +11,6 @@ import com.voxelwind.server.network.mcpe.packets.McpeMoveEntity;
 import com.voxelwind.server.network.mcpe.packets.McpeSetEntityMotion;
 import com.voxelwind.server.network.session.McpeSession;
 import com.voxelwind.server.network.session.PlayerSession;
-import gnu.trove.TCollections;
 import gnu.trove.iterator.TLongObjectIterator;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;

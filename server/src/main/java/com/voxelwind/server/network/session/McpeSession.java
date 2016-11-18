@@ -26,7 +26,6 @@ import javax.annotation.Nonnull;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Optional;

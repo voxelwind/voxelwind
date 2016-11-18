@@ -5,8 +5,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-import java.nio.ByteOrder;
-
 public class RconEncoder extends MessageToByteEncoder<RconMessage> {
     @Override
     protected void encode(ChannelHandlerContext ctx, RconMessage message, ByteBuf buf) throws Exception {

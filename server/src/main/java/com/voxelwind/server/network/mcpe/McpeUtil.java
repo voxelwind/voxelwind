@@ -25,12 +25,9 @@ import com.voxelwind.server.network.mcpe.util.ResourcePackInfo;
 import com.voxelwind.server.network.util.LittleEndianByteBufInputStream;
 import com.voxelwind.server.network.util.LittleEndianByteBufOutputStream;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;

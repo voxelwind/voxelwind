@@ -9,7 +9,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import io.netty.buffer.ByteBuf;
 
-import java.nio.ByteOrder;
 import java.util.Optional;
 
 public final class MetadataDictionary {

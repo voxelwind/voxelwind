@@ -8,8 +8,6 @@ import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
-import java.nio.ByteOrder;
-
 @Data
 public class McpeAddEntity implements NetworkPackage {
     private long entityId;

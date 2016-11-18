@@ -3,8 +3,6 @@ package com.voxelwind.server.game.level.chunk;
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.game.level.util.NibbleArray;
 
-import java.util.Arrays;
-
 /**
  * Represents a 16x16x16 section of a chunk (which is 16x256x16).
  */
