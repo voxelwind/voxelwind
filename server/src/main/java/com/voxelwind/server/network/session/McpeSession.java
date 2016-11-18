@@ -249,7 +249,7 @@ public class McpeSession {
         ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer(8);
         ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer(serverKey.length);
         try {
-            counterBuf.order(ByteOrder.LITTLE_ENDIAN).writeLong(encryptedSentPacketGenerator.getAndIncrement());
+            counterBuf.writeLongLE(encryptedSentPacketGenerator.getAndIncrement());
             keyBuf.writeBytes(serverKey);
 
             hash.update(counterBuf);

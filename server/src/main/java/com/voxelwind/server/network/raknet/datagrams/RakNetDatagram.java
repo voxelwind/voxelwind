@@ -3,6 +3,7 @@ package com.voxelwind.server.network.raknet.datagrams;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.AbstractReferenceCounted;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.ReferenceCounted;
 import lombok.Data;
 
 import java.nio.ByteOrder;
@@ -28,9 +29,17 @@ public class RakNetDatagram extends AbstractReferenceCounted {
         return this;
     }
 
+    @Override
+    public ReferenceCounted touch(Object hint) {
+        for (EncapsulatedRakNetPacket packet : packets) {
+            packet.touch(hint);
+        }
+        return this;
+    }
+
     public void decode(ByteBuf buf) {
         flags = new RakNetDatagramFlags(buf.readByte());
-        datagramSequenceNumber = buf.order(ByteOrder.LITTLE_ENDIAN).readMedium();
+        datagramSequenceNumber = buf.readMediumLE();
         while (buf.isReadable()) {
             EncapsulatedRakNetPacket packet = new EncapsulatedRakNetPacket();
             packet.decode(buf);
@@ -40,7 +49,7 @@ public class RakNetDatagram extends AbstractReferenceCounted {
 
     public void encode(ByteBuf buf) {
         buf.writeByte(flags.getFlagByte());
-        buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(datagramSequenceNumber);
+        buf.writeMediumLE(datagramSequenceNumber);
         for (EncapsulatedRakNetPacket packet : packets) {
             packet.encode(buf);
         }

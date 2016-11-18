@@ -1,5 +1,6 @@
 package com.voxelwind.server.network.raknet.datagrams;
 
+import com.sun.org.apache.regexp.internal.RE;
 import com.voxelwind.server.network.raknet.RakNetSession;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCounted;
@@ -68,12 +69,12 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
                 reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(reliabilityNumber);
+            buf.writeMediumLE(reliabilityNumber);
         }
 
         if (reliability == RakNetReliability.UNRELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_SEQUENCED ||
                 reliability == RakNetReliability.RELIABLE_ORDERED || reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(orderingIndex);
+            buf.writeMediumLE(orderingIndex);
             buf.writeByte(orderingChannel);
         }
 
@@ -95,12 +96,12 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
                 reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            reliabilityNumber = buf.order(ByteOrder.LITTLE_ENDIAN).readUnsignedMedium();
+            reliabilityNumber = buf.readUnsignedMediumLE();
         }
 
         if (reliability == RakNetReliability.UNRELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_SEQUENCED ||
                 reliability == RakNetReliability.RELIABLE_ORDERED || reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            orderingIndex = buf.order(ByteOrder.LITTLE_ENDIAN).readUnsignedMedium();
+            orderingIndex = buf.readUnsignedMediumLE();
             orderingChannel = buf.readByte();
         }
 
@@ -139,6 +140,16 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
     @Override
     public ReferenceCounted retain(int i) {
         return buffer.retain(i);
+    }
+
+    @Override
+    public ReferenceCounted touch() {
+        return buffer.touch();
+    }
+
+    @Override
+    public ReferenceCounted touch(Object o) {
+        return buffer.touch(o);
     }
 
     @Override
