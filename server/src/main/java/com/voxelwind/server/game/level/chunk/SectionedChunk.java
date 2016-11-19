@@ -1,5 +1,6 @@
 package com.voxelwind.server.game.level.chunk;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Preconditions;
 import com.voxelwind.api.game.level.Chunk;
 import com.voxelwind.api.game.level.ChunkSnapshot;
@@ -21,14 +22,14 @@ import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import lombok.Synchronized;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * This class stores chunk data in sections of 16x16x16 sections, with each section eventually representing a 16x128x16
@@ -73,7 +74,6 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         ChunkSection section = getOrCreateSection(y / 16);
         section.setBlockId(x, y % 16, z, (byte) state.getBlockType().getId());
         section.setBlockData(x, y % 16, z, (byte) MetadataSerializer.serializeMetadata(state));
-        //section.setBlockLight(x, y % 16, z, (byte) state.getBlockType().emitsLight());
 
         if (shouldRecalculateLight) {
             // Recalculate the height map and lighting for this chunk section.
@@ -85,6 +85,7 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
             }
 
             populateSkyLightAt(x, z);
+            calculateBlockLight(x, y, z);
         }
 
         // now set the block entity, if any
@@ -109,6 +110,9 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
 
     @Synchronized
     public ChunkSection getOrCreateSection(int y) {
+        if (y >= sections.length) {
+            throw new IllegalArgumentException("expected y to be up to " + (sections.length - 1) + ", got " + y);
+        }
         ChunkSection section = sections[y];
         if (section == null) {
             sections[y] = section = new ChunkSection();
@@ -277,6 +281,97 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         }
     }
 
+    private void calculateBlockLight(int x, int y, int z) {
+        // NB: This will benefit from Java 9 value types. However, that won't be until late 2017...
+        Queue<Vector3i> spread = new ArrayDeque<>();
+        Queue<LightRemoveData> remove = new ArrayDeque<>();
+        TLongSet visitedSpread = new TLongHashSet();
+        TLongSet visitedRemove = new TLongHashSet();
+
+        ChunkSection section = getOrCreateSection(y / 16);
+        BlockType ourType = BlockTypes.forId(section.getBlockId(x, y % 16, z));
+        byte currentBlockLight = section.getBlockLight(x, y % 16, z);
+        byte newBlockLight = (byte) ourType.emitsLight();
+
+        if (currentBlockLight != newBlockLight) {
+            // Set the current block's light.
+            System.out.println("old light: " + currentBlockLight + ", new light: " + newBlockLight);
+            section.setBlockLight(x, y % 16, z, newBlockLight);
+
+            if (newBlockLight < currentBlockLight) {
+                remove.add(new LightRemoveData(new Vector3i(x, y, z), currentBlockLight));
+                visitedRemove.add(xyzIdx(x, y, z));
+            } else {
+                spread.add(new Vector3i(x, y, z));
+                visitedSpread.add(xyzIdx(x, y, z));
+            }
+        }
+
+        LightRemoveData toRemove;
+        while ((toRemove = remove.poll()) != null) {
+            computeRemoveBlockLight(toRemove.data.sub(1, 0, 0), toRemove.light, remove, spread, visitedRemove, visitedSpread);
+            computeRemoveBlockLight(toRemove.data.add(1, 0, 0), toRemove.light, remove, spread, visitedRemove, visitedSpread);
+            computeRemoveBlockLight(toRemove.data.sub(0, 1, 0), toRemove.light, remove, spread, visitedRemove, visitedSpread);
+            computeRemoveBlockLight(toRemove.data.add(0, 1, 0), toRemove.light, remove, spread, visitedRemove, visitedSpread);
+            computeRemoveBlockLight(toRemove.data.sub(0, 0, 1), toRemove.light, remove, spread, visitedRemove, visitedSpread);
+            computeRemoveBlockLight(toRemove.data.add(0, 0, 1), toRemove.light, remove, spread, visitedRemove, visitedSpread);
+        }
+
+        Vector3i toSpread;
+        while ((toSpread = spread.poll()) != null) {
+            ChunkSection cs = getOrCreateSection(toSpread.getY() / 16);
+            byte adjustedLight = (byte) (cs.getBlockLight(toSpread.getX(), toSpread.getY() % 16, toSpread.getZ())
+                                - BlockTypes.forId(cs.getBlockId(toSpread.getX(), toSpread.getY() % 16, toSpread.getZ())).filtersLight());
+
+            if(adjustedLight >= 1){
+                computeSpreadBlockLight(toSpread.sub(1, 0, 0), adjustedLight, spread, visitedSpread);
+                computeSpreadBlockLight(toSpread.add(1, 0, 0), adjustedLight, spread, visitedSpread);
+                computeSpreadBlockLight(toSpread.sub(0, 1, 0), adjustedLight, spread, visitedSpread);
+                computeSpreadBlockLight(toSpread.add(0, 1, 0), adjustedLight, spread, visitedSpread);
+                computeSpreadBlockLight(toSpread.sub(0, 0, 1), adjustedLight, spread, visitedSpread);
+                computeSpreadBlockLight(toSpread.add(0, 0, 1), adjustedLight, spread, visitedSpread);
+            }
+        }
+    }
+
+    private void computeRemoveBlockLight(Vector3i loc, byte currentLight, Queue<LightRemoveData> removalQueue, Queue<Vector3i> spreadQueue, TLongSet removalVisited, TLongSet spreadVisited) {
+        if (loc.getY() >= 256) {
+            return;
+        }
+        ChunkSection section = getOrCreateSection(loc.getY() / 16);
+        byte presentLight = section.getBlockLight(loc.getX(), loc.getY() % 16, loc.getZ());
+        long idx = xyzIdx(loc.getX(), loc.getY(), loc.getZ());
+        if (presentLight != 0 && presentLight < currentLight) {
+            section.setBlockLight(loc.getX(), loc.getY() % 16, loc.getZ(), (byte) 0);
+            if (removalVisited.add(idx)) {
+                if (presentLight > 1) {
+                    removalQueue.add(new LightRemoveData(loc, presentLight));
+                }
+            }
+        } else if (presentLight >= currentLight) {
+            if (spreadVisited.add(idx)) {
+                spreadQueue.add(loc);
+            }
+        }
+    }
+
+    private void computeSpreadBlockLight(Vector3i loc, byte currentLight, Queue<Vector3i> spreadQueue, TLongSet spreadVisited) {
+        if (loc.getY() >= 256) {
+            return;
+        }
+        ChunkSection section = getOrCreateSection(loc.getY() / 16);
+        byte presentLight = section.getBlockLight(loc.getX(), loc.getY() % 16, loc.getZ());
+        long idx = xyzIdx(loc.getX(), loc.getY(), loc.getZ());
+        if (presentLight < currentLight) {
+            section.setBlockLight(loc.getX(), loc.getY() % 16, loc.getZ(), currentLight);
+            if (spreadVisited.add(idx)) {
+                if (presentLight > 1) {
+                    spreadQueue.add(loc);
+                }
+            }
+        }
+    }
+
     /**
      * Special version of {@link ByteArrayOutputStream} that can directly write its output to a {@link ByteBuffer}.
      */
@@ -287,6 +382,16 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
 
         public void writeTo(ByteBuffer byteBuffer) {
             byteBuffer.put(buf, 0, count);
+        }
+    }
+
+    private static class LightRemoveData {
+        private final Vector3i data;
+        private final byte light;
+
+        private LightRemoveData(Vector3i data, byte light) {
+            this.data = data;
+            this.light = light;
         }
     }
 }

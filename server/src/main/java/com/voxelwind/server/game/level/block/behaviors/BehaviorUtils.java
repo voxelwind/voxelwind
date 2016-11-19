@@ -50,8 +50,8 @@ public class BehaviorUtils {
     }
 
     private static boolean canProceed(Block block, BlockState newState, Player player) {
-        BlockReplaceEvent event = new BlockReplaceEvent(block, block.getBlockState(), new BasicBlockState(BlockTypes.AIR, null, null),
-                player, BlockReplaceEvent.ReplaceReason.PLAYER_PLACE);
+        BlockReplaceEvent event = new BlockReplaceEvent(block, block.getBlockState(), newState, player,
+                BlockReplaceEvent.ReplaceReason.PLAYER_PLACE);
         player.getServer().getEventManager().fire(event);
         return event.getResult() == BlockReplaceEvent.Result.CONTINUE;
     }

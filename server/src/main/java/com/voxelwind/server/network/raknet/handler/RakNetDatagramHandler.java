@@ -112,9 +112,7 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
                     cleartext = wrappedData;
                 }
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("[HEX IN] {}", ByteBufUtil.prettyHexDump(cleartext));
-                }
+                System.out.println("[HEX IN] " + ByteBufUtil.prettyHexDump(cleartext));;
 
                 NetworkPackage pkg = PacketRegistry.tryDecode(cleartext, PacketType.MCPE);
                 handlePackage(pkg, session);

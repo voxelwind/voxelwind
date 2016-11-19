@@ -10,36 +10,52 @@ public class Varints {
     private static final int MSB = 0x80, REST = 0x7F, MSBALL = ~REST;
     private static final long MSBALL_LONG = ~REST;
 
-    public static void encodeUnsigned(DataOutput output, int num) throws IOException {
-        while ((num & MSBALL) != 0) {
-            output.writeByte((byte) ((num & REST) | MSB));
-            num >>>= 7;
+    public static void encodeUnsigned(DataOutput output, int value) throws IOException {
+        while (true) {
+            if ((value & ~0x7F) == 0) {
+                output.writeByte(value);
+                return;
+            } else {
+                output.writeByte((byte) ((value & 0x7F) | 0x80));
+                value >>>= 7;
+            }
         }
-        output.writeByte((byte) num);
     }
 
-    public static void encodeUnsigned(ByteBuf output, int num) {
-        while ((num & MSBALL) != 0) {
-            output.writeByte((byte) ((num & REST) | MSB));
-            num >>>= 7;
+    public static void encodeUnsigned(ByteBuf output, int value) {
+        while (true) {
+            if ((value & ~0x7F) == 0) {
+                output.writeByte(value);
+                return;
+            } else {
+                output.writeByte((byte) ((value & 0x7F) | 0x80));
+                value >>>= 7;
+            }
         }
-        output.writeByte((byte) num);
     }
 
-    public static void encodeUnsignedLong(DataOutput output, long num) throws IOException {
-        while ((num & MSBALL_LONG) != 0) {
-            output.writeByte((byte) ((num & REST) | MSB));
-            num >>= 7;
+    public static void encodeUnsignedLong(DataOutput output, long value) throws IOException {
+        while (true) {
+            if ((value & ~0x7FL) == 0) {
+                output.writeByte((int) value);
+                return;
+            } else {
+                output.writeByte((byte) (((int) value & 0x7F) | 0x80));
+                value >>>= 7;
+            }
         }
-        output.writeByte((byte) num);
     }
 
-    public static void encodeUnsignedLong(ByteBuf output, long num) {
-        while ((num & MSBALL_LONG) != 0) {
-            output.writeByte((byte) ((num & REST) | MSB));
-            num >>>= 7;
+    public static void encodeUnsignedLong(ByteBuf output, long value) {
+        while (true) {
+            if ((value & ~0x7FL) == 0) {
+                output.writeByte((int) value);
+                return;
+            } else {
+                output.writeByte((byte) (((int) value & 0x7F) | 0x80));
+                value >>>= 7;
+            }
         }
-        output.writeByte((int) (num & REST));
     }
 
     public static int decodeUnsigned(DataInput input) throws IOException {
@@ -128,21 +144,21 @@ public class Varints {
 
     public static int decodeSigned(DataInput input) throws IOException {
         int n = decodeUnsigned(input);
-        return (n >> 1) ^ -(n & 1);
+        return (n >>> 1) ^ -(n & 1);
     }
 
     public static int decodeSigned(ByteBuf input) {
         int n = decodeUnsigned(input);
-        return (n >> 1) ^ -(n & 1);
+        return (n >>> 1) ^ -(n & 1);
     }
 
     public static long decodeSignedLong(DataInput input) throws IOException {
         long n = decodeUnsignedLong(input);
-        return (n >> 1) ^ -(n & 1);
+        return (n >>> 1) ^ -(n & 1);
     }
 
     public static long decodeSignedLong(ByteBuf input) {
         long n = decodeUnsignedLong(input);
-        return (n >> 1) ^ -(n & 1);
+        return (n >>> 1) ^ -(n & 1);
     }
 }
