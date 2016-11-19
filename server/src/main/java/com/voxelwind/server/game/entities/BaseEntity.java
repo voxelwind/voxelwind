@@ -315,26 +315,4 @@ public class BaseEntity implements Entity {
     protected void setEntityId(long entityId) {
         this.entityId = entityId;
     }
-
-    protected void doMovement() {
-        doMovement(0.02f, 0.08f);
-    }
-
-    protected void doMovement(float drag, double gravity) {
-        if (getMotion().lengthSquared() > 0) {
-            boolean onGroundPreviously = isOnGround();
-            setPosition(getPosition().add(getMotion()));
-            boolean onGroundNow = isOnGround();
-
-            if (!onGroundPreviously && onGroundNow) {
-                setPosition(new Vector3f(getPosition().getX(), getPosition().getFloorY(), getPosition().getZ()));
-                setMotion(Vector3f.ZERO);
-            } else {
-                setMotion(getMotion().mul(1f - drag));
-                if (!onGroundNow) {
-                    setMotion(getMotion().sub(0, gravity, 0));
-                }
-            }
-        }
-    }
 }
