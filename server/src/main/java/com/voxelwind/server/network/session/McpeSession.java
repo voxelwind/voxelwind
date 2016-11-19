@@ -181,6 +181,17 @@ public class McpeSession {
                 }
 
                 continue;
+            } else if (batch.getPackages().size() >= 3) {
+                // Reached a per-batch limit on packages, send these packages now
+                internalSendPackage(batch);
+                batch = new McpeBatch();
+
+                try {
+                    // Delay things a tiny bit
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Interrupted", e);
+                }
             }
 
             batch.getPackages().add(netPackage);
