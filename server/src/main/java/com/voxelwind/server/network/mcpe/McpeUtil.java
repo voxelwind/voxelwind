@@ -51,7 +51,7 @@ public class McpeUtil {
 
     public static String readVarintLengthString(ByteBuf buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
-        int length = Varints.decodeUnsigned(buffer);
+        int length = (int) Varints.decodeUnsigned(buffer);
         byte[] readBytes = new byte[length];
         buffer.readBytes(readBytes);
         return new String(readBytes, StandardCharsets.UTF_8);
@@ -81,7 +81,7 @@ public class McpeUtil {
 
     public static Vector3i readBlockCoords(ByteBuf buf) {
         int x = Varints.decodeSigned(buf);
-        int y = Varints.decodeUnsigned(buf);
+        int y = (int) Varints.decodeUnsigned(buf);
         int z = Varints.decodeSigned(buf);
         return new Vector3i(x, y, z);
     }
@@ -101,7 +101,7 @@ public class McpeUtil {
 
     public static Collection<Attribute> readAttributes(ByteBuf buf) {
         List<Attribute> attributes = new ArrayList<>();
-        int size = Varints.decodeUnsigned(buf);
+        int size = (int) Varints.decodeUnsigned(buf);
 
         for (int i = 0; i < size; i++) {
             float min = readFloatLE(buf);

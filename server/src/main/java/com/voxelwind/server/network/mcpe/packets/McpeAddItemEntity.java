@@ -23,7 +23,7 @@ public class McpeAddItemEntity implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         Varints.encodeSignedLong(buffer, entityId);
-        Varints.encodeUnsignedLong(buffer, entityId);
+        Varints.encodeUnsigned(buffer, entityId);
         McpeUtil.writeItemStack(buffer, stack);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);

@@ -22,12 +22,12 @@ public class McpeBatch implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         ByteBuf decompressed = null;
         try {
-            int compressedSize = Varints.decodeUnsigned(buffer);
+            int compressedSize = (int) Varints.decodeUnsigned(buffer);
             decompressed = CompressionUtil.inflate(buffer.readSlice(compressedSize));
 
             // Now process the decompressed result.
             while (decompressed.isReadable()) {
-                int length = Varints.decodeUnsigned(decompressed);
+                int length = (int) Varints.decodeUnsigned(decompressed);
                 ByteBuf data = decompressed.readSlice(length);
 
                 if (data.readableBytes() == 0) {

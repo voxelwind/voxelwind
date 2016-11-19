@@ -36,7 +36,7 @@ public class McpeAddPlayer implements NetworkPackage {
         McpeUtil.writeUuid(buffer, uuid);
         McpeUtil.writeVarintLengthString(buffer, username);
         Varints.encodeSignedLong(buffer, entityId);
-        Varints.encodeUnsignedLong(buffer, runtimeEntityId);
+        Varints.encodeUnsigned(buffer, runtimeEntityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);
         McpeUtil.writeRotation(buffer, rotation);

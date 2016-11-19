@@ -7,6 +7,7 @@ import gnu.trove.TCollections;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 
 public class PacketRegistry {
@@ -169,7 +170,13 @@ public class PacketRegistry {
             throw new RuntimeException("Unable to create packet instance", e);
         }
 
-        netPackage.decode(buf);
+        try {
+            netPackage.decode(buf);
+        } catch (Exception e) {
+            buf.readerIndex(0);
+            System.out.println("[FAILED DECODE] " + ByteBufUtil.prettyHexDump(buf));
+            throw e;
+        }
         return netPackage;
     }
 

@@ -21,10 +21,10 @@ public class McpeCommandStep implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         command = McpeUtil.readVarintLengthString(buffer);
         overload = McpeUtil.readVarintLengthString(buffer);
-        unknown1 = Varints.decodeUnsigned(buffer);
-        unknown2 = Varints.decodeUnsigned(buffer);
+        unknown1 = (int) Varints.decodeUnsigned(buffer);
+        unknown2 = (int) Varints.decodeUnsigned(buffer);
         unknown3 = buffer.readBoolean();
-        unknown4 = Varints.decodeUnsignedLong(buffer);
+        unknown4 = (int) Varints.decodeUnsigned(buffer);
         args = McpeUtil.readVarintLengthString(buffer);
         unknown5 = McpeUtil.readVarintLengthString(buffer);
         buffer.skipBytes(buffer.readableBytes());

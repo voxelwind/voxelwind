@@ -29,7 +29,7 @@ public class McpePlayerList implements NetworkPackage {
             McpeUtil.writeUuid(buffer, record.uuid);
             // 0 is ADD, 1 is REMOVE
             if (type == 0) {
-                Varints.encodeUnsignedLong(buffer, record.entityId);
+                Varints.encodeUnsigned(buffer, record.entityId);
                 McpeUtil.writeVarintLengthString(buffer, record.name);
                 McpeUtil.writeSkin(buffer, record.skin);
             }

@@ -16,8 +16,8 @@ public class McpeUpdateBlock implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         position = McpeUtil.readBlockCoords(buffer);
-        blockId = Varints.decodeUnsigned(buffer);
-        metadata = Varints.decodeUnsigned(buffer);
+        blockId = (int) Varints.decodeUnsigned(buffer);
+        metadata = (int) Varints.decodeUnsigned(buffer);
     }
 
     @Override

@@ -45,10 +45,10 @@ public final class MetadataDictionary {
 
     public static MetadataDictionary deserialize(ByteBuf buf) {
         MetadataDictionary dictionary = new MetadataDictionary();
-        int sz = Varints.decodeUnsigned(buf);
+        int sz = (int) Varints.decodeUnsigned(buf);
         for (int i = 0; i < sz; i++) {
-            int idx = Varints.decodeUnsigned(buf);
-            int type = Varints.decodeUnsigned(buf);
+            int idx = (int) Varints.decodeUnsigned(buf);
+            int type = (int) Varints.decodeUnsigned(buf);
 
             switch (type) {
                 case EntityMetadataConstants.DATA_TYPE_BYTE:

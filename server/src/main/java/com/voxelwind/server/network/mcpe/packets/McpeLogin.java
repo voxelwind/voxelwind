@@ -25,7 +25,7 @@ public class McpeLogin implements NetworkPackage {
             return;
         }
         gameEdition = buffer.readByte();
-        int bodyLength = Varints.decodeUnsigned(buffer);
+        int bodyLength = (int) Varints.decodeUnsigned(buffer);
         ByteBuf body = buffer.readSlice(bodyLength);
 
         // Decompress the body

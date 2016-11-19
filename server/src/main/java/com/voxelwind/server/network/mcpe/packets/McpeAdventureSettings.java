@@ -12,8 +12,8 @@ public class McpeAdventureSettings implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        flags = Varints.decodeUnsigned(buffer);
-        playerPermissions = Varints.decodeUnsigned(buffer);
+        flags = (int) Varints.decodeUnsigned(buffer);
+        playerPermissions = (int) Varints.decodeUnsigned(buffer);
     }
 
     @Override

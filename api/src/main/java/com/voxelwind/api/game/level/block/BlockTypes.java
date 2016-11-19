@@ -70,7 +70,7 @@ public class BlockTypes {
     public static final BlockType BOOKSHELF = IntBlock.builder().name("bookshelf").id(47).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType MOSS_STONE = IntBlock.builder().name("moss_stone").id(48).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType OBSIDIAN = IntBlock.builder().name("obsidian").id(49).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
-    public static final BlockType TORCH = IntBlock.builder().name("torch").id(50).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType TORCH = IntBlock.builder().name("torch").id(50).maxStackSize(64).diggable(true).transparent(true).emitLight(14).filterLight(0).build();
     public static final BlockType FIRE = IntBlock.builder().name("fire").id(51).maxStackSize(0).diggable(true).transparent(true).emitLight(15).filterLight(0).build();
     public static final BlockType MONSTER_SPAWNER = IntBlock.builder().name("monster_spawner").id(52).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType OAK_WOOD_STAIRS = IntBlock.builder().name("oak_wood_stairs").id(53).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
@@ -108,7 +108,7 @@ public class BlockTypes {
     public static final BlockType PUMPKIN = IntBlock.builder().name("pumpkin").id(86).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
     public static final BlockType NETHERRACK = IntBlock.builder().name("netherrack").id(87).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType SOUL_SAND = IntBlock.builder().name("soul_sand").id(88).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
-    public static final BlockType GLOWSTONE = IntBlock.builder().name("glowstone").id(89).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType GLOWSTONE = IntBlock.builder().name("glowstone").id(89).maxStackSize(64).diggable(true).transparent(true).emitLight(15).filterLight(0).build();
     public static final BlockType PORTAL = IntBlock.builder().name("portal").id(90).maxStackSize(0).diggable(false).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType JACK_OLANTERN = IntBlock.builder().name("jack_olantern").id(91).maxStackSize(64).diggable(true).transparent(true).emitLight(15).filterLight(15).build();
     public static final BlockType CAKE = IntBlock.builder().name("cake").id(92).maxStackSize(1).diggable(true).transparent(true).emitLight(0).filterLight(0).metadataClass(Cake.class).build();

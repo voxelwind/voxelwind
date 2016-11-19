@@ -32,7 +32,7 @@ public class McpeServerHandshake implements NetworkPackage {
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new AssertionError(e);
         }
-        int tokenSz = Varints.decodeUnsigned(buffer);
+        int tokenSz = (int) Varints.decodeUnsigned(buffer);
         token = new byte[tokenSz];
         buffer.readBytes(token);
     }
