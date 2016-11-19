@@ -87,6 +87,7 @@ public class BaseEntity implements Entity {
 
     @Override
     public void setPositionFromSystem(Vector3f position) {
+        Preconditions.checkState(level.getEntityManager().isTicking(), "entities in level are not being ticked");
         setPosition(position);
     }
 
