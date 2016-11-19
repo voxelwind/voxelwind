@@ -59,7 +59,7 @@ public class NBTReader implements Closeable {
         switch (type) {
             case END:
                 if (depth == 0) {
-                    throw new IllegalArgumentException("Found TAG_End but not in a compound or list.");
+                    throw new IllegalArgumentException("Found a TAG_End in root tag!");
                 }
                 return EndTag.INSTANCE;
             case BYTE:
