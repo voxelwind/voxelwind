@@ -103,33 +103,39 @@ public class McpeSession {
     private void internalSendPackage(NetworkPackage netPackage) {
         int id = PacketRegistry.getId(netPackage);
 
-        ByteBuf encodedPacketData = PooledByteBufAllocator.DEFAULT.directBuffer();
-
         if (LOGGER.isDebugEnabled()) {
             String to = connection.getRemoteAddress().map(InetSocketAddress::toString).orElse(connection.toString());
             LOGGER.debug("Sending packet {} to {}", netPackage, to);
         }
 
+        ByteBuf encodedPacketData = PooledByteBufAllocator.DEFAULT.directBuffer();
         ByteBuf dataToSend;
         if (encryptionCipher == null || netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
             if (!netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
                 encodedPacketData.writeByte(0xFE);
             }
             encodedPacketData.writeByte((id & 0xFF));
-            netPackage.encode(encodedPacketData);
-
+            try {
+                netPackage.encode(encodedPacketData);
+            } catch (Exception e) {
+                encodedPacketData.release();
+                throw e;
+            }
             dataToSend = encodedPacketData;
         } else {
             encodedPacketData.writeByte((id & 0xFF));
-            netPackage.encode(encodedPacketData);
+            try {
+                netPackage.encode(encodedPacketData);
+                encodedPacketData.readerIndex(0);
+                byte[] trailer = generateTrailer(encodedPacketData);
+                encodedPacketData.readerIndex(0);
+                encodedPacketData.writeBytes(trailer);
+            } catch (Exception e) {
+                encodedPacketData.release();
+                throw e;
+            }
 
-            encodedPacketData.readerIndex(0);
-            byte[] trailer = generateTrailer(encodedPacketData);
-            encodedPacketData.readerIndex(0);
-
-            encodedPacketData.writeBytes(trailer);
-
-            dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer();
+            dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer(encodedPacketData.readableBytes() + 1);
             dataToSend.writeByte(0xFE);
 
             try {
