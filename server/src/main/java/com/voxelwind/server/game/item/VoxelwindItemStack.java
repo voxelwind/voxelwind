@@ -5,6 +5,7 @@ import com.voxelwind.api.game.item.ItemStack;
 import com.voxelwind.api.game.item.ItemStackBuilder;
 import com.voxelwind.api.game.item.ItemType;
 import com.voxelwind.nbt.tags.*;
+import com.voxelwind.nbt.util.CompoundTagBuilder;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -68,12 +69,12 @@ public class VoxelwindItemStack implements ItemStack {
     }
 
     public CompoundTag toFullNBT() {
-        List<Tag<?>> tags = new ArrayList<>();
-        tags.add(new ByteTag("Count", (byte) amount));
-        tags.add(new ShortTag("Damage", MetadataSerializer.serializeMetadata(this)));
-        tags.add(new ShortTag("id", (short) itemType.getId()));
-        tags.add(new CompoundTag("tag", toSpecificNBT().getValue()));
-        return CompoundTag.createFromList("", tags);
+        return CompoundTagBuilder.builder()
+                .tag(new ByteTag("Count", (byte) amount))
+                .tag(new ShortTag("Damage", MetadataSerializer.serializeMetadata(this)))
+                .tag(new ShortTag("id", (short) itemType.getId()))
+                .tag(new CompoundTag("tag", toSpecificNBT().getValue()))
+                .buildRootTag();
     }
 
     public CompoundTag toSpecificNBT() {

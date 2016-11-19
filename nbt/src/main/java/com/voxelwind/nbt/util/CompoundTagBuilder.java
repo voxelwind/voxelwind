@@ -12,7 +12,7 @@ import java.util.Map;
 public class CompoundTagBuilder {
     private final Map<String, Tag<?>> tagMap = new HashMap<>();
 
-    public static CompoundTagBuilder create() {
+    public static CompoundTagBuilder builder() {
         return new CompoundTagBuilder();
     }
 

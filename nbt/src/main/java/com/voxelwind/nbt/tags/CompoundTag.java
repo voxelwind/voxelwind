@@ -1,5 +1,7 @@
 package com.voxelwind.nbt.tags;
 
+import com.voxelwind.nbt.util.CompoundTagBuilder;
+
 import java.util.*;
 
 public class CompoundTag implements Tag<Map<String, Tag<?>>> {
@@ -60,5 +62,13 @@ public class CompoundTag implements Tag<Map<String, Tag<?>>> {
             map.put(tag.getName(), tag);
         }
         return new CompoundTag(name, map);
+    }
+
+    public CompoundTagBuilder toBuilder() {
+        return CompoundTagBuilder.from(this);
+    }
+
+    public Tag<?> get(String key) {
+        return value.get(key);
     }
 }
