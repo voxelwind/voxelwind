@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class NBTWriter implements Closeable {
+    private static final int MAXIMUM_DEPTH = 16;
     private final DataOutput output;
     private final NBTEncoding encoding;
     private boolean closed = false;
@@ -24,14 +25,20 @@ public class NBTWriter implements Closeable {
     }
 
     public void write(Tag<?> tag) throws IOException {
+        if (closed) {
+            throw new IllegalStateException("closed");
+        }
         Objects.requireNonNull(tag, "tag");
         if (!(tag instanceof CompoundTag)) {
             throw new IllegalArgumentException("Trying to write a non-compound tag!");
         }
-        serialize(tag, false);
+        serialize(tag, false, 0);
     }
 
-    private void serialize(Tag<?> tag, boolean skipHeader) throws IOException {
+    private void serialize(Tag<?> tag, boolean skipHeader, int depth) throws IOException {
+        if (depth >= MAXIMUM_DEPTH) {
+            throw new IllegalArgumentException("Reached depth limit");
+        }
         TagType type = TagType.fromClass(tag.getClass());
         if (type == null) {
             throw new IllegalArgumentException("Tag " + tag + " is not valid.");
@@ -96,13 +103,13 @@ public class NBTWriter implements Closeable {
                     output.writeInt(listt.getValue().size());
                 }
                 for (Tag<?> tag1 : listt.getValue()) {
-                    serialize(tag1, true);
+                    serialize(tag1, true, depth++);
                 }
                 break;
             case COMPOUND:
                 CompoundTag compoundTag = (CompoundTag) tag;
                 for (Tag<?> tag1 : compoundTag.getValue().values()) {
-                    serialize(tag1, false);
+                    serialize(tag1, false, depth++);
                 }
                 output.writeByte(0);
                 break;
@@ -133,6 +140,7 @@ public class NBTWriter implements Closeable {
 
     @Override
     public void close() throws IOException {
+        if (closed) return;
         closed = true;
         if (output instanceof Closeable) {
             ((Closeable) output).close();

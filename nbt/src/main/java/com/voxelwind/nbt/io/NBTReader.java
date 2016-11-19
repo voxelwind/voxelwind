@@ -122,6 +122,7 @@ public class NBTReader implements Closeable {
 
     @Override
     public void close() throws IOException {
+        if (closed) return;
         closed = true;
         if (input instanceof Closeable) {
             ((Closeable) input).close();
