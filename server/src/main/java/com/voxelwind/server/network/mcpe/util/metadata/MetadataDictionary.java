@@ -40,7 +40,7 @@ public final class MetadataDictionary {
 
     private static boolean isAcceptable(Object o) {
         return o instanceof Byte || o instanceof Short || o instanceof Integer || o instanceof Float || o
-                instanceof String || o instanceof Vector3i || o instanceof Long;
+                instanceof String || o instanceof Vector3i || o instanceof Long || o instanceof ItemStack;
     }
 
     public static MetadataDictionary deserialize(ByteBuf buf) {
