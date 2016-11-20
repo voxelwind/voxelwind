@@ -169,8 +169,7 @@ public class VoxelwindLevel implements Level {
         Preconditions.checkArgument((entitySpawner = ENTITY_SPAWNER.get(klass)) != null, "Entity class is not valid");
 
         CompletableFuture<T> future = new CompletableFuture<>();
-        Vector3i vector3i = position.toInt();
-        getChunk(vector3i.getX() >> 4, vector3i.getZ() >> 4).whenComplete((chunk, throwable) -> {
+        getChunk(position.getFloorX() >> 4, position.getFloorZ() >> 4).whenComplete((chunk, throwable) -> {
             if (throwable != null) {
                 return;
             }
