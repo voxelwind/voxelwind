@@ -170,13 +170,7 @@ public class PacketRegistry {
             throw new RuntimeException("Unable to create packet instance", e);
         }
 
-        try {
-            netPackage.decode(buf);
-        } catch (Exception e) {
-            buf.readerIndex(0);
-            System.out.println("[FAILED DECODE] " + ByteBufUtil.prettyHexDump(buf));
-            throw e;
-        }
+        netPackage.decode(buf);
         return netPackage;
     }
 
