@@ -26,7 +26,7 @@ public class BlockTypes {
     public static final BlockType GRASS_BLOCK = IntBlock.builder().name("grass_block").id(2).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType DIRT = IntBlock.builder().name("dirt").id(3).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType COBBLESTONE = IntBlock.builder().name("cobblestone").id(4).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
-    public static final BlockType WOOD_PLANKS = IntBlock.builder().name("wood_planks").id(5).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Wood.class).build();
+    public static final BlockType WOOD_PLANKS = IntBlock.builder().name("wood_planks").id(5).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Wood.class).flammable(true).build();
     public static final BlockType SAPLING = IntBlock.builder().name("sapling").id(6).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType BEDROCK = IntBlock.builder().name("bedrock").id(7).maxStackSize(64).diggable(false).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType WATER = IntBlock.builder().name("water").id(8).maxStackSize(0).diggable(false).transparent(true).emitLight(0).filterLight(2).build();
@@ -38,7 +38,7 @@ public class BlockTypes {
     public static final BlockType GOLD_ORE = IntBlock.builder().name("gold_ore").id(14).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType IRON_ORE = IntBlock.builder().name("iron_ore").id(15).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType COAL_ORE = IntBlock.builder().name("coal_ore").id(16).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
-    public static final BlockType WOOD = IntBlock.builder().name("wood").id(17).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Log.class).build();
+    public static final BlockType WOOD = IntBlock.builder().name("wood").id(17).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Log.class).flammable(true).build();
     public static final BlockType LEAVES = IntBlock.builder().name("leaves").id(18).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType SPONGE = IntBlock.builder().name("sponge").id(19).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType GLASS = IntBlock.builder().name("glass").id(20).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
@@ -56,7 +56,7 @@ public class BlockTypes {
     public static final BlockType DEAD_BUSH = IntBlock.builder().name("dead_bush").id(32).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType PISTON = IntBlock.builder().name("piston").id(33).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType PISTON_HEAD = IntBlock.builder().name("piston_head").id(34).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType WOOL = IntBlock.builder().name("wool").id(35).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Dyed.class).build();
+    public static final BlockType WOOL = IntBlock.builder().name("wool").id(35).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Dyed.class).flammable(true).build();
     public static final BlockType DANDELION = IntBlock.builder().name("dandelion").id(37).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType FLOWER = IntBlock.builder().name("flower").id(38).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType BROWN_MUSHROOM = IntBlock.builder().name("brown_mushroom").id(39).maxStackSize(64).diggable(true).transparent(false).emitLight(1).filterLight(15).build();
@@ -73,7 +73,7 @@ public class BlockTypes {
     public static final BlockType TORCH = IntBlock.builder().name("torch").id(50).maxStackSize(64).diggable(true).transparent(true).emitLight(14).filterLight(0).build();
     public static final BlockType FIRE = IntBlock.builder().name("fire").id(51).maxStackSize(0).diggable(true).transparent(true).emitLight(15).filterLight(0).build();
     public static final BlockType MONSTER_SPAWNER = IntBlock.builder().name("monster_spawner").id(52).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType OAK_WOOD_STAIRS = IntBlock.builder().name("oak_wood_stairs").id(53).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
+    public static final BlockType OAK_WOOD_STAIRS = IntBlock.builder().name("oak_wood_stairs").id(53).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).flammable(true).build();
     public static final BlockType CHEST = IntBlock.builder().name("chest").id(54).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType REDSTONE_WIRE = IntBlock.builder().name("redstone_wire").id(55).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType DIAMOND_ORE = IntBlock.builder().name("diamond_ore").id(56).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
@@ -84,7 +84,7 @@ public class BlockTypes {
     public static final BlockType FURNACE = IntBlock.builder().name("furnace").id(61).maxStackSize(64).diggable(true).transparent(true).emitLight(13).filterLight(0).build();
     public static final BlockType BURNING_FURNACE = IntBlock.builder().name("burning_furnace").id(62).maxStackSize(64).diggable(true).transparent(true).emitLight(13).filterLight(0).build();
     public static final BlockType SIGN = IntBlock.builder().name("sign").id(63).maxStackSize(16).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType WOODEN_DOOR = IntBlock.builder().name("wooden_door").id(64).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType WOODEN_DOOR = IntBlock.builder().name("wooden_door").id(64).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).flammable(true).build();
     public static final BlockType LADDER = IntBlock.builder().name("ladder").id(65).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType RAIL = IntBlock.builder().name("rail").id(66).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType COBBLESTONE_STAIRS = IntBlock.builder().name("cobblestone_stairs").id(67).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
@@ -150,9 +150,9 @@ public class BlockTypes {
     public static final BlockType TRIPWIRE_HOOK = IntBlock.builder().name("tripwire_hook").id(131).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType TRIPWIRE = IntBlock.builder().name("tripwire").id(132).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType EMERALD_BLOCK = IntBlock.builder().name("emerald_block").id(133).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
-    public static final BlockType SPRUCE_WOOD_STAIRS = IntBlock.builder().name("spruce_wood_stairs").id(134).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
-    public static final BlockType BIRCH_WOOD_STAIRS = IntBlock.builder().name("birch_wood_stairs").id(135).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
-    public static final BlockType JUNGLE_WOOD_STAIRS = IntBlock.builder().name("jungle_wood_stairs").id(136).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
+    public static final BlockType SPRUCE_WOOD_STAIRS = IntBlock.builder().name("spruce_wood_stairs").id(134).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).flammable(true).build();
+    public static final BlockType BIRCH_WOOD_STAIRS = IntBlock.builder().name("birch_wood_stairs").id(135).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).flammable(true).build();
+    public static final BlockType JUNGLE_WOOD_STAIRS = IntBlock.builder().name("jungle_wood_stairs").id(136).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).flammable(true).build();
     public static final BlockType BEACON = IntBlock.builder().name("beacon").id(138).maxStackSize(64).diggable(true).transparent(false).emitLight(15).filterLight(0).build();
     public static final BlockType COBBLESTONE_WALL = IntBlock.builder().name("cobblestone_wall").id(139).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType FLOWER_POT = IntBlock.builder().name("flower_pot").id(140).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).metadataClass(FlowerpotBlockEntity.class).build();
@@ -172,13 +172,13 @@ public class BlockTypes {
     public static final BlockType HOPPER = IntBlock.builder().name("hopper").id(154).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType QUARTZ_BLOCK = IntBlock.builder().name("quartz_block").id(155).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
     public static final BlockType QUARTZ_STAIRS = IntBlock.builder().name("quartz_stairs").id(156).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
-    public static final BlockType WOODEN_DOUBLE_SLAB = IntBlock.builder().name("wooden_double_slab").id(157).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType WOODEN_SLAB = IntBlock.builder().name("wooden_slab").id(158).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
+    public static final BlockType WOODEN_DOUBLE_SLAB = IntBlock.builder().name("wooden_double_slab").id(157).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).flammable(true).build();
+    public static final BlockType WOODEN_SLAB = IntBlock.builder().name("wooden_slab").id(158).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).flammable(true).build();
     public static final BlockType STAINED_CLAY = IntBlock.builder().name("stained_clay").id(159).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Dyed.class).build();
     public static final BlockType ACACIA_LEAVES = IntBlock.builder().name("acacia_leaves").id(161).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
-    public static final BlockType ACACIA_WOOD = IntBlock.builder().name("acacia_wood").id(162).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Log.class).build();
-    public static final BlockType ACACIA_WOOD_STAIRS = IntBlock.builder().name("acacia_wood_stairs").id(163).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
-    public static final BlockType DARK_OAK_WOOD_STAIRS = IntBlock.builder().name("dark_oak_wood_stairs").id(164).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).build();
+    public static final BlockType ACACIA_WOOD = IntBlock.builder().name("acacia_wood").id(162).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).metadataClass(Log.class).flammable(true).build();
+    public static final BlockType ACACIA_WOOD_STAIRS = IntBlock.builder().name("acacia_wood_stairs").id(163).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).flammable(true).build();
+    public static final BlockType DARK_OAK_WOOD_STAIRS = IntBlock.builder().name("dark_oak_wood_stairs").id(164).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(15).flammable(true).build();
     public static final BlockType SLIME_BLOCK = IntBlock.builder().name("slime_block").id(165).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType IRON_TRAPDOOR = IntBlock.builder().name("iron_trapdoor").id(167).maxStackSize(64).diggable(true).transparent(true).emitLight(0).filterLight(0).build();
     public static final BlockType PRISMARINE = IntBlock.builder().name("prismarine").id(168).maxStackSize(64).diggable(true).transparent(false).emitLight(0).filterLight(15).build();
@@ -227,17 +227,19 @@ public class BlockTypes {
         private final int maxStackSize;
         private final boolean diggable;
         private final boolean transparent;
+        private final boolean flammable;
         private final int emitLight;
         private final int filterLight;
         private final Class<? extends Metadata> metadataClass;
         private final Class<? extends BlockEntity> blockEntityClass;
 
-        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, int emitLight, int filterLight, Class<? extends Metadata> aClass, Class<? extends BlockEntity> blockEntityClass) {
+        public IntBlock(int id, String name, int maxStackSize, boolean diggable, boolean transparent, boolean flammable, int emitLight, int filterLight, Class<? extends Metadata> aClass, Class<? extends BlockEntity> blockEntityClass) {
             this.id = id;
             this.name = name;
             this.maxStackSize = maxStackSize;
             this.diggable = diggable;
             this.transparent = transparent;
+            this.flammable = flammable;
             this.emitLight = emitLight;
             this.filterLight = filterLight;
             this.metadataClass = aClass;
