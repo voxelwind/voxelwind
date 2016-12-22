@@ -25,7 +25,7 @@ public interface BlockStateBuilder {
     BlockStateBuilder data(Metadata data);
 
     /**
-     * Creates the {@link BlockState).
+     * Creates the {@link BlockState}.
      * @return the new block state
      */
     BlockState build();

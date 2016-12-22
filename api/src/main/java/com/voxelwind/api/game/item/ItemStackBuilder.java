@@ -47,7 +47,7 @@ public interface ItemStackBuilder {
     // TODO: Add more methods as more functionality is implemented
 
     /**
-     * Creates the {@link ItemStack).
+     * Creates the {@link ItemStack}.
      * @return the item stack
      */
     ItemStack build();
