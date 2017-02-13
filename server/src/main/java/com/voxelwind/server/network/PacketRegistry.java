@@ -7,7 +7,6 @@ import gnu.trove.TCollections;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 
 public class PacketRegistry {
@@ -35,12 +34,12 @@ public class PacketRegistry {
 
         MCPE_PACKETS[0x01] = McpeLogin.class;
         MCPE_PACKETS[0x02] = McpePlayStatus.class;
-        MCPE_PACKETS[0x03] = McpeServerHandshake.class;
+        MCPE_PACKETS[0x03] = McpeServerHandshake.class;  // McpeServerExchange.class
         MCPE_PACKETS[0x04] = McpeClientMagic.class;
         MCPE_PACKETS[0x05] = McpeDisconnect.class;
         MCPE_PACKETS[0x06] = McpeBatch.class;
         MCPE_PACKETS[0x07] = McpeResourcePackInfo.class;
-	    // RESOURCE_PACK_STACK_PACKET = 0x08;
+	    // RESOURCE_PACK_STACK_PACKET = 0x08; //McpeResourcePackStack.class
 	    MCPE_PACKETS[0x09] = McpeResourcePackClientResponse.class;
         MCPE_PACKETS[0x0a] = McpeText.class;
         MCPE_PACKETS[0x0b] = McpeSetTime.class;
@@ -49,69 +48,75 @@ public class PacketRegistry {
         MCPE_PACKETS[0x0e] = McpeAddEntity.class;
         MCPE_PACKETS[0x0f] = McpeRemoveEntity.class;
         MCPE_PACKETS[0x10] = McpeAddItemEntity.class;
-        // ADD_HANGING_ENTITY_PACKET = 0x11;
-        MCPE_PACKETS[0x12] = McpeTakeItem.class;
+        // ADD_HANGING_ENTITY_PACKET = 0x11; McpeAddHangingEntity.class
+        MCPE_PACKETS[0x12] = McpeTakeItem.class;  //McpeTakeItemEntity.class
         MCPE_PACKETS[0x13] = McpeMoveEntity.class;
         MCPE_PACKETS[0x14] = McpeMovePlayer.class;
-        // RIDER_JUMP_PACKET = 0x15;
+        // RIDER_JUMP_PACKET = 0x15;  //McpeRiderJump.class
         MCPE_PACKETS[0x16] = McpeRemoveBlock.class;
         MCPE_PACKETS[0x17] = McpeUpdateBlock.class;
-        // ADD_PAINTING_PACKET = 0x18;
-        // EXPLODE_PACKET = 0x19;
-        // LEVEL_SOUND_EVENT_PACKET = 0x1a;
-        // LEVEL_EVENT_PACKET = 0x1b;
-        // BLOCK_EVENT_PACKET = 0x1c;
+        // ADD_PAINTING_PACKET = 0x18;  // McpeAddPainting.class
+        // EXPLODE_PACKET = 0x19;  // McpeExplode.class
+        // LEVEL_SOUND_EVENT_PACKET = 0x1a; // McpeLevelSoundEvent.class
+        // LEVEL_EVENT_PACKET = 0x1b;  // McpeLevelEvent.class
+        // BLOCK_EVENT_PACKET = 0x1c;  // McpeBlockEvent.class
         MCPE_PACKETS[0x1d] = McpeEntityEvent.class;
-        // MOB_EFFECT_PACKET = 0x1e;
+        // MOB_EFFECT_PACKET = 0x1e; // McpeMobEffect.class
         MCPE_PACKETS[0x1f] = McpeUpdateAttributes.class;
         MCPE_PACKETS[0x20] = McpeMobEquipment.class;
-        // MOB_ARMOR_EQUIPMENT_PACKET = 0x21;
+        // MOB_ARMOR_EQUIPMENT_PACKET = 0x21; // McpeMobArmorEquipment.class
         MCPE_PACKETS[0x22] = McpeInteract.class;
         MCPE_PACKETS[0x23] = McpeUseItem.class;
         MCPE_PACKETS[0x24] = McpePlayerAction.class;
-        // HURT_ARMOR_PACKET = 0x25;
-        MCPE_PACKETS[0x26] = McpeSetEntityData.class;
-        MCPE_PACKETS[0x27] = McpeSetEntityMotion.class;
-        // SET_ENTITY_LINK_PACKET = 0x28;
-        MCPE_PACKETS[0x29] = McpeSetHealth.class;
-        MCPE_PACKETS[0x2a] = McpeSetSpawnPosition.class;
-        MCPE_PACKETS[0x2b] = McpeAnimate.class;
-        MCPE_PACKETS[0x2c] = McpeRespawn.class;
-        MCPE_PACKETS[0x2d] = McpeDropItem.class;
-        // INVENTORY_ACTION_PACKET = 0x2e;
-        MCPE_PACKETS[0x2f] = McpeContainerOpen.class;
-        MCPE_PACKETS[0x30] = McpeContainerClose.class;
-        MCPE_PACKETS[0x31] = McpeContainerSetSlot.class;
-        MCPE_PACKETS[0x32] = McpeContainerSetData.class;
-        MCPE_PACKETS[0x33] = McpeContainerSetContents.class;
-        // CRAFTING_DATA_PACKET = 0x34;
-	    // CRAFTING_EVENT_PACKET = 0x35;
-        MCPE_PACKETS[0x36] = McpeAdventureSettings.class;
-        MCPE_PACKETS[0x37] = McpeBlockEntityData.class;
-        // PLAYER_INPUT_PACKET = 0x38;
-        MCPE_PACKETS[0x39] = McpeFullChunkData.class;
-        MCPE_PACKETS[0x3a] = McpeSetCommandsEnabled.class;
-        // SET_DIFFICULTY_PACKET = 0x3b;
-        MCPE_PACKETS[0x3c] = McpeChangeDimension.class;
-        MCPE_PACKETS[0x3d] = McpeSetPlayerGameMode.class;
-        MCPE_PACKETS[0x3e] = McpePlayerList.class;
-        // EVENT_PACKET = 0x3f;
-        // SPAWN_EXPERIENCE_ORB_PACKET = 0x40;
-        // CLIENTBOUND_MAP_ITEM_DATA_PACKET = 0x41;
-        // MAP_INFO_REQUEST_PACKET = 0x42;
-        MCPE_PACKETS[0x43] = McpeRequestChunkRadius.class;
-        MCPE_PACKETS[0x44] = McpeChunkRadiusUpdated.class;
-        // ITEM_FRAME_DROP_ITEM_PACKET = 0x45;
-        // REPLACE_SELECTED_ITEM_PACKET = 0x46;
-        // GAME_RULES_CHANGED_PACKET = 0x47;
-        // CAMERA_PACKET = 0x48;
-        // ADD_ITEM_PACKET = 0x49;
-        // BOSS_EVENT_PACKET = 0x4a;
-        MCPE_PACKETS[0x4c] = McpeAvailableCommands.class;
-        MCPE_PACKETS[0x4d] = McpeCommandStep.class;
-        // RESOURCE_PACK_DATA_INFO_PACKET = 0x4d;
-        // RESOURCE_PACK_CHUNK_DATA_PACKET = 0x4e;
-        // RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x4f;
+        // 0x25 McpePlayerFall.class
+        // HURT_ARMOR_PACKET = 0x26; McpeHurtArmor.class
+        MCPE_PACKETS[0x27] = McpeSetEntityData.class;
+        MCPE_PACKETS[0x28] = McpeSetEntityMotion.class;
+        // SET_ENTITY_LINK_PACKET = 0x29;   // McpeSetEntityLink.class
+        MCPE_PACKETS[0x2a] = McpeSetHealth.class;
+        MCPE_PACKETS[0x2b] = McpeSetSpawnPosition.class;
+        MCPE_PACKETS[0x2c] = McpeAnimate.class;
+        MCPE_PACKETS[0x2d] = McpeRespawn.class;
+        MCPE_PACKETS[0x2e] = McpeDropItem.class;
+        // INVENTORY_ACTION_PACKET = 0x2f;  // McpeInventoryAction.class
+        MCPE_PACKETS[0x30] = McpeContainerOpen.class;
+        MCPE_PACKETS[0x31] = McpeContainerClose.class;
+        MCPE_PACKETS[0x32] = McpeContainerSetSlot.class;
+        MCPE_PACKETS[0x33] = McpeContainerSetData.class;
+        MCPE_PACKETS[0x34] = McpeContainerSetContents.class;
+        // CRAFTING_DATA_PACKET = 0x35;  // McpeCraftingData.class
+	    // CRAFTING_EVENT_PACKET = 0x36; // McpeCraftingEvent.class
+        MCPE_PACKETS[0x37] = McpeAdventureSettings.class;
+        MCPE_PACKETS[0x38] = McpeBlockEntityData.class;
+        // PLAYER_INPUT_PACKET = 0x39; // McpePlayerInput.class
+        MCPE_PACKETS[0x3a] = McpeFullChunkData.class;
+        MCPE_PACKETS[0x3b] = McpeSetCommandsEnabled.class;
+        // SET_DIFFICULTY_PACKET = 0x3c; // McpeSetDifficulty.class
+        MCPE_PACKETS[0x3d] = McpeChangeDimension.class;
+        MCPE_PACKETS[0x3e] = McpeSetPlayerGameMode.class;
+        MCPE_PACKETS[0x3f] = McpePlayerList.class;
+        // EVENT_PACKET = 0x40; //McpeEvent.class
+        // SPAWN_EXPERIENCE_ORB_PACKET = 0x41;   // McpeSpawnExperienceOrb.class
+        // CLIENTBOUND_MAP_ITEM_DATA_PACKET = 0x42;  // McpeClientboundMapItemData.class
+        // MAP_INFO_REQUEST_PACKET = 0x43;  // McpeMapInfoRequest.class
+
+        MCPE_PACKETS[0x44] = McpeRequestChunkRadius.class;
+        MCPE_PACKETS[0x45] = McpeChunkRadiusUpdated.class;
+
+        // ITEM_FRAME_DROP_ITEM_PACKET = 0x46;  // McpeItemFramDropItem.class
+        // REPLACE_SELECTED_ITEM_PACKET = 0x47; // McpeReplaceSelectedItem.class
+        // GAME_RULES_CHANGED_PACKET = 0x48;    // McpeGameRulesChanged.class
+        // CAMERA_PACKET = 0x49;                // McpeCamera.class
+        // ADD_ITEM_PACKET = 0x4a;              // McpeAddItem.class
+        // BOSS_EVENT_PACKET = 0x4b;            // McpeBossEvent.class
+        // 0x4c ????
+        MCPE_PACKETS[0x4d] = McpeAvailableCommands.class;
+        MCPE_PACKETS[0x4e] = McpeCommandStep.class;
+        // RESOURCE_PACK_DATA_INFO_PACKET = 0x4f; // McpeResourcePackDataInfo.class
+        // RESOURCE_PACK_CHUNK_DATA_PACKET = 0x50;// McpeResourcePackChunkData.class
+        // RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x51; //McpeResourcePackChunkRequest.class
+
+        //0x52 McpeTransfer.class
 
         TObjectIntMap<Class<? extends NetworkPackage>> classToIdMap = new TObjectIntHashMap<>(64, 0.75f, -1);
         for (int i = 0; i < RAKNET_PACKETS.length; i++) {
