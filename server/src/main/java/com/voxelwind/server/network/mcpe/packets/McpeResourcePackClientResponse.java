@@ -6,13 +6,13 @@ import lombok.Data;
 
 @Data
 public class McpeResourcePackClientResponse implements NetworkPackage {
-    private byte responceStatus;
+    private byte responseStatus;
     private short resourcePackIdVersions;
 
 
     @Override
     public void decode(ByteBuf buffer) {
-        responceStatus = buffer.readByte();
+        responseStatus = buffer.readByte();
         resourcePackIdVersions = buffer.readShort();
     }
 
