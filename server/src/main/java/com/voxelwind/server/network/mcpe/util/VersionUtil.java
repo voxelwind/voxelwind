@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VersionUtil {
-    private static final int[] COMPATIBLE_PROTOCOL_VERSIONS = new int[]{ 91 };
+    private static final int[] COMPATIBLE_PROTOCOL_VERSIONS = new int[]{ 101 };
 
     public static int[] getCompatibleProtocolVersions() {
         return COMPATIBLE_PROTOCOL_VERSIONS.clone();
@@ -21,6 +21,10 @@ public class VersionUtil {
         switch (protocolVersion) {
             case 91:
                 return "0.16.x";
+            case 100:
+                return "1.0.0";
+            case 101:
+                return "1.0.3";
         }
         return null;
     }

@@ -3,6 +3,7 @@ package com.voxelwind.server.network.mcpe.packets;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
+import com.voxelwind.server.network.mcpe.util.VersionUtil;
 import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -21,7 +22,7 @@ public class McpeLogin implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         protocolVersion = buffer.readInt();
-        if (protocolVersion != 91) {
+        if (!VersionUtil.isCompatible(protocolVersion)) {
             return;
         }
         gameEdition = buffer.readByte();
