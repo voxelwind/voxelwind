@@ -62,6 +62,16 @@ public class CompoundTagBuilder {
         return tag(new StringTag(name, value));
     }
 
+    public CompoundTagBuilder tag (String name, CompoundTag value) {
+        tagMap.put(name, value);
+        return this;
+    }
+
+    public CompoundTagBuilder tag(String name, ListTag value) {
+        tagMap.put(name, value);
+        return this;
+    }
+
     public CompoundTag buildRootTag() {
         return new CompoundTag("", tagMap);
     }
