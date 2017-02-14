@@ -26,48 +26,48 @@ public class CompoundTagBuilder {
         return this;
     }
 
-    public CompoundTagBuilder tag(String name, byte value) {
+    public CompoundTagBuilder tagByte (String name, byte value) {
         return tag(new ByteTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, byte [] value) {
+    public CompoundTagBuilder tagByteArray (String name, byte [] value) {
         return tag(new ByteArrayTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, double value) {
+    public CompoundTagBuilder tagDouble (String name, double value) {
         return tag(new DoubleTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, float value) {
+    public CompoundTagBuilder tagFloat (String name, float value) {
         return tag(new FloatTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, int[] value) {
+    public CompoundTagBuilder tagIntArray (String name, int[] value) {
         return tag(new IntArrayTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, int value) {
+    public CompoundTagBuilder tagInt (String name, int value) {
         return tag(new IntTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, long value) {
+    public CompoundTagBuilder tagLong (String name, long value) {
         return tag(new LongTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, short value) {
+    public CompoundTagBuilder tagShort (String name, short value) {
         return tag(new ShortTag(name, value));
     }
 
-    public CompoundTagBuilder tag(String name, String value) {
+    public CompoundTagBuilder tagString (String name, String value) {
         return tag(new StringTag(name, value));
     }
 
-    public CompoundTagBuilder tag (String name, CompoundTag value) {
+    public CompoundTagBuilder tagCompoundTag (String name, CompoundTag value) {
         tagMap.put(name, value);
         return this;
     }
 
-    public CompoundTagBuilder tag(String name, ListTag value) {
+    public CompoundTagBuilder tagListTag(String name, ListTag value) {
         tagMap.put(name, value);
         return this;
     }
