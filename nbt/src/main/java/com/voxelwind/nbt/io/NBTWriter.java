@@ -103,13 +103,13 @@ public class NBTWriter implements Closeable {
                     output.writeInt(listt.getValue().size());
                 }
                 for (Tag<?> tag1 : listt.getValue()) {
-                    serialize(tag1, true, depth++);
+                    serialize(tag1, true, depth+1);
                 }
                 break;
             case COMPOUND:
                 CompoundTag compoundTag = (CompoundTag) tag;
                 for (Tag<?> tag1 : compoundTag.getValue().values()) {
-                    serialize(tag1, false, depth++);
+                    serialize(tag1, false, depth+1);
                 }
                 output.writeByte(0);
                 break;
