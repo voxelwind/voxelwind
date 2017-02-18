@@ -34,7 +34,7 @@ public class AnvilConversion {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     for (int y = 0; y < 16; y++) {
-                        int pos = anvilBlockPosition(x, (ySec * 16) + y, z);
+                        int pos = anvilBlockPosition(x, y, z);
                         section.setBlockId(x, y, z, blockIds[pos]);
                         section.setBlockData(x, y, z, data.get(pos));
                         section.setSkyLight(x, y, z, skyLight.get(pos));
