@@ -1,7 +1,6 @@
 package com.voxelwind.nbt.util;
 
-import com.voxelwind.nbt.tags.CompoundTag;
-import com.voxelwind.nbt.tags.Tag;
+import com.voxelwind.nbt.tags.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +23,52 @@ public class CompoundTagBuilder {
 
     public CompoundTagBuilder tag(Tag<?> tag) {
         tagMap.put(tag.getName(), tag);
+        return this;
+    }
+
+    public CompoundTagBuilder tagByte (String name, byte value) {
+        return tag(new ByteTag(name, value));
+    }
+
+    public CompoundTagBuilder tagByteArray (String name, byte [] value) {
+        return tag(new ByteArrayTag(name, value));
+    }
+
+    public CompoundTagBuilder tagDouble (String name, double value) {
+        return tag(new DoubleTag(name, value));
+    }
+
+    public CompoundTagBuilder tagFloat (String name, float value) {
+        return tag(new FloatTag(name, value));
+    }
+
+    public CompoundTagBuilder tagIntArray (String name, int[] value) {
+        return tag(new IntArrayTag(name, value));
+    }
+
+    public CompoundTagBuilder tagInt (String name, int value) {
+        return tag(new IntTag(name, value));
+    }
+
+    public CompoundTagBuilder tagLong (String name, long value) {
+        return tag(new LongTag(name, value));
+    }
+
+    public CompoundTagBuilder tagShort (String name, short value) {
+        return tag(new ShortTag(name, value));
+    }
+
+    public CompoundTagBuilder tagString (String name, String value) {
+        return tag(new StringTag(name, value));
+    }
+
+    public CompoundTagBuilder tagCompoundTag (String name, CompoundTag value) {
+        tagMap.put(name, value);
+        return this;
+    }
+
+    public CompoundTagBuilder tagListTag(String name, ListTag value) {
+        tagMap.put(name, value);
         return this;
     }
 
