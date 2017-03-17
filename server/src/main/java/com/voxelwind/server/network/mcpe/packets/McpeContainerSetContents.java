@@ -16,14 +16,14 @@ public class McpeContainerSetContents implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         windowId = buffer.readByte();
-        int stacksToRead = Varints.decodeUnsigned(buffer);
+        int stacksToRead = (int) Varints.decodeUnsigned(buffer);
         stacks = new ItemStack[stacksToRead];
         for (int i = 0; i < stacksToRead; i++) {
             stacks[i] = McpeUtil.readItemStack(buffer);
         }
 
         if (windowId == 0) {
-            int hotbarEntriesToRead = Varints.decodeUnsigned(buffer);
+            int hotbarEntriesToRead = (int) Varints.decodeUnsigned(buffer);
             hotbarData = new int[hotbarEntriesToRead];
             for (int i = 0; i < hotbarEntriesToRead; i++) {
                 hotbarData[i] = Varints.decodeSigned(buffer);

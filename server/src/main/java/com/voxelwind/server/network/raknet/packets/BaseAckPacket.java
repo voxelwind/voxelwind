@@ -7,7 +7,6 @@ import gnu.trove.list.TIntList;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -54,11 +53,11 @@ public abstract class BaseAckPacket implements NetworkPackage {
         short size = buffer.readShort();
         for (int i = 0; i < size; i++) {
             boolean isSingleton = buffer.readBoolean();
-            int lower = buffer.order(ByteOrder.LITTLE_ENDIAN).readMedium();
+            int lower = buffer.readMediumLE();
             if (isSingleton) {
                 ids.add(new IntRange(lower, lower));
             } else {
-                int upper = buffer.order(ByteOrder.LITTLE_ENDIAN).readMedium();
+                int upper = buffer.readMediumLE();
                 ids.add(new IntRange(lower, upper));
             }
         }
@@ -70,9 +69,9 @@ public abstract class BaseAckPacket implements NetworkPackage {
         for (IntRange id : ids) {
             boolean singleton = id.getStart() == id.getEnd();
             buffer.writeBoolean(singleton);
-            buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.getStart());
+            buffer.writeMediumLE(id.getStart());
             if (!singleton) {
-                buffer.order(ByteOrder.LITTLE_ENDIAN).writeMedium(id.getEnd());
+                buffer.writeMediumLE(id.getEnd());
             }
         }
     }

@@ -64,8 +64,8 @@ public class NBTReaderTest {
         assertTrue("Read tag is not an compound tag, violates NBT standard!", readTag instanceof CompoundTag);
         CompoundTag compoundTag = (CompoundTag) readTag;
         assertEquals("hello world", compoundTag.getName());
-        assertTrue("Read compound tag lacks named tag 'name'", compoundTag.getValue().containsKey("name"));
-        Tag<?> nameTagRaw = compoundTag.getValue().get("name");
+        Tag<?> nameTagRaw = compoundTag.get("name");
+        assertTrue("Read compound tag lacks named tag 'name'", nameTagRaw != null);
         assertTrue("'name' tag inside read compound is not a TAG_String", nameTagRaw instanceof StringTag);
         assertEquals("Bananrama", nameTagRaw.getValue());
     }

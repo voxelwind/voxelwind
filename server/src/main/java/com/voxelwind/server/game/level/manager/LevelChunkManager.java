@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -51,10 +50,11 @@ public class LevelChunkManager {
         this.level = level;
         this.backingChunkProvider = backingChunkProvider;
         this.backingChunkGenerator = backingChunkGenerator;
-        this.loadService = Executors.newFixedThreadPool(server.getConfiguration().getFineTuning().getChunkLoadThreads(), new ThreadFactoryBuilder()
-                .setNameFormat("Voxelwind Chunk Load Handler for " + level.getName() + " - #%d")
-                .setDaemon(true)
-                .build());
+        this.loadService = Executors.newFixedThreadPool(Math.max(1, server.getConfiguration().getFineTuning().getChunkLoadThreads()),
+                new ThreadFactoryBuilder()
+                        .setNameFormat("Voxelwind Chunk Load Handler for " + level.getName() + " - #%d")
+                        .setDaemon(true)
+                        .build());
     }
 
     public CompletableFuture<Chunk> getChunk(int x, int z) {

@@ -4,11 +4,9 @@ import com.flowpowered.math.vector.Vector3f;
 import com.voxelwind.api.game.entities.components.ArmorEquipment;
 import com.voxelwind.api.game.entities.components.Health;
 import com.voxelwind.api.game.entities.components.Physics;
-import com.voxelwind.api.game.entities.components.system.PhysicsSystem;
 import com.voxelwind.api.server.Server;
 import com.voxelwind.server.game.entities.components.HealthComponent;
 import com.voxelwind.server.game.entities.components.PhysicsComponent;
-import com.voxelwind.server.game.entities.systems.DeathSystem;
 import com.voxelwind.server.game.inventories.VoxelwindArmorEquipment;
 import com.voxelwind.server.game.level.VoxelwindLevel;
 

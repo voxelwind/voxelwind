@@ -26,7 +26,6 @@ import javax.annotation.Nonnull;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -104,33 +103,39 @@ public class McpeSession {
     private void internalSendPackage(NetworkPackage netPackage) {
         int id = PacketRegistry.getId(netPackage);
 
-        ByteBuf encodedPacketData = PooledByteBufAllocator.DEFAULT.directBuffer();
-
         if (LOGGER.isDebugEnabled()) {
             String to = connection.getRemoteAddress().map(InetSocketAddress::toString).orElse(connection.toString());
             LOGGER.debug("Sending packet {} to {}", netPackage, to);
         }
 
+        ByteBuf encodedPacketData = PooledByteBufAllocator.DEFAULT.directBuffer();
         ByteBuf dataToSend;
         if (encryptionCipher == null || netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
             if (!netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
                 encodedPacketData.writeByte(0xFE);
             }
             encodedPacketData.writeByte((id & 0xFF));
-            netPackage.encode(encodedPacketData);
-
+            try {
+                netPackage.encode(encodedPacketData);
+            } catch (Exception e) {
+                encodedPacketData.release();
+                throw e;
+            }
             dataToSend = encodedPacketData;
         } else {
             encodedPacketData.writeByte((id & 0xFF));
-            netPackage.encode(encodedPacketData);
+            try {
+                netPackage.encode(encodedPacketData);
+                encodedPacketData.readerIndex(0);
+                byte[] trailer = generateTrailer(encodedPacketData);
+                encodedPacketData.readerIndex(0);
+                encodedPacketData.writeBytes(trailer);
+            } catch (Exception e) {
+                encodedPacketData.release();
+                throw e;
+            }
 
-            encodedPacketData.readerIndex(0);
-            byte[] trailer = generateTrailer(encodedPacketData);
-            encodedPacketData.readerIndex(0);
-
-            encodedPacketData.writeBytes(trailer);
-
-            dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer();
+            dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer(encodedPacketData.readableBytes() + 1);
             dataToSend.writeByte(0xFE);
 
             try {
@@ -182,6 +187,17 @@ public class McpeSession {
                 }
 
                 continue;
+            } else if (batch.getPackages().size() >= 3) {
+                // Reached a per-batch limit on packages, send these packages now
+                internalSendPackage(batch);
+                batch = new McpeBatch();
+
+                try {
+                    // Delay things a tiny bit
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Interrupted", e);
+                }
             }
 
             batch.getPackages().add(netPackage);
@@ -249,7 +265,7 @@ public class McpeSession {
         ByteBuf counterBuf = PooledByteBufAllocator.DEFAULT.directBuffer(8);
         ByteBuf keyBuf = PooledByteBufAllocator.DEFAULT.directBuffer(serverKey.length);
         try {
-            counterBuf.order(ByteOrder.LITTLE_ENDIAN).writeLong(encryptedSentPacketGenerator.getAndIncrement());
+            counterBuf.writeLongLE(encryptedSentPacketGenerator.getAndIncrement());
             keyBuf.writeBytes(serverKey);
 
             hash.update(counterBuf);

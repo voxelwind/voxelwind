@@ -6,7 +6,6 @@ import com.voxelwind.api.game.inventories.InventoryHolder;
 import com.voxelwind.api.game.inventories.PlayerInventory;
 import com.voxelwind.api.server.command.CommandExecutorSource;
 import com.voxelwind.api.server.event.block.iface.BlockReplacer;
-import com.voxelwind.api.server.player.GameMode;
 import com.voxelwind.api.server.player.PlayerMessageDisplayType;
 import com.voxelwind.api.server.player.PopupMessage;
 import com.voxelwind.api.server.player.TranslatedMessage;

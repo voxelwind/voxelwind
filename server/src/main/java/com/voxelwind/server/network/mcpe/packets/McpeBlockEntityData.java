@@ -6,12 +6,11 @@ import com.voxelwind.nbt.io.NBTWriter;
 import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
+import com.voxelwind.server.network.util.LittleEndianByteBufOutputStream;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufOutputStream;
 import lombok.Data;
 
 import java.io.IOException;
-import java.nio.ByteOrder;
 
 @Data
 public class McpeBlockEntityData implements NetworkPackage {
@@ -26,7 +25,7 @@ public class McpeBlockEntityData implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         McpeUtil.writeBlockCoords(buffer, position);
-        try (NBTWriter writer = new NBTWriter(new ByteBufOutputStream(buffer.order(ByteOrder.LITTLE_ENDIAN)), NBTEncoding.MCPE_0_16_NETWORK)) {
+        try (NBTWriter writer = new NBTWriter(new LittleEndianByteBufOutputStream(buffer), NBTEncoding.MCPE_0_16_NETWORK)) {
             writer.write(blockEntityData);
         } catch (IOException e) {
             throw new RuntimeException(e);

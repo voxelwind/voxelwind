@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class RakNetDatagramHandler extends SimpleChannelInboundHandler<AddressedRakNetDatagram> {
+    private static final InetSocketAddress LOOPBACK_MCPE = new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132);
+    private static final InetSocketAddress JUNK_ADDRESS = new InetSocketAddress(InetAddresses.forString("255.255.255.255"), 19132);
     private static final Logger LOGGER = LogManager.getLogger(RakNetDatagramHandler.class);
     private final VoxelwindServer server;
 
@@ -97,15 +99,17 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
         // Special cases we need to handle here.
         // McpeWrapper: Encrypted packet.
         if (netPackage instanceof McpeWrapper) {
+            ByteBuf wrappedData = ((McpeWrapper) netPackage).getWrapped();
             ByteBuf cleartext = null;
             try {
                 if (session.isEncrypted()) {
-                    cleartext = PooledByteBufAllocator.DEFAULT.directBuffer();
+                    cleartext = PooledByteBufAllocator.DEFAULT.directBuffer(wrappedData.readableBytes());
                     session.getDecryptionCipher().cipher(((McpeWrapper) netPackage).getWrapped(), cleartext);
-                    LOGGER.debug("[CHECKSUM] {}", ByteBufUtil.hexDump(cleartext.slice(cleartext.readableBytes() - 8, 8)));
+                    // MCPE appends a 8-byte checksum at the end of each packet, but we don't want it.
+                    // TODO: Would it be worth checking it?
                     cleartext = cleartext.slice(0, cleartext.readableBytes() - 8);
                 } else {
-                    cleartext = ((McpeWrapper) netPackage).getWrapped();
+                    cleartext = wrappedData;
                 }
 
                 if (LOGGER.isDebugEnabled()) {
@@ -115,7 +119,7 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
                 NetworkPackage pkg = PacketRegistry.tryDecode(cleartext, PacketType.MCPE);
                 handlePackage(pkg, session);
             } finally {
-                if (cleartext != null && cleartext != ((McpeWrapper) netPackage).getWrapped()) {
+                if (cleartext != null && cleartext != wrappedData) {
                     cleartext.release();
                 }
             }
@@ -137,10 +141,10 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
             ConnectionResponsePacket response = new ConnectionResponsePacket();
             response.setIncomingTimestamp(request.getTimestamp());
             response.setSystemTimestamp(System.currentTimeMillis());
-            response.setSystemAddress(session.getRemoteAddress().orElse(new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132)));
+            response.setSystemAddress(session.getRemoteAddress().orElse(LOOPBACK_MCPE));
             InetSocketAddress[] addresses = new InetSocketAddress[10];
-            Arrays.fill(addresses, new InetSocketAddress(InetAddresses.forString("255.255.255.255"), 19132));
-            addresses[0] = new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132);
+            Arrays.fill(addresses, JUNK_ADDRESS);
+            addresses[0] = LOOPBACK_MCPE;
             response.setSystemAddresses(addresses);
             response.setSystemIndex((short) 0);
             session.sendImmediatePackage(response);

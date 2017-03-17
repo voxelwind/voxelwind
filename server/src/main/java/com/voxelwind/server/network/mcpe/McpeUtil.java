@@ -22,13 +22,14 @@ import com.voxelwind.server.game.item.VoxelwindNBTUtils;
 import com.voxelwind.server.game.level.util.Attribute;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.util.ResourcePackInfo;
+import com.voxelwind.server.network.util.LittleEndianByteBufInputStream;
+import com.voxelwind.server.network.util.LittleEndianByteBufOutputStream;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.ByteBufOutputStream;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,27 +51,26 @@ public class McpeUtil {
 
     public static String readVarintLengthString(ByteBuf buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
-        int length = Varints.decodeUnsigned(buffer);
+        int length = (int) Varints.decodeUnsigned(buffer);
         byte[] readBytes = new byte[length];
         buffer.readBytes(readBytes);
         return new String(readBytes, StandardCharsets.UTF_8);
     }
 
-    public static void writeLELengthString(ByteBuf buffer, String string) {
+    public static void writeLELengthAsciiString(ByteBuf buffer, AsciiString string) {
         Preconditions.checkNotNull(buffer, "buffer");
         Preconditions.checkNotNull(string, "string");
-        byte[] bytes = string.getBytes(CharsetUtil.US_ASCII);
-        buffer.order(ByteOrder.LITTLE_ENDIAN).writeInt(bytes.length);
-        buffer.writeBytes(bytes);
+        buffer.writeIntLE(string.length());
+        buffer.writeBytes(string.toByteArray());
     }
 
-    public static String readLELengthString(ByteBuf buffer) {
+    public static AsciiString readLELengthAsciiString(ByteBuf buffer) {
         Preconditions.checkNotNull(buffer, "buffer");
 
-        int length = buffer.order(ByteOrder.LITTLE_ENDIAN).readInt();
+        int length = buffer.readIntLE();
         byte[] bytes = new byte[length];
         buffer.readBytes(bytes);
-        return new String(bytes, StandardCharsets.US_ASCII);
+        return new AsciiString(bytes);
     }
 
     public static void writeBlockCoords(ByteBuf buf, Vector3i vector3i) {
@@ -81,36 +81,33 @@ public class McpeUtil {
 
     public static Vector3i readBlockCoords(ByteBuf buf) {
         int x = Varints.decodeSigned(buf);
-        int y = Varints.decodeUnsigned(buf);
+        int y = (int) Varints.decodeUnsigned(buf);
         int z = Varints.decodeSigned(buf);
         return new Vector3i(x, y, z);
     }
 
     public static void writeVector3f(ByteBuf buf, Vector3f vector3f) {
-        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
-        leBuf.writeFloat(vector3f.getX());
-        leBuf.writeFloat(vector3f.getY());
-        leBuf.writeFloat(vector3f.getZ());
+        writeFloatLE(buf, vector3f.getX());
+        writeFloatLE(buf, vector3f.getY());
+        writeFloatLE(buf, vector3f.getZ());
     }
 
     public static Vector3f readVector3f(ByteBuf buf) {
-        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
-        double x = leBuf.readFloat();
-        double y = leBuf.readFloat();
-        double z = leBuf.readFloat();
+        double x = readFloatLE(buf);
+        double y = readFloatLE(buf);
+        double z = readFloatLE(buf);
         return new Vector3f(x, y, z);
     }
 
     public static Collection<Attribute> readAttributes(ByteBuf buf) {
         List<Attribute> attributes = new ArrayList<>();
-        int size = Varints.decodeUnsigned(buf);
+        int size = (int) Varints.decodeUnsigned(buf);
 
-        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
         for (int i = 0; i < size; i++) {
-            float min = leBuf.readFloat();
-            float max = leBuf.readFloat();
-            float val = leBuf.readFloat();
-            float defaultVal = leBuf.readFloat();
+            float min = readFloatLE(buf);
+            float max = readFloatLE(buf);
+            float val = readFloatLE(buf);
+            float defaultVal = readFloatLE(buf);
             String name = readVarintLengthString(buf);
 
             attributes.add(new Attribute(name, min, max, val, defaultVal));
@@ -119,14 +116,21 @@ public class McpeUtil {
         return attributes;
     }
 
+    public static void writeFloatLE(ByteBuf buf, float value) {
+        buf.writeIntLE(Float.floatToRawIntBits(value));
+    }
+
+    public static float readFloatLE(ByteBuf buf) {
+        return Float.intBitsToFloat(buf.readIntLE());
+    }
+
     public static void writeAttributes(ByteBuf buf, Collection<Attribute> attributeList) {
         Varints.encodeUnsigned(buf, attributeList.size());
-        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
         for (Attribute attribute : attributeList) {
-            leBuf.writeFloat(attribute.getMinimumValue());
-            leBuf.writeFloat(attribute.getMaximumValue());
-            leBuf.writeFloat(attribute.getValue());
-            leBuf.writeFloat(attribute.getDefaultValue());
+            writeFloatLE(buf, attribute.getMinimumValue());
+            writeFloatLE(buf, attribute.getMaximumValue());
+            writeFloatLE(buf, attribute.getValue());
+            writeFloatLE(buf, attribute.getDefaultValue());
             writeVarintLengthString(buf, attribute.getName());
         }
     }
@@ -165,7 +169,7 @@ public class McpeUtil {
         int aux = Varints.decodeSigned(buf);
         int damage = aux >> 8;
         int count = aux & 0xff;
-        short nbtSize = buf.order(ByteOrder.LITTLE_ENDIAN).readShort();
+        short nbtSize = buf.readShortLE();
 
         ItemType type = ItemTypes.forId(id);
 
@@ -175,7 +179,7 @@ public class McpeUtil {
                 .amount(count);
 
         if (nbtSize > 0) {
-            try (NBTReader reader = new NBTReader(new ByteBufInputStream(buf.readSlice(nbtSize).order(ByteOrder.LITTLE_ENDIAN)))) {
+            try (NBTReader reader = new NBTReader(new LittleEndianByteBufInputStream(buf.readSlice(nbtSize)))) {
                 Tag<?> tag = reader.readTag();
                 if (tag instanceof CompoundTag) {
                     VoxelwindNBTUtils.applyItemData(builder, ((CompoundTag) tag).getValue());
@@ -199,12 +203,11 @@ public class McpeUtil {
 
         // Remember this position, since we'll be writing the true NBT size here later:
         int sizeIndex = buf.writerIndex();
-        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
-        leBuf.writeShort(0);
+        buf.writeShort(0);
         int afterSizeIndex = buf.writerIndex();
 
         if (stack instanceof VoxelwindItemStack) {
-            try (NBTWriter stream = new NBTWriter(new ByteBufOutputStream(leBuf))) {
+            try (NBTWriter stream = new NBTWriter(new LittleEndianByteBufOutputStream(buf))) {
                 stream.write(((VoxelwindItemStack) stack).toSpecificNBT());
             } catch (IOException e) {
                 // This shouldn't happen (as this is backed by a Netty ByteBuf), but okay...
@@ -212,7 +215,7 @@ public class McpeUtil {
             }
 
             // Set to the written NBT size
-            leBuf.setShort(sizeIndex, buf.writerIndex() - afterSizeIndex);
+            buf.setShortLE(sizeIndex, buf.writerIndex() - afterSizeIndex);
         }
     }
 
@@ -226,18 +229,16 @@ public class McpeUtil {
     }
 
     public static Rotation readRotation(ByteBuf buffer) {
-        ByteBuf leBuf = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        float yaw = leBuf.readFloat();
-        float headYaw = leBuf.readFloat();
-        float pitch = leBuf.readFloat();
+        float yaw = readFloatLE(buffer);
+        float headYaw = readFloatLE(buffer);
+        float pitch = readFloatLE(buffer);
         return new Rotation(pitch, yaw, headYaw);
     }
 
     public static void writeRotation(ByteBuf buffer, Rotation rotation) {
-        ByteBuf leBuf = buffer.order(ByteOrder.LITTLE_ENDIAN);
-        leBuf.writeFloat(rotation.getYaw());
-        leBuf.writeFloat(rotation.getHeadYaw());
-        leBuf.writeFloat(rotation.getPitch());
+        writeFloatLE(buffer, rotation.getYaw());
+        writeFloatLE(buffer, rotation.getHeadYaw());
+        writeFloatLE(buffer, rotation.getPitch());
     }
 
     public static Rotation readByteRotation(ByteBuf buf) {

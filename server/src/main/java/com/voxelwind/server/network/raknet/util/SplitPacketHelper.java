@@ -26,13 +26,16 @@ public class SplitPacketHelper {
 
         packets[packet.getPartIndex()] = packet;
 
+        int sz = 0;
         for (EncapsulatedRakNetPacket netPacket : packets) {
             if (netPacket == null) {
                 return Optional.empty();
             }
+            sz += netPacket.getBuffer().readableBytes();
         }
 
-        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer();
+        // We can't use a composite buffer as the native code will choke on it
+        ByteBuf buf = PooledByteBufAllocator.DEFAULT.directBuffer(sz);
         for (EncapsulatedRakNetPacket netPacket : packets) {
             buf.writeBytes(netPacket.getBuffer());
         }

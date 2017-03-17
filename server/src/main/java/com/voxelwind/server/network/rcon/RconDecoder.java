@@ -4,15 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
-import java.nio.ByteOrder;
 import java.util.List;
 
 public class RconDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> list) throws Exception {
-        ByteBuf leBuf = buf.order(ByteOrder.LITTLE_ENDIAN);
-        int id = leBuf.readInt();
-        int type = leBuf.readInt();
+        int id = buf.readIntLE();
+        int type = buf.readIntLE();
         String body = readNullTerminatedString(buf);
 
         // Discard remaining bytes

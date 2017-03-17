@@ -8,8 +8,6 @@ import com.voxelwind.server.network.mcpe.util.metadata.MetadataDictionary;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
-import java.nio.ByteOrder;
-
 @Data
 public class McpeAddEntity implements NetworkPackage {
     private long entityId;
@@ -29,12 +27,12 @@ public class McpeAddEntity implements NetworkPackage {
     @Override
     public void encode(ByteBuf buffer) {
         Varints.encodeSignedLong(buffer, entityId);
-        Varints.encodeUnsignedLong(buffer, entityId);
+        Varints.encodeUnsigned(buffer, entityId);
         Varints.encodeUnsigned(buffer, entityType);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeVector3f(buffer, velocity);
-        buffer.order(ByteOrder.LITTLE_ENDIAN).writeFloat(yaw);
-        buffer.order(ByteOrder.LITTLE_ENDIAN).writeFloat(pitch);
+        McpeUtil.writeFloatLE(buffer, yaw);
+        McpeUtil.writeFloatLE(buffer, pitch);
         Varints.encodeUnsigned(buffer, modifiers);
         metadata.writeTo(buffer);
         Varints.encodeUnsigned(buffer, 0); // links, todo

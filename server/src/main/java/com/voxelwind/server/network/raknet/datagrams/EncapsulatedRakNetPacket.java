@@ -5,7 +5,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCounted;
 import lombok.Data;
 
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,17 +22,18 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
     private ByteBuf buffer;
 
     public static List<EncapsulatedRakNetPacket> encapsulatePackage(ByteBuf buffer, RakNetSession session, boolean isOrdered) {
-        // Potentially split the package..
+        // Potentially split the package.
         List<ByteBuf> bufs = new ArrayList<>();
-        int by = session.getMtu() - 100; // TODO: This could be lowered to as little as 24, but needs to be checked.
-        if (buffer.readableBytes() > by) { // accounting for bookkeeping
+        int by = session.getMtu() - 32; // MTU minus 32 seems to work well
+        if (buffer.readableBytes() > by) {
+            // Packet requires splitting
             ByteBuf from = buffer.slice();
-            // Split the buffer up
             int split = (int) Math.ceil(buffer.readableBytes() / by);
             for (int i = 0; i < split; i++) {
                 bufs.add(from.readSlice(Math.min(by, from.readableBytes())));
             }
         } else {
+            // No splitting required.
             bufs.add(buffer);
         }
 
@@ -67,12 +67,12 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
                 reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(reliabilityNumber);
+            buf.writeMediumLE(reliabilityNumber);
         }
 
         if (reliability == RakNetReliability.UNRELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_SEQUENCED ||
                 reliability == RakNetReliability.RELIABLE_ORDERED || reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            buf.order(ByteOrder.LITTLE_ENDIAN).writeMedium(orderingIndex);
+            buf.writeMediumLE(orderingIndex);
             buf.writeByte(orderingChannel);
         }
 
@@ -94,12 +94,12 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
         if (reliability == RakNetReliability.RELIABLE || reliability == RakNetReliability.RELIABLE_ORDERED ||
                 reliability == RakNetReliability.RELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_WITH_ACK_RECEIPT ||
                 reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            reliabilityNumber = buf.order(ByteOrder.LITTLE_ENDIAN).readUnsignedMedium();
+            reliabilityNumber = buf.readUnsignedMediumLE();
         }
 
         if (reliability == RakNetReliability.UNRELIABLE_SEQUENCED || reliability == RakNetReliability.RELIABLE_SEQUENCED ||
                 reliability == RakNetReliability.RELIABLE_ORDERED || reliability == RakNetReliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT) {
-            orderingIndex = buf.order(ByteOrder.LITTLE_ENDIAN).readUnsignedMedium();
+            orderingIndex = buf.readUnsignedMediumLE();
             orderingChannel = buf.readByte();
         }
 
@@ -138,6 +138,16 @@ public class EncapsulatedRakNetPacket implements ReferenceCounted {
     @Override
     public ReferenceCounted retain(int i) {
         return buffer.retain(i);
+    }
+
+    @Override
+    public ReferenceCounted touch() {
+        return buffer.touch();
+    }
+
+    @Override
+    public ReferenceCounted touch(Object o) {
+        return buffer.touch(o);
     }
 
     @Override

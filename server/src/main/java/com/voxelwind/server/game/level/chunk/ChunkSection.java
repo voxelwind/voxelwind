@@ -1,4 +1,4 @@
-package com.voxelwind.server.game.level.chunk.provider.anvil;
+package com.voxelwind.server.game.level.chunk;
 
 import com.google.common.base.Preconditions;
 import com.voxelwind.server.game.level.util.NibbleArray;
@@ -92,13 +92,22 @@ public class ChunkSection {
         );
     }
 
+    public boolean isEmpty() {
+        for (byte id : ids) {
+            if (id != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static void checkBounds(int x, int y, int z) {
         Preconditions.checkArgument(x >= 0 && x < 16, "x (%s) is not between 0 and 15", x);
-        Preconditions.checkArgument(y >= 0 && y < 16, "y (%s) is not between 0 and 15", x);
-        Preconditions.checkArgument(z >= 0 && z < 16, "z (%s) is not between 0 and 15", x);
+        Preconditions.checkArgument(y >= 0 && y < 16, "y (%s) is not between 0 and 15", y);
+        Preconditions.checkArgument(z >= 0 && z < 16, "z (%s) is not between 0 and 15", z);
     }
 
     private static int anvilBlockPosition(int x, int y, int z) {
-        return y * 16 * 16 + z * 16 + x;
+        return (x * 256) + (z * 16) + y;
     }
 }

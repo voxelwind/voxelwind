@@ -783,7 +783,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             // If we haven't moved in the X or Z axis, don't update viewable entities or try updating chunks - they haven't changed.
             if (hasSubstantiallyMoved(originalPosition, newPosition)) {
                 updateViewableEntities();
-                sendNewChunks();
+                sendNewChunks().exceptionally(throwable -> {
+                    LOGGER.error("Unable to send chunks", throwable);
+                    disconnect("Internal server error");
+                    return null;
+                });
             }
         }
 
@@ -1189,7 +1193,11 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     session.sendMovePlayerPacket();
                 }
                 session.updateViewableEntities();
-                session.sendNewChunks();
+                session.sendNewChunks().exceptionally(throwable -> {
+                    LOGGER.error("Unable to send chunks", throwable);
+                    session.disconnect("Internal server error");
+                    return null;
+                });
             }
 
             // Check for items on the ground.

@@ -25,12 +25,12 @@ import com.voxelwind.server.game.entities.systems.PickupDelayDecrementSystem;
 import com.voxelwind.server.game.entities.visitor.EntityClassVisitor;
 import com.voxelwind.server.game.level.chunk.generator.DiscoFloorChunkGenerator;
 import com.voxelwind.server.game.level.chunk.generator.SimpleFlatworldChunkGenerator;
+import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
+import com.voxelwind.server.game.level.chunk.provider.LevelDataProvider;
 import com.voxelwind.server.game.level.manager.LevelBlockManager;
 import com.voxelwind.server.game.level.manager.LevelChunkManager;
 import com.voxelwind.server.game.level.manager.LevelEntityManager;
 import com.voxelwind.server.game.level.manager.LevelPacketManager;
-import com.voxelwind.server.game.level.chunk.provider.ChunkProvider;
-import com.voxelwind.server.game.level.chunk.provider.LevelDataProvider;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import com.voxelwind.server.network.mcpe.packets.McpeBlockEntityData;
 import com.voxelwind.server.network.mcpe.packets.McpeUpdateBlock;
@@ -89,7 +89,7 @@ public class VoxelwindLevel implements Level {
     public VoxelwindLevel(VoxelwindServer server, String name, ChunkProvider chunkProvider, LevelDataProvider dataProvider) {
         this.server = server;
         this.name = name;
-        this.chunkManager = new LevelChunkManager(server, this, chunkProvider, new DiscoFloorChunkGenerator());
+        this.chunkManager = new LevelChunkManager(server, this, chunkProvider, new SimpleFlatworldChunkGenerator());
         this.uuid = UUID.randomUUID();
         this.seed = dataProvider.getSeed();
         this.entityManager = new LevelEntityManager(this);
@@ -169,8 +169,7 @@ public class VoxelwindLevel implements Level {
         Preconditions.checkArgument((entitySpawner = ENTITY_SPAWNER.get(klass)) != null, "Entity class is not valid");
 
         CompletableFuture<T> future = new CompletableFuture<>();
-        Vector3i vector3i = position.toInt();
-        getChunk(vector3i.getX() >> 4, vector3i.getZ() >> 4).whenComplete((chunk, throwable) -> {
+        getChunk(position.getFloorX() >> 4, position.getFloorZ() >> 4).whenComplete((chunk, throwable) -> {
             if (throwable != null) {
                 return;
             }

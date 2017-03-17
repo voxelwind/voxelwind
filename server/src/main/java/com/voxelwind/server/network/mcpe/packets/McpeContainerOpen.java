@@ -21,7 +21,7 @@ public class McpeContainerOpen implements NetworkPackage {
         type = buffer.readByte();
         slotCount = buffer.readShort();
         position = McpeUtil.readBlockCoords(buffer);
-        runtimeEntityId = Varints.decodeUnsignedLong(buffer);
+        runtimeEntityId = Varints.decodeUnsigned(buffer);
     }
 
     @Override
@@ -30,6 +30,6 @@ public class McpeContainerOpen implements NetworkPackage {
         buffer.writeByte(type);
         buffer.writeShort(slotCount);
         McpeUtil.writeBlockCoords(buffer, position);
-        Varints.encodeUnsignedLong(buffer, runtimeEntityId);
+        Varints.encodeUnsigned(buffer, runtimeEntityId);
     }
 }

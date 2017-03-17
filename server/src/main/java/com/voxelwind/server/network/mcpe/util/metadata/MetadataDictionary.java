@@ -9,7 +9,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import io.netty.buffer.ByteBuf;
 
-import java.nio.ByteOrder;
 import java.util.Optional;
 
 public final class MetadataDictionary {
@@ -41,28 +40,28 @@ public final class MetadataDictionary {
 
     private static boolean isAcceptable(Object o) {
         return o instanceof Byte || o instanceof Short || o instanceof Integer || o instanceof Float || o
-                instanceof String || o instanceof Vector3i || o instanceof Long;
+                instanceof String || o instanceof Vector3i || o instanceof Long || o instanceof ItemStack;
     }
 
     public static MetadataDictionary deserialize(ByteBuf buf) {
         MetadataDictionary dictionary = new MetadataDictionary();
-        int sz = Varints.decodeUnsigned(buf);
+        int sz = (int) Varints.decodeUnsigned(buf);
         for (int i = 0; i < sz; i++) {
-            int idx = Varints.decodeUnsigned(buf);
-            int type = Varints.decodeUnsigned(buf);
+            int idx = (int) Varints.decodeUnsigned(buf);
+            int type = (int) Varints.decodeUnsigned(buf);
 
             switch (type) {
                 case EntityMetadataConstants.DATA_TYPE_BYTE:
                     dictionary.put(idx, buf.readByte());
                     break;
                 case EntityMetadataConstants.DATA_TYPE_SHORT:
-                    dictionary.put(idx, buf.order(ByteOrder.LITTLE_ENDIAN).readShort());
+                    dictionary.put(idx, buf.readShortLE());
                     break;
                 case EntityMetadataConstants.DATA_TYPE_INT:
                     dictionary.put(idx, Varints.decodeSigned(buf));
                     break;
                 case EntityMetadataConstants.DATA_TYPE_FLOAT:
-                    dictionary.put(idx, buf.order(ByteOrder.LITTLE_ENDIAN).readFloat());
+                    dictionary.put(idx, McpeUtil.readFloatLE(buf));
                     break;
                 case EntityMetadataConstants.DATA_TYPE_STRING:
                     dictionary.put(idx, McpeUtil.readVarintLengthString(buf));
@@ -96,7 +95,7 @@ public final class MetadataDictionary {
             Short aShort = (Short) o;
             Varints.encodeUnsigned(buf, idx);
             Varints.encodeUnsigned(buf, EntityMetadataConstants.DATA_TYPE_SHORT);
-            buf.order(ByteOrder.LITTLE_ENDIAN).writeShort(aShort);
+            buf.writeShortLE(aShort);
         } else if (o instanceof Integer) {
             Integer integer = (Integer) o;
             Varints.encodeUnsigned(buf, idx);
@@ -106,7 +105,7 @@ public final class MetadataDictionary {
             Float aFloat = (Float) o;
             Varints.encodeUnsigned(buf, idx);
             Varints.encodeUnsigned(buf, EntityMetadataConstants.DATA_TYPE_FLOAT);
-            buf.order(ByteOrder.LITTLE_ENDIAN).writeFloat(aFloat);
+            McpeUtil.writeFloatLE(buf, aFloat);
         } else if (o instanceof String) {
             String s = (String) o;
             Varints.encodeUnsigned(buf, idx);

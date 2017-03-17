@@ -25,4 +25,14 @@ public class NibbleArrayTest {
             assertEquals("Stored value is not valid", randomNumbers[i], array.get(i));
         }
     }
+
+    @Test
+    public void fillTest() throws Exception {
+        NibbleArray array = new NibbleArray(ARRAY_SIZE);
+        array.fill((byte) 11);
+
+        for (int i = 0; i < ARRAY_SIZE; i++) {
+            assertEquals("Stored value is not valid", 11, array.get(i));
+        }
+    }
 }

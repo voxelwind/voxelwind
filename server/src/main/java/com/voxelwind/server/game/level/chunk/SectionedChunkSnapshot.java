@@ -12,7 +12,6 @@ import com.voxelwind.api.game.level.block.BlockTypes;
 import com.voxelwind.api.game.level.blockentities.BlockEntity;
 import com.voxelwind.server.game.level.block.BasicBlockState;
 import com.voxelwind.server.game.level.block.VoxelwindBlock;
-import com.voxelwind.server.game.level.chunk.provider.anvil.ChunkSection;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -23,8 +22,8 @@ public class SectionedChunkSnapshot implements ChunkSnapshot {
     protected final ChunkSection[] sections;
     protected final int x;
     protected final int z;
-    protected final int[] biomeColor = new int[256];
-    protected final byte[] height = new byte[256];
+    protected final byte[] biomeId = new byte[256];
+    protected final byte[] height = new byte[512];
     protected final TIntObjectMap<BlockEntity> blockEntities = new TIntObjectHashMap<>();
 
     public SectionedChunkSnapshot(ChunkSection[] sections, int x, int z) {
@@ -34,13 +33,13 @@ public class SectionedChunkSnapshot implements ChunkSnapshot {
     }
 
     static int xyzIdx(int x, int y, int z) {
-        return x + 16 * (z + 16 * y);
+        return (x * 256) + (z * 16) + y;
     }
 
     static void checkPosition(int x, int y, int z) {
         Preconditions.checkArgument(x >= 0 && x <= 15, "x value (%s) not in range (0 to 15)", x);
         Preconditions.checkArgument(z >= 0 && z <= 15, "z value (%s) not in range (0 to 15)", z);
-        Preconditions.checkArgument(y >= 0 && y < 128, "y value (%s) not in range (0 to 127)", y);
+        Preconditions.checkArgument(y >= 0 && y < 256, "y value (%s) not in range (0 to 255)", y);
     }
 
     Vector3i getLevelLocation(int chunkX, int y, int chunkZ) {
