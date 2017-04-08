@@ -25,7 +25,6 @@ import com.voxelwind.server.network.mcpe.util.ResourcePackInfo;
 import com.voxelwind.server.network.util.LittleEndianByteBufInputStream;
 import com.voxelwind.server.network.util.LittleEndianByteBufOutputStream;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
 
