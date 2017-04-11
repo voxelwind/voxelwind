@@ -30,6 +30,12 @@ public @interface Plugin {
     String version();
 
     /**
+     * The website of this plugin.
+     * @return the websute of this plugin
+     */
+    String website() default "";
+
+    /**
      * The array of plugin IDs that this plugin requires in order to load.
      * @return the dependencies
      */

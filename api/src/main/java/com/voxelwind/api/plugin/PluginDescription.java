@@ -24,6 +24,12 @@ public interface PluginDescription {
     String getVersion();
 
     /**
+     * The website of this plugin.
+     * @return the websute of this plugin
+     */
+    String getWebsite();
+
+    /**
      * The array of plugin IDs that this plugin requires in order to load.
      * @return the dependencies
      */

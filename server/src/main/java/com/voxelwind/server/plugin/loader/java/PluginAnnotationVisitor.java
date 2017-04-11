@@ -29,6 +29,9 @@ public class PluginAnnotationVisitor extends AnnotationVisitor {
                     case "version":
                         information.setVersion((String) value);
                         break;
+                    case "website":
+                        information.setWebsite((String) value);
+                        break;
                 }
                 break;
             case DEPENDENCIES:
