@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class McpeResourcePackInfo implements NetworkPackage {
+public class McpeResourcePacksInfo implements NetworkPackage {
     private boolean mustAccept;
     private final List<ResourcePackInfo> behaviorPacks = new ArrayList<>();
     private final List<ResourcePackInfo> resourcePacks = new ArrayList<>();

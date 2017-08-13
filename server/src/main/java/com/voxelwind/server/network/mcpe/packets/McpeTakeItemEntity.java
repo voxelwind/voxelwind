@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeTakeItem implements NetworkPackage {
+public class McpeTakeItemEntity implements NetworkPackage {
     private long itemEntityId;
     private long playerEntityId;
 

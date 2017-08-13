@@ -177,8 +177,8 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
         if (netPackage instanceof McpeLogin) {
             session.getHandler().handle((McpeLogin) netPackage);
         }
-        if (netPackage instanceof McpeClientMagic) {
-            session.getHandler().handle((McpeClientMagic) netPackage);
+        if (netPackage instanceof McpeClientToServerHandshake) {
+            session.getHandler().handle((McpeClientToServerHandshake) netPackage);
         }
         if (netPackage instanceof McpeRequestChunkRadius) {
             session.getHandler().handle((McpeRequestChunkRadius) netPackage);

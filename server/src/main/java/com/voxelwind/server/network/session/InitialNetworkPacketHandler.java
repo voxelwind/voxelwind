@@ -141,7 +141,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     }
 
     @Override
-    public void handle(McpeClientMagic packet) {
+    public void handle(McpeClientToServerHandshake packet) {
         initializePlayerSession();
     }
 
@@ -247,7 +247,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         PlayerSession playerSession = session.initializePlayerSession(session.getServer().getDefaultLevel());
         session.setHandler(playerSession.getPacketHandler());
 
-        McpeResourcePackInfo info = new McpeResourcePackInfo();
+        McpeResourcePacksInfo info = new McpeResourcePacksInfo();
         session.addToSendQueue(info);
     }
 

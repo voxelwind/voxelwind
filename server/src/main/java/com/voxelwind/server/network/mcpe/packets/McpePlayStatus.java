@@ -22,6 +22,9 @@ public class McpePlayStatus implements NetworkPackage {
         LOGIN_SUCCESS,
         LOGIN_FAILED_CLIENT,
         LOGIN_FAILED_SERVER,
-        PLAYER_SPAWN
+        PLAYER_SPAWN,
+        LOGIN_FAILED_INVALID_TENANT,
+        LOGIN_FAILED_VANILLA_EDU,
+        LOGIN_FAILED_EDU_VANILLA
     }
 }

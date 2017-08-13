@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeContainerSetContents implements NetworkPackage {
+public class McpeContainerSetContent implements NetworkPackage {
     private byte windowId;
     private ItemStack[] stacks;
     private int[] hotbarData = new int[0];

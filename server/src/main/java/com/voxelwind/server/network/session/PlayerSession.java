@@ -119,12 +119,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
                     if (entity instanceof DroppedItem) {
                         ContainedItem item = entity.ensureAndGet(ContainedItem.class);
                         if (playerInventory.addItem(item.getItemStack())) {
-                            McpeTakeItem packetBroadcast = new McpeTakeItem();
+                            McpeTakeItemEntity packetBroadcast = new McpeTakeItemEntity();
                             packetBroadcast.setItemEntityId(entity.getEntityId());
                             packetBroadcast.setPlayerEntityId(getEntityId());
                             getLevel().getPacketManager().queuePacketForViewers(this, packetBroadcast);
 
-                            McpeTakeItem packetSelf = new McpeTakeItem();
+                            McpeTakeItemEntity packetSelf = new McpeTakeItemEntity();
                             packetSelf.setItemEntityId(entity.getEntityId());
                             packetSelf.setPlayerEntityId(0);
                             session.addToSendQueue(packetSelf);
@@ -456,7 +456,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         openPacket.setType(internalType.getType());
         session.addToSendQueue(openPacket);
 
-        McpeContainerSetContents contents = new McpeContainerSetContents();
+        McpeContainerSetContent contents = new McpeContainerSetContent();
         contents.setWindowId(windowId);
         contents.setStacks(inventory.getAllContents());
         McpeBatch contentsBatch = new McpeBatch();
@@ -517,7 +517,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             return;
         }
 
-        McpeContainerSetContents packet = new McpeContainerSetContents();
+        McpeContainerSetContent packet = new McpeContainerSetContent();
         packet.setWindowId(windowId);
         packet.setStacks(newItems);
         McpeBatch contentsBatch = new McpeBatch();
@@ -526,7 +526,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
     }
 
     private void sendPlayerInventory() {
-        McpeContainerSetContents contents = new McpeContainerSetContents();
+        McpeContainerSetContent contents = new McpeContainerSetContent();
         contents.setWindowId((byte) 0x00);
         // Because MCPE is stupid, we have to add 9 more slots. The rest will be filled in as air.
         contents.setStacks(Arrays.copyOf(playerInventory.getAllContents(), playerInventory.getInventoryType().getInventorySize() + 9));
@@ -613,14 +613,14 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         }
 
         @Override
-        public void handle(McpeClientMagic packet) {
+        public void handle(McpeClientToServerHandshake packet) {
             throw new IllegalStateException("Client packet received but player session is currently active!");
         }
 
         @Override
         public void handle(McpeRequestChunkRadius packet) {
             int radius = Math.max(5, Math.min(vwServer.getConfiguration().getMaximumViewDistance(), packet.getRadius()));
-            McpeChunkRadiusUpdated updated = new McpeChunkRadiusUpdated();
+            McpeChunkRadiusUpdate updated = new McpeChunkRadiusUpdate();
             updated.setRadius(radius);
             session.sendImmediatePackage(updated);
             viewDistance = radius;
@@ -1217,7 +1217,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             }
 
             if (((PlayerDataComponent) playerData).gamemodeTouched()) {
-                McpeSetPlayerGameMode gameMode = new McpeSetPlayerGameMode();
+                McpeSetPlayerGameType gameMode = new McpeSetPlayerGameType();
                 gameMode.setGamemode(playerData.getGameMode().ordinal());
                 session.getMcpeSession().addToSendQueue(gameMode);
             }

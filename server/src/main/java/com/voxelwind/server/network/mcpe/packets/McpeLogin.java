@@ -14,7 +14,7 @@ import java.util.zip.DataFormatException;
 
 @Data
 public class McpeLogin implements NetworkPackage {
-    private int protocolVersion; // = 91
+    private int protocolVersion;
     private byte gameEdition;
     private AsciiString chainData;
     private AsciiString skinData;

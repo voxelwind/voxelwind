@@ -1,6 +1,6 @@
 package com.voxelwind.server.network.util;
 
-import com.voxelwind.server.network.mcpe.packets.McpeServerHandshake;
+import com.voxelwind.server.network.mcpe.packets.McpeServerToClientHandshake;
 
 import javax.crypto.KeyAgreement;
 import java.security.*;
@@ -40,8 +40,8 @@ public class EncryptionUtil {
         return agreement.generateSecret();
     }
 
-    public static McpeServerHandshake createHandshakePacket(KeyPair pair, byte[] token) {
-        McpeServerHandshake handshake = new McpeServerHandshake();
+    public static McpeServerToClientHandshake createHandshakePacket(KeyPair pair, byte[] token) {
+        McpeServerToClientHandshake handshake = new McpeServerToClientHandshake();
         handshake.setKey(pair.getPublic());
         handshake.setToken(token);
         return handshake;

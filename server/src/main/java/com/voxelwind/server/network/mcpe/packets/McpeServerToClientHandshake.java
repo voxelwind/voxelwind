@@ -19,7 +19,7 @@ import java.util.Base64;
 @ForceClearText
 @BatchDisallowed
 @Data
-public class McpeServerHandshake implements NetworkPackage {
+public class McpeServerToClientHandshake implements NetworkPackage {
     private PublicKey key;
     private byte[] token;
 

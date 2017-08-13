@@ -6,16 +6,16 @@ import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
-public class McpeSetPlayerGameMode implements NetworkPackage {
-    private int gamemode;
+public class McpeChunkRadiusUpdate implements NetworkPackage {
+    private int radius;
 
     @Override
     public void decode(ByteBuf buffer) {
-        gamemode = Varints.decodeSigned(buffer);
+        radius = Varints.decodeSigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(buffer, gamemode);
+        Varints.encodeSigned(buffer, radius);
     }
 }
