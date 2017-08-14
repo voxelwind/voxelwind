@@ -6,14 +6,19 @@ import com.voxelwind.server.network.mcpe.McpeUtil;
 import com.voxelwind.server.network.mcpe.util.VersionUtil;
 import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.AsciiString;
 import lombok.Data;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.zip.DataFormatException;
 
 @Data
 public class McpeLogin implements NetworkPackage {
+    private static final Logger LOGGER = LogManager.getLogger(McpeLogin.class);
+
     private int protocolVersion;
     private byte gameEdition;
     private AsciiString chainData;
@@ -29,39 +34,19 @@ public class McpeLogin implements NetworkPackage {
         int bodyLength = (int) Varints.decodeUnsigned(buffer);
         ByteBuf body = buffer.readSlice(bodyLength);
 
-        // Decompress the body
-        ByteBuf result = null;
-        try {
-            result = CompressionUtil.inflate(body);
-            chainData = McpeUtil.readLELengthAsciiString(result);
-            skinData = McpeUtil.readLELengthAsciiString(result);
-        } catch (DataFormatException e) {
-            throw new RuntimeException("Unable to inflate login data body", e);
-        } finally {
-            if (result != null) {
-                result.release();
-            }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("[MCPE LOGIN HEX]\n{}", ByteBufUtil.prettyHexDump(body));
         }
+
+        chainData = McpeUtil.readLELengthAsciiString(body);
+        skinData = McpeUtil.readLELengthAsciiString(body);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         buffer.writeInt(protocolVersion);
         buffer.writeByte(gameEdition);
-
-        ByteBuf body = PooledByteBufAllocator.DEFAULT.directBuffer();
-        try {
-            McpeUtil.writeLELengthAsciiString(body, chainData);
-            McpeUtil.writeLELengthAsciiString(body, skinData);
-
-            ByteBuf compressed = CompressionUtil.deflate(body);
-
-            Varints.encodeUnsigned(buffer, compressed.readableBytes());
-            buffer.writeBytes(compressed);
-        } catch (DataFormatException e) {
-            throw new RuntimeException("Unable to compress login data body", e);
-        } finally {
-            body.release();
-        }
+        McpeUtil.writeLELengthAsciiString(buffer, chainData);
+        McpeUtil.writeLELengthAsciiString(buffer, skinData);
     }
 }

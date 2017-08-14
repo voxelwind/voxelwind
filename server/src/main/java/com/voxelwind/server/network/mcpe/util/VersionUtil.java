@@ -19,18 +19,8 @@ public class VersionUtil {
 
     public static String getHumanVersionName(int protocolVersion) {
         switch (protocolVersion) {
-            case 91:
-                return "0.16.x";
-            case 100:
-                return "1.0.0";
-            case 101:
-                return "1.0.3";
-            case 102:
-                return "1.0.4";
-            case 105:
-                return "1.0.5";
             case 113:
-                return "1.1.0";
+                return "1.1";
         }
         return null;
     }

@@ -1,6 +1,7 @@
 package com.voxelwind.server.network.raknet.handler;
 
 import com.google.common.net.InetAddresses;
+import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.VoxelwindServer;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.PacketRegistry;
@@ -13,6 +14,7 @@ import com.voxelwind.server.network.raknet.enveloped.AddressedRakNetDatagram;
 import com.voxelwind.server.network.raknet.enveloped.DirectAddressedRakNetPacket;
 import com.voxelwind.server.network.raknet.packets.*;
 import com.voxelwind.server.network.session.McpeSession;
+import com.voxelwind.server.network.util.CompressionUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -23,8 +25,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.zip.DataFormatException;
 
 public class RakNetDatagramHandler extends SimpleChannelInboundHandler<AddressedRakNetDatagram> {
     private static final InetSocketAddress LOOPBACK_MCPE = new InetSocketAddress(InetAddress.getLoopbackAddress(), 19132);
@@ -92,13 +97,15 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
         }
 
         if (session.getHandler() == null) {
-            LOGGER.error("Session " + session.getRemoteAddress() + " has no handler!?!?!");
+            LOGGER.error("Session " + session.getRemoteAddress() + " has no handler!?");
             return;
         }
 
-        // Special cases we need to handle here.
-        // McpeWrapper: Encrypted packet.
+        // McpeWrapper: Encrypted batch packet.
+        // TODO: Proper wrapper handling
         if (netPackage instanceof McpeWrapper) {
+            List<NetworkPackage> packages = new ArrayList<>();
+
             ByteBuf wrappedData = ((McpeWrapper) netPackage).getWrapped();
             ByteBuf cleartext = null;
             try {
@@ -113,15 +120,47 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
                 }
 
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("[HEX IN] {}", ByteBufUtil.prettyHexDump(cleartext));
+                    LOGGER.debug("[MCPE WRAPPER HEX]\n{}", ByteBufUtil.prettyHexDump(cleartext));
                 }
 
-                NetworkPackage pkg = PacketRegistry.tryDecode(cleartext, PacketType.MCPE);
-                handlePackage(pkg, session);
+                ByteBuf decompressed = null;
+                try {
+                    decompressed = CompressionUtil.inflate(cleartext);
+
+                    // Now process the decompressed result.
+                    while (decompressed.isReadable()) {
+                        int length = (int) Varints.decodeUnsigned(decompressed);
+                        ByteBuf data = decompressed.readSlice(length);
+
+                        if (data.readableBytes() == 0) {
+                            throw new DataFormatException("Contained wrapper packet is empty.");
+                        }
+
+                        NetworkPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE, true);
+                        if (pkg != null) {
+                            packages.add(pkg);
+                        } else {
+                            data.readerIndex(0);
+                            McpeUnknown unknown = new McpeUnknown();
+                            unknown.decode(data);
+                            packages.add(unknown);
+                        }
+                    }
+                } catch (DataFormatException e) {
+                    throw new RuntimeException("Unable to inflate wrapper data", e);
+                } finally {
+                    if (decompressed != null) {
+                        decompressed.release();
+                    }
+                }
             } finally {
                 if (cleartext != null && cleartext != wrappedData) {
                     cleartext.release();
                 }
+            }
+
+            for (NetworkPackage aPackage : packages) {
+                handlePackage(aPackage, session);
             }
             return;
         }
@@ -163,14 +202,6 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
                 LOGGER.debug("Dump: {}", ByteBufUtil.hexDump(((McpeUnknown) netPackage).getBuf()));
             }
             ((McpeUnknown) netPackage).getBuf().release();
-        }
-
-        // McpeBatch: Multiple packets. This method will handle everything.
-        if (netPackage instanceof McpeBatch) {
-            for (NetworkPackage aPackage : ((McpeBatch) netPackage).getPackages()) {
-                handlePackage(aPackage, session);
-            }
-            return;
         }
 
         // Dispatch block...
