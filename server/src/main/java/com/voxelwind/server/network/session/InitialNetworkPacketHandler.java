@@ -15,7 +15,6 @@ import com.voxelwind.server.jni.CryptoUtil;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.mcpe.util.VersionUtil;
 import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
-import com.voxelwind.server.network.session.auth.ChainTrustInvalidException;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.JwtPayload;
 import com.voxelwind.server.network.session.auth.TemporarySession;
@@ -42,7 +41,7 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
 
     static {
         try {
-            MOJANG_PUBLIC_KEY = getKey(MOJANG_PUBLIC_KEY_BASE64);
+            MOJANG_PUBLIC_KEY = generateKey(MOJANG_PUBLIC_KEY_BASE64);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }
@@ -54,9 +53,8 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         this.session = session;
     }
 
-    private static PublicKey getKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return KeyFactory.getInstance("EC").generatePublic(
-                new X509EncodedKeySpec(Base64.getDecoder().decode(b64)));
+    private static PublicKey generateKey(String b64) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(b64)));
     }
 
     @Override
@@ -100,39 +98,31 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         }
 
         try {
-            JwtPayload payload = validateChainData(certChainData);
+            boolean trustedChain = validateChainData(certChainData);
+            if (!trustedChain && session.getServer().getConfiguration().getXboxAuthentication().isForceAuthentication()) {
+                session.disconnect("This server requires that you sign in with Xbox Live.");
+                return;
+            }
+
+            JwtPayload payload = VoxelwindServer.MAPPER.convertValue(
+                    getPayload(certChainData.get(certChainData.size() - 1).asText()), JwtPayload.class);
+            if (!trustedChain && payload.getExtraData().getXuid() != null) {
+                payload.getExtraData().setXuid(null); //fake
+            }
+
             session.setAuthenticationProfile(payload.getExtraData());
 
-            // Get the key to use for encrypting the connection and skin data
-            PublicKey key = getKey(payload.getIdentityPublicKey());
+            // Get the key to use for verifying the client data and encrypting the connection
+            PublicKey key = generateKey(payload.getIdentityPublicKey());
 
             // Set the client data.
             ClientData clientData = getClientData(key, packet.getSkinData().toString());
             session.setClientData(clientData);
 
-            startEncryptionHandshake(key);
-        } catch (ChainTrustInvalidException e) {
-            // If configuration permits us to continue logging the player in, then initialize all authentication fields
-            // as if Xbox authentication successfully completed.
-            if (!session.getServer().getConfiguration().getXboxAuthentication().isForceAuthentication()) {
-                // Fill in all data and try again.
-                try {
-                    JsonNode authProfilePayload = getPayload(certChainData.get(certChainData.size() - 1).asText());
-                    JwtPayload payload = VoxelwindServer.MAPPER.convertValue(authProfilePayload, JwtPayload.class);
-                    payload.getExtraData().setXuid(null);
-                    session.setAuthenticationProfile(payload.getExtraData());
-                    session.setClientData(VoxelwindServer.MAPPER.convertValue(getPayloadFromAsciiString(packet.getSkinData()), ClientData.class));
-
-                    // Start encrypting the connection.
-                    PublicKey key = getKey(payload.getIdentityPublicKey());
-                    startEncryptionHandshake(key);
-                } catch (Exception e1) {
-                    // Disconnect the player.
-                    LOGGER.error("Unable to force-initialize player session", e1);
-                    session.disconnect("Internal server error");
-                }
+            if (CAN_USE_ENCRYPTION) {
+                startEncryptionHandshake(key);
             } else {
-                session.disconnect("This server requires that you sign in with Xbox Live.");
+                initializePlayerSession();
             }
         } catch (Exception e) {
             LOGGER.error("Unable to initialize player session", e);
@@ -211,12 +201,6 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
     }
 
     private void startEncryptionHandshake(PublicKey key) throws Exception {
-        if (!CAN_USE_ENCRYPTION) {
-            // Can't use encryption.
-            initializePlayerSession();
-            return;
-        }
-
         // Generate a fresh key for each session
         KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
         generator.initialize(new ECGenParameterSpec("secp384r1"));
@@ -251,68 +235,47 @@ public class InitialNetworkPacketHandler implements NetworkPacketHandler {
         session.addToSendQueue(info);
     }
 
-    private JwtPayload validateChainData(JsonNode data) throws Exception {
+    // Verify whether client has sent valid and trusted certificate chain
+    private boolean validateChainData(JsonNode data) throws Exception {
         Preconditions.checkArgument(data.getNodeType() == JsonNodeType.ARRAY, "chain data provided is not an array");
 
-        if (CAN_USE_ENCRYPTION) {
-            // If encryption support is available, enable authentication.
-            PublicKey lastKey = null;
-            boolean trustedChain = false;
-            for (JsonNode node : data) {
-                JWSObject object = JWSObject.parse(node.asText());
-                if (!trustedChain) {
-                    trustedChain = verify(MOJANG_PUBLIC_KEY, object);
-                }
-                if (lastKey != null) {
-                    if (!verify(lastKey, object)) {
-                        throw new JOSEException("Unable to verify key in chain.");
-                    }
-                }
-                JsonNode payloadNode = VoxelwindServer.MAPPER.readTree(object.getPayload().toString());
-                JsonNode ipkNode = payloadNode.get("identityPublicKey");
-                Verify.verify(ipkNode != null && ipkNode.getNodeType() == JsonNodeType.STRING, "identityPublicKey node is missing in chain");
-                lastKey = getKey(ipkNode.asText());
-            }
+        PublicKey lastKey = null;
+        boolean trustedChain = false;
+        for (JsonNode node : data) {
+            JWSObject object = JWSObject.parse(node.asText());
 
             if (!trustedChain) {
-                throw new ChainTrustInvalidException();
+                trustedChain = verify(MOJANG_PUBLIC_KEY, object);
             }
+
+            if (lastKey != null) {
+                if (!verify(lastKey, object)) {
+                    throw new JOSEException("Unable to verify key in chain.");
+                }
+            }
+
+            JsonNode payloadNode = VoxelwindServer.MAPPER.readTree(object.getPayload().toString());
+            JsonNode ipkNode = payloadNode.get("identityPublicKey");
+            Verify.verify(ipkNode != null && ipkNode.getNodeType() == JsonNodeType.STRING, "identityPublicKey node is missing in chain");
+            lastKey = generateKey(ipkNode.asText());
         }
 
-        JsonNode payload = getPayload(data.get(data.size() - 1).asText());
-        JwtPayload jwtPayload = VoxelwindServer.MAPPER.convertValue(payload, JwtPayload.class);
-        if (!CAN_USE_ENCRYPTION) {
-            // Not authenticated, don't allow faking the XUID.
-            jwtPayload.getExtraData().setXuid(null);
-        }
-        return jwtPayload;
+        return trustedChain;
     }
 
     private ClientData getClientData(PublicKey key, String clientData) throws Exception {
-        if (CAN_USE_ENCRYPTION) {
-            JWSObject object = JWSObject.parse(clientData);
-            if (!verify(key, object)) {
-                throw new IllegalArgumentException("Unable to verify client data.");
-            }
+        JWSObject object = JWSObject.parse(clientData);
+        if (!verify(key, object)) {
+            throw new IllegalArgumentException("Unable to verify client data.");
         }
+
         JsonNode payload = getPayload(clientData);
         return VoxelwindServer.MAPPER.convertValue(payload, ClientData.class);
-    }
-
-    // ¯\_(ツ)_/¯
-    private JsonNode getHeader(String token) throws IOException {
-        String payload = token.split("\\.")[0];
-        return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload));
     }
 
     private JsonNode getPayload(String token) throws IOException {
         String payload = token.split("\\.")[1];
         return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload));
-    }
-
-    private JsonNode getPayloadFromAsciiString(AsciiString token) throws IOException {
-        AsciiString payload = token.split('.')[1];
-        return VoxelwindServer.MAPPER.readTree(Base64.getDecoder().decode(payload.toByteArray()));
     }
 
     private boolean verify(PublicKey key, JWSObject object) throws JOSEException {

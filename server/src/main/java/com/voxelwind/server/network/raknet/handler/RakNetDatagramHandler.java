@@ -102,17 +102,16 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
         }
 
         // McpeWrapper: Encrypted batch packet.
-        // TODO: Proper wrapper handling
         if (netPackage instanceof McpeWrapper) {
-            List<NetworkPackage> packages = new ArrayList<>();
+            List<NetworkPackage> packages;
 
-            ByteBuf wrappedData = ((McpeWrapper) netPackage).getWrapped();
+            ByteBuf wrappedData = ((McpeWrapper) netPackage).getPayload();
             ByteBuf cleartext = null;
             try {
                 if (session.isEncrypted()) {
                     cleartext = PooledByteBufAllocator.DEFAULT.directBuffer(wrappedData.readableBytes());
-                    session.getDecryptionCipher().cipher(((McpeWrapper) netPackage).getWrapped(), cleartext);
-                    // MCPE appends a 8-byte checksum at the end of each packet, but we don't want it.
+                    session.getDecryptionCipher().cipher(wrappedData, cleartext);
+                    // MCPE appends an 8-byte checksum at the end of each packet, but we don't want it.
                     // TODO: Would it be worth checking it?
                     cleartext = cleartext.slice(0, cleartext.readableBytes() - 8);
                 } else {
@@ -123,36 +122,7 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
                     LOGGER.debug("[MCPE WRAPPER HEX]\n{}", ByteBufUtil.prettyHexDump(cleartext));
                 }
 
-                ByteBuf decompressed = null;
-                try {
-                    decompressed = CompressionUtil.inflate(cleartext);
-
-                    // Now process the decompressed result.
-                    while (decompressed.isReadable()) {
-                        int length = (int) Varints.decodeUnsigned(decompressed);
-                        ByteBuf data = decompressed.readSlice(length);
-
-                        if (data.readableBytes() == 0) {
-                            throw new DataFormatException("Contained wrapper packet is empty.");
-                        }
-
-                        NetworkPackage pkg = PacketRegistry.tryDecode(data, PacketType.MCPE, true);
-                        if (pkg != null) {
-                            packages.add(pkg);
-                        } else {
-                            data.readerIndex(0);
-                            McpeUnknown unknown = new McpeUnknown();
-                            unknown.decode(data);
-                            packages.add(unknown);
-                        }
-                    }
-                } catch (DataFormatException e) {
-                    throw new RuntimeException("Unable to inflate wrapper data", e);
-                } finally {
-                    if (decompressed != null) {
-                        decompressed.release();
-                    }
-                }
+                packages = CompressionUtil.decompressWrapperPackets(cleartext);
             } finally {
                 if (cleartext != null && cleartext != wrappedData) {
                     cleartext.release();
@@ -162,6 +132,7 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
             for (NetworkPackage aPackage : packages) {
                 handlePackage(aPackage, session);
             }
+
             return;
         }
 
@@ -181,7 +152,7 @@ public class RakNetDatagramHandler extends SimpleChannelInboundHandler<Addressed
             response.setIncomingTimestamp(request.getTimestamp());
             response.setSystemTimestamp(System.currentTimeMillis());
             response.setSystemAddress(session.getRemoteAddress().orElse(LOOPBACK_MCPE));
-            InetSocketAddress[] addresses = new InetSocketAddress[10];
+            InetSocketAddress[] addresses = new InetSocketAddress[20];
             Arrays.fill(addresses, JUNK_ADDRESS);
             addresses[0] = LOOPBACK_MCPE;
             response.setSystemAddresses(addresses);

@@ -18,8 +18,9 @@ import com.voxelwind.nbt.tags.Tag;
 import com.voxelwind.nbt.util.SwappedDataOutputStream;
 import com.voxelwind.server.game.level.chunk.util.FullChunkPacketCreator;
 import com.voxelwind.server.game.serializer.MetadataSerializer;
-import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeFullChunkData;
+import com.voxelwind.server.network.mcpe.packets.McpeWrapper;
+import com.voxelwind.server.network.util.CompressionUtil;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TLongSet;
@@ -38,7 +39,7 @@ import java.util.*;
 public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, FullChunkPacketCreator {
     private final Level level;
     private final TIntObjectMap<CompoundTag> serializedBlockEntities = new TIntObjectHashMap<>();
-    private McpeBatch precompressed;
+    private McpeWrapper precompressed;
 
     public SectionedChunk(int x, int z, Level level) {
         this(new ChunkSection[16], x, z, level);
@@ -184,7 +185,7 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
 
     @Override
     @Synchronized
-    public McpeBatch toFullChunkData() {
+    public McpeWrapper toFullChunkData() {
         if (precompressed != null) {
             return precompressed;
         }
@@ -248,10 +249,8 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         }
 
         data.setData(buffer.array());
-        McpeBatch precompressed = new McpeBatch();
-        precompressed.getPackages().add(data);
-        precompressed.precompress();
-        precompressed.getPackages().clear();
+        McpeWrapper precompressed = new McpeWrapper();
+        precompressed.setPayload(CompressionUtil.compressWrapperPackets(data));
         this.precompressed = precompressed;
         return precompressed;
     }

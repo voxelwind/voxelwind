@@ -1,6 +1,6 @@
 package com.voxelwind.server.network;
 
-import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
+import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.packets.*;
 import com.voxelwind.server.network.raknet.packets.*;
 import gnu.trove.TCollections;
@@ -172,7 +172,7 @@ public class PacketRegistry {
         }
 
         if (fromBatch) {
-            if (pkgClass.isAnnotationPresent(BatchDisallowed.class)) {
+            if (pkgClass.isAnnotationPresent(DisallowWrapping.class)) {
                 return null;
             }
         }

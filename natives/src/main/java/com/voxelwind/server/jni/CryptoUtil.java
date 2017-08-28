@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 @UtilityClass
 public class CryptoUtil
 {
-
     public static boolean isJCEUnlimitedStrength()
     {
         try

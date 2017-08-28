@@ -459,9 +459,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeContainerSetContent contents = new McpeContainerSetContent();
         contents.setWindowId(windowId);
         contents.setStacks(inventory.getAllContents());
-        McpeBatch contentsBatch = new McpeBatch();
-        contentsBatch.getPackages().add(contents);
-        session.addToSendQueue(contentsBatch);
+
+        McpeWrapper contentsWrapper = new McpeWrapper();
+        contentsWrapper.getPackets().add(contents);
+        session.addToSendQueue(contentsWrapper);
 
         ((VoxelwindBaseInventory) openedInventory).getObserverList().add(this);
     }
@@ -520,9 +521,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         McpeContainerSetContent packet = new McpeContainerSetContent();
         packet.setWindowId(windowId);
         packet.setStacks(newItems);
-        McpeBatch contentsBatch = new McpeBatch();
-        contentsBatch.getPackages().add(packet);
-        session.addToSendQueue(contentsBatch);
+
+        McpeWrapper contentsWrapper = new McpeWrapper();
+        contentsWrapper.getPackets().add(packet);
+        session.addToSendQueue(contentsWrapper);
     }
 
     private void sendPlayerInventory() {
@@ -532,9 +534,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         contents.setStacks(Arrays.copyOf(playerInventory.getAllContents(), playerInventory.getInventoryType().getInventorySize() + 9));
         // Populate hotbar links.
         contents.setHotbarData(playerInventory.getHotbarLinks());
-        McpeBatch contentsBatch = new McpeBatch();
-        contentsBatch.getPackages().add(contents);
-        session.sendImmediatePackage(contentsBatch);
+
+        McpeWrapper contentsWrapper = new McpeWrapper();
+        contentsWrapper.getPackets().add(contents);
+        session.sendImmediatePackage(contentsWrapper);
     }
 
     @Override
@@ -648,9 +651,10 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
                     McpeAvailableCommands availableCommands = ((VoxelwindCommandManager) vwServer.getCommandManager())
                             .generateAvailableCommandsPacket();
-                    McpeBatch availableCommandsBatch = new McpeBatch();
-                    availableCommandsBatch.getPackages().add(availableCommands);
-                    session.sendImmediatePackage(availableCommandsBatch);
+
+                    McpeWrapper availableCommandsWrapper = new McpeWrapper();
+                    availableCommandsWrapper.getPackets().add(availableCommands);
+                    session.sendImmediatePackage(availableCommandsWrapper);
 
                     spawned = true;
 

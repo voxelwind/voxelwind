@@ -3,7 +3,6 @@ package com.voxelwind.server.network.mcpe.packets;
 import com.voxelwind.nbt.util.Varints;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.mcpe.McpeUtil;
-import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
@@ -17,7 +16,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 @ForceClearText
-@BatchDisallowed
 @Data
 public class McpeServerToClientHandshake implements NetworkPackage {
     private PublicKey key;

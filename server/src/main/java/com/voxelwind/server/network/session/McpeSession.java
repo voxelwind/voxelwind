@@ -6,15 +6,15 @@ import com.voxelwind.server.game.level.VoxelwindLevel;
 import com.voxelwind.server.jni.hash.VoxelwindHash;
 import com.voxelwind.server.network.NetworkPackage;
 import com.voxelwind.server.network.PacketRegistry;
-import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
-import com.voxelwind.server.network.mcpe.packets.McpeBatch;
 import com.voxelwind.server.network.mcpe.packets.McpeDisconnect;
+import com.voxelwind.server.network.mcpe.packets.McpeWrapper;
 import com.voxelwind.server.network.raknet.RakNetSession;
 import com.voxelwind.server.network.raknet.handler.NetworkPacketHandler;
 import com.voxelwind.server.network.session.auth.ClientData;
 import com.voxelwind.server.network.session.auth.UserAuthenticationProfile;
+import com.voxelwind.server.network.util.CompressionUtil;
 import com.voxelwind.server.network.util.NativeCodeFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -108,44 +108,43 @@ public class McpeSession {
             LOGGER.debug("Sending packet {} to {}", netPackage, to);
         }
 
-        ByteBuf encodedPacketData = PooledByteBufAllocator.DEFAULT.directBuffer();
         ByteBuf dataToSend;
-        if (encryptionCipher == null || netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
-            if (!netPackage.getClass().isAnnotationPresent(DisallowWrapping.class)) {
-                encodedPacketData.writeByte(0xFE);
-            }
-            encodedPacketData.writeByte((id & 0xFF));
-            try {
-                netPackage.encode(encodedPacketData);
-            } catch (Exception e) {
-                encodedPacketData.release();
-                throw e;
-            }
-            dataToSend = encodedPacketData;
-        } else {
-            encodedPacketData.writeByte((id & 0xFF));
-            try {
-                netPackage.encode(encodedPacketData);
-                encodedPacketData.readerIndex(0);
-                byte[] trailer = generateTrailer(encodedPacketData);
-                encodedPacketData.readerIndex(0);
-                encodedPacketData.writeBytes(trailer);
-            } catch (Exception e) {
-                encodedPacketData.release();
-                throw e;
-            }
-
-            dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer(encodedPacketData.readableBytes() + 1);
+        if (!netPackage.getClass().isAnnotationPresent(DisallowWrapping.class) || netPackage instanceof McpeWrapper) {
+            dataToSend = PooledByteBufAllocator.DEFAULT.directBuffer();
             dataToSend.writeByte(0xFE);
 
+            ByteBuf compressed;
+            if (netPackage instanceof McpeWrapper) {
+                McpeWrapper wrapper = (McpeWrapper) netPackage;
+                if (wrapper.getPayload() == null) {
+                    compressed = CompressionUtil.compressWrapperPackets(wrapper.getPackets());
+                } else {
+                    compressed = wrapper.getPayload();
+                }
+            } else {
+                compressed = CompressionUtil.compressWrapperPackets(netPackage);
+            }
+
             try {
-                encryptionCipher.cipher(encodedPacketData, dataToSend);
+                if (encryptionCipher == null || netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
+                    compressed.readerIndex(0);
+                    dataToSend.writeBytes(compressed);
+                } else {
+                    compressed.readerIndex(0);
+                    byte[] trailer = generateTrailer(compressed);
+                    compressed.writeBytes(trailer);
+
+                    compressed.readerIndex(0);
+                    encryptionCipher.cipher(compressed, dataToSend);
+                }
             } catch (GeneralSecurityException e) {
                 dataToSend.release();
                 throw new RuntimeException("Unable to encipher package", e);
             } finally {
-                encodedPacketData.release();
+                compressed.release();
             }
+        } else {
+            dataToSend = PacketRegistry.tryEncode(netPackage);
         }
 
         connection.sendPacket(dataToSend);
@@ -167,14 +166,14 @@ public class McpeSession {
 
     private void sendQueued() {
         NetworkPackage netPackage;
-        McpeBatch batch = new McpeBatch();
+        McpeWrapper wrapper = new McpeWrapper();
         while ((netPackage = currentlyQueued.poll()) != null) {
-            if (netPackage.getClass().isAnnotationPresent(BatchDisallowed.class) ||
+            if (netPackage.getClass().isAnnotationPresent(DisallowWrapping.class) ||
                     netPackage.getClass().isAnnotationPresent(ForceClearText.class)) {
                 // We hit a un-batchable packet. Send the current batch and then send the un-batchable packet.
-                if (!batch.getPackages().isEmpty()) {
-                    internalSendPackage(batch);
-                    batch = new McpeBatch();
+                if (!wrapper.getPackets().isEmpty()) {
+                    internalSendPackage(wrapper);
+                    wrapper = new McpeWrapper();
                 }
 
                 internalSendPackage(netPackage);
@@ -187,10 +186,10 @@ public class McpeSession {
                 }
 
                 continue;
-            } else if (batch.getPackages().size() >= 3) {
+            } else if (wrapper.getPackets().size() >= 3) {
                 // Reached a per-batch limit on packages, send these packages now
-                internalSendPackage(batch);
-                batch = new McpeBatch();
+                internalSendPackage(wrapper);
+                wrapper = new McpeWrapper();
 
                 try {
                     // Delay things a tiny bit
@@ -200,11 +199,11 @@ public class McpeSession {
                 }
             }
 
-            batch.getPackages().add(netPackage);
+            wrapper.getPackets().add(netPackage);
         }
 
-        if (!batch.getPackages().isEmpty()) {
-            internalSendPackage(batch);
+        if (!wrapper.getPackets().isEmpty()) {
+            internalSendPackage(wrapper);
         }
     }
 
@@ -317,7 +316,7 @@ public class McpeSession {
             LOGGER.info("{} ({}) has been disconnected from the server: {}", authenticationProfile.getDisplayName(),
                     getRemoteAddress().map(Object::toString).orElse("UNKNOWN"), reason);
         } else {
-            LOGGER.info("{} has lost connection to the server: ", getRemoteAddress().map(Object::toString).orElse("UNKNOWN"),
+            LOGGER.info("{} has lost connection to the server: {}", getRemoteAddress().map(Object::toString).orElse("UNKNOWN"),
                     reason);
         }
 

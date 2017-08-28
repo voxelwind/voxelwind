@@ -1,13 +1,11 @@
 package com.voxelwind.server.network.raknet.packets;
 
 import com.voxelwind.server.network.NetworkPackage;
-import com.voxelwind.server.network.mcpe.annotations.BatchDisallowed;
 import com.voxelwind.server.network.mcpe.annotations.DisallowWrapping;
 import com.voxelwind.server.network.mcpe.annotations.ForceClearText;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
-@BatchDisallowed
 @ForceClearText
 @DisallowWrapping
 @Data
