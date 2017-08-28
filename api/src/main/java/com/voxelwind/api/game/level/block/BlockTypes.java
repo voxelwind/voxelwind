@@ -279,6 +279,11 @@ public class BlockTypes {
         }
 
         @Override
+        public boolean isFlammable() {
+            return flammable;
+        }
+
+        @Override
         public int emitsLight() {
             return emitLight;
         }
