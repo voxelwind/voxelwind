@@ -15,6 +15,7 @@ public class McpeMovePlayer implements NetworkPackage {
     private Rotation rotation;
     private byte mode;
     private boolean onGround;
+    private long ridingEntityId;
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -23,6 +24,7 @@ public class McpeMovePlayer implements NetworkPackage {
         rotation = McpeUtil.readByteRotation(buffer);
         mode = buffer.readByte();
         onGround = buffer.readBoolean();
+        ridingEntityId = Varints.decodeUnsigned(buffer);
     }
 
     @Override
@@ -32,5 +34,6 @@ public class McpeMovePlayer implements NetworkPackage {
         McpeUtil.writeByteRotation(buffer, rotation);
         buffer.writeByte(mode);
         buffer.writeBoolean(onGround);
+        Varints.encodeUnsigned(buffer, ridingEntityId);
     }
 }

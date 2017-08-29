@@ -13,12 +13,12 @@ public class McpeAnimate implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         action = Varints.decodeSigned(buffer);
-        entityId = Varints.decodeSignedLong(buffer);
+        entityId = Varints.decodeUnsigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
         Varints.encodeSigned(buffer, action);
-        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeUnsigned(buffer, entityId);
     }
 }

@@ -9,21 +9,26 @@ import lombok.Data;
 
 @Data
 public class McpeSetSpawnPosition implements NetworkPackage {
-    private int unknown1;
+    private SpawnType spawnType;
     private Vector3i position;
-    private boolean unknown2;
+    private boolean spawnForced;
 
     @Override
     public void decode(ByteBuf buffer) {
-        unknown1 = Varints.decodeSigned(buffer);
+        spawnType = SpawnType.values()[Varints.decodeSigned(buffer)];
         position = McpeUtil.readBlockCoords(buffer);
-        buffer.writeBoolean(unknown2);
+        buffer.writeBoolean(spawnForced);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSigned(buffer, unknown1);
+        Varints.encodeSigned(buffer, spawnType.ordinal());
         McpeUtil.writeBlockCoords(buffer, position);
-        buffer.writeBoolean(unknown2);
+        buffer.writeBoolean(spawnForced);
+    }
+
+    public enum SpawnType {
+        PLAYER_SPAWN,
+        WORLD_SPAWN
     }
 }

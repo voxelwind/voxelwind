@@ -11,7 +11,6 @@ import lombok.Data;
 public class McpeContainerOpen implements NetworkPackage {
     private byte windowId;
     private byte type;
-    private int slotCount;
     private Vector3i position;
     private long runtimeEntityId;
 
@@ -19,7 +18,6 @@ public class McpeContainerOpen implements NetworkPackage {
     public void decode(ByteBuf buffer) {
         windowId = buffer.readByte();
         type = buffer.readByte();
-        slotCount = buffer.readShort();
         position = McpeUtil.readBlockCoords(buffer);
         runtimeEntityId = Varints.decodeUnsigned(buffer);
     }
@@ -28,7 +26,6 @@ public class McpeContainerOpen implements NetworkPackage {
     public void encode(ByteBuf buffer) {
         buffer.writeByte(windowId);
         buffer.writeByte(type);
-        buffer.writeShort(slotCount);
         McpeUtil.writeBlockCoords(buffer, position);
         Varints.encodeUnsigned(buffer, runtimeEntityId);
     }

@@ -9,13 +9,15 @@ import lombok.Data;
 
 @Data
 public class McpeContainerSetContent implements NetworkPackage {
-    private byte windowId;
+    private int windowId;
+    private long targetEntityId;
     private ItemStack[] stacks;
     private int[] hotbarData = new int[0];
 
     @Override
     public void decode(ByteBuf buffer) {
-        windowId = buffer.readByte();
+        windowId = (int) Varints.decodeUnsigned(buffer);
+        targetEntityId = Varints.decodeSignedLong(buffer);
         int stacksToRead = (int) Varints.decodeUnsigned(buffer);
         stacks = new ItemStack[stacksToRead];
         for (int i = 0; i < stacksToRead; i++) {
@@ -33,7 +35,8 @@ public class McpeContainerSetContent implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        buffer.writeByte(windowId);
+        Varints.encodeUnsigned(buffer, windowId);
+        Varints.encodeSignedLong(buffer, targetEntityId);
         Varints.encodeUnsigned(buffer, stacks.length);
         for (ItemStack stack : stacks) {
             McpeUtil.writeItemStack(buffer, stack);

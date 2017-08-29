@@ -10,7 +10,7 @@ public class McpeSetCommandsEnabled implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override

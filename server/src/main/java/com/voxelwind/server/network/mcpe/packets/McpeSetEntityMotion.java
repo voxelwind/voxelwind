@@ -14,13 +14,13 @@ public class McpeSetEntityMotion implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = Varints.decodeSignedLong(buffer);
+        entityId = Varints.decodeUnsigned(buffer);
         motion = McpeUtil.readVector3f(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeUnsigned(buffer, entityId);
         McpeUtil.writeVector3f(buffer, motion);
     }
 }

@@ -19,7 +19,8 @@ public class McpeBlockEntityData implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        throw new UnsupportedOperationException();
+        position = McpeUtil.readBlockCoords(buffer);
+        // TODO: BlockEntityData
     }
 
     @Override

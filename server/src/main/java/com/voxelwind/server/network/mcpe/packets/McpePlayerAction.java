@@ -16,7 +16,7 @@ public class McpePlayerAction implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = Varints.decodeSignedLong(buffer);
+        entityId = Varints.decodeUnsigned(buffer);
         action = Varints.decodeSigned(buffer);
         position = McpeUtil.readBlockCoords(buffer);
         face = Varints.decodeSigned(buffer);
@@ -24,7 +24,7 @@ public class McpePlayerAction implements NetworkPackage {
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeUnsigned(buffer, entityId);
         Varints.encodeSigned(buffer, action);
         McpeUtil.writeBlockCoords(buffer, position);
         Varints.encodeSigned(buffer, face);

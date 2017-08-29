@@ -211,7 +211,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         McpeSetTime setTime = new McpeSetTime();
         setTime.setTime(getLevel().getTime());
-        setTime.setRunning(true);
         session.addToSendQueue(setTime);
 
         // Send packets to spawn the player.
@@ -219,9 +218,12 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         startGame.setSeed(-1);
         startGame.setDimension((byte) 0);
         startGame.setGenerator(1);
-        startGame.setGamemode(playerDataComponent.getGameMode().ordinal());
+        startGame.setPlayerGamemode(playerDataComponent.getGameMode().ordinal());
+        startGame.setPitch(event.getRotation().getPitch());
+        startGame.setYaw(event.getRotation().getYaw());
         startGame.setEntityId(getEntityId());
         startGame.setSpawn(getGamePosition());
+        startGame.setWorldGamemode((byte) 0);
         startGame.setWorldSpawn(getLevel().getSpawnLocation().toInt());
         startGame.setWorldName(getLevel().getName());
         startGame.setLevelId("SECRET");
@@ -235,7 +237,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
         session.addToSendQueue(settings);
 
         McpeSetSpawnPosition spawnPosition = new McpeSetSpawnPosition();
+        spawnPosition.setSpawnType(McpeSetSpawnPosition.SpawnType.PLAYER_SPAWN);
         spawnPosition.setPosition(getLevel().getSpawnLocation().toInt());
+        spawnPosition.setSpawnForced(false);
         session.addToSendQueue(spawnPosition);
 
         sendMovePlayerPacket();
@@ -451,9 +455,9 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
         McpeContainerOpen openPacket = new McpeContainerOpen();
         openPacket.setWindowId(windowId);
-        openPacket.setSlotCount((short) inventory.getInventoryType().getInventorySize());
-        openPacket.setPosition(((OpenableInventory) inventory).getPosition());
         openPacket.setType(internalType.getType());
+        openPacket.setPosition(((OpenableInventory) inventory).getPosition());
+        openPacket.setRuntimeEntityId(-1);
         session.addToSendQueue(openPacket);
 
         McpeContainerSetContent contents = new McpeContainerSetContent();
@@ -637,7 +641,6 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
 
                     McpeSetTime setTime = new McpeSetTime();
                     setTime.setTime(getLevel().getTime());
-                    setTime.setRunning(true);
                     session.sendImmediatePackage(setTime);
 
                     //McpeRespawn respawn = new McpeRespawn();
@@ -1018,7 +1021,7 @@ public class PlayerSession extends LivingEntity implements Player, InventoryObse
             // TODO: Replace with nicer command API
             JsonNode argsNode;
             try {
-                argsNode = VoxelwindServer.MAPPER.readTree(packet.getArgs());
+                argsNode = VoxelwindServer.MAPPER.readTree(packet.getInputJson());
             } catch (IOException e) {
                 LOGGER.error("Unable to decode command argument JSON", e);
                 return;

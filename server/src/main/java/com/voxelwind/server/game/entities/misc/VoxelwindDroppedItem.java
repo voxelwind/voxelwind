@@ -32,6 +32,7 @@ public class VoxelwindDroppedItem extends BaseEntity implements DroppedItem {
         packet.setPosition(getGamePosition());
         packet.setVelocity(getMotion());
         packet.setStack(ensureAndGet(ContainedItem.class).getItemStack());
+        packet.getMetadata().putAll(getMetadata());
         return packet;
     }
 }

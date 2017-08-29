@@ -11,22 +11,22 @@ public class McpeCommandStep implements NetworkPackage {
     private String command;
     private String overload;
     private int unknown1;
-    private int unknown2;
+    private int currentStep;
     private boolean unknown3;
-    private long unknown4;
-    private String args;
-    private String unknown5;
+    private long clientId;
+    private String inputJson;
+    private String outputJson;
 
     @Override
     public void decode(ByteBuf buffer) {
         command = McpeUtil.readVarintLengthString(buffer);
         overload = McpeUtil.readVarintLengthString(buffer);
         unknown1 = (int) Varints.decodeUnsigned(buffer);
-        unknown2 = (int) Varints.decodeUnsigned(buffer);
+        currentStep = (int) Varints.decodeUnsigned(buffer);
         unknown3 = buffer.readBoolean();
-        unknown4 = (int) Varints.decodeUnsigned(buffer);
-        args = McpeUtil.readVarintLengthString(buffer);
-        unknown5 = McpeUtil.readVarintLengthString(buffer);
+        clientId = (int) Varints.decodeUnsigned(buffer);
+        inputJson = McpeUtil.readVarintLengthString(buffer);
+        outputJson = McpeUtil.readVarintLengthString(buffer);
         buffer.skipBytes(buffer.readableBytes());
     }
 

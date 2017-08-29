@@ -28,14 +28,14 @@ public class McpeEntityEvent implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = Varints.decodeSignedLong(buffer);
+        entityId = Varints.decodeUnsigned(buffer);
         event = buffer.readByte();
         unknown = Varints.decodeSigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeUnsigned(buffer, entityId);
         buffer.writeByte(event);
         Varints.encodeSigned(buffer, unknown);
     }

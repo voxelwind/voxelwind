@@ -13,18 +13,24 @@ public class McpeMoveEntity implements NetworkPackage {
     private long entityId;
     private Vector3f position;
     private Rotation rotation;
+    private boolean onGround;
+    private boolean teleported;
 
     @Override
     public void decode(ByteBuf buffer) {
-        entityId = Varints.decodeSignedLong(buffer);
+        entityId = Varints.decodeUnsigned(buffer);
         position = McpeUtil.readVector3f(buffer);
         rotation = McpeUtil.readByteRotation(buffer);
+        onGround = buffer.readBoolean();
+        teleported = buffer.readBoolean();
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSignedLong(buffer, entityId);
+        Varints.encodeUnsigned(buffer, entityId);
         McpeUtil.writeVector3f(buffer, position);
         McpeUtil.writeByteRotation(buffer, rotation);
+        buffer.writeBoolean(onGround);
+        buffer.writeBoolean(teleported);
     }
 }

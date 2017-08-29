@@ -1,6 +1,5 @@
 package com.voxelwind.server.network.mcpe.packets;
 
-import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.voxelwind.nbt.util.Varints;
@@ -13,12 +12,14 @@ import lombok.Data;
 public class McpeStartGame implements NetworkPackage {
     private long entityId; // = null;
     private long runtimeEntityId; // = null;
+    private int playerGamemode;
     private Vector3f spawn; // = null;
-    private Vector2i unknown1; // = null;
+    private float pitch; // = null;
+    private float yaw;
     private int seed; // = null;
     private int dimension; // = null;
     private int generator; // = null;
-    private int gamemode; // = null;
+    private int worldGamemode; // = null;
     private int difficulty; // = null;
     private Vector3i worldSpawn; // = null;
     private boolean hasAchievementsDisabled; // = null;
@@ -28,8 +29,12 @@ public class McpeStartGame implements NetworkPackage {
     private float lightingLevel; // = null;
     private boolean enableCommands; // = null;
     private boolean isTexturepacksRequired; // = null;
+    // private GameRules gameRules; // TODO
     private String levelId; // = null;
     private String worldName; // = null;
+    private String premiumWorldTemplateId;
+    private boolean unknown0;
+    private long currentTick;
 
     @Override
     public void decode(ByteBuf buffer) {
@@ -40,14 +45,14 @@ public class McpeStartGame implements NetworkPackage {
     public void encode(ByteBuf buffer) {
         Varints.encodeSignedLong(buffer, entityId);
         Varints.encodeUnsigned(buffer, runtimeEntityId);
+        Varints.encodeSigned(buffer, playerGamemode);
         McpeUtil.writeVector3f(buffer, spawn);
-        // TODO: what are these next two?
-        buffer.writeFloat(0);
-        buffer.writeFloat(0);
+        buffer.writeFloat(pitch);
+        buffer.writeFloat(yaw);
         Varints.encodeSigned(buffer, seed);
         Varints.encodeSigned(buffer, dimension);
         Varints.encodeSigned(buffer, generator);
-        Varints.encodeSigned(buffer, gamemode);
+        Varints.encodeSigned(buffer, worldGamemode);
         Varints.encodeSigned(buffer, dimension);
         McpeUtil.writeBlockCoords(buffer, worldSpawn);
         buffer.writeBoolean(hasAchievementsDisabled);

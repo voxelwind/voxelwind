@@ -12,13 +12,13 @@ public class McpeTakeItemEntity implements NetworkPackage {
 
     @Override
     public void decode(ByteBuf buffer) {
-        itemEntityId = Varints.decodeSignedLong(buffer);
-        playerEntityId = Varints.decodeSignedLong(buffer);
+        itemEntityId = Varints.decodeUnsigned(buffer);
+        playerEntityId = Varints.decodeUnsigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        Varints.encodeSignedLong(buffer, itemEntityId);
-        Varints.encodeSignedLong(buffer, playerEntityId);
+        Varints.encodeUnsigned(buffer, itemEntityId);
+        Varints.encodeUnsigned(buffer, playerEntityId);
     }
 }

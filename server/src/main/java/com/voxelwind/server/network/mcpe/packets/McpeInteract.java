@@ -13,11 +13,12 @@ public class McpeInteract implements NetworkPackage {
     @Override
     public void decode(ByteBuf buffer) {
         type = buffer.readByte();
-        entityId = Varints.decodeSignedLong(buffer);
+        entityId = Varints.decodeUnsigned(buffer);
     }
 
     @Override
     public void encode(ByteBuf buffer) {
-        throw new UnsupportedOperationException();
+        buffer.writeByte(type);
+        Varints.encodeUnsigned(buffer, entityId);
     }
 }
