@@ -25,6 +25,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
+import io.netty.buffer.Unpooled;
 import lombok.Synchronized;
 
 import java.io.ByteArrayOutputStream;
@@ -39,7 +40,7 @@ import java.util.*;
 public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, FullChunkPacketCreator {
     private final Level level;
     private final TIntObjectMap<CompoundTag> serializedBlockEntities = new TIntObjectHashMap<>();
-    private McpeWrapper precompressed;
+    private byte[] precompressed;
 
     public SectionedChunk(int x, int z, Level level) {
         this(new ChunkSection[16], x, z, level);
@@ -187,7 +188,9 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
     @Synchronized
     public McpeWrapper toFullChunkData() {
         if (precompressed != null) {
-            return precompressed;
+            McpeWrapper wrapper = new McpeWrapper();
+            wrapper.setPayload(Unpooled.wrappedBuffer(precompressed));
+            return wrapper;
         }
 
         McpeFullChunkData data = new McpeFullChunkData();
@@ -249,10 +252,14 @@ public class SectionedChunk extends SectionedChunkSnapshot implements Chunk, Ful
         }
 
         data.setData(buffer.array());
-        McpeWrapper precompressed = new McpeWrapper();
-        precompressed.setPayload(CompressionUtil.compressWrapperPackets(data));
-        this.precompressed = precompressed;
-        return precompressed;
+
+        McpeWrapper wrapper = new McpeWrapper();
+        wrapper.setPayload(CompressionUtil.compressWrapperPackets(data));
+
+        precompressed = new byte[wrapper.getPayload().readableBytes()];
+        wrapper.getPayload().readBytes(precompressed);
+
+        return wrapper;
     }
 
     @Synchronized

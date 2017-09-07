@@ -101,8 +101,6 @@ public class McpeSession {
     }
 
     private void internalSendPackage(NetworkPackage netPackage) {
-        int id = PacketRegistry.getId(netPackage);
-
         if (LOGGER.isDebugEnabled()) {
             String to = connection.getRemoteAddress().map(InetSocketAddress::toString).orElse(connection.toString());
             LOGGER.debug("Sending packet {} to {}", netPackage, to);
